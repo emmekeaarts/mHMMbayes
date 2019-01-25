@@ -25,12 +25,25 @@ number of dependent variables} \item{\code{q_emis}: numeric vector with
 length \code{n_dep} denoting the number of obseved catagories for the
 catagorical emission distribution of each dependent variable.}}}
 
+\item{xx}{List of covariates. Number of elements in the list is equal to 1 +
+\code{n_dep} (i.e., the number of dependent variables). The first element
+is used to predict the transiton matrix. Subsequent elements are used to
+predict the emission distribution for (each of) the dependent variable(s).
+Each element is a matrix, with the number of rows equal to the number of
+subjects. The first column \emph{has to} represent the intercept, that is,
+a column only consisting of ones. Subsequent columns correspond to
+covariates used to predict the transition matrix / emission distribution.
+If \code{xx} is omitted completely, \code{xx} defaults to NULL, resembling
+no covaraites. Specific elements in the list can also be left empty (i.e.,
+set to NULL) to signify that either the transition probability matrix or a
+specific emission distribution is not predicted by covariates}
+
 \item{start_val}{Startvalues for gamma and emis used for first run of the
 forward algorithm}
 
 \item{gamma_sampler}{List containing start values for mle estimates of pooled
-data for gamma, int_mle0, scalar and weight for the overall ll in the
-fractional likelihood, w}
+data for gamma: \code{int_mle0}, \code{scalar}, and weight for the overall ll in the
+fractional likelihood, \code{w}.}
 
 \item{emis_sampler}{List containing start values for mle estimates of pooled
 data for emis, emis_int_mle0, emis_scalar and weight for the overall ll in the
