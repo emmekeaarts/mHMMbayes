@@ -5,13 +5,14 @@ Version: 0.0.0.9000
 Depends: R (>= 3.0.1)
 Imports:
     MCMCpack,
-    mvtnorm
+    mvtnorm,
+    stats
 Authors@R: person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
                   role = c("aut", "cre"))
 Maintainer: Emmeke Aarts <e.aarts@uu.nl>
 Description: An implementation of multilevel hidden Markov models using Bayesian 
     estimation in R. It allows to simultaneously fit xx while accounting for 
-    heterogeneity between subjects. It also implements multivariate HMMs (HMMs 
+    heterogeneity between subjects. It also implements multivariate HMMs (HMMs
     in which the states are determined by more than one dependent variable) and 
     covariates at the subject level, e.g., enabling group comparisons. See xxx 
     for more information, documentation and examples.
