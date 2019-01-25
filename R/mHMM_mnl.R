@@ -29,7 +29,7 @@
 #'   is used to predict the transiton matrix. Subsequent elements are used to
 #'   predict the emission distribution for (each of) the dependent variable(s).
 #'   Each element is a matrix, with the number of rows equal to the number of
-#'   subjects. The first column \emph{has to] represent the intercept, that is,
+#'   subjects. The first column \emph{has to} represent the intercept, that is,
 #'   a column only consisting of ones. Subsequent columns correspond to
 #'   covariates used to predict the transition matrix / emission distribution.
 #'   If \code{xx} is omitted completely, \code{xx} defaults to NULL, resembling
@@ -39,8 +39,8 @@
 #' @param start_val Startvalues for gamma and emis used for first run of the
 #'   forward algorithm
 #' @param gamma_sampler List containing start values for mle estimates of pooled
-#'   data for gamma, int_mle0, scalar and weight for the overall ll in the
-#'   fractional likelihood, w
+#'   data for gamma: \code{int_mle0}, \code{scalar}, and weight for the overall ll in the
+#'   fractional likelihood, \code{w}.
 #' @param emis_sampler List containing start values for mle estimates of pooled
 #'   data for emis, emis_int_mle0, emis_scalar and weight for the overall ll in the
 #'   fractional likelihood, emis_w
@@ -121,6 +121,7 @@
 #' @export
 #' @importFrom mvtnorm dmvnorm rmvnorm dmvt rmvt
 #' @importFrom MCMCpack rdirichlet rwish
+#' @importFrom stats optim rnorm runif
 
 mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, emis_sampler = NULL,
                      gamma_hyp_prior = NULL, emis_hyp_prior = NULL, mcmc, return_path = FALSE){
