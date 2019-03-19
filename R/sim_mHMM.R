@@ -41,9 +41,9 @@
 #'   transition probability matrix, hence the variance is assumed fixed across
 #'   all components. The default equals 1, which corresponds to quite some
 #'   variation between subjects. A less extreme value would be 0.5. If one wants
-#'   to simulate data from exactly the same HMM for all subjects, var_gamma
-#'   should be set to 0.
-#' @param var_emmis An integer denoting the variance between subjects in the
+#'   to simulate data from exactly the same HMM for all subjects,
+#'   \code{var_gamma} should be set to 0.
+#' @param var_emiss An integer denoting the variance between subjects in the
 #'   emission distribution. Note that this value corresponds to the variance of
 #'   the parameters of the multinomial distribution (i.e., the intercepts of the
 #'   regression equation of the multinomial distribution used to sample the
@@ -52,8 +52,8 @@
 #'   distribution, hence the variance is assumed fixed across all components.
 #'   The default equals 1, which corresponds to quite some variation between
 #'   subjects. A less extreme value would be 0.5. If one wants to simulate data
-#'   from exactly the same HMM for all subjects, var_emmis should be set to
-#'   0.
+#'   from exactly the same HMM for all subjects, \code{var_emiss} should be set
+#'   to 0.
 #' @param return_ind_par A logical scalar. Should the subject specific
 #'   transition probability matrix gamma and emission probability matrix be
 #'   returned by the function (\code{return_ind_par = TRUE}) or not
@@ -105,7 +105,10 @@
 #' data3 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
 #'                   var_gamma = .5, var_emiss = .5)
 #' data3
-
+#'
+#'
+#'
+#' @export
 
 sim_mHMM <- function(T, n, m, pr, gamma, emiss_distr, var_gamma = 1, var_emiss = 1, return_ind_par = FALSE){
   if (dim(gamma)[1] != m){

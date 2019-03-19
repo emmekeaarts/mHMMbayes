@@ -39,8 +39,20 @@ addition, only one variance value can be specified for the complete
 transition probability matrix, hence the variance is assumed fixed across
 all components. The default equals 1, which corresponds to quite some
 variation between subjects. A less extreme value would be 0.5. If one wants
-to simulate data from exactly the same HMM for all subjects, var_gamma
-should be set to 0.}
+to simulate data from exactly the same HMM for all subjects,
+\code{var_gamma} should be set to 0.}
+
+\item{var_emiss}{An integer denoting the variance between subjects in the
+emission distribution. Note that this value corresponds to the variance of
+the parameters of the multinomial distribution (i.e., the intercepts of the
+regression equation of the multinomial distribution used to sample the
+components of the emission distribution), see details below.  In addition,
+only one variance value can be specified for the complete emission
+distribution, hence the variance is assumed fixed across all components.
+The default equals 1, which corresponds to quite some variation between
+subjects. A less extreme value would be 0.5. If one wants to simulate data
+from exactly the same HMM for all subjects, \code{var_emiss} should be set
+to 0.}
 
 \item{return_ind_par}{A logical scalar. Should the subject specific
   transition probability matrix gamma and emission probability matrix be
@@ -52,18 +64,6 @@ Note: the subject specific) initial state distributions (i.e., the
 probability of each of the states at the first time point) needed to simulate
 the data are obtained from the stationary distributions of the subject
 specific transition probability matrices gamma.}
-
-\item{var_emmis}{An integer denoting the variance between subjects in the
-emission distribution. Note that this value corresponds to the variance of
-the parameters of the multinomial distribution (i.e., the intercepts of the
-regression equation of the multinomial distribution used to sample the
-components of the emission distribution), see details below.  In addition,
-only one variance value can be specified for the complete emission
-distribution, hence the variance is assumed fixed across all components.
-The default equals 1, which corresponds to quite some variation between
-subjects. A less extreme value would be 0.5. If one wants to simulate data
-from exactly the same HMM for all subjects, var_emmis should be set to
-0.}
 }
 \description{
 This function simulates data for multiple subjects, for which the data have
@@ -116,4 +116,7 @@ data2
 data3 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
                   var_gamma = .5, var_emiss = .5)
 data3
+
+
+
 }
