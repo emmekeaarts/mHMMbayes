@@ -20,25 +20,27 @@ equal to the number of dependent variables (\code{n_dep}) + 1.}
 
 \item{gen}{List containing the following elements:
 \itemize{\item{\code{m}: numeric vector with length 1 denoting the number
-of states} \item{\code{n_dep}: numeric vector with length 1 denoting the
-number of dependent variables} \item{\code{q_emis}: numeric vector with
-length \code{n_dep} denoting the number of obseved catagories for the
-catagorical emission distribution of each dependent variable.}}}
+of states}
+\item{\code{n_dep}: numeric vector with length 1 denoting the
+number of dependent variables}
+\item{\code{q_emis}: numeric vector with length \code{n_dep} denoting the
+number of observed categories for the categorical  emission distribution of
+each dependent variable.}}}
 
 \item{xx}{List of covariates. Number of elements in the list is equal to 1 +
 \code{n_dep} (i.e., the number of dependent variables). The first element
-is used to predict the transiton matrix. Subsequent elements are used to
+is used to predict the transition matrix. Subsequent elements are used to
 predict the emission distribution for (each of) the dependent variable(s).
 Each element is a matrix, with the number of rows equal to the number of
-subjects. The first column \emph{has to} represent the intercept, that is,
+subjects. The first column \emph{has to}  represent the intercept, that is,
 a column only consisting of ones. Subsequent columns correspond to
 covariates used to predict the transition matrix / emission distribution.
 If \code{xx} is omitted completely, \code{xx} defaults to NULL, resembling
-no covaraites. Specific elements in the list can also be left empty (i.e.,
+no covariates. Specific elements in the list can also be left empty (i.e.,
 set to NULL) to signify that either the transition probability matrix or a
 specific emission distribution is not predicted by covariates}
 
-\item{start_val}{Startvalues for gamma and emis used for first run of the
+\item{start_val}{Start values for gamma and emis used for first run of the
 forward algorithm}
 
 \item{gamma_sampler}{List containing start values for mle estimates of pooled
@@ -57,42 +59,22 @@ fractional likelihood, emis_w}
 \code{J} number of iterations of the MCMC algorithm. \code{burn_in} Burn in
 period for the MCMC algorithm}
 
-\item{return_path}{A logical scalar. Should the sampled state sequence obtianed at
+\item{return_path}{A logical scalar. Should the sampled state sequence obtained at
 each iteration and for each subject be returned by the function
 (\code{sample_path = TRUE}) or not (\code{sample_path = FALSE}). This is
 quite a large object! Can be used for local decoding purposes.}
 }
 \value{
-A list of
+A list of ... (to be completed)
 }
 \description{
-This function is for an multilevel model, can handle covariates at level 2
-(unlimited number), uses a hybrid metropolis within gibs sampler, where the
-metropolis hastings sampler is a random walk, and does the forward backward
-algorithm for all subjects in a sequential manner. Can handle varying
-observation length over subjects
-}
-\details{
-Here are the details of the function
-\subsection{Equations}{
-  The following hyper prior is used on each row \eqn{i} of gamma (\eqn{\Gamma_i}) at the population level:
-  \deqn{\Gamma_i ~ (idd) MNL(int_i)}
-  \deqn{int_i ~ N(mu_int_bar, V_int)}
-  \deqn{mu_int_bar ~ N(mu0, \frac{1}{K0} * V_int)}
-  \deqn{V_int ~ IW(nu, V)}
-  where \eqn{\alpha_i} denotes \code{int_i}, \eqn{\bar{\mu}_\alpha} denotes \code{mu_int_bar},  \code{} \code{} \code{} \code{} \code{}
-
-  The following hyper prior is used for the conditional emission distribution of each state at the population level:
-  \deqn{\theta_i ~ (idd) MNL(emis_int_i)}
-  \deqn{emis_int ~ N(mu_emis_int_bar, V_emis_int)}
-  \deqn{mu_emis_int_bar ~ N(emis_mu0, (1 / emis_K0) * V_emis_int)}
-  \deqn{V_emis_int 					~ IW(emis_nu, emis_V)}
-
-}
-
-\subsection{Covariates}{
-  Here is some info on using covariates
-}
+This function analyses (intense longitudinal) data from multiple subjects
+using a multilevel hidden Markov model. By using a multilevel framework, one
+general 'population' HMM is estimated, while heterogeneity between subjects
+is accommodated. The function can handle covariates at the subject level
+(unlimited number), uses a hybrid metropolis within gibs sampler, and performs
+the forward backward algorithm for all subjects in a sequential manner. Can
+handle varying observation length over subjects
 }
 \examples{
 # specifying general model properties
