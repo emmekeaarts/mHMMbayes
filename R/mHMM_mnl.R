@@ -130,7 +130,7 @@
 mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, emis_sampler = NULL,
                      gamma_hyp_prior = NULL, emis_hyp_prior = NULL, mcmc, return_path = FALSE){
 
-# Initialize data -----------------------------------
+  # Initialize data -----------------------------------
   # dependent variable(s), sample size, dimensions gamma and conditional distribuiton
   id         <- unique(s_data[,1])
   n_subj     <- length(id)
@@ -181,7 +181,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   burn_in			<- mcmc$burn_in
 
 
-# Initalize priors and hyper priors --------------------------------
+  # Initalize priors and hyper priors --------------------------------
   # Initialize gamma sampler
   if(is.null(gamma_sampler)) {
     int_mle0  <- mu_prop <- rep(0, m - 1)
@@ -254,7 +254,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   }
 
 
-# Define objects used to store data in mcmc algorithm, not returned ----------------------------
+  # Define objects used to store data in mcmc algorithm, not returned ----------------------------
   # overall
   c <- llk <- numeric(1)
   sample_path <- lapply(n_vary, dif_matrix, cols = J)
@@ -276,7 +276,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   emis_naccept <- rep(list(matrix(0, n_subj, m)), n_dep)
 
 
-# Define objects that are returned from mcmc algorithm ----------------------------
+  # Define objects that are returned from mcmc algorithm ----------------------------
   # Define object for subject specific posterior density, put start values on first row
   PD 					  <- matrix(, nrow = J, ncol = sum(m * q_emis) + m * m + 1)
   PD_emis_names   <- paste("q", 1, "_emis", rep(1:q_emis[1], m), "_S", rep(1:m, each = q_emis[1]), sep = "")
@@ -308,12 +308,12 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   delta 			<- rep(list(solve(t(diag(m) - gamma[[1]] + 1), rep(1, m))), n_subj)
 
 
-# Start analysis --------------------------------------------
+  # Start analysis --------------------------------------------
   # Run the MCMC algorithm
   itime <- proc.time()[3]
   for (iter in 2 : J){
 
-# For each subject, obtain sampled state sequence with subject individual parameters ----------
+    # For each subject, obtain sampled state sequence with subject individual parameters ----------
     for(s in 1:n_subj){
       # Run forward algorithm, obtain subject specific forward proababilities and log likelihood
       forward				<- cat_Mult_HMM_fw(x = subj_data[[s]]$y, m = m, emis = emis[[s]], gamma = gamma[[s]], n_dep = n_dep, delta=NULL)
@@ -339,10 +339,10 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
       }
     }
 
-# The remainder of the mcmc algorithm is state specific
+    # The remainder of the mcmc algorithm is state specific
     for(i in 1:m){
 
-# Obtain MLE of the covariance matrices and log likelihood of gamma and emis at subject and population level -----------------
+      # Obtain MLE of the covariance matrices and log likelihood of gamma and emis at subject and population level -----------------
       # used to scale the propasal distribution of the RW Metropolis sampler
 
       # population level, transition matrix
@@ -359,7 +359,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
           cond_y_pooled             <- c(cond_y_pooled, cond_y[[s]][[i]][[q]])
         }
         emis_mle_pooled[[i]][[q]]		  <- optim(emis_int_mle0[[q]], llmnl_int, Obs = c(cond_y_pooled, c(1:q_emis[q])), n_cat = q_emis[q],
-                                          method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
+                                              method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
         emis_int_mle_pooled[[i]][[q]]	<- emis_mle_pooled[[i]][[q]]$par
         emis_pooled_ll[[i]][[q]]			<- emis_mle_pooled[[i]][[q]]$value
       }
@@ -386,7 +386,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
         # subject level, conditional probabilities, seperate for each dependent variable
         for(q in 1:n_dep){
           emis_out				<- optim(emis_int_mle_pooled[[i]][[q]], llmnl_int_frac, Obs = c(cond_y[[s]][[i]][[q]], c(1:q_emis[q])),
-                             n_cat = q_emis[q], pooled_likel = emis_pooled_ll[[i]][[q]], w = emis_w, wgt = wgt, method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
+                               n_cat = q_emis[q], pooled_likel = emis_pooled_ll[[i]][[q]], w = emis_w, wgt = wgt, method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
           if(emis_out$convergence == 0){
             subj_data[[s]]$emis_converge[[q]][i]									<- 1
             subj_data[[s]]$emis_mhess[[q]][(1 + (i - 1) * (q_emis[q] - 1)):((q_emis[q] - 1) + (i - 1) * (q_emis[q] - 1)), ]	<- mnlHess_int(int = emis_out$par, Obs = c(cond_y[[s]][[i]][[q]], c(1:q_emis[q])), n_cat =  q_emis[q])
@@ -403,7 +403,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
         }
       }
 
-# Sample pouplaton values for gamma and conditional probabilities using Gibbs sampler -----------
+      # Sample pouplaton values for gamma and conditional probabilities using Gibbs sampler -----------
       # mu0_n and mu_int_bar are matrices, with the number of rows equal to the number of covariates, and ncol equal to number of intercepts estimated
       mu0_n           <- solve(t(xx[[1]]) %*% xx[[1]] + K0)  %*% (t(xx[[1]]) %*% c_int[[i]] + K0 %*% mu0)
       V_n             <- V + t(c_int[[i]] - xx[[1]] %*% mu0_n) %*% (c_int[[i]] - xx[[1]] %*% mu0_n) + t(mu0_n - mu0) %*% K0 %*% (mu0_n - mu0)
@@ -422,7 +422,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
       }
 
 
-# Sample subject values for gamma and conditional probabilities using RW Metropolis sampler -----------
+      # Sample subject values for gamma and conditional probabilities using RW Metropolis sampler -----------
       for (s in 1:n_subj){
         candcov_comb 			<- chol2inv(chol(subj_data[[s]]$mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ] + chol2inv(chol(V_int[[i]]))))
         RWout					    <- mnl_RW_once(int1 = c_int[[i]][s,], Obs = trans[[s]][[i]], n_cat = m, mu_int_bar1 = c(t(mu_int_bar[[i]]) %*% xx[[1]][s,]), V_int1 = V_int[[i]], scalar = scalar, candcov1 = candcov_comb)
@@ -448,7 +448,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
     }
 
 
-# End of 1 MCMC iteration, save output values --------
+    # End of 1 MCMC iteration, save output values --------
     int_bar[iter, ]				   	<- unlist(mu_int_bar)
     gamma_prob_bar[iter,]			<- unlist(mu_gamma_prob_bar)
     for(q in 1:n_dep){
