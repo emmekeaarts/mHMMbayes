@@ -77,7 +77,8 @@ the forward backward algorithm for all subjects in a sequential manner. Can
 handle varying observation length over subjects
 }
 \examples{
-# specifying general model properties
+###### Example on package data
+# specifying general model properties:
 m <- 2
 n_dep <- 4
 q_emis <- c(3, 2, 3, 2)
@@ -94,15 +95,16 @@ start.EM <- list(matrix(c(0.9, 0.05, 0.05, 0.05, 0.05, 0.9), byrow = TRUE,
 start.TM <- diag(.8, m)
 start.TM[lower.tri(start.TM) | upper.tri(start.TM)] <- .2
 
-# run a model without covariates
-out <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
+# Run a model without covariate(s):
+out1 <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
                 q_emis = q_emis), start_val = c(as.vector(t(start.EM[[1]])),
                 as.vector(t(start.EM[[2]])), as.vector(t(start.EM[[3]])),
                 as.vector(t(start.EM[[4]])), as.vector(t(start.TM))),
                 mcmc = list(J = 11, burn_in = 5))
 
-# including covariates. Only the emission distribution for each of the 4
-# dependent variables is predicted using standardized CDI change.
+# Run a model including a covariate. Here, the covariate (standardized CDI
+# change) predicts the emission distribution for each of the 4 dependent
+# variables:
 n_subj <- 10
 xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), (n_dep + 1))
 for(i in 2:(n_dep + 1)){
@@ -114,5 +116,28 @@ out2 <- mHMM_mnl(s_data = nonverbal, xx = xx, gen = list(m = m, n_dep = n_dep,
                 as.vector(t(start.EM[[4]])), as.vector(t(start.TM))),
                 mcmc = list(J = 11, burn_in = 5))
 
+
+###### Example on simulated data
+# Simulate data for 10 subjects with each 100 observations:
+T <- 100
+n <- 10
+m <- 2
+pr <- 3
+gamma <- matrix(c(0.8, 0.2,
+                  0.3, 0.7), ncol = m, byrow = TRUE)
+emiss_distr <- matrix(c(0.5, 0.5, 0.0,
+                        0.1, 0.1, 0.8), nrow = m, ncol = pr, byrow = TRUE)
+data1 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
+                  var_gamma = .5, var_emiss = .5)
+
+# Specify remaining required anaylsis input (for now, use simulation input as
+# starting values):
+n_dep <- 1
+q_emis <- 3
+
+# Run the model on the simulated data:
+out3 <- mHMM_mnl(s_data = data1$obs, gen = list(m = m, n_dep = n_dep,
+                q_emis = q_emis), start_val = c(as.vector(t(emiss_distr)),
+                as.vector(t(gamma))), mcmc = list(J = 11, burn_in = 5))
 
 }
