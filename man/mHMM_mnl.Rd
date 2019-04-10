@@ -156,11 +156,11 @@ data1 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emi
 # Specify remaining required anaylsis input (for now, use simulation input as
 # starting values):
 n_dep <- 1
-q_emis <- 3
+q_emiss <- 3
 
 # Run the model on the simulated data:
 out3 <- mHMM_mnl(s_data = data1$obs, gen = list(m = m, n_dep = n_dep,
-                q_emis = q_emis), start_val = c(as.vector(t(emiss_distr)),
+                q_emiss = q_emiss), start_val = c(as.vector(t(emiss_distr)),
                 as.vector(t(gamma))), mcmc = list(J = 11, burn_in = 5))
 
 }
