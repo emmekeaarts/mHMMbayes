@@ -1,0 +1,132 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# mHMMbayes
+
+  With the package mHMMbayes you can fit multilevel hidden Markov models. The 
+  multilevel hidden Markov model (HMM) is a generalization of the well-known
+  hidden Markov model, tailored to accomodate (intense) longitudinal data of 
+  multiple individuals simultaneously. Using a multilevel framework, we allow 
+  for heterogeneity in the model parameters (transition probability matrix and
+  conditional distribution), while estimating one overall HMM. The model has a
+  great potential of application in  many fields, such as the social sciences 
+  and medicine. The model can be fitted on multivariate data with a catagorical 
+  distribution, and include individual level covariates (allowing for e.g.,
+  group comparisons on model parameters). Parameters are estimated using 
+  Bayesian estimation utilizing the forward-backward recursion within a hybrid 
+  Metropolis within Gibbs sampler. The package also a function to simulate data.
+  
+  NOTE: this is a beta version of the package. The package is still (heavily) 
+  under development, new functionalities will be added and functionalities will 
+  be altered in the near future. 
+  
+  Please do not hesitate to contact me if you have any questions regarding the 
+  package. 
+
+## Installation
+
+You can install mHMMbayes from github with:
+
+```{r gh-installation, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("emmekeaarts/mHMMbayes")
+```
+
+## Usage
+
+This is a basic example which shows you how to run the model using example data 
+included with the package, and how to simulate data:
+
+```{r example}
+library(mHMMbayes)
+# specifying general model properties
+m <- 2
+n_dep <- 4
+q_emis <- c(3, 2, 3, 2)
+
+# specifying starting values
+start.EM <- list(matrix(c(0.9, 0.05, 0.05, 0.05, 0.05, 0.9), byrow = TRUE,
+                         nrow = m, ncol = q_emis[1]), # vocalizing patient
+                  matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
+                         ncol = q_emis[2]), # looking patient
+                  matrix(c(0.05, 0.05, 0.9, 0.9, 0.05, 0.05), byrow = TRUE,
+                         nrow = m, ncol = q_emis[3]), # vocalizing therapist
+                  matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
+                         ncol = q_emis[4])) # looking therapist
+ start.TM <- diag(.8, m)
+ start.TM[lower.tri(start.TM) | upper.tri(start.TM)] <- .2
+
+ # run a model without covariates
+ set.seed(23245)
+ out <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
+                 q_emis = q_emis), start_val = c(as.vector(t(start.EM[[1]])),
+                 as.vector(t(start.EM[[2]])), as.vector(t(start.EM[[3]])),
+                 as.vector(t(start.EM[[4]])), as.vector(t(start.TM))),
+                 mcmc = list(J = 11, burn_in = 5))
+
+ # including covariates. Only the emission distribution for each of the 4
+ # dependent variables is predicted using standardized CDI change.
+ n_subj <- 10
+ xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), (n_dep + 1))
+ for(i in 2:(n_dep + 1)){
+   xx[[i]] <- cbind(xx[[i]], nonverbal_cov$std_CDI_change)
+ }
+ set.seed(34109)
+ out2 <- mHMM_mnl(s_data = nonverbal, xx = xx, gen = list(m = m, n_dep = n_dep,
+                 q_emis = q_emis), start_val = c(as.vector(t(start.EM[[1]])),
+                 as.vector(t(start.EM[[2]])), as.vector(t(start.EM[[3]])),
+                 as.vector(t(start.EM[[4]])), as.vector(t(start.TM))),
+                 mcmc = list(J = 11, burn_in = 5))
+
+ 
+ ### Simulating data
+ # simulating data for 10 subjects with each 100 observations
+ T <- 100
+ n <- 10
+ m <- 3
+ pr <- 4
+ gamma <- matrix(c(0.8, 0.1, 0.1,
+                   0.2, 0.7, 0.1,
+                   0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
+ emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
+                         0.1, 0.1, 0.8, 0.0,
+                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = pr, byrow = TRUE)
+ set.seed(1253)
+ data1 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
+                   var_gamma = 1, var_emiss = 1)
+
+
+ # simulating subject specific transition probability matrices and emission distributions only
+ T <- 0
+ n <- 5
+ m <- 3
+ pr <- 4
+ gamma <- matrix(c(0.8, 0.1, 0.1,
+                   0.2, 0.7, 0.1,
+                   0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
+ emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
+                         0.1, 0.1, 0.8, 0.0,
+                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = pr, byrow = TRUE)
+ set.seed(549801)
+ data2 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
+                   var_gamma = 1, var_emiss = 1)
+ data2
+
+ set.seed(10893)
+ data3 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
+                   var_gamma = .5, var_emiss = .5)
+ data3
+
+
+```
