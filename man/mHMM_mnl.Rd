@@ -5,8 +5,8 @@
 \title{Multilevel hidden markov model using Bayesian estimation}
 \usage{
 mHMM_mnl(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL,
-  emis_sampler = NULL, gamma_hyp_prior = NULL, emis_hyp_prior = NULL,
-  mcmc, return_path = FALSE)
+  emiss_sampler = NULL, gamma_hyp_prior = NULL,
+  emiss_hyp_prior = NULL, mcmc, return_path = FALSE)
 }
 \arguments{
 \item{s_data}{A matrix containing the observations to be modelled, with one
@@ -20,117 +20,124 @@ equal to the number of dependent variables (\code{n_dep}) + 1.}
 
 \item{gen}{List containing the following elements:
 \itemize{\item{\code{m}: numeric vector with length 1 denoting the number
-of states} \item{\code{n_dep}: numeric vector with length 1 denoting the
-number of dependent variables} \item{\code{q_emis}: numeric vector with
-length \code{n_dep} denoting the number of obseved catagories for the
-catagorical emission distribution of each dependent variable.}}}
+of states}
+\item{\code{n_dep}: numeric vector with length 1 denoting the
+number of dependent variables}
+\item{\code{q_emiss}: numeric vector with length \code{n_dep} denoting the
+number of observed categories for the categorical  emission distribution of
+each dependent variable.}}}
 
 \item{xx}{List of covariates. Number of elements in the list is equal to 1 +
 \code{n_dep} (i.e., the number of dependent variables). The first element
-is used to predict the transiton matrix. Subsequent elements are used to
+is used to predict the transition matrix. Subsequent elements are used to
 predict the emission distribution for (each of) the dependent variable(s).
 Each element is a matrix, with the number of rows equal to the number of
-subjects. The first column \emph{has to} represent the intercept, that is,
+subjects. The first column \emph{has to}  represent the intercept, that is,
 a column only consisting of ones. Subsequent columns correspond to
 covariates used to predict the transition matrix / emission distribution.
 If \code{xx} is omitted completely, \code{xx} defaults to NULL, resembling
-no covaraites. Specific elements in the list can also be left empty (i.e.,
+no covariates. Specific elements in the list can also be left empty (i.e.,
 set to NULL) to signify that either the transition probability matrix or a
 specific emission distribution is not predicted by covariates}
 
-\item{start_val}{Startvalues for gamma and emis used for first run of the
-forward algorithm}
+\item{start_val}{List containing the start values for the transition probability
+matrix gamma and the emission distribuition(s). The first element of the list
+contains a matrix with the start values for gamma. The subsequent elements
+contain matrices for the start values for the conditional distribution(s):
+one element containing one matrix for each emission distribtution of a
+dependent variable.}
 
 \item{gamma_sampler}{List containing start values for mle estimates of pooled
-data for gamma: \code{int_mle0}, \code{scalar}, and weight for the overall ll in the
-fractional likelihood, \code{w}.}
+data for gamma: \code{gamma_int_mle0}, \code{gamma_scalar}, and weight for the overall ll in the
+fractional likelihood, \code{gamma_w}.}
 
-\item{emis_sampler}{List containing start values for mle estimates of pooled
-data for emis, emis_int_mle0, emis_scalar and weight for the overall ll in the
-fractional likelihood, emis_w}
+\item{emiss_sampler}{List containing start values for mle estimates of pooled
+data for emiss, emiss_int_mle0, emiss_scalar and weight for the overall ll in the
+fractional likelihood, emiss_w}
 
-\item{gamma_hyp_prior}{List containing \code{mu0}, \code{K0}, \code{nu} and \code{V}, see details below}
+\item{gamma_hyp_prior}{List containing \code{gamma_mu0}, \code{gamma_K0}, \code{gamma_nu} and \code{gamma_V}, see details below}
 
-\item{emis_hyp_prior}{List containing \code{emis_mu0}, \code{emis_K0}, \code{emis_nu} and \code{emis_V}, see details below}
+\item{emiss_hyp_prior}{List containing \code{emiss_mu0}, \code{emiss_K0}, \code{emiss_nu} and \code{emiss_V}, see details below}
 
 \item{mcmc}{List of MCMC argument, containing the following elements:
 \code{J} number of iterations of the MCMC algorithm. \code{burn_in} Burn in
 period for the MCMC algorithm}
 
-\item{return_path}{A logical scalar. Should the sampled state sequence obtianed at
+\item{return_path}{A logical scalar. Should the sampled state sequence obtained at
 each iteration and for each subject be returned by the function
 (\code{sample_path = TRUE}) or not (\code{sample_path = FALSE}). This is
 quite a large object! Can be used for local decoding purposes.}
 }
 \value{
-A list of
+A list of ... (to be completed)
 }
 \description{
-This function is for an multilevel model, can handle covariates at level 2
-(unlimited number), uses a hybrid metropolis within gibs sampler, where the
-metropolis hastings sampler is a random walk, and does the forward backward
-algorithm for all subjects in a sequential manner. Can handle varying
-observation length over subjects
-}
-\details{
-Here are the details of the function
-\subsection{Equations}{
-  The following hyper prior is used on each row \eqn{i} of gamma (\eqn{\Gamma_i}) at the population level:
-  \deqn{\Gamma_i ~ (idd) MNL(int_i)}
-  \deqn{int_i ~ N(mu_int_bar, V_int)}
-  \deqn{mu_int_bar ~ N(mu0, \frac{1}{K0} * V_int)}
-  \deqn{V_int ~ IW(nu, V)}
-  where \eqn{\alpha_i} denotes \code{int_i}, \eqn{\bar{\mu}_\alpha} denotes \code{mu_int_bar},  \code{} \code{} \code{} \code{} \code{}
-
-  The following hyper prior is used for the conditional emission distribution of each state at the population level:
-  \deqn{\theta_i ~ (idd) MNL(emis_int_i)}
-  \deqn{emis_int ~ N(mu_emis_int_bar, V_emis_int)}
-  \deqn{mu_emis_int_bar ~ N(emis_mu0, (1 / emis_K0) * V_emis_int)}
-  \deqn{V_emis_int 					~ IW(emis_nu, emis_V)}
-
-}
-
-\subsection{Covariates}{
-  Here is some info on using covariates
-}
+This function analyses (intense longitudinal) data from multiple subjects
+using a multilevel hidden Markov model. By using a multilevel framework, one
+general 'population' HMM is estimated, while heterogeneity between subjects
+is accommodated. The function can handle covariates at the subject level
+(unlimited number), uses a hybrid metropolis within gibs sampler, and performs
+the forward backward algorithm for all subjects in a sequential manner. Can
+handle varying observation length over subjects
 }
 \examples{
-# specifying general model properties
+###### Example on package data
+# specifying general model properties:
 m <- 2
 n_dep <- 4
-q_emis <- c(3, 2, 3, 2)
+q_emiss <- c(3, 2, 3, 2)
 
 # specifying starting values
-start.EM <- list(matrix(c(0.9, 0.05, 0.05, 0.05, 0.05, 0.9), byrow = TRUE,
-                        nrow = m, ncol = q_emis[1]), # vocalizing patient
-                 matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
-                        ncol = q_emis[2]), # looking patient
-                 matrix(c(0.05, 0.05, 0.9, 0.9, 0.05, 0.05), byrow = TRUE,
-                        nrow = m, ncol = q_emis[3]), # vocalizing therapist
-                 matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
-                        ncol = q_emis[4])) # looking therapist
 start.TM <- diag(.8, m)
 start.TM[lower.tri(start.TM) | upper.tri(start.TM)] <- .2
+start.EM <- list(matrix(c(0.9, 0.05, 0.05, 0.05, 0.05, 0.9), byrow = TRUE,
+                        nrow = m, ncol = q_emiss[1]), # vocalizing patient
+                 matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
+                        ncol = q_emiss[2]), # looking patient
+                 matrix(c(0.05, 0.05, 0.9, 0.9, 0.05, 0.05), byrow = TRUE,
+                        nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+                 matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
+                        ncol = q_emiss[4])) # looking therapist
 
-# run a model without covariates
-out <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
-                q_emis = q_emis), start_val = c(as.vector(t(start.EM[[1]])),
-                as.vector(t(start.EM[[2]])), as.vector(t(start.EM[[3]])),
-                as.vector(t(start.EM[[4]])), as.vector(t(start.TM))),
+# Run a model without covariate(s):
+out1 <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
+                q_emiss = q_emiss), start_val = c(list(start.TM), start.EM),
                 mcmc = list(J = 11, burn_in = 5))
 
-# including covariates. Only the emission distribution for each of the 4
-# dependent variables is predicted using standardized CDI change.
+# Run a model including a covariate. Here, the covariate (standardized CDI
+# change) predicts the emission distribution for each of the 4 dependent
+# variables:
 n_subj <- 10
 xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), (n_dep + 1))
 for(i in 2:(n_dep + 1)){
   xx[[i]] <- cbind(xx[[i]], nonverbal_cov$std_CDI_change)
 }
 out2 <- mHMM_mnl(s_data = nonverbal, xx = xx, gen = list(m = m, n_dep = n_dep,
-                q_emis = q_emis), start_val = c(as.vector(t(start.EM[[1]])),
-                as.vector(t(start.EM[[2]])), as.vector(t(start.EM[[3]])),
-                as.vector(t(start.EM[[4]])), as.vector(t(start.TM))),
+                q_emiss = q_emiss), start_val = c(list(start.TM), start.EM),
                 mcmc = list(J = 11, burn_in = 5))
+
+#' ###### Example on simulated data
+# Simulate data for 10 subjects with each 100 observations:
+T <- 100
+n <- 10
+m <- 2
+pr <- 3
+gamma <- matrix(c(0.8, 0.2,
+                  0.3, 0.7), ncol = m, byrow = TRUE)
+emiss_distr <- matrix(c(0.5, 0.5, 0.0,
+                        0.1, 0.1, 0.8), nrow = m, ncol = pr, byrow = TRUE)
+data1 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
+                  var_gamma = .5, var_emiss = .5)
+
+# Specify remaining required anaylsis input (for now, use simulation input as
+# starting values):
+n_dep <- 1
+q_emiss <- 3
+
+# Run the model on the simulated data:
+out3 <- mHMM_mnl(s_data = data1$obs, gen = list(m = m, n_dep = n_dep,
+                q_emiss = q_emiss), start_val = c(as.vector(t(emiss_distr)),
+                as.vector(t(gamma))), mcmc = list(J = 11, burn_in = 5))
 
 
 }
