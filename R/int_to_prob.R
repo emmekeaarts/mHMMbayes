@@ -1,3 +1,4 @@
+
 #' @keywords internal
 # computes probabilities from intercepts
 int_to_prob <- function(int1) {

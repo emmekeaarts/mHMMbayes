@@ -146,6 +146,29 @@
 #'                 as.vector(t(gamma))), mcmc = list(J = 11, burn_in = 5))
 #'
 #'
+#' ###### Example on simulated data
+#' # Simulate data for 10 subjects with each 100 observations:
+#' T <- 100
+#' n <- 10
+#' m <- 2
+#' pr <- 3
+#' gamma <- matrix(c(0.8, 0.2,
+#'                   0.3, 0.7), ncol = m, byrow = TRUE)
+#' emiss_distr <- matrix(c(0.5, 0.5, 0.0,
+#'                         0.1, 0.1, 0.8), nrow = m, ncol = pr, byrow = TRUE)
+#' data1 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
+#'                   var_gamma = .5, var_emiss = .5)
+#'
+#' # Specify remaining required anaylsis input (for now, use simulation input as
+#' # starting values):
+#' n_dep <- 1
+#' q_emis <- 3
+#'
+#' # Run the model on the simulated data:
+#' out3 <- mHMM_mnl(s_data = data1$obs, gen = list(m = m, n_dep = n_dep,
+#'                 q_emis = q_emis), start_val = c(as.vector(t(emiss_distr)),
+#'                 as.vector(t(gamma))), mcmc = list(J = 11, burn_in = 5))
+#'
 # not sure if all functions given below for packages are actually still used, check!
 #' @export
 #' @importFrom mvtnorm dmvnorm rmvnorm dmvt rmvt
@@ -155,7 +178,7 @@
 mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, emiss_sampler = NULL,
                      gamma_hyp_prior = NULL, emiss_hyp_prior = NULL, mcmc, return_path = FALSE){
 
-# Initialize data -----------------------------------
+  # Initialize data -----------------------------------
   # dependent variable(s), sample size, dimensions gamma and conditional distribuiton
   n_dep			 <- gen$n_dep
   id         <- unique(s_data[,1])
@@ -206,7 +229,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   burn_in			<- mcmc$burn_in
 
 
-# Initalize priors and hyper priors --------------------------------
+  # Initalize priors and hyper priors --------------------------------
   # Initialize gamma sampler
   if(is.null(gamma_sampler)) {
     gamma_int_mle0  <- gamma_mu_prop <- rep(0, m - 1)
@@ -279,7 +302,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   }
 
 
-# Define objects used to store data in mcmc algorithm, not returned ----------------------------
+  # Define objects used to store data in mcmc algorithm, not returned ----------------------------
   # overall
   c <- llk <- numeric(1)
   sample_path <- lapply(n_vary, dif_matrix, cols = J)
@@ -301,7 +324,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   emiss_naccept <- rep(list(matrix(0, n_subj, m)), n_dep)
 
 
-# Define objects that are returned from mcmc algorithm ----------------------------
+  # Define objects that are returned from mcmc algorithm ----------------------------
   # Define object for subject specific posterior density, put start values on first row
   PD 					  <- matrix(, nrow = J, ncol = sum(m * q_emiss) + m * m + 1)
   PD_emiss_names   <- paste("q", 1, "_emiss", rep(1:q_emiss[1], m), "_S", rep(1:m, each = q_emiss[1]), sep = "")
@@ -338,12 +361,12 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   delta 			<- rep(list(solve(t(diag(m) - gamma[[1]] + 1), rep(1, m))), n_subj)
 
 
-# Start analysis --------------------------------------------
+  # Start analysis --------------------------------------------
   # Run the MCMC algorithm
   itime <- proc.time()[3]
   for (iter in 2 : J){
 
-# For each subject, obtain sampled state sequence with subject individual parameters ----------
+    # For each subject, obtain sampled state sequence with subject individual parameters ----------
     for(s in 1:n_subj){
       # Run forward algorithm, obtain subject specific forward proababilities and log likelihood
       forward				<- cat_Mult_HMM_fw(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], gamma = gamma[[s]], n_dep = n_dep, delta=NULL)
@@ -369,7 +392,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
       }
     }
 
-# The remainder of the mcmc algorithm is state specific
+    # The remainder of the mcmc algorithm is state specific
     for(i in 1:m){
 
 # Obtain MLE of the covariance matrices and log likelihood of gamma and emiss at subject and population level -----------------
@@ -452,7 +475,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
       }
 
 
-# Sample subject values for gamma and conditional probabilities using RW Metropolis sampler -----------
+      # Sample subject values for gamma and conditional probabilities using RW Metropolis sampler -----------
       for (s in 1:n_subj){
         gamma_candcov_comb 			<- chol2inv(chol(subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ] + chol2inv(chol(gamma_V_int[[i]]))))
         gamma_RWout					    <- mnl_RW_once(int1 = gamma_c_int[[i]][s,], Obs = trans[[s]][[i]], n_cat = m, mu_int_bar1 = c(t(gamma_mu_int_bar[[i]]) %*% xx[[1]][s,]), V_int1 = gamma_V_int[[i]], scalar = gamma_scalar, candcov1 = gamma_candcov_comb)

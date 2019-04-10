@@ -140,4 +140,27 @@ out3 <- mHMM_mnl(s_data = data1$obs, gen = list(m = m, n_dep = n_dep,
                 as.vector(t(gamma))), mcmc = list(J = 11, burn_in = 5))
 
 
+###### Example on simulated data
+# Simulate data for 10 subjects with each 100 observations:
+T <- 100
+n <- 10
+m <- 2
+pr <- 3
+gamma <- matrix(c(0.8, 0.2,
+                  0.3, 0.7), ncol = m, byrow = TRUE)
+emiss_distr <- matrix(c(0.5, 0.5, 0.0,
+                        0.1, 0.1, 0.8), nrow = m, ncol = pr, byrow = TRUE)
+data1 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
+                  var_gamma = .5, var_emiss = .5)
+
+# Specify remaining required anaylsis input (for now, use simulation input as
+# starting values):
+n_dep <- 1
+q_emis <- 3
+
+# Run the model on the simulated data:
+out3 <- mHMM_mnl(s_data = data1$obs, gen = list(m = m, n_dep = n_dep,
+                q_emis = q_emis), start_val = c(as.vector(t(emiss_distr)),
+                as.vector(t(gamma))), mcmc = list(J = 11, burn_in = 5))
+
 }
