@@ -3,7 +3,7 @@
 # Calculates the forward probabilities, used for sampling the state sequence
 # Based on Xx
 
-cat_Mult_HMM_fw <- function(x, m, emis, n_dep, gamma, delta = NULL){
+cat_Mult_HMM_fw <- function(x, m, emiss, n_dep, gamma, delta = NULL){
   if(is.null(delta)) {
     delta <- solve(t(diag(m) - gamma + 1), rep(1, m))
   }
@@ -13,7 +13,7 @@ cat_Mult_HMM_fw <- function(x, m, emis, n_dep, gamma, delta = NULL){
   inp      <- matrix(ncol = n_dep, nrow = m)
   for(i in 1:n){
     for (q in 1:n_dep){
-      inp[, q]    <- emis[[q]][, x[i, q]] # dit moet beter (dus niet in loop) kunnen!
+      inp[, q]    <- emiss[[q]][, x[i, q]] # dit moet beter (dus niet in loop) kunnen!
     }
     allprobs[i, ] <- apply(inp, 1, prod)
   }
