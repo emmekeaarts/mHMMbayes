@@ -30,7 +30,7 @@ each dependent variable.}}}
 \item{xx}{List of covariates. Number of elements in the list is equal to 1 +
 \code{n_dep} (i.e., the number of dependent variables). The first element
 is used to predict the transition matrix. Subsequent elements are used to
-predict the emission distribution for (each of) the dependent variable(s).
+predict the emission distribution of (each of) the dependent variable(s).
 Each element is a matrix, with the number of rows equal to the number of
 subjects. The first column \emph{has to}  represent the intercept, that is,
 a column only consisting of ones. Subsequent columns correspond to
@@ -38,7 +38,7 @@ covariates used to predict the transition matrix / emission distribution.
 If \code{xx} is omitted completely, \code{xx} defaults to NULL, resembling
 no covariates. Specific elements in the list can also be left empty (i.e.,
 set to NULL) to signify that either the transition probability matrix or a
-specific emission distribution is not predicted by covariates}
+specific emission distribution is not predicted by covariates.}
 
 \item{start_val}{List containing the start values for the transition probability
 matrix gamma and the emission distribuition(s). The first element of the list
@@ -116,29 +116,6 @@ out2 <- mHMM_mnl(s_data = nonverbal, xx = xx, gen = list(m = m, n_dep = n_dep,
                 q_emiss = q_emiss), start_val = c(list(start.TM), start.EM),
                 mcmc = list(J = 11, burn_in = 5))
 
-#' ###### Example on simulated data
-# Simulate data for 10 subjects with each 100 observations:
-T <- 100
-n <- 10
-m <- 2
-pr <- 3
-gamma <- matrix(c(0.8, 0.2,
-                  0.3, 0.7), ncol = m, byrow = TRUE)
-emiss_distr <- matrix(c(0.5, 0.5, 0.0,
-                        0.1, 0.1, 0.8), nrow = m, ncol = pr, byrow = TRUE)
-data1 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
-                  var_gamma = .5, var_emiss = .5)
-
-# Specify remaining required anaylsis input (for now, use simulation input as
-# starting values):
-n_dep <- 1
-q_emiss <- 3
-
-# Run the model on the simulated data:
-out3 <- mHMM_mnl(s_data = data1$obs, gen = list(m = m, n_dep = n_dep,
-                q_emiss = q_emiss), start_val = c(as.vector(t(emiss_distr)),
-                as.vector(t(gamma))), mcmc = list(J = 11, burn_in = 5))
-
 
 ###### Example on simulated data
 # Simulate data for 10 subjects with each 100 observations:
@@ -163,4 +140,7 @@ out3 <- mHMM_mnl(s_data = data1$obs, gen = list(m = m, n_dep = n_dep,
                 q_emiss = q_emiss), start_val = c(as.vector(t(emiss_distr)),
                 as.vector(t(gamma))), mcmc = list(J = 11, burn_in = 5))
 
+}
+\seealso{
+\code{\link{sim_mHMM}} for simulating multilevel hidden Markov data.
 }
