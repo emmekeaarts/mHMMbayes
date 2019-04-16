@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 
 # mHMMbayes
 
-  With the package mHMMbayes you can fit multilevel hidden Markov models. The 
+  With the \code{R} package mHMMbayes you can fit multilevel hidden Markov models. The 
   multilevel hidden Markov model (HMM) is a generalization of the well-known
   hidden Markov model, tailored to accomodate (intense) longitudinal data of 
   multiple individuals simultaneously. Using a multilevel framework, we allow 
