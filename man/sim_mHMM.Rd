@@ -4,8 +4,8 @@
 \alias{sim_mHMM}
 \title{Simulate data using a multilevel hidden markov model}
 \usage{
-sim_mHMM(T, n, m, pr, gamma, emiss_distr, var_gamma = 1, var_emiss = 1,
-  return_ind_par = FALSE)
+sim_mHMM(T, n, m, pr, gamma, emiss_distr, beta = NULL, xx = NULL,
+  var_gamma = 1, var_emiss = 1, return_ind_par = FALSE)
 }
 \arguments{
 \item{T}{The length of the observed sequence to be simulated for each
@@ -29,6 +29,36 @@ containing the average population emission distribution of the
 (categorical) observations given the hidden states. That is, the
 probability of observing category \emph{k} (column \emph{k}) in state
 \emph{i} (row \emph{i}).}
+
+\item{beta}{List of regressoin parameters to predict \code{gamma} and/or
+\code{emiss_distr} in combination with \code{xx} using multinomial logisitc
+regression. The list is composed of two elements. The first element
+consists of a matrix with regression paremeters used to to predict the
+transition probability matrix \code{gamma}. The second element consist of a
+matrix with regression paremeters used to to predict the emission
+distribution \code{emiss_distr} of the dependent variable. Note that for
+both \code{gamma} and/or \code{emiss_distr}, the first element in each row
+is used as reference category in the multinomial logistic regression, and
+no regression parameters can be specified for these categories. Hence, the
+first element in the list \code{beta} to predict \code{gamma} consist of a
+matrix with the number of rows equal to \code{m} and the number of columns
+equal to \code{m} - 1. See \emph{details} for more information.  Note that
+if \code{beta} is specified, \code{xx} has to be specified as well.}
+
+\item{xx}{List of covariates to predict \code{gamma} and/or
+\code{emiss_distr} using the regression parameters specified in
+\code{beta}. The list is composed of two elements. The first element is
+used to predict the transition matrix. The second elements is used to
+predict the emission distribution of the dependent variable. Both elements
+are a matrix, with the number of rows equal to \code{n} the number of
+subjects to be simulated. The first column \emph{has to}  represent the
+intercept, that is, a column only consisting of ones. Subsequent columns
+correspond to covariates used to predict the transition matrix / emission
+distribution. If \code{xx} is omitted completely, \code{xx} defaults to
+NULL, resembling no covariates. Specific elements in the list can also be
+left empty (i.e., set to NULL) to signify that either the transition
+probability matrix or a specific emission distribution is not predicted by
+covariates.}
 
 \item{var_gamma}{An integer denoting the variance between subjects in the
 transition probability matrix. Note that this value corresponds to the
@@ -55,34 +85,40 @@ from exactly the same HMM for all subjects, var_emmis should be set to
 0.}
 
 \item{return_ind_par}{A logical scalar. Should the subject specific
-  transition probability matrix gamma and emission probability matrix be
-  returned by the function (\code{return_ind_par = TRUE}) or not
-  (\code{return_ind_par = FALSE}). The default equals \code{return_ind_par =
-  FALSE}.
+transition probability matrix \code{gamma} and emission probability matrix
+\code{emiss_distr} be returned by the function (\code{return_ind_par =
+TRUE}) or not (\code{return_ind_par = FALSE}). The default equals
+\code{return_ind_par = FALSE}.}
+}
+\value{
+The following components are returned by the function \code{sim_mHMM}:
+\describe{
+  \item{\code{states}}{A matrix containing the simulated hidden state
+  sequences, with one row per hidden state per subject. The first column
+  indicates subject id number. The second column contains the simulated
+  hidden state sequence, consecutively for all subjects. Hence, the id number
+  is repeated over the rows (with the number of repeats equal to the lenght
+  of the simulated hidden state sequence \code{T} for each subject).}
+  \item{\code{obs}}{A matrix containing the simulated observed outputs, with
+  one row per simulated observation per subject. The first column indicates
+  subject id number. The second column contains the simulated observation
+  sequence, consecutively for all subjects. Hence, the id number is repeated
+  over rows (with the number of repeats equal to the lenght of the simulated
+  observation sequence \code{T} for each subject).}
+  \item{\code{gamma}}{A list containing \code{n} elements with the simulated
+  subject specific transition probability matrices \code{gamma}. Only
+  returned if \code{return_ind_par} is set to \code{TRUE}.}
+  \item{\code{emiss_distr}}{A list containing \code{n} elements with the
+  simulated subject specific emission probability matrices
+  \code{emiss_distr}. Only returned if \code{return_ind_par} is set to
+  \code{TRUE}.}
+}
 
-Note: the subject specific) initial state distributions (i.e., the
-probability of each of the states at the first time point) needed to simulate
-the data are obtained from the stationary distributions of the subject
-specific transition probability matrices gamma.}
-}
-\description{
-This function simulates data for multiple subjects, for which the data have
-categorical observations that follow a hidden Markov model (HMM) with an
-multilevel structure. The multilevel structure means that each subject can
-have it's own set of parameters, and that the parameters at the subject
-level (level 1) are tied together by a population distribution at level 2 for
-each of the corresponding parameters. The shape of the population distribution
-for each of the parameters is a normal (i.e., Gaussian) distribution. In
-simulating the data, having a multilevel structure means that the parameters
-for each subject are sampled from the population level distribution of the
-corresponding parameter. The user specifies the population distribution for
-each parameter: the average population transition probability matrix and its
-variance, and the average population emission distribution and its variance.
-For now, the variance is assumed fixed for all components of the transition
-probability matrix and for all components of the emissiondistribution, and
-the simulated data can only consist of one dependent variable.
-}
-\examples{
+
+ @seealso \code{\link{mHMM_mnl}} for analyzing multilevel hidden Markov data.
+
+
+  @examples
 # simulating data for 10 subjects with each 100 observations
 T <- 100
 n <- 10
@@ -116,4 +152,54 @@ data2
 data3 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
                   var_gamma = .5, var_emiss = .5)
 data3
+}
+\description{
+This function simulates data for multiple subjects, for which the data have
+categorical observations that follow a hidden Markov model (HMM) with an
+multilevel structure. The multilevel structure implies that each subject is
+allowed to have it's own set of parameters, and that the parameters at the
+subject level (level 1) are tied together by a population distribution at
+level 2 for each of the corresponding parameters. The shape of the population
+distribution for each of the parameters is a normal (i.e., Gaussian)
+distribution. In addition to (natural and/or unexplained) heterogeneity
+between subjects, the subjects parameters can also depend on a (set of)
+covariate(s).
+}
+\details{
+In simulating the data, having a multilevel structure means that the
+parameters for each subject are sampled from the population level
+distribution of the corresponding parameter. The user specifies the
+population distribution for each parameter: the average population transition
+probability matrix and its variance, and the average population emission
+distribution and its variance. For now, the variance is assumed fixed for all
+components of the transition probability matrix and for all components of the
+emissiondistribution, and the simulated data can only consist of one
+dependent variable. In additon, at this point only one dependent variable can
+be simulated. That is, the hidden Markov model is a univariate hidden Markov
+model.
+
+Note: the subject specific) initial state distributions (i.e., the
+probability of each of the states at the first time point) needed to simulate
+the data are obtained from the stationary distributions of the subject
+specific transition probability matrices gamma.
+
+\subsection{Covariates}{ Here is some info on using covariates ... (to be
+completed)
+
+\code{beta}: The first element in the list \code{beta} to predict
+\code{gamma} consist of a matrix with the number of rows equal to \code{m}
+and the number of columns equal to \code{m} - 1. The first element in the
+first row corresponds to the probability of switching from state one to state
+two. The second element in the first row corresponds to the probability of
+switching from state one to state three, and so on. The last element in the
+first row corresponds to the probability of switching from state one to the
+last state. The second element in the list \code{beta} to predict
+\code{emiss_distr} consist of a matrix with the number of rows equal to
+\code{m} and the number of columns equal to \code{pr} - 1. The first element
+in the first row corresponds to the probability of observing category two in
+state one. The second element in the first row corresponds to the probability
+of observing category three is state one, and so on. The last element in the
+first row corresponds to the probability of observing the last category in
+state one.
+}
 }
