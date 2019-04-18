@@ -6,7 +6,7 @@
 \alias{mHMMbayes-package}
 \title{mHMMbayes: A package for multilevel hidden Markov models using Bayesian estimation.}
 \description{
-The mHMMbayes package provides two categories of important functions: mHMM_mnl and sim_mHMM
+The mHMMbayes package provides two main functions: mHMM_mnl and sim_mHMM
 }
 \section{mHMM_mnl}{
 
