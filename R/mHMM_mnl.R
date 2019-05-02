@@ -1,17 +1,13 @@
 #' Multilevel hidden markov model using Bayesian estimation
 #'
-#' This function analyses (intense longitudinal) data from multiple subjects
+#' \code{mHMM_mnl} analyses (intense longitudinal) data from multiple subjects
 #' using a multilevel hidden Markov model. By using a multilevel framework, one
 #' general 'population' HMM is estimated, while heterogeneity between subjects
 #' is accommodated. The function can handle covariates at the subject level
-#' (unlimited number), uses a hybrid metropolis within gibs sampler, and performs
-#' the forward backward algorithm for all subjects in a sequential manner. Can
-#' handle varying observation length over subjects
-
-# For each parameter (also for the sub ones contained in lists), clearly specify
-# the type (e.g., matrix with dimensions xx, numeric vector with lenght, string,
-# list, etc)
-
+#' (unlimited number), uses a hybrid metropolis within gibs sampler, and
+#' performs the forward backward algorithm for all subjects in a sequential
+#' manner. Can handle varying observation length over subjects.
+#'
 #' @param s_data A matrix containing the observations to be modelled, with one
 #'   row per observation. In the \code{s_data} matrix, the first column
 #'   indicates subject id number. Hence, the id number is repeated over rows
@@ -86,7 +82,9 @@
 #
 #' @return A list of ... (to be completed)
 #'
-#' @seealso \code{\link{sim_mHMM}} for simulating multilevel hidden Markov data.
+#' @seealso \code{\link{sim_mHMM}} for simulating multilevel hidden Markov data
+#'   and \code{\link{vit_mHMM}} for obtaining the most likely hidden state
+#'   sequence for each subject using the Viterbi algorithm.
 #'
 #' @examples
 #' ###### Example on package data
@@ -495,8 +493,8 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   ctime = proc.time()[3]
   print(paste("total time elapsed in minutes", round((ctime-itime) / 60, 2)))
   if(return_path == TRUE){
-    return(list(PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj, gamma_int_bar = gamma_int_bar, emiss_int_bar = emiss_int_bar, gamma_prob_bar = gamma_prob_bar, emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept, sample_path = sample_path))
+    return(list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J, burn_in = burn_in), PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj, gamma_int_bar = gamma_int_bar, emiss_int_bar = emiss_int_bar, gamma_prob_bar = gamma_prob_bar, emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept, sample_path = sample_path))
   } else {
-    return(list(PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj, gamma_int_bar = gamma_int_bar, emiss_int_bar = emiss_int_bar, gamma_prob_bar = gamma_prob_bar, emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept))
+    return(list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J, burn_in = burn_in), PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj, gamma_int_bar = gamma_int_bar, emiss_int_bar = emiss_int_bar, gamma_prob_bar = gamma_prob_bar, emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept))
   }
 }

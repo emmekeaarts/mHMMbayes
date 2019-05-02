@@ -72,13 +72,13 @@ quite a large object! Can be used for local decoding purposes.}
 A list of ... (to be completed)
 }
 \description{
-This function analyses (intense longitudinal) data from multiple subjects
+\code{mHMM_mnl} analyses (intense longitudinal) data from multiple subjects
 using a multilevel hidden Markov model. By using a multilevel framework, one
 general 'population' HMM is estimated, while heterogeneity between subjects
 is accommodated. The function can handle covariates at the subject level
-(unlimited number), uses a hybrid metropolis within gibs sampler, and performs
-the forward backward algorithm for all subjects in a sequential manner. Can
-handle varying observation length over subjects
+(unlimited number), uses a hybrid metropolis within gibs sampler, and
+performs the forward backward algorithm for all subjects in a sequential
+manner. Can handle varying observation length over subjects.
 }
 \examples{
 ###### Example on package data
@@ -142,5 +142,7 @@ out3 <- mHMM_mnl(s_data = data1$obs, gen = list(m = m, n_dep = n_dep,
 
 }
 \seealso{
-\code{\link{sim_mHMM}} for simulating multilevel hidden Markov data.
+\code{\link{sim_mHMM}} for simulating multilevel hidden Markov data
+  and \code{\link{vit_mHMM}} for obtaining the most likely hidden state
+  sequence for each subject using the Viterbi algorithm.
 }
