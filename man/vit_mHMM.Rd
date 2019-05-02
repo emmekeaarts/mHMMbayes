@@ -28,7 +28,7 @@ burn_in period specified at \code{mHMM_mnl} will be used.}
 }
 \value{
 The function \code{vit_mHMM} returns the matrix \code{state_seq} that
-  denotes the most likely state at each point in time. Each column represtns
+  denotes the most likely state at each point in time. Each column represents
   a subject, and each row represents a point in time. If sequence lenghts
   differ over subjects, states for none existing time points for subjects are
   filled with \code{NA}.
@@ -69,13 +69,13 @@ out1 <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
                 q_emiss = q_emiss), start_val = c(list(start.TM), start.EM),
                 mcmc = list(J = 11, burn_in = 5))
 
-# obtain the most likely state sequence with the Viterbi algorithm
+###### obtain the most likely state sequence with the Viterbi algorithm
 states <- vit_mHMM(s_data = nonverbal, object = out1)
 
 
 }
 \seealso{
 \code{\link{mHMM_mnl}} for analyzing multilevel hidden Markov data
-  and how to obtain the input needed for \code{vit_mHMM}, and
+  and obtaining the input needed for \code{vit_mHMM}, and
   \code{\link{sim_mHMM}} for simulating multilevel hidden Markov data.
 }

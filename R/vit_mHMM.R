@@ -17,7 +17,7 @@
 #' @param burn_in The number of iterations to be discarded from the MCMC
 #'   algorithm when inferring the transition probability matrix gamma and the
 #'   emission distribution of (each of) the dependent variable(s) for each
-#'   subject from \code{out1}. If omitted, defaults to \code{NULL} and the
+#'   subject from \code{s_data}. If omitted, defaults to \code{NULL} and the
 #'   burn_in period specified at \code{mHMM_mnl} will be used.
 #'
 #' @return The function \code{vit_mHMM} returns the matrix \code{state_seq} that
@@ -65,8 +65,15 @@ vit_mHMM <- function(object, s_data, burn_in = NULL){
   # input should be output object from mHMM_mnl, change output to class 3 type, such that we can check this here
   # number of iterations and burn_in used should be inherited from mHMM_mnl, with the option to change burn_in
 
+  if (!is.mHMM(object)){
+    stop("The input object used should be from the class mHMM, obtained by using the function mHMM_mnl.")
+  }
   id         <- unique(s_data[,1])
   n_subj     <- length(id)
+  if(length(object$PD_subj) != n_subj){
+    stop("s_data used should be identical to the data used for creating the object in mHMM_mnl.
+         The number of subjects in the datasets are not the same.")
+  }
   n_vary     <- table(s_data[,1])
   max_n      <- max(n_vary)
   state_seq  <- matrix(,ncol = n_subj, nrow = max_n)
