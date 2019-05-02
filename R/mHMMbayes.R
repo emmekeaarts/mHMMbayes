@@ -28,7 +28,7 @@
 # not sure if all functions given below for packages are actually still used, check!
 #' @importFrom mvtnorm dmvnorm rmvnorm dmvt rmvt
 #' @importFrom MCMCpack rdirichlet rwish
-#' @importFrom stats optim rnorm runif
+#' @importFrom stats optim rnorm runif median
 #'
 #'
 #' @docType package
