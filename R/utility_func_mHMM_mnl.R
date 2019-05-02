@@ -18,3 +18,8 @@ dif_vector <- function(x){
 is.whole <- function(x) {
   return(is.numeric(x) && floor(x) == x)
 }
+
+#' @keywords internal
+is.mHMM <- function(x) {
+  inherits(x, "mHMM")
+}
