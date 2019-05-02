@@ -126,7 +126,7 @@ The following components are returned by the function \code{sim_mHMM}:
 }
 }
 \description{
-This function simulates data for multiple subjects, for which the data have
+\code{sim_mHMM} simulates data for multiple subjects, for which the data have
 categorical observations that follow a hidden Markov model (HMM) with an
 multilevel structure. The multilevel structure implies that each subject is
 allowed to have it's own set of parameters, and that the parameters at the
