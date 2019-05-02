@@ -69,7 +69,30 @@ each iteration and for each subject be returned by the function
 quite a large object! Can be used for local decoding purposes.}
 }
 \value{
-A list of ... (to be completed)
+\code{mHMM_mnl} returns an object (list) of the class \code{mHMM}.
+  The list contains the following components:
+  \describe{
+  \item{\code{PD_subj}}{A list with one matrix per subject containing the xx,
+  log likelihood}
+  \item{\code{emiss_prob_bar}}{A matrix containing XX, with
+  one row per XX. The columns ... }
+  \item{\code{emiss_int_bar}}{A matrix containing XX, with
+  one row per XX. The columns ... }
+  \item{\code{emiss_int_subj}}{A matrix containing XX, with
+  one row per XX. The columns ... }
+  \item{\code{emiss_naccept}}{A matrix containing XX, with
+  one row per XX. The columns ... }
+  \item{\code{gamma_prob_bar}}{A matrix containing XX, with
+  one row per XX. The columns ... }
+  \item{\code{gamma_int_bar}}{A matrix containing XX, with
+  one row per XX. The columns ... }
+  \item{\code{gamma_int_subj}}{A matrix containing XX, with
+  one row per XX. The columns ... }
+  \item{\code{gamma_naccept}}{A matrix containing XX, with
+  one row per XX. The columns ... }
+  \item{\code{input}}{Overview of used input specifications. Namely, ...}
+  \item{\code{sample_path}}{Only returned if .. }
+}
 }
 \description{
 \code{mHMM_mnl} analyses (intense longitudinal) data from multiple subjects

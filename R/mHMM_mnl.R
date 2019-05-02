@@ -80,7 +80,30 @@
 #   Here is some info on using covariates ... (to be completed)
 # }
 #
-#' @return A list of ... (to be completed)
+#' @return \code{mHMM_mnl} returns an object (list) of the class \code{mHMM}.
+#'   The list contains the following components:
+#'   \describe{
+#'   \item{\code{PD_subj}}{A list with one matrix per subject containing the xx,
+#'   log likelihood}
+#'   \item{\code{emiss_prob_bar}}{A matrix containing XX, with
+#'   one row per XX. The columns ... }
+#'   \item{\code{emiss_int_bar}}{A matrix containing XX, with
+#'   one row per XX. The columns ... }
+#'   \item{\code{emiss_int_subj}}{A matrix containing XX, with
+#'   one row per XX. The columns ... }
+#'   \item{\code{emiss_naccept}}{A matrix containing XX, with
+#'   one row per XX. The columns ... }
+#'   \item{\code{gamma_prob_bar}}{A matrix containing XX, with
+#'   one row per XX. The columns ... }
+#'   \item{\code{gamma_int_bar}}{A matrix containing XX, with
+#'   one row per XX. The columns ... }
+#'   \item{\code{gamma_int_subj}}{A matrix containing XX, with
+#'   one row per XX. The columns ... }
+#'   \item{\code{gamma_naccept}}{A matrix containing XX, with
+#'   one row per XX. The columns ... }
+#'   \item{\code{input}}{Overview of used input specifications. Namely, ...}
+#'   \item{\code{sample_path}}{Only returned if .. }
+#' }
 #'
 #' @seealso \code{\link{sim_mHMM}} for simulating multilevel hidden Markov data
 #'   and \code{\link{vit_mHMM}} for obtaining the most likely hidden state
@@ -493,8 +516,17 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   ctime = proc.time()[3]
   print(paste("total time elapsed in minutes", round((ctime-itime) / 60, 2)))
   if(return_path == TRUE){
-    return(list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J, burn_in = burn_in), PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj, gamma_int_bar = gamma_int_bar, emiss_int_bar = emiss_int_bar, gamma_prob_bar = gamma_prob_bar, emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept, sample_path = sample_path))
+    out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J, burn_in = burn_in, n_subj = n_subj, n_vary = n_vary),
+                PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
+                gamma_int_bar = gamma_int_bar, emiss_int_bar = emiss_int_bar, gamma_prob_bar = gamma_prob_bar,
+                emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept,
+                sample_path = sample_path)
   } else {
-    return(list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J, burn_in = burn_in), PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj, gamma_int_bar = gamma_int_bar, emiss_int_bar = emiss_int_bar, gamma_prob_bar = gamma_prob_bar, emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept))
+    out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J, burn_in = burn_in, n_subj = n_subj, n_vary = n_vary),
+                PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
+                gamma_int_bar = gamma_int_bar, emiss_int_bar = emiss_int_bar, gamma_prob_bar = gamma_prob_bar,
+                emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept)
   }
+  class(out) <- append(class(out), "mHMM")
+  return(out)
 }
