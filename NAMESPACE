@@ -2,6 +2,7 @@
 
 export(mHMM_mnl)
 export(sim_mHMM)
+export(vit_mHMM)
 importFrom(MCMCpack,rdirichlet)
 importFrom(MCMCpack,rwish)
 importFrom(mvtnorm,dmvnorm)
