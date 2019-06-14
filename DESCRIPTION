@@ -20,8 +20,9 @@ Description: An implementation of multilevel hidden Markov models using Bayesian
     with a catagorical distribution, and include individual level covariates 
     (allowing for e.g., group comparisons on model parameters). Parameters are 
     estimated using Bayesian estimation utilizing the forward-backward recursion 
-    within a hybrid Metropolis within Gibbs sampler. The package also contains 
-    a function to simulate data.
+    within a hybrid Metropolis within Gibbs sampler. The package also includes a 
+    function to simulate data and a function to obtain the most likely hidden 
+    state sequence for each individual using the Viterbi algorithm. 
 URL: https://github.com/emmekeaarts/mHMMbayes
 BugReports: https://github.com/emmekeaarts/mHMMbayes/issues
 License: GPL-3

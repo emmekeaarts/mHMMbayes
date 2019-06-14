@@ -3,7 +3,7 @@
 mHMMbayes
 =========
 
-With the package mHMMbayes you can fit multilevel hidden Markov models. The multilevel hidden Markov model (HMM) is a generalization of the well-known hidden Markov model, tailored to accomodate (intense) longitudinal data of multiple individuals simultaneously. Using a multilevel framework, we allow for heterogeneity in the model parameters (transition probability matrix and conditional distribution), while estimating one overall HMM. The model has a great potential of application in many fields, such as the social sciences and medicine. The model can be fitted on multivariate data with a catagorical distribution, and include individual level covariates (allowing for e.g., group comparisons on model parameters). Parameters are estimated using Bayesian estimation utilizing the forward-backward recursion within a hybrid Metropolis within Gibbs sampler. The package also a function to simulate data.
+With the package mHMMbayes you can fit multilevel hidden Markov models. The multilevel hidden Markov model (HMM) is a generalization of the well-known hidden Markov model, tailored to accomodate (intense) longitudinal data of multiple individuals simultaneously. Using a multilevel framework, we allow for heterogeneity in the model parameters (transition probability matrix and conditional distribution), while estimating one overall HMM. The model has a great potential of application in many fields, such as the social sciences and medicine. The model can be fitted on multivariate data with a catagorical distribution, and include individual level covariates (allowing for e.g., group comparisons on model parameters). Parameters are estimated using Bayesian estimation utilizing the forward-backward recursion within a hybrid Metropolis within Gibbs sampler. The package also includes a function to simulate data and a function to obtain the most likely hidden state sequence for each individual using the Viterbi algorithm.
 
 NOTE: this is a beta version of the package. The package is still (heavily) under development, new functionalities will be added and functionalities will be altered in the near future.
 
@@ -51,7 +51,7 @@ start.EM <- list(matrix(c(0.9, 0.05, 0.05, 0.05, 0.05, 0.9), byrow = TRUE,
                  as.vector(t(start.EM[[4]])), as.vector(t(start.TM))),
                  mcmc = list(J = 11, burn_in = 5))
 #> [1] 10
-#> [1] "total time elapsed in minutes 0.34"
+#> [1] "total time elapsed in minutes 0.37"
 
  # including covariates. Only the emission distribution for each of the 4
  # dependent variables is predicted using standardized CDI change.

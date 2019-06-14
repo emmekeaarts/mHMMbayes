@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 
 # mHMMbayes
 
-  With the \code{R} package mHMMbayes you can fit multilevel hidden Markov models. The 
+  With the \code{R} package mHMMbayes you can fit multilevel hidden Markov models.   The 
   multilevel hidden Markov model (HMM) is a generalization of the well-known
   hidden Markov model, tailored to accomodate (intense) longitudinal data of 
   multiple individuals simultaneously. Using a multilevel framework, we allow 
@@ -25,7 +25,9 @@ knitr::opts_chunk$set(
   distribution, and include individual level covariates (allowing for e.g.,
   group comparisons on model parameters). Parameters are estimated using 
   Bayesian estimation utilizing the forward-backward recursion within a hybrid 
-  Metropolis within Gibbs sampler. The package also a function to simulate data.
+  Metropolis within Gibbs sampler. The package also includes a function to 
+  simulate data and a function to obtain the most likely hidden state sequence 
+  for each individual using the Viterbi algorithm. 
   
   NOTE: this is a beta version of the package. The package is still (heavily) 
   under development, new functionalities will be added and functionalities will 
