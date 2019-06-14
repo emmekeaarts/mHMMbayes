@@ -23,7 +23,7 @@ equal to the number of dependent variables (\code{n_dep}) + 1.}
 \item{burn_in}{The number of iterations to be discarded from the MCMC
 algorithm when inferring the transition probability matrix gamma and the
 emission distribution of (each of) the dependent variable(s) for each
-subject from \code{out1}. If omitted, defaults to \code{NULL} and the
+subject from \code{s_data}. If omitted, defaults to \code{NULL} and the
 burn_in period specified at \code{mHMM_mnl} will be used.}
 }
 \value{
