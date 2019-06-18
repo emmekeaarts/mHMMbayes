@@ -1,4 +1,4 @@
-#' @keywords internal
+#' @export
 #'
 print.mHMM <- function(object){
   input   <- object$input
@@ -15,9 +15,12 @@ print.mHMM <- function(object){
   for(i in 1:n_subj){
     LL[i] <- median(object$PD_subj[[i]][((burn_in + 1): J), (sum(q_emiss * m) + m*m + 1)])
   }
+  AIC<-2*(sum((q_emiss-1)*m)+(m-1)*m) - (2*LL)
   cat("Average Log likelihood over all subjects:", mean(LL), "\n")
+  cat("Average AIC over all subjects:", mean(AIC), "\n")
   cat("\n")
   cat("Number of states used:", m, "\n")
   cat("\n")
   cat("Number of dependent variables used:", n_dep, "\n")
+  cat("\n")
 }
