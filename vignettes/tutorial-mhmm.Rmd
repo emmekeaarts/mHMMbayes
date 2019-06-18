@@ -74,7 +74,7 @@ We illustrate using the package using the embedded example data `nonverbal`. The
 * `t_looking`: looking behavior of the therapist, consisting of 1 = looking at patient, 2 = not looking at patient.
 The top 6 rows of the dataset are provided below. 
 
-```{r}
+```{r, include = FALSE}
 library(mHMMbayes)
 nonverbal <- data.frame(nonverbal)
 head(nonverbal)
@@ -113,13 +113,37 @@ legend("topleft", bty = "n", fill = Look_col, legend = Look_lab)
 
 ```
 
-We can for example oberve that both the patient and the therapist are mainly looking at eachother. During the first minute, the patient is mainly speaking. During the second minute, the the therapists, after which the patient takes over while the therapist is backchanneling. 
+We can, for example, oberve that both the patient and the therapist are mainly looking at eachother during the observed 5 minutes. During the first minute, the patient is mainly speaking. During the second minute, the the therapists starts, after which the patient takes over while the therapist is backchanneling. 
 
-### Running the analysis
+## A simple model
+To fit a simple 2 state multilevel model with the function `mHMM_mnl`, one first has to specify some general model properties and starting values:  
+```{r, include = FALSE}
+# specifying general model properties:
+m <- 2
+n_dep <- 4
+q_emiss <- c(3, 2, 3, 2)
 
+# specifying starting values
+start.TM <- diag(.8, m)
+start.TM[lower.tri(start.TM) | upper.tri(start.TM)] <- .2
+start.EM <- list(matrix(c(0.9, 0.05, 0.05, 
+                          0.05, 0.05, 0.9), byrow = TRUE,
+                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
+                  matrix(c(0.9, 0.1, 
+                           0.9, 0.1), byrow = TRUE, nrow = m,
+                         ncol = q_emiss[2]), # looking patient
+                  matrix(c(0.05, 0.05, 0.9, 
+                           0.9, 0.05, 0.05), byrow = TRUE,
+                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+                  matrix(c(0.9, 0.1, 
+                           0.9, 0.1), byrow = TRUE, nrow = m,
+                         ncol = q_emiss[4])) # looking therapist
 
+load("nonv_2st_1000it.rda")
+```
 
-```{r}
+```{r, eval = FALSE}
+library(mHMMbayes)
 # specifying general model properties:
 m <- 2
 n_dep <- 4
@@ -136,17 +160,32 @@ start.EM <- list(matrix(c(0.9, 0.05, 0.05, 0.05, 0.05, 0.9), byrow = TRUE,
                          nrow = m, ncol = q_emiss[3]), # vocalizing therapist
                   matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
                          ncol = q_emiss[4])) # looking therapist
+```
+The first line of code loads the `mHMMbayes` package and the `nonverbal` data. Next we specifiy the general model properties: the number of states used is set by `m <- 2`, the number of dependent variables in the dataset used to infer the hidden states is specified by `n_dep <- 4`, and the number of categorical outcomes for each of the dependent variables is specified by `q_emiss <- c(3, 2, 3, 2)`. 
 
+#### Starting values
+To run the analysis, one has to specifiy starting values for both the transition probability matrix and the emission distribution(s). These starting values are used for the first run of the forward backward algorithm. Although the hidden states cannot be observed, one often has an idea for probable compositions of the states. In the example, we expect that there is a state in which the patient mostly speaks, and the therapist is silent, and a state during which the patient is silent and the therapists speaks. In addition, we expect that during both states, the therapist and the patient will be mainly looking at each other instead of looking away. One usally also has some (vague) idea on likely  and unlikely switches between states, and the size of sel-transition probabilities. In the example, we think a state will usually last quite some seconds, and thus expect a rather high self transition probability. All these ideas can be used to construct a set of sensible starting values.  Using sensible starting values increases convergence speed, and often prevents a problem called 'label switching'. Hence, using random or uniform starting values is not recommended. However, one does have to check if the algorithm reaches the same solution when a set of different (but often conceptually similar) starting values are used, see below. See the vignette [Estimation of the multilevel hidden Markov model](estimation-mhmm.pdf)) for more information on the forward backward algorithm and on the problem of label switching.
+
+#### fitting the model
+The multilevel HMM is fitted using the function `mHMM_mnl`: 
+```{r, eval = FALSE}
 # Run a model without covariate(s):
+set.seed(241632)
 out1 <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
-                 q_emiss = q_emiss), start_val = c(list(start.TM), start.EM),
-                 mcmc = list(J = 11, burn_in = 5))
+                 q_emiss = q_emiss), start_val = list(start.TM, start.EM),
+                 mcmc = list(J = 1000, burn_in = 200))
+
+```
+The call to `mHMM_mnl` specifies the model with several arguments. The `s_data` argument specifies the input data used to infer the hidden states over time. The `gen` and `start_val` argument specificy the general model properties and the starting values, as discussed above. The arguments needed for the MCMC algorithm are given in `mcmc`: `J` specifies the number of iterations used by the hybrid metropolis within Gibbs algorithm and `burn_in` specifies the number of iterations to discard when obtaining the model parameter summary statistics. The function `mHMM_mnl` retruns on object of class `mHMM`, which has `print`and `summary` methods to see the results.  
+
+```{r}
+out1
+summary(out1)
 
 ```
 
 
-
-* running the analysis plus start values, prior
+* prior
 * outcomes of the anlaysis: emission distribution and transition matrix, group means
 * individual level parameters, plotting
 * number of states
