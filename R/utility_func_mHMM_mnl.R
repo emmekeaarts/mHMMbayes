@@ -23,3 +23,8 @@ is.whole <- function(x) {
 is.mHMM <- function(x) {
   inherits(x, "mHMM")
 }
+
+#' @keywords internal
+is.mHMM_gamma <- function(x) {
+  inherits(x, "mHMM_gamma")
+}

@@ -19,8 +19,10 @@
 #'   NULL}), the burn in period specified when creating the \code{mHMM} object
 #'   with the function \code{\link{mHMM_mnl}} will be used.
 #'
-#' @return \code{obtain_gamma} returns the object \code{est_gamma}. Depending on
-#'   the specification at the input variable \code{level}, \code{est_gamma} is
+#' @return \code{obtain_gamma} returns the object \code{est_gamma} of the class
+#'   \code{mHMM_gamma}. This object can be directly plotted using the function
+#'   \code{plot.mHMM_gamma()}, or simply \code{plot()}. Depending on the
+#'   specification at the input variable \code{level}, \code{est_gamma} is
 #'   either a matrix with the transiton probabilities at the group level (if
 #'   \code{level = "group"}), or a list of matrices (with the number of elements
 #'   equal to the number of subjects analyzed, if \code{level = 'subject'}),
@@ -68,5 +70,6 @@ obtain_gamma <- function(object, level = "group", burn_in = NULL){
                                 byrow = TRUE, ncol = m, nrow = m)
    }
   }
+  class(est_gamma) <- append(class(est_gamma), "mHMM_gamma")
   return(est_gamma)
 }
