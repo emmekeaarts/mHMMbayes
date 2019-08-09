@@ -82,22 +82,22 @@ vit_mHMM <- function(object, s_data, burn_in = NULL){
   n_dep      <- input$n_dep
   m          <- input$m
   q_emiss    <- input$q_emiss
-  emiss      <- rep(list(NULL), n_dep)
   if(is.null(burn_in)){
     burn_in  <- input$burn_in
   }
   J          <- input$J
-  for(s in 1:n_subj){
-    emiss[[1]] <- matrix(apply(object$PD_subj[[s]][burn_in : J, 1 : (q_emiss[1] * m)], 2, median),
-                         byrow = TRUE, ncol = q_emiss[1], nrow = m)
-    if(n_dep > 1){
-      for(q in 2:n_dep){
-        emiss[[q]] <- matrix(apply(object$PD_subj[[s]][burn_in : J, (sum(m * q_emiss[1:(q-1)]) + 1) : sum(m * q_emiss[1:q])], 2, median),
-                             byrow = TRUE, ncol = q_emiss[q], nrow = m)
-      }
+  est_emiss  <- rep(list(lapply(q_emiss, dif_matrix, rows = m)), n_subj)
+  start <- c(0, q_emiss * m)
+  for(i in 1:n_subj){
+    for(j in 1:n_dep){
+      est_emiss[[i]][[j]][] <- matrix(round(apply(object$PD_subj[[i]][burn_in:J, (sum(start[1:j]) + 1) : sum(start[1:(j+1)])], 2, median), 3),
+                                      byrow = TRUE, ncol = q_emiss[j], nrow = m)
     }
-    gamma    <- matrix(apply(object$PD_subj[[s]][burn_in : J, (sum(m * q_emiss) + 1) : (sum(m * q_emiss) + m * m)], 2, median),
-                       byrow = TRUE, ncol = m, nrow = m)
+  }
+  est_gamma <- obtain_gamma(object, level = "subject")
+  for(s in 1:n_subj){
+    emiss <- est_emiss[[s]]
+    gamma    <- est_gamma[[s]]
     probs    <- cat_Mult_HMM_fw(x = matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep),
                                 m = m, emiss = emiss, n_dep = n_dep, gamma = gamma)$forward_p
     state_seq[1:n_vary[s], s] <- apply(probs, 2, which.max)
