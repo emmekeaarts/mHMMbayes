@@ -133,6 +133,13 @@
 #'                 q_emiss = q_emiss), start_val = c(list(start.TM), start.EM),
 #'                 mcmc = list(J = 11, burn_in = 5))
 #'
+#' # plot the posterior densities for the transition and emission probabilities
+#' plot(out1, component = "gamma")
+#' plot(out1, component = "emiss", dep = 1)
+#' plot(out1, component = "emiss", dep = 2)
+#' plot(out1, component = "emiss", dep = 3)
+#' plot(out1, component = "emiss", dep = 4)
+#'
 #' # Run a model including a covariate. Here, the covariate (standardized CDI
 #' # change) predicts the emission distribution for each of the 4 dependent
 #' # variables:
