@@ -32,5 +32,6 @@ RoxygenNote: 6.1.1
 Suggests: 
     knitr,
     rmarkdown,
-    alluvial
+    alluvial,
+    grDevices
 VignetteBuilder: knitr
