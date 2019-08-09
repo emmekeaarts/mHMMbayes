@@ -1,5 +1,5 @@
 #' @export
 #'
- print.mHMM_gamma <- function(object){
-  print(object[])
+ print.mHMM_gamma <- function(x, ...){
+  print(x[])
 }

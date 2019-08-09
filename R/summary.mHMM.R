@@ -1,6 +1,6 @@
 #' @export
 #'
-summary.mHMM <- function(object){
+summary.mHMM <- function(object, ...){
   input   <- object$input
   dep_labels <- input$dep_labels
   n_subj  <- input$n_subj
