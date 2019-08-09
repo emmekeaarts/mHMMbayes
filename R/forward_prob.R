@@ -13,7 +13,7 @@ cat_Mult_HMM_fw <- function(x, m, emiss, n_dep, gamma, delta = NULL){
   inp      <- matrix(ncol = n_dep, nrow = m)
   for(i in 1:n){
     for (q in 1:n_dep){
-      inp[, q]    <- emiss[[q]][, x[i, q]] # dit moet beter (dus niet in loop) kunnen!
+      inp[, q]    <- emiss[[q]][, x[i, q]]
     }
     allprobs[i, ] <- apply(inp, 1, prod)
   }
