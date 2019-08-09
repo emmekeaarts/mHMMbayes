@@ -172,7 +172,7 @@ First of all, note that the prior distributions on the emission distribution and
 The sets of intercepts of the multinomial regression model have a multivariate normal distribution. The (hyper-) prior for these intercepts thus consists of a prior distribution on the vector of means, and a prior distribution on the covariance matrix. The hyper-prior for the mean intercepts is a multivariate Normal distribution, with, as default, a vector of means equal to 0, and a parameter $K_0$ with which the covariance matrix is multiplied. Here, $K_0$ denotes the number of observations (i.e., the number of hypothetical prior subjects) on which the prior mean vector of zero's is based. By default, $K_0$ is set to 1. The hyper-prior for the covariance matrix between the set of (state specific) intercepts has an Inverse Wishart distribution, for which the variance in the default setting equals 3 + $m$ - 1 for the transition probabilities and 3 + $pr$ - 1 for the emission probabilites, and the covariance equals 0. The degrees of freedom of the Inverse Wishart distribution is set to 3 + $m$ - 1 for the transition probabilities and 3 + $pr$ - 1 for the emission probabilites.  \
 To use user specific prior distributions, one uses the input option `emiss_hyp_prior` for the emission distribution and `gamma_hyp_prior` for the transition probabilities in the function `mHMM_mnl`. Both objects are a list, containing the elements:
 
- * `mu0`, a vector containing the hypothesised mean values of the intercepts.
+ * `mu0`, a matrix with one row (when not including covariates in the model) and the number of columns equal to the number of intercepts to be estimated, containing the hypothesised mean values of the intercepts.
  * `K0`, the number of hypothetical prior subjects on which this vector of means is based.
  * `nu`, the degrees of freedom of the Inverse Wishart distribution.
  * `V`, the hypothesised variance-covariance matrix between the set of intercepts.  
@@ -190,36 +190,74 @@ out1 <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
                  mcmc = list(J = 1000, burn_in = 200))
 
 ```
-The call to `mHMM_mnl` specifies the model with several arguments. The `s_data` argument specifies the input data used to infer the hidden states over time. The `gen` and `start_val` argument specificy the general model properties and the starting values, as discussed above. The arguments needed for the MCMC algorithm are given in `mcmc`: `J` specifies the number of iterations used by the hybrid metropolis within Gibbs algorithm and `burn_in` specifies the number of iterations to discard when obtaining the model parameter summary statistics. The function `mHMM_mnl` retruns an object of class `mHMM`, which has `print`and `summary` methods to see the results. The `print` method provedes inrommation on xx, xx and xx:   
+The call to `mHMM_mnl` specifies the model with several arguments. The `s_data` argument specifies the input data used to infer the hidden states over time. The `gen` and `start_val` argument specificy the general model properties and the starting values, as discussed above. The arguments needed for the MCMC algorithm are given in `mcmc`: `J` specifies the number of iterations used by the hybrid metropolis within Gibbs algorithm and `burn_in` specifies the number of iterations to discard when obtaining the model parameter summary statistics. The function `mHMM_mnl` retruns an object of class `mHMM`, which has `print`and `summary` methods to see the results. The `print` method provides basic infomation on the model fitted. That is, the number of subjects in the dataset analyzed, the number of iterations and burn-in period, the average log likelihood over all subjects and model fit indice AIC, the number of states specified, and the number of dependent variables the states are based on:   
 
 ```{r}
 out1
 ```
-XX can also be extracted using xx. \
-The `summary`method provides xx. 
+The `summary`method provides information on the estimated parameters. That is, the point estimates of the posterior distribution for the transition probability matrix and the emission distribution of each of the dependent variables at the group level: 
 ```{r}
 summary(out1)
 ```
-XX can also be extracted using xx. \
+The resulting model indicates 2 well seperated states: one in which the patient is speaking and one in which the therapist is speaking. Looking behavior is quite similar for both the patient and the therapist in the 2 states. Information on the estimated parameters can also be obtained using the function `obtain_gamma` and `obtain_emiss`. These functions allow the user not only to inspect the estimated parameters at the group level, but for each subject individually as well, by specifying the input variable `level = "subject"`: \
+```{r}
+# When not specified, level defaults to "group"
+gamma_pop <- obtain_gamma(out1)
+gamma_pop
+
+# To obtain the subject specific parameter estimates:
+gamma_subj <- obtain_gamma(out1, level = "subject")
+gamma_subj
+```
+An additional option that the functions `obtain_gamma` and `obtain_emiss`  offer is changing the burn-in period used for obtaining the summary statistics, using the input variable `burn_in`. 
+
+#### Graphically displaying outcomes
+The package includes several plot functions to display the fitted model and its parameters. First, one can plot the posterior densities of a fitted model, for both the transition probability matrix gamma and for the emission distribution probabilities. The posterior densities are plotted for the group level and the subject level simultaneously. For example, for the emission distribution for the variable `p_vocalizing`: 
+```{r, fig.width = 7.2, fig.height = 4}
+Voc_col <- c("darkslategray3", "darkslategray4", "gray85")
+Voc_lab <- c("Speaking", "Back-channeling", "Not speaking")
+
+plot(out1, component = "emiss", dep = 1, col = Voc_col, parameter = "emiss", dep_lab = c("Patient vocalizing"), cat_lab = Voc_lab)
+```
+Here, `component` specifies whether we want to visualize the posterior densities for the transition probability matrix gamma (`component = "gamma"`) or for the emission distribution probabilities (`component = "emiss"`), when using `component = "emiss"` the input variable `dep` specifies which dependent variable we want to inspect (as the variable `p_vocolizing` is the first variable in the set, we set `dep = 1`), `col` specifies the colors to be used when plotting the lines, `dep_lab` denotes the label of the dependent variable we are plotting, and `cat_lab` denotes the labels of the categorical outcomes in the dependent variable. In the plot, the solid line visualizes the posterior density at the group level, while each of the dotted lines visualizes the posterior density of one subject. \
+Second, one can plot the transition probabilities obtained with the function `obtain_gamma` with a riverplot: 
+```{r, fig.show='hold'}
+# Transition probabilities at the group level and for subject number 1, respectively:
+plot(gamma_pop)
+plot(gamma_subj, subj_nr = 1)
+```
+
+(Note that graphically displaying the transition probabilities becomes more informative as the number of states increase.) \
 
 
-* outcomes of the anlaysis: emission distribution and transition matrix, group means
-* individual level parameters, plotting
-* number of states
+
+```{r, include = FALSE}
+load("nonv_3st_1000it.rda")
+load("nonv_4st_1000it.rda")
+```
+###Determining the number of hidden states
+The first step in developing a HMM is to determine the number of states $m$ that best describes the observed data, and is a model selection problem. When modelling, for example, behavior, the task is to define the states by clusters of observed behavioral outcomes that provide a reasonable, theoretically interpretable, description of the data. We suggest using a combination of the Akaike Information Criterion (AIC) and the theoretical interpretability of the estimated states to choose between models^[Note that the likelihood ratio test, commonly used to compare nested models, cannot be used in case of the HMM (i.e., the difference in the log-likelihoods between models is not $\chi^2$ distributed \cite{ryden2008}).]. In the example dataset, the 2, 3 and 4 state model result in an AIC of 3279, 3087, and 2959, respectively. According to model fit indices, the 4 state model is clearly the best model^[We note, however, that the AIC approximates the posterior distribution of the parameters by a Gaussian distribution, which might not be appropriate for models including parameters on the boundary of the parameter space (e.g., close to 0 or 1 in case of probability estimates), or for small data sets, as exemplified by @scott2002. Model selection is therefore not a straightforward procedure in the context of HMM, and the choices remain subjective.]. Let's inpect the composition of the states for the 4 state model, and the transition probabilities: 
+```{r, fig.width = 5, fig.height = 3}
+summary(out3)
+ plot(obtain_gamma(out3), cex = .5)
+```
+
+We can see that we have a state in which the patient speaks and the therapist is silent (state 1), a state in which the patient is silent and the therapist speaks (state 2), a state in which both the patient and therapist speak (state 3) and a state in which the therapsist speaks but does not look at the patient (in contrast to the looking behavior in all other states), and the patient is silent. In additon, all states are quite stable as the probability of remaining in the same state is above .6 for all states.
+
+###Determining the most likely state sequence 
+Given a well-fitting HMM, it may be of interest to determine the actual *sequence*, or order of succession, of hidden states that has most likely given rise to the sequence of outcomes as observed in a subject. One can either use local decoding, in which the probabilities of the hidden state sequence are obtained simultaneously with the model parameters estimates, or the well-known Viterbi algorithm  [@viterbi1967; @forney1973]. In local decoding, the most likely state is determined separately at each time point $t$, in contrast to the Viterbi algorithm in which one determines the joint probability of the complete sequence of observations $O_{1:T}$ and the complete sequence of hidden states $S_{1:T}$. \
+In the package, local decoding can be achieved by saving the sampled hidden state sequence at each iteration of the Gibbs sampler, by setting the input variable `return_path = TRUE` for the function `mHMM_mnl`. This will result in very large output files, however. Global decoding can be performed by using the function `vit_mHMM`: 
+```{r}
+# state_seq <- vit_mHMM(s_data = nonverbal, object = out1)
+# head(state_seq)
+```
+The function returns the hidden state sequence for each subject in a matrix, where each row represents a point in time and each column represents a subject. We can inpect the obtained hidden state sequence by for example plotting it toghether with the observed data. 
+
+
+
 * convergence, using different starting values
 * covariates, (plus, how does prior specification change)
 * simulating data
-
-
-
-###Determining the number of hidden states
-The first step in developing a HMM is to determine the number of states $m$ that best describes the observed data, and is a model selection problem. In case of the mouse data, the task is to define the states by clusters of observed behavioral acts that provide a reasonable, biologically interpretable, description of the data. As such, we used a combination of unadjusted and the Bayesian Information Criterion (BIC) adjusted log- likelihoods and the biological interpretability of the estimated states to choose between models. We used both the unadjusted and BIC adjusted log-likelihoods, because the likelihood ratio test, commonly used to compare nested models, cannot be used in case of the HMM (i.e., the difference in the log-likelihoods between models is not $\chi^2$ distributed \cite{ryden2008}). The BIC adjusted log-likelihood provides an alternative to compare the log-likelihoods of various models adjusted for the number of estimated parameters in the model. The BIC is defined as BIC $= -2 \text{log} L + n_p \ \text{log}(T)$, where $L$ is the likelihood of the model, $n_p$ is the number of (freely) estimated parameters, and $T$ is the length of the observed event sequence (see the vignette [Estimation of the multilevel hidden Markov model](estimation-mhmm.pdf) for the likelihood function).^[We note, however, that the BIC approximates the posterior distribution of the parameters by a Gaussian distribution, which might not be appropriate for models including parameters on the boundary of the parameter space (e.g., close to 0 or 1 in case of probability estimates), or for small data sets, as exemplified by @scott2002. Model selection is therefore not a straightforward procedure in the context of HMM, and the choices remain subjective.]
-
-###Determining the most likely state sequence 
-Given a well-fitting HMM, it may be of interest to determine the actual *sequence*, or order of succession, of hidden states that has most likely given rise to the sequence of outcomes as observed in a subject. One can either use local decoding, in which the probabilities of the hidden state sequence are obtained simultaneously with the model parameters estimates, or the well-known Viterbi algorithm  [@viterbi1967; @forney1973]. In local decoding, the most likely state is determined separately at each time point $t$, in contrast to the Viterbi algorithm in which one determines the joint probability of the complete sequence of observations $O_{1:T}$ and the complete sequence of hidden states $S_{1:T}$.
-
-
-
 
 
 Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
