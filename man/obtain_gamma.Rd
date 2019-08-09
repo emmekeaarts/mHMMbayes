@@ -17,10 +17,11 @@ or at the subject level (\code{level = "subject"}). When the latter is
 specified, the returned gamma is a list with the number of elements equal
 to the number of subjects analyzed.}
 
-\item{burn_in}{The number of iterations to discard when obtaining the model
-parameter summary statistics. When left unspecified (\code{burn_in =
-NULL}), the burn in period specified when creating the \code{mHMM} object
-with the function \code{\link{mHMM_mnl}} will be used.}
+\item{burn_in}{An integer wich specifies the number of iterations to discard
+when obtaining the model parameter summary statistics. When left
+unspecified (\code{burn_in = NULL}), the burn in period specified when
+creating the \code{mHMM} object with the function \code{\link{mHMM_mnl}}
+will be used.}
 }
 \value{
 \code{obtain_gamma} returns the object \code{est_gamma} of the class
