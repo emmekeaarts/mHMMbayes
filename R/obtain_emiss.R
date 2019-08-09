@@ -15,10 +15,11 @@
 #'   latter is specified, the returned emission distribution proabilities are
 #'   given in a list with the number of elements equal to the number of subjects
 #'   analyzed.
-#' @param burn_in The number of iterations to discard when obtaining the model
-#'   parameter summary statistics. When left unspecified (\code{burn_in =
-#'   NULL}), the burn in period specified when creating the \code{mHMM} object
-#'   with the function \code{\link{mHMM_mnl}} will be used.
+#' @param burn_in An integer wich specifies the number of iterations to discard
+#'   when obtaining the model parameter summary statistics. When left
+#'   unspecified (\code{burn_in = NULL}), the burn in period specified when
+#'   creating the \code{mHMM} object with the function \code{\link{mHMM_mnl}}
+#'   will be used.
 #'
 #' @return \code{obtain_emiss} returns the object \code{est_emiss}. Depending on
 #'   the specification at the input variable \code{level}, \code{est_emiss} is
