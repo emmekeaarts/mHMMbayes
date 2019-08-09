@@ -53,7 +53,6 @@
 #' @importFrom mvtnorm dmvnorm rmvnorm dmvt rmvt
 #' @importFrom MCMCpack rdirichlet rwish
 #' @importFrom stats optim rnorm runif median
-#' @importFrom alluvial alluvial
 #'
 #'
 #' @docType package
