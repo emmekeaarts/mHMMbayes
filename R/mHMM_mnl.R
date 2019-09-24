@@ -26,12 +26,25 @@
 #'   each dependent variable.}}
 #' @param xx List of covariates. Number of elements in the list is equal to 1 +
 #'   \code{n_dep} (i.e., the number of dependent variables). The first element
-#'   is used to predict the transition matrix. Subsequent elements are used to
-#'   predict the emission distribution of (each of) the dependent variable(s).
-#'   Each element is a matrix, with the number of rows equal to the number of
-#'   subjects. The first column \emph{has to}  represent the intercept, that is,
-#'   a column only consisting of ones. Subsequent columns correspond to
-#'   covariates used to predict the transition matrix / emission distribution.
+#'   in the list is used to predict the transition matrix. Subsequent elements
+#'   in the list are used to predict the emission distribution of (each of) the
+#'   dependent variable(s). Each element in the list is a matrix, with the
+#'   number of rows equal to the number of subjects. The first column \emph{has
+#'   to}  represent the intercept, that is, a column only consisting of ones.
+#'   Subsequent columns correspond to covariates used to predict the transition
+#'   matrix / emission distribution. Covariates can either be dichotomous or
+#'   continuous variables. Dichotomous variables have to be coded as 0/1
+#'   variables. Categroical or factor variables can as yet not be used as
+#'   predictor covariates. The user can however break up the categorical
+#'   variable in multiple dummy variables (i.e., dichotomous variables), which
+#'   can be used simultaneously in the analysis. Continuous predictors are
+#'   automatically centered. That is, the mean value of the covariate is
+#'   subtracted from all values of the covariate such that the new mean equals
+#'   zero. This is done such that the presented probabilities in the output
+#'   (i.e., for the population transiton probability matrix and population
+#'   emission probabilities) correspond to the predicted probabilities at the
+#'   average value of the covariate(s). MOVE PART TO DETAILS
+#'
 #'   If \code{xx} is omitted completely, \code{xx} defaults to NULL, resembling
 #'   no covariates. Specific elements in the list can also be left empty (i.e.,
 #'   set to NULL) to signify that either the transition probability matrix or a
@@ -226,6 +239,22 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
         nx[i] <- 1
       } else {
         nx[i] <- ncol(xx[[i]])
+        if (sum(xx[[i]][,1] != 1)){
+          stop("If xx is specified, the first column in each element of xx has to represent the intercept. That is, a column that only consists of the value 1")
+        }
+        if(nx[i] > 1){
+          for(j in 2:nx[i]){
+            if(is.factor(xx[[i]][,j])){
+              stop("Factors currently cannot be used as covariates, see help file for alternatives")
+            }
+            if((length(unique(xx[[i]][,j])) == 2) & (sum(xx[[i]][,j] != 0 & xx[[i]][,j] !=1) > 0)){
+              stop("Dichotomous covariates in xx need to be coded as 0 / 1 variables. That is, only conisting of the values 0 and 1")
+            }
+            if(length(unique(xx[[i]][,j])) > 2){
+              xx[[i]][,j] <- xx[[i]][,j] - mean(xx[[i]][,j])
+            }
+          }
+        }
       }
     }
   }
@@ -346,15 +375,44 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
 
   PD_subj				<- rep(list(PD), n_subj)
 
-  # Define object for subject specific posterior density (regression coefficients parameterization )
-  gamma_int_subj			<- rep(list(matrix(, nrow = J, ncol = (m-1) * m)), n_subj)
-  emiss_int_subj			<- rep(list(lapply((q_emiss - 1) * m, dif_matrix, rows = J)), n_subj)
-
-  # Define object for population posterior density ('normal' and regression coefficients parameterization )
+  # Define object for population posterior density (probabilities and regression coefficients parameterization )
   gamma_prob_bar		<- matrix(, nrow = J, ncol = (m * m))
+  colnames(gamma_prob_bar) <- paste("S", rep(1:m, each = m), "toS", rep(1:m, m), sep = "")
   emiss_prob_bar			<- lapply(q_emiss * m, dif_matrix, rows = J)
-  gamma_int_bar				<- matrix(, nrow = J, ncol = ((m-1) * m) * nx[1])
-  emiss_int_bar			<- lapply((q_emiss-1) * m * nx[-1], dif_matrix, rows = J)
+  names(emiss_prob_bar) <- dep_labels
+  for(q in 1:n_dep){
+    colnames(emiss_prob_bar[[q]]) <- paste("Emiss", rep(1:q_emiss[q], m), "_S", rep(1:m, each = q_emiss[q]), sep = "")
+  }
+  gamma_int_bar				<- matrix(, nrow = J, ncol = ((m-1) * m))
+  colnames(gamma_int_bar) <- paste("int_S", rep(1:m, each = m-1), "toS", rep(2:m, m), sep = "")
+  if(nx[1] > 1){
+    gamma_cov_bar				<- matrix(, nrow = J, ncol = ((m-1) * m) * (nx[1] - 1))
+    colnames(gamma_cov_bar) <- paste( paste("cov", 1 : (nx[1] - 1), "_", sep = ""), "S", rep(1:m, each = (m-1) * (nx[1] - 1)), "toS", rep(2:m, m * (nx[1] - 1)), sep = "")
+  } else{
+    gamma_cov_bar <- "No covariates where used to predict the transition probability matrix"
+  }
+  emiss_int_bar			<- lapply((q_emiss-1) * m, dif_matrix, rows = J)
+  names(emiss_int_bar) <- dep_labels
+  for(q in 1:n_dep){
+    colnames(emiss_int_bar[[q]]) <-  paste("int_Emiss", rep(2:q_emiss[q], m), "_S", rep(1:m, each = q_emiss[q] - 1), sep = "")
+  }
+  if(sum(nx[-1]) > n_dep){
+    emiss_cov_bar			<- lapply((q_emiss-1) * m * (nx[-1] - 1 ), dif_matrix, rows = J)
+    names(emiss_cov_bar) <- dep_labels
+    for(q in 1:n_dep){
+      if(nx[1 + q] > 1){
+        colnames(emiss_cov_bar[[q]]) <-  paste( paste("cov", 1 : (nx[1 + q] - 1), "_", sep = ""), "emiss", rep(2:q_emiss[q], m * (nx[1 + q] - 1)), "_S", rep(1:m, each = (q_emiss[q] - 1) * (nx[1 + q] - 1)), sep = "")
+      } else {
+        emiss_cov_bar[[q]] <- "No covariates where used to predict the emission probabilities for this outcome"
+      }
+    }
+  } else{
+    emiss_cov_bar <- "No covariates where used to predict the emission probabilities"
+  }
+
+  # Define object for subject specific posterior density (regression coefficients parameterization )
+  gamma_int_subj			<- rep(list(gamma_int_bar), n_subj)
+  emiss_int_subj			<- rep(list(emiss_int_bar), n_subj)
 
   # Put starting values in place for fist run forward algorithm
   emiss_sep 			<- vector("list", n_dep)
@@ -508,10 +566,20 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
 
 
 # End of 1 MCMC iteration, save output values --------
-    gamma_int_bar[iter, ]				   	<- unlist(gamma_mu_int_bar)
+    gamma_int_bar[iter, ]				   	<- unlist(lapply(gamma_mu_int_bar, "[",1,))
+    if(nx[1] > 1){
+      gamma_cov_bar[iter, ]      	<- unlist(lapply(gamma_mu_int_bar, "[",-1,))
+    }
     gamma_prob_bar[iter,]			<- unlist(gamma_mu_prob_bar)
     for(q in 1:n_dep){
-      emiss_int_bar[[q]][iter, ]	<- as.vector(unlist(sapply(emiss_mu_int_bar, "[[", q)))
+      emiss_int_bar[[q]][iter, ]	<- as.vector(unlist(lapply(
+        lapply(emiss_mu_int_bar, "[[", q), "[",1,)
+        ))
+      if(nx[1+q] > 1){
+        emiss_cov_bar[[q]][iter, ]  <- as.vector(unlist(lapply(
+          lapply(emiss_mu_int_bar, "[[", q), "[",-1,)
+        ))
+      }
       emiss_prob_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_mu_prob_bar, "[[", q)))
     }
     if(is.whole(iter/10)){
@@ -527,14 +595,16 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
     out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
                              burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                 PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
-                gamma_int_bar = gamma_int_bar, emiss_int_bar = emiss_int_bar, gamma_prob_bar = gamma_prob_bar,
+                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, emiss_int_bar = emiss_int_bar,
+                emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
                 emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept,
                 sample_path = sample_path)
   } else {
     out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
                              burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                 PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
-                gamma_int_bar = gamma_int_bar, emiss_int_bar = emiss_int_bar, gamma_prob_bar = gamma_prob_bar,
+                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, emiss_int_bar = emiss_int_bar,
+                emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
                 emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept)
   }
   class(out) <- append(class(out), "mHMM")
