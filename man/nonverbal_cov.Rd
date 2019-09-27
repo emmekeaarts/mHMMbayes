@@ -10,10 +10,6 @@
 \item{std_CDI_change}{Change in measure for depression (CDI) before and after therapy, standardized scale}
 \item{std_SCA_change}{Change in measure for anxiety (SCARED) before and after therapy, standardized scale}
 }}
-\source{
-Give source here once published, or something else referring to
-  earlier published work on data
-}
 \usage{
 nonverbal_cov
 }

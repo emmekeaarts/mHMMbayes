@@ -7,15 +7,11 @@
 \format{A matrix with 10 * 900 rows and 5 variables:
 \describe{
 \item{id}{id variable of patient - therapis couple to distinguish which observation belongs to which couple}
-\item{p_verbalizing}{verbalizing behavior of the patient, consisiting of 1 = verbalizing, 2 = back chanelling, 3 = not verbalizing}
-\item{p_looking}{looking behavior of the patient, consisting of 1 = looking at therapist, 2 = not looking at therapist}
-\item{t_verbalizing}{verbalizing behavior of the therapist, consisiting of 1 = verbalizing, 2 = back chanelling, 3 = not verbalizing}
-\item{t_looking}{looking behavior of the therapist, consisting of 1 = looking at patient, 2 = not looking at patient}
+\item{p_verbalizing}{verbalizing behavior of the patient, consisiting of 1 = not verbalizing, 2 = verbalizing, 3 = back chanelling}
+\item{p_looking}{looking behavior of the patient, consisting of 1 = not looking at therapist, 2 = looking at therapist}
+\item{t_verbalizing}{verbalizing behavior of the therapist, consisiting of 1 = not verbalizing, 2 = verbalizing, 3 = back chanelling}
+\item{t_looking}{looking behavior of the therapist, consisting of 1 = not looking at patient, 2 = looking at patient}
 }}
-\source{
-Give source here once published, or something else referring to
-  earlier published work on data
-}
 \usage{
 nonverbal
 }
