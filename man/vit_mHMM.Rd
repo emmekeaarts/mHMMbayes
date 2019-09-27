@@ -53,20 +53,20 @@ n_dep <- 4
 q_emiss <- c(3, 2, 3, 2)
 
 # specifying starting values
-start.TM <- diag(.8, m)
-start.TM[lower.tri(start.TM) | upper.tri(start.TM)] <- .2
-start.EM <- list(matrix(c(0.9, 0.05, 0.05, 0.05, 0.05, 0.9), byrow = TRUE,
+start_TM <- diag(.8, m)
+start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+start_EM <- list(matrix(c(0.05, 0.90, 0.05, 0.90, 0.05, 0.05), byrow = TRUE,
                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
-                 matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
+                 matrix(c(0.1, 0.9, 0.1, 0.9), byrow = TRUE, nrow = m,
                         ncol = q_emiss[2]), # looking patient
-                 matrix(c(0.05, 0.05, 0.9, 0.9, 0.05, 0.05), byrow = TRUE,
+                 matrix(c(0.90, 0.05, 0.05, 0.05, 0.90, 0.05), byrow = TRUE,
                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-                 matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
+                 matrix(c(0.1, 0.9, 0.1, 0.9), byrow = TRUE, nrow = m,
                         ncol = q_emiss[4])) # looking therapist
 
 # Run a model without covariate(s):
 out1 <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
-                q_emiss = q_emiss), start_val = c(list(start.TM), start.EM),
+                q_emiss = q_emiss), start_val = c(list(start_TM), start_EM),
                 mcmc = list(J = 11, burn_in = 5))
 
 ###### obtain the most likely state sequence with the Viterbi algorithm
