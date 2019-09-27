@@ -28,24 +28,38 @@ number of observed categories for the categorical  emission distribution of
 each dependent variable.}}}
 
 \item{xx}{List of covariates. Number of elements in the list is equal to 1 +
-\code{n_dep} (i.e., the number of dependent variables). The first element
-is used to predict the transition matrix. Subsequent elements are used to
-predict the emission distribution of (each of) the dependent variable(s).
-Each element is a matrix, with the number of rows equal to the number of
-subjects. The first column \emph{has to}  represent the intercept, that is,
-a column only consisting of ones. Subsequent columns correspond to
-covariates used to predict the transition matrix / emission distribution.
-If \code{xx} is omitted completely, \code{xx} defaults to NULL, resembling
-no covariates. Specific elements in the list can also be left empty (i.e.,
-set to NULL) to signify that either the transition probability matrix or a
-specific emission distribution is not predicted by covariates.}
+  \code{n_dep} (i.e., the number of dependent variables). The first element
+  in the list is used to predict the transition matrix. Subsequent elements
+  in the list are used to predict the emission distribution of (each of) the
+  dependent variable(s). Each element in the list is a matrix, with the
+  number of rows equal to the number of subjects. The first column \emph{has
+  to}  represent the intercept, that is, a column only consisting of ones.
+  Subsequent columns correspond to covariates used to predict the transition
+  matrix / emission distribution. Covariates can either be dichotomous or
+  continuous variables. Dichotomous variables have to be coded as 0/1
+  variables. Categroical or factor variables can as yet not be used as
+  predictor covariates. The user can however break up the categorical
+  variable in multiple dummy variables (i.e., dichotomous variables), which
+  can be used simultaneously in the analysis. Continuous predictors are
+  automatically centered. That is, the mean value of the covariate is
+  subtracted from all values of the covariate such that the new mean equals
+  zero. This is done such that the presented probabilities in the output
+  (i.e., for the population transiton probability matrix and population
+  emission probabilities) correspond to the predicted probabilities at the
+  average value of the covariate(s). MOVE PART TO DETAILS
+
+  If \code{xx} is omitted completely, \code{xx} defaults to NULL, resembling
+  no covariates. Specific elements in the list can also be left empty (i.e.,
+  set to NULL) to signify that either the transition probability matrix or a
+  specific emission distribution is not predicted by covariates.}
 
 \item{start_val}{List containing the start values for the transition probability
-matrix gamma and the emission distribuition(s). The first element of the list
-contains a matrix with the start values for gamma. The subsequent elements
-contain matrices for the start values for the conditional distribution(s):
-one element containing one matrix for each emission distribtution of a
-dependent variable.}
+  matrix gamma and the emission distribuition(s). The first element of the list
+  contains a matrix with the start values for gamma. The subsequent elements
+  contain matrices for the start values for the conditional distribution(s):
+  one element containing one matrix for each emission distribtution of a
+dependent variable. Note that \code{start_val} should not contain nested
+lists (i.e., lists within lists).}
 
 \item{gamma_sampler}{List containing start values for mle estimates of pooled
 data for gamma: \code{gamma_int_mle0}, \code{gamma_scalar}, and weight for the overall ll in the
@@ -111,21 +125,32 @@ n_dep <- 4
 q_emiss <- c(3, 2, 3, 2)
 
 # specifying starting values
-start.TM <- diag(.8, m)
-start.TM[lower.tri(start.TM) | upper.tri(start.TM)] <- .2
-start.EM <- list(matrix(c(0.9, 0.05, 0.05, 0.05, 0.05, 0.9), byrow = TRUE,
+start_TM <- diag(.8, m)
+start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+start_EM <- list(matrix(c(0.05, 0.90, 0.05,
+                          0.90, 0.05, 0.05), byrow = TRUE,
                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
-                 matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
+                 matrix(c(0.1, 0.9,
+                          0.1, 0.9), byrow = TRUE, nrow = m,
                         ncol = q_emiss[2]), # looking patient
-                 matrix(c(0.05, 0.05, 0.9, 0.9, 0.05, 0.05), byrow = TRUE,
+                 matrix(c(0.90, 0.05, 0.05,
+                          0.05, 0.90, 0.05), byrow = TRUE,
                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-                 matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
+                 matrix(c(0.1, 0.9,
+                          0.1, 0.9), byrow = TRUE, nrow = m,
                         ncol = q_emiss[4])) # looking therapist
 
 # Run a model without covariate(s):
 out1 <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
-                q_emiss = q_emiss), start_val = c(list(start.TM), start.EM),
+                q_emiss = q_emiss), start_val = c(list(start_TM), start_EM),
                 mcmc = list(J = 11, burn_in = 5))
+
+# plot the posterior densities for the transition and emission probabilities
+plot(out1, component = "gamma")
+plot(out1, component = "emiss", dep = 1)
+plot(out1, component = "emiss", dep = 2)
+plot(out1, component = "emiss", dep = 3)
+plot(out1, component = "emiss", dep = 4)
 
 # Run a model including a covariate. Here, the covariate (standardized CDI
 # change) predicts the emission distribution for each of the 4 dependent
@@ -136,7 +161,7 @@ for(i in 2:(n_dep + 1)){
   xx[[i]] <- cbind(xx[[i]], nonverbal_cov$std_CDI_change)
 }
 out2 <- mHMM_mnl(s_data = nonverbal, xx = xx, gen = list(m = m, n_dep = n_dep,
-                q_emiss = q_emiss), start_val = c(list(start.TM), start.EM),
+                q_emiss = q_emiss), start_val = c(list(start_TM), start_EM),
                 mcmc = list(J = 11, burn_in = 5))
 
 
@@ -159,9 +184,10 @@ n_dep <- 1
 q_emiss <- 3
 
 # Run the model on the simulated data:
-out3 <- mHMM_mnl(s_data = data1$obs, gen = list(m = m, n_dep = n_dep,
-                q_emiss = q_emiss), start_val = c(as.vector(t(emiss_distr)),
-                as.vector(t(gamma))), mcmc = list(J = 11, burn_in = 5))
+out3 <- mHMM_mnl(s_data = data1$obs,
+                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                 start_val = list(gamma, emiss_distr),
+                 mcmc = list(J = 11, burn_in = 5))
 
 }
 \seealso{
