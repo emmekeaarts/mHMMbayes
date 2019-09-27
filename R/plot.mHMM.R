@@ -80,29 +80,29 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
       state_col <- col
     }
     if(m > 3){
-      par(mfrow = c(2,ceiling(m/2)), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
+      graphics::par(mfrow = c(2,ceiling(m/2)), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
     } else {
-      par(mfrow = c(1,m), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
+      graphics::par(mfrow = c(1,m), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
     }
     for(i in 1:m){
       max <- 0
       for(j in 1:m){
-        new <- max(density(object$gamma_prob_bar[burn_in:J, m * (i-1) + j])$y)
+        new <- max(stats::density(object$gamma_prob_bar[burn_in:J, m * (i-1) + j])$y)
         if(new > max){max <- new}
       }
-      plot(x = 1, ylim = c(0, max), xlim = c(0,1), type = "n", cex = .8,  main =
+      graphics::plot.default(x = 1, ylim = c(0, max), xlim = c(0,1), type = "n", cex = .8,  main =
              paste("From state", i, "to state ..."), yaxt = "n", ylab = "",
            xlab = "Transition probability", ...)
-      title(ylab="Density", line=.5)
+      graphics::title(ylab="Density", line=.5)
       for(j in 1:m){
-        lines(density(object$gamma_prob_bar[burn_in:J,m * (i-1) + j]),
+        graphics::lines(stats::density(object$gamma_prob_bar[burn_in:J,m * (i-1) + j]),
               type = "l", col = state_col[j], lwd = lwd1, lty = lty1)
         for(s in 1:n_subj){
-          lines(density(object$PD_subj[[s]][burn.in:J,(sum(q_emiss * m) + m * (i-1) + j)]),
+          graphics::lines(stats::density(object$PD_subj[[s]][burn_in:J,(sum(q_emiss * m) + m * (i-1) + j)]),
                 type = "l", col = state_col[j], lwd = lwd2, lty = lty2)
         }
       }
-      legend("topright", col = state_col, legend = paste("To state", 1:m),
+      graphics::legend("topright", col = state_col, legend = paste("To state", 1:m),
              bty = 'n', lty = 1, lwd = 2, cex = .8)
     }
   } else if (component == "emiss"){
@@ -120,34 +120,34 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
       cat_col <- col
     }
     if(m > 3){
-      par(mfrow = c(2,ceiling(m/2)), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
+      graphics::par(mfrow = c(2,ceiling(m/2)), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
     } else {
-      par(mfrow = c(1,m), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
+      graphics::par(mfrow = c(1,m), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
     }
     for(i in 1:m){
       # determining the scale of the y axis
       max <- 0
       for(q in 1:q_emiss[dep]){
-        new <- max(density(object$emiss_prob_bar[[dep]][burn_in:J,q_emiss[dep] * (i-1) + q])$y)
+        new <- max(stats::density(object$emiss_prob_bar[[dep]][burn_in:J,q_emiss[dep] * (i-1) + q])$y)
         if(new > max){max <- new}
       }
       # set plotting area
-      plot(x = 1, ylim = c(0, max), xlim = c(0,1), type = "n",
+      graphics::plot.default(x = 1, ylim = c(0, max), xlim = c(0,1), type = "n",
            main = paste(dep_lab, ", state", i),
            yaxt = "n", ylab = "", xlab = "Conditional probability")
-      title(ylab="Density", line=.5)
+      graphics::title(ylab="Density", line=.5)
       for(q in 1:q_emiss[dep]){
         # add density curve for population level posterior distribution
-        lines(density(object$emiss_prob_bar[[dep]][burn_in:J,q_emiss[dep] * (i-1) + q]),
+        graphics::lines(stats::density(object$emiss_prob_bar[[dep]][burn_in:J,q_emiss[dep] * (i-1) + q]),
               type = "l", col = cat_col[q], lwd = lwd1, lty = lty1)
         # add density curves for subject posterior distributions
         for(s in 1:10){
-          lines(density(object$PD_subj[[s]][burn_in:J,(sum(start[1:dep])
+          graphics::lines(stats::density(object$PD_subj[[s]][burn_in:J,(sum(start[1:dep])
                                                      + (i-1)*q_emiss[dep] + q)]),
                 type = "l", col = cat_col[q], lwd = lwd2, lty = lty2)
         }
       }
-      legend("topright", col = cat_col, legend = cat_lab, bty = 'n', lty = 1, lwd = 2, cex = .7)
+      graphics::legend("topright", col = cat_col, legend = cat_lab, bty = 'n', lty = 1, lwd = 2, cex = .7)
     }
   }
 }
