@@ -14,14 +14,14 @@ knitr::opts_chunk$set(
 
 # mHMMbayes
 
-  With the \code{R} package mHMMbayes you can fit multilevel hidden Markov models.   The 
-  multilevel hidden Markov model (HMM) is a generalization of the well-known
-  hidden Markov model, tailored to accomodate (intense) longitudinal data of 
+  With the \code{R} package mHMMbayes you can fit multilevel hidden Markov models.   
+  The multilevel hidden Markov model (HMM) is a generalization of the well-known
+  hidden Markov model, tailored to accommodate (intense) longitudinal data of 
   multiple individuals simultaneously. Using a multilevel framework, we allow 
   for heterogeneity in the model parameters (transition probability matrix and
   conditional distribution), while estimating one overall HMM. The model has a
   great potential of application in  many fields, such as the social sciences 
-  and medicine. The model can be fitted on multivariate data with a catagorical 
+  and medicine. The model can be fitted on multivariate data with a categorical 
   distribution, and include individual level covariates (allowing for e.g.,
   group comparisons on model parameters). Parameters are estimated using 
   Bayesian estimation utilizing the forward-backward recursion within a hybrid 
@@ -52,43 +52,59 @@ included with the package, and how to simulate data:
 
 ```{r example}
 library(mHMMbayes)
+
+##### Simple 2 state model
 # specifying general model properties
 m <- 2
 n_dep <- 4
 q_emis <- c(3, 2, 3, 2)
 
 # specifying starting values
-start.EM <- list(matrix(c(0.9, 0.05, 0.05, 0.05, 0.05, 0.9), byrow = TRUE,
-                         nrow = m, ncol = q_emis[1]), # vocalizing patient
-                  matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
-                         ncol = q_emis[2]), # looking patient
-                  matrix(c(0.05, 0.05, 0.9, 0.9, 0.05, 0.05), byrow = TRUE,
-                         nrow = m, ncol = q_emis[3]), # vocalizing therapist
-                  matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
-                         ncol = q_emis[4])) # looking therapist
- start.TM <- diag(.8, m)
- start.TM[lower.tri(start.TM) | upper.tri(start.TM)] <- .2
+start_TM <- diag(.8, m)
+start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+start_EM <- list(matrix(c(0.05, 0.90, 0.05,
+                          0.90, 0.05, 0.05), byrow = TRUE,
+                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
+                  matrix(c(0.1, 0.9,
+                           0.1, 0.9), byrow = TRUE, nrow = m,
+                         ncol = q_emiss[2]), # looking patient
+                  matrix(c(0.90, 0.05, 0.05,
+                           0.05, 0.90, 0.05), byrow = TRUE,
+                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+                  matrix(c(0.1, 0.9,
+                           0.1, 0.9), byrow = TRUE, nrow = m,
+                         ncol = q_emiss[4])) # looking therapist
 
- # run a model without covariates
+ # Run a model without covariates. 
+ # Note that normally, a much higher number of iterations J would be used
  set.seed(23245)
- out <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
-                 q_emis = q_emis), start_val = c(as.vector(t(start.EM[[1]])),
-                 as.vector(t(start.EM[[2]])), as.vector(t(start.EM[[3]])),
-                 as.vector(t(start.EM[[4]])), as.vector(t(start.TM))),
-                 mcmc = list(J = 11, burn_in = 5))
+ out_2st <- mHMM(s_data = nonverbal, 
+              gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
+              start_val = c(list(start_TM), start_EM),
+              mcmc = list(J = 11, burn_in = 5))
+ 
+out_2st
+summary(out2_st)
 
- # including covariates. Only the emission distribution for each of the 4
- # dependent variables is predicted using standardized CDI change.
- n_subj <- 10
- xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), (n_dep + 1))
- for(i in 2:(n_dep + 1)){
-   xx[[i]] <- cbind(xx[[i]], nonverbal_cov$std_CDI_change)
- }
- set.seed(34109)
- out2 <- mHMM_mnl(s_data = nonverbal, xx = xx, gen = list(m = m, n_dep = n_dep,
-                 q_emis = q_emis), start_val = c(as.vector(t(start.EM[[1]])),
-                 as.vector(t(start.EM[[2]])), as.vector(t(start.EM[[3]])),
-                 as.vector(t(start.EM[[4]])), as.vector(t(start.TM))),
+# One can also plot the posterior densities for the transition and 
+# emission probabilities:
+plot(out1, component = "gamma")
+plot(out1, component = "emiss", dep = 1)
+plot(out1, component = "emiss", dep = 2)
+plot(out1, component = "emiss", dep = 3)
+plot(out1, component = "emiss", dep = 4)
+
+# Run a model including a covariate 
+# Here, the covariate (standardized CDI change) predicts the emission 
+# distribution for each of the 4 dependent variables:
+n_subj <- 10
+xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), (n_dep + 1))
+for(i in 2:(n_dep + 1)){
+ xx[[i]] <- cbind(xx[[i]], nonverbal_cov$std_CDI_change)
+}
+out_2st_c <- mHMM(s_data = nonverbal, xx = xx, 
+                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
+                 start_val = c(list(start_TM), start_EM),
                  mcmc = list(J = 11, burn_in = 5))
 
  
