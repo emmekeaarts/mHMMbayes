@@ -14,8 +14,8 @@ knitr::opts_chunk$set(
 
 # mHMMbayes
 
-  With the \code{R} package mHMMbayes you can fit multilevel hidden Markov models.   
-  The multilevel hidden Markov model (HMM) is a generalization of the well-known
+  With the \code{R} package mHMMbayes you can fit multilevel hidden Markov 
+  models. The multilevel hidden Markov model (HMM) is a generalization of the well-known
   hidden Markov model, tailored to accommodate (intense) longitudinal data of 
   multiple individuals simultaneously. Using a multilevel framework, we allow 
   for heterogeneity in the model parameters (transition probability matrix and
@@ -25,13 +25,9 @@ knitr::opts_chunk$set(
   distribution, and include individual level covariates (allowing for e.g.,
   group comparisons on model parameters). Parameters are estimated using 
   Bayesian estimation utilizing the forward-backward recursion within a hybrid 
-  Metropolis within Gibbs sampler. The package also includes a function to 
-  simulate data and a function to obtain the most likely hidden state sequence 
-  for each individual using the Viterbi algorithm. 
-  
-  NOTE: this is a beta version of the package. The package is still (heavily) 
-  under development, new functionalities will be added and functionalities will 
-  be altered in the near future. 
+  Metropolis within Gibbs sampler. The package also includes various options for 
+  model visualization, a function to simulate data and a function to obtain the 
+  most likely hidden state sequence for each individual using the Viterbi algorithm. 
   
   Please do not hesitate to contact me if you have any questions regarding the 
   package. 
@@ -48,7 +44,8 @@ devtools::install_github("emmekeaarts/mHMMbayes")
 ## Usage
 
 This is a basic example which shows you how to run the model using example data 
-included with the package, and how to simulate data:
+included with the package, and how to simulate data. For a more elaborate
+introduction, see the vignette "tutorial-mHMMbayes" accompanying the package.
 
 ```{r example}
 library(mHMMbayes)
@@ -57,7 +54,7 @@ library(mHMMbayes)
 # specifying general model properties
 m <- 2
 n_dep <- 4
-q_emis <- c(3, 2, 3, 2)
+q_emiss <- c(3, 2, 3, 2)
 
 # specifying starting values
 start_TM <- diag(.8, m)
@@ -84,15 +81,11 @@ start_EM <- list(matrix(c(0.05, 0.90, 0.05,
               mcmc = list(J = 11, burn_in = 5))
  
 out_2st
-summary(out2_st)
+summary(out_2st)
 
 # One can also plot the posterior densities for the transition and 
-# emission probabilities:
-plot(out1, component = "gamma")
-plot(out1, component = "emiss", dep = 1)
-plot(out1, component = "emiss", dep = 2)
-plot(out1, component = "emiss", dep = 3)
-plot(out1, component = "emiss", dep = 4)
+# emission probabilities, for example:
+plot(out_2st, component = "gamma", col = c("darkslategray3", "goldenrod"))
 
 # Run a model including a covariate 
 # Here, the covariate (standardized CDI change) predicts the emission 
@@ -110,40 +103,42 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
  
  ### Simulating data
  # simulating data for 10 subjects with each 100 observations
- T <- 100
+ n_t <- 100
  n <- 10
  m <- 3
- pr <- 4
+ q_emiss <- 4
  gamma <- matrix(c(0.8, 0.1, 0.1,
                    0.2, 0.7, 0.1,
                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
  emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
                          0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = pr, byrow = TRUE)
+                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
  set.seed(1253)
- data1 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
-                   var_gamma = 1, var_emiss = 1)
+ data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
+                   emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
+ head(data1$states)
+ head(data1$obs)
 
 
  # simulating subject specific transition probability matrices and emission distributions only
- T <- 0
+ n_t <- 0
  n <- 5
  m <- 3
- pr <- 4
+ q_emiss <- 4
  gamma <- matrix(c(0.8, 0.1, 0.1,
                    0.2, 0.7, 0.1,
                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
  emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
                          0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = pr, byrow = TRUE)
+                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
  set.seed(549801)
- data2 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
-                   var_gamma = 1, var_emiss = 1)
+ data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
+                   emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
  data2
 
  set.seed(10893)
- data3 <- sim_mHMM(T = T, n = n, m = m, pr = pr, gamma = gamma, emiss_distr = emiss_distr,
-                   var_gamma = .5, var_emiss = .5)
+ data3 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
+                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
  data3
 
 
