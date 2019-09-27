@@ -54,7 +54,8 @@
 #'   contains a matrix with the start values for gamma. The subsequent elements
 #'   contain matrices for the start values for the conditional distribution(s):
 #'   one element containing one matrix for each emission distribtution of a
-#'   dependent variable.
+#' dependent variable. Note that \code{start_val} should not contain nested
+#' lists (i.e., lists within lists).
 #' @param gamma_sampler List containing start values for mle estimates of pooled
 #'   data for gamma: \code{gamma_int_mle0}, \code{gamma_scalar}, and weight for the overall ll in the
 #'   fractional likelihood, \code{gamma_w}.
@@ -130,20 +131,24 @@
 #' q_emiss <- c(3, 2, 3, 2)
 #'
 #' # specifying starting values
-#' start.TM <- diag(.8, m)
-#' start.TM[lower.tri(start.TM) | upper.tri(start.TM)] <- .2
-#' start.EM <- list(matrix(c(0.9, 0.05, 0.05, 0.05, 0.05, 0.9), byrow = TRUE,
+#' start_TM <- diag(.8, m)
+#' start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+#' start_EM <- list(matrix(c(0.05, 0.90, 0.05,
+#'                           0.90, 0.05, 0.05), byrow = TRUE,
 #'                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
-#'                  matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
+#'                  matrix(c(0.1, 0.9,
+#'                           0.1, 0.9), byrow = TRUE, nrow = m,
 #'                         ncol = q_emiss[2]), # looking patient
-#'                  matrix(c(0.05, 0.05, 0.9, 0.9, 0.05, 0.05), byrow = TRUE,
+#'                  matrix(c(0.90, 0.05, 0.05,
+#'                           0.05, 0.90, 0.05), byrow = TRUE,
 #'                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-#'                  matrix(c(0.9, 0.1, 0.9, 0.1), byrow = TRUE, nrow = m,
+#'                  matrix(c(0.1, 0.9,
+#'                           0.1, 0.9), byrow = TRUE, nrow = m,
 #'                         ncol = q_emiss[4])) # looking therapist
 #'
 #' # Run a model without covariate(s):
 #' out1 <- mHMM_mnl(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
-#'                 q_emiss = q_emiss), start_val = c(list(start.TM), start.EM),
+#'                 q_emiss = q_emiss), start_val = c(list(start_TM), start_EM),
 #'                 mcmc = list(J = 11, burn_in = 5))
 #'
 #' # plot the posterior densities for the transition and emission probabilities
@@ -162,7 +167,7 @@
 #'   xx[[i]] <- cbind(xx[[i]], nonverbal_cov$std_CDI_change)
 #' }
 #' out2 <- mHMM_mnl(s_data = nonverbal, xx = xx, gen = list(m = m, n_dep = n_dep,
-#'                 q_emiss = q_emiss), start_val = c(list(start.TM), start.EM),
+#'                 q_emiss = q_emiss), start_val = c(list(start_TM), start_EM),
 #'                 mcmc = list(J = 11, burn_in = 5))
 #'
 #'
@@ -185,9 +190,10 @@
 #' q_emiss <- 3
 #'
 #' # Run the model on the simulated data:
-#' out3 <- mHMM_mnl(s_data = data1$obs, gen = list(m = m, n_dep = n_dep,
-#'                 q_emiss = q_emiss), start_val = c(as.vector(t(emiss_distr)),
-#'                 as.vector(t(gamma))), mcmc = list(J = 11, burn_in = 5))
+#' out3 <- mHMM_mnl(s_data = data1$obs,
+#'                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                  start_val = list(gamma, emiss_distr),
+#'                  mcmc = list(J = 11, burn_in = 5))
 #'
 #' @export
 #'
@@ -196,6 +202,7 @@
 mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, emiss_sampler = NULL,
                      gamma_hyp_prior = NULL, emiss_hyp_prior = NULL, mcmc, return_path = FALSE){
 
+  .Deprecated("mHMM")
   # Initialize data -----------------------------------
   # dependent variable(s), sample size, dimensions gamma and conditional distribuiton
   n_dep			 <- gen$n_dep
@@ -361,6 +368,10 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
 
   # Define objects that are returned from mcmc algorithm ----------------------------
   # Define object for subject specific posterior density, put start values on first row
+  if(length(start_val) != n_dep + 1){
+    stop("The number of elements in the list start_val should be equal to 1 + the number of dependent variables,
+         and should not contain nested lists (i.e., lists within lists)")
+  }
   PD 					  <- matrix(, nrow = J, ncol = sum(m * q_emiss) + m * m + 1)
   PD_emiss_names   <- paste("q", 1, "_emiss", rep(1:q_emiss[1], m), "_S", rep(1:m, each = q_emiss[1]), sep = "")
   if(n_dep > 1){
@@ -378,16 +389,21 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   # Define object for population posterior density (probabilities and regression coefficients parameterization )
   gamma_prob_bar		<- matrix(, nrow = J, ncol = (m * m))
   colnames(gamma_prob_bar) <- paste("S", rep(1:m, each = m), "toS", rep(1:m, m), sep = "")
+  gamma_prob_bar[1,] <- PD[1,(sum(m*q_emiss) + 1):(sum(m * q_emiss) + m * m)]
   emiss_prob_bar			<- lapply(q_emiss * m, dif_matrix, rows = J)
   names(emiss_prob_bar) <- dep_labels
   for(q in 1:n_dep){
     colnames(emiss_prob_bar[[q]]) <- paste("Emiss", rep(1:q_emiss[q], m), "_S", rep(1:m, each = q_emiss[q]), sep = "")
+    start <- c(0, q_emiss * m)
+    emiss_prob_bar[[q]][1,] <- PD[1,(sum(start[1:q]) + 1):(sum(start[1:q]) + (m * q_emiss[q]))]
   }
   gamma_int_bar				<- matrix(, nrow = J, ncol = ((m-1) * m))
   colnames(gamma_int_bar) <- paste("int_S", rep(1:m, each = m-1), "toS", rep(2:m, m), sep = "")
+  gamma_int_bar[1,] <- as.vector(prob_to_int(matrix(gamma_prob_bar[1,], byrow = TRUE, ncol = m, nrow = m)))
   if(nx[1] > 1){
     gamma_cov_bar				<- matrix(, nrow = J, ncol = ((m-1) * m) * (nx[1] - 1))
     colnames(gamma_cov_bar) <- paste( paste("cov", 1 : (nx[1] - 1), "_", sep = ""), "S", rep(1:m, each = (m-1) * (nx[1] - 1)), "toS", rep(2:m, m * (nx[1] - 1)), sep = "")
+    gamma_cov_bar[1,] <- 0
   } else{
     gamma_cov_bar <- "No covariates where used to predict the transition probability matrix"
   }
@@ -395,6 +411,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
   names(emiss_int_bar) <- dep_labels
   for(q in 1:n_dep){
     colnames(emiss_int_bar[[q]]) <-  paste("int_Emiss", rep(2:q_emiss[q], m), "_S", rep(1:m, each = q_emiss[q] - 1), sep = "")
+    emiss_int_bar[[q]][1,] <- as.vector(prob_to_int(matrix(emiss_prob_bar[[q]][1,], byrow = TRUE, ncol = q_emiss[q], nrow = m)))
   }
   if(sum(nx[-1]) > n_dep){
     emiss_cov_bar			<- lapply((q_emiss-1) * m * (nx[-1] - 1 ), dif_matrix, rows = J)
@@ -402,6 +419,7 @@ mHMM_mnl <- function(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL, em
     for(q in 1:n_dep){
       if(nx[1 + q] > 1){
         colnames(emiss_cov_bar[[q]]) <-  paste( paste("cov", 1 : (nx[1 + q] - 1), "_", sep = ""), "emiss", rep(2:q_emiss[q], m * (nx[1 + q] - 1)), "_S", rep(1:m, each = (q_emiss[q] - 1) * (nx[1 + q] - 1)), sep = "")
+        emiss_cov_bar[[q]][1,] <- 0
       } else {
         emiss_cov_bar[[q]] <- "No covariates where used to predict the emission probabilities for this outcome"
       }
