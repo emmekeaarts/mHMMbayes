@@ -43,7 +43,7 @@ has to specify for which subject the transition probability matrix should be
 plotted.
 }
 \seealso{
-\code{\link{mHMM_mnl}} for fitting the multilevel hidden Markov
+\code{\link{mHMM}} for fitting the multilevel hidden Markov
   model, creating the object \code{mHMM}, and \code{\link{obtain_gamma}} to
   obtain the the transition proabilities gamma for a fitted multilevel HMM,
   creating the object \code{mHMM_gamma}.
