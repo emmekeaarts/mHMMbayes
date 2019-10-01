@@ -1,5 +1,5 @@
 #' @keywords internal
-# simple functions used in mHMM_mnl
+# simple functions used in mHMM
 dif_matrix <- function(rows, cols){
   return(matrix(, ncol = cols, nrow = rows))
 }
