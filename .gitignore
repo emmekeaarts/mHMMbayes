@@ -1,7 +1,26 @@
-Meta
+# raw data files
+data-raw/*.csv
+
+# produced vignettes and related
+vignettes/*.html
+vignettes/*.pdf
 doc
-data-raw
+Meta
+
+# RStudio files
 .Rproj.user
+
+# History files
 .Rhistory
+
+# Session Data files
 .RData
+
+# User-specific files
 .Ruserdata
+
+# Output files from R CMD check
+/*.Rcheck/
+
+# Output files from R CMD check
+/*.Rcheck/
