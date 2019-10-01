@@ -125,7 +125,7 @@ legend("topleft", bty = "n", fill = Look_col, legend = Look_lab)
 We can, for example, observe that both the patient and the therapist are mainly looking at each other during the observed 5 minutes. During the first minute, the patient is primarily speaking. During the second minute, the therapists starts, after which the patient takes over while the therapist is back channeling. 
 
 ###A simple model
-To fit a simple 2 state multilevel model with the function `mHMM_mnl`, one first has to specify some general model properties and starting values:  
+To fit a simple 2 state multilevel model with the function `mHMM`, one first has to specify some general model properties and starting values:  
 ```{r settings and load 2 state model, include = FALSE}
 # specifying general model properties:
 m <- 2
@@ -184,7 +184,7 @@ To run the analysis, one has to specify starting values for both the transition 
 As the estimation proceeds within a Bayesian context, a (hyper-)prior distribution has to be defined for the group level parameters, i.e., the group level emission and transition probabilities. Default, non-informative priors are used unless specified otherwise by the user. Below, we present some information on this. For a more elaborate explanation on the used (hyper-)prior distributions and their parameters, see the vignette [Estimation of the multilevel hidden Markov model](estimation-mhmm.pdf). \
 First of all, note that the prior distributions on the emission distribution and transition probabilities are not on the probabilities directly, but on the intercepts (and regression coefficients given that covariates are used) of the multinomial regression model used to accommodate the multilevel framework of the data. Second, parameters do not each have their own independent prior distribution. As each row of the emission distribution matrix and transition probability matrix sum to one, the individual parameters of these rows are connected. Hence, each row is seen as a set of parameters which are estimated jointly, and each set of parameters has a multivariate prior distribution. \
 The sets of intercepts of the multinomial regression model have a multivariate normal distribution. The (hyper-) prior for these intercepts thus consists of a prior distribution on the vector of means, and a prior distribution on the covariance matrix. The hyper-prior for the mean intercepts is a multivariate Normal distribution, with, as default, a vector of means equal to 0, and a parameter $K_0$ with which the covariance matrix is multiplied. Here, $K_0$ denotes the number of observations (i.e., the number of hypothetical prior subjects) on which the prior mean vector of zero's is based. By default, $K_0$ is set to 1. The hyper-prior for the covariance matrix between the set of (state specific) intercepts has an Inverse Wishart distribution, for which the variance in the default setting equals 3 + $m$ - 1 for the transition probabilities and 3 + $pr$ - 1 for the emission probabilities, and the covariance equals 0. The degrees of freedom of the Inverse Wishart distribution is set to 3 + $m$ - 1 for the transition probabilities and 3 + $pr$ - 1 for the emission probabilities.  \
-To use user specific prior distributions, one uses the input option `emiss_hyp_prior` for the emission distribution and `gamma_hyp_prior` for the transition probabilities in the function `mHMM_mnl`. Both objects are a list, containing the elements:
+To use user specific prior distributions, one uses the input option `emiss_hyp_prior` for the emission distribution and `gamma_hyp_prior` for the transition probabilities in the function `mHMM`. Both objects are a list, containing the elements:
 
  * `mu0`, a matrix with one row (when not including covariates in the model) and the number of columns equal to the number of intercepts to be estimated, containing the hypothesized mean values of the intercepts.
  * `K0`, the number of hypothetical prior subjects on which this vector of means is based.
@@ -195,17 +195,17 @@ All elements in the list either have the prefix `gamma_` or `emiss_`, depending 
 
 
 ####Fitting the model
-The multilevel HMM is fitted using the function `mHMM_mnl`: 
+The multilevel HMM is fitted using the function `mHMM`: 
 ```{r show fitting 2 state model, eval = FALSE}
 # Run a model without covariate(s) and default priors:
 set.seed(14532)
-out_2st <- mHMM_mnl(s_data = nonverbal, 
+out_2st <- mHMM(s_data = nonverbal, 
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
                     start_val = c(list(start_TM), start_EM),
                     mcmc = list(J = 1000, burn_in = 200))
 
 ```
-The call to `mHMM_mnl` specifies the model with several arguments. The `s_data` argument specifies the input data used to infer the hidden states over time. The `gen` and `start_val` argument specify the general model properties and the starting values, as discussed above. The arguments needed for the MCMC algorithm are given in `mcmc`: `J` specifies the number of iterations used by the hybrid metropolis within Gibbs algorithm and `burn_in` specifies the number of iterations to discard when obtaining the model parameter summary statistics. The function `mHMM_mnl` returns an object of class `mHMM`, which has `print` and `summary` methods to see the results. The `print` method provides basic information on the model fitted. That is, the number of subjects in the dataset analyzed, the number of iterations and burn-in period, the average log likelihood over all subjects and model fit indices AIC, the number of states specified, and the number of dependent variables the states are based on:   
+The call to `mHMM` specifies the model with several arguments. The `s_data` argument specifies the input data used to infer the hidden states over time. The `gen` and `start_val` argument specify the general model properties and the starting values, as discussed above. The arguments needed for the MCMC algorithm are given in `mcmc`: `J` specifies the number of iterations used by the hybrid metropolis within Gibbs algorithm and `burn_in` specifies the number of iterations to discard when obtaining the model parameter summary statistics. The function `mHMM` returns an object of class `mHMM`, which has `print` and `summary` methods to see the results. The `print` method provides basic information on the model fitted. That is, the number of subjects in the dataset analyzed, the number of iterations and burn-in period, the average log likelihood over all subjects and model fit indices AIC, the number of states specified, and the number of dependent variables the states are based on:   
 
 ```{r show print model}
 out_2st
@@ -268,7 +268,7 @@ We can see that we have a state in which the patient speaks and the therapist is
 
 ###Determining the most likely state sequence 
 Given a well-fitting HMM, it may be of interest to determine the actual *sequence*, or order of succession, of hidden states that has most likely given rise to the sequence of outcomes as observed in a subject. One can either use local decoding, in which the probabilities of the hidden state sequence are obtained simultaneously with the model parameters estimates, or the well-known Viterbi algorithm [@viterbi1967; @forney1973]. In local decoding, the most likely state is determined separately at each time point $t$, in contrast to the Viterbi algorithm in which one determines the joint probability of the complete sequence of observations $O_{1:T}$ and the complete sequence of hidden states $S_{1:T}$. \
-In the package, local decoding can be achieved by saving the sampled hidden state sequence at each iteration of the Gibbs sampler, by setting the input variable `return_path = TRUE` for the function `mHMM_mnl`. This will result in very large output files, however. Global decoding can be performed by using the function `vit_mHMM`: 
+In the package, local decoding can be achieved by saving the sampled hidden state sequence at each iteration of the Gibbs sampler, by setting the input variable `return_path = TRUE` for the function `mHMM`. This will result in very large output files, however. Global decoding can be performed by using the function `vit_mHMM`: 
 ```{r using viterbi algorithm}
 state_seq <- vit_mHMM(out_2st, s_data = nonverbal)
  head(state_seq)
@@ -366,7 +366,7 @@ start_EM_b <- list(matrix(c(0.2, 0.6, 0.2,
 
 # Run a model identical to out_2st, but with different starting values:
 set.seed(9843)
-out_2st_b <- mHMM_mnl(s_data = nonverbal, 
+out_2st_b <- mHMM(s_data = nonverbal, 
                       gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
                       start_val = c(list(start_TM), start_EM),
                       mcmc = list(J = 1000, burn_in = 200))
