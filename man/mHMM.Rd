@@ -4,83 +4,80 @@
 \alias{mHMM}
 \title{Multilevel hidden markov model using Bayesian estimation}
 \usage{
-mHMM(s_data, gen, xx = NULL, start_val, gamma_sampler = NULL,
-  emiss_sampler = NULL, gamma_hyp_prior = NULL,
-  emiss_hyp_prior = NULL, mcmc, return_path = FALSE)
+mHMM(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
+  gamma_hyp_prior = NULL, emiss_hyp_prior = NULL,
+  gamma_sampler = NULL, emiss_sampler = NULL)
 }
 \arguments{
-\item{s_data}{A matrix containing the observations to be modelled, with one
-row per observation. In the \code{s_data} matrix, the first column
-indicates subject id number. Hence, the id number is repeated over rows
-equal to the number of observations for that subject. The number of
-observations can vary over subjects. The subsequent columns contain the
-dependent variable(s). The total number of rows are equal to the sum over
-the number of observations of each subject, and the number of columns are
-equal to the number of dependent variables (\code{n_dep}) + 1.}
+\item{s_data}{A matrix containing the observations to be modelled, where the
+rows represent the observations over time. In the \code{s_data} matrix, the
+first column indicates subject id number. Hence, the id number is repeated
+over rows equal to the number of observations for that subject. The
+subsequent columns contain the dependent variable(s). The total number of
+rows are equal to the sum over the number of observations of each subject,
+and the number of columns are equal to the number of dependent variables
+(\code{n_dep}) + 1. The number of observations can vary over subjects.}
 
-\item{gen}{List containing the following elements:
+\item{gen}{List containing the following elements denoting the general model
+properties:
 \itemize{\item{\code{m}: numeric vector with length 1 denoting the number
 of states}
 \item{\code{n_dep}: numeric vector with length 1 denoting the
 number of dependent variables}
 \item{\code{q_emiss}: numeric vector with length \code{n_dep} denoting the
-number of observed categories for the categorical  emission distribution of
-each dependent variable.}}}
+number of observed categories for the categorical emission distribution
+for each of the dependent variables.}}}
 
-\item{xx}{List of covariates. Number of elements in the list is equal to 1 +
-  \code{n_dep} (i.e., the number of dependent variables). The first element
+\item{xx}{An optional list of covariates. The first element
   in the list is used to predict the transition matrix. Subsequent elements
   in the list are used to predict the emission distribution of (each of) the
   dependent variable(s). Each element in the list is a matrix, with the
-  number of rows equal to the number of subjects. The first column \emph{has
-  to}  represent the intercept, that is, a column only consisting of ones.
+  number of rows equal to the number of subjects. The first column of each
+  matrix represents the intercept, that is, a column only consisting of ones.
   Subsequent columns correspond to covariates used to predict the transition
-  matrix / emission distribution. Covariates can either be dichotomous or
-  continuous variables. Dichotomous variables have to be coded as 0/1
-  variables. Categroical or factor variables can as yet not be used as
-  predictor covariates. The user can however break up the categorical
-  variable in multiple dummy variables (i.e., dichotomous variables), which
-  can be used simultaneously in the analysis. Continuous predictors are
-  automatically centered. That is, the mean value of the covariate is
-  subtracted from all values of the covariate such that the new mean equals
-  zero. This is done such that the presented probabilities in the output
-  (i.e., for the population transiton probability matrix and population
-  emission probabilities) correspond to the predicted probabilities at the
-  average value of the covariate(s). MOVE PART TO DETAILS
+  matrix / emission distribution. See \emph{details} for more information on
+  the use of covariates.
 
-  If \code{xx} is omitted completely, \code{xx} defaults to NULL, resembling
-  no covariates. Specific elements in the list can also be left empty (i.e.,
-  set to NULL) to signify that either the transition probability matrix or a
-  specific emission distribution is not predicted by covariates.}
+  If \code{xx} is omitted completely, \code{xx} defaults to \code{NULL},
+  resembling no covariates. Specific elements in the list can also be left
+  empty (i.e., set to \code{NULL}) to signify that either the transition
+  probability matrix or a specific emission distribution is not predicted by
+  covariates.}
 
-\item{start_val}{List containing the start values for the transition probability
-  matrix gamma and the emission distribuition(s). The first element of the list
-  contains a matrix with the start values for gamma. The subsequent elements
-  contain matrices for the start values for the conditional distribution(s):
-  one element containing one matrix for each emission distribtution of a
-dependent variable. Note that \code{start_val} should not contain nested
-lists (i.e., lists within lists).}
+\item{start_val}{List containing the start values for the transition
+probability matrix gamma and the emission distribuition(s). The first
+element of the list contains a \code{m} by \code {m} matrix with the start
+values for gamma. The subsequent elements contain \code{m} by
+\code{q_emiss[k]} matrices for the start values for each of the \code{k}
+conditional distribution(s): one element containing one matrix for each
+emission distribtution of dependent variable \code{k}. Note that
+\code{start_val} should not contain nested lists (i.e., lists within
+lists).}
 
-\item{gamma_sampler}{List containing start values for mle estimates of pooled
+\item{mcmc}{List of Markov chain Monte Carlo (MCMC) algorithm arguments,
+containing the following elements:
+\itemize{\item{\code{J}: numeric vector with length 1 denoting the number of iterations of the
+MCMC algorithm}
+\item{\code{burn_in}: Burn in period for the MCMC algorithm}
+}}
+
+\item{return_path}{A logical scalar. Should the sampled state sequence
+obtained at each iteration and for each subject be returned by the function
+(\code{sample_path = TRUE}) or not (\code{sample_path = FALSE}). This is
+quite a large object! Can be used for local decoding purposes. Default
+setting is \code{sample_path = FALSE}.}
+
+\item{gamma_hyp_prior}{An optional list containing \code{gamma_mu0}, \code{gamma_K0}, \code{gamma_nu} and \code{gamma_V}, see details below}
+
+\item{emiss_hyp_prior}{An optional list containing \code{emiss_mu0}, \code{emiss_K0}, \code{emiss_nu} and \code{emiss_V}, see details below}
+
+\item{gamma_sampler}{An optional list containing start values for mle estimates of pooled
 data for gamma: \code{gamma_int_mle0}, \code{gamma_scalar}, and weight for the overall ll in the
 fractional likelihood, \code{gamma_w}.}
 
-\item{emiss_sampler}{List containing start values for mle estimates of pooled
+\item{emiss_sampler}{An optional list containing start values for mle estimates of pooled
 data for emiss, emiss_int_mle0, emiss_scalar and weight for the overall ll in the
 fractional likelihood, emiss_w}
-
-\item{gamma_hyp_prior}{List containing \code{gamma_mu0}, \code{gamma_K0}, \code{gamma_nu} and \code{gamma_V}, see details below}
-
-\item{emiss_hyp_prior}{List containing \code{emiss_mu0}, \code{emiss_K0}, \code{emiss_nu} and \code{emiss_V}, see details below}
-
-\item{mcmc}{List of MCMC argument, containing the following elements:
-\code{J} number of iterations of the MCMC algorithm. \code{burn_in} Burn in
-period for the MCMC algorithm}
-
-\item{return_path}{A logical scalar. Should the sampled state sequence obtained at
-each iteration and for each subject be returned by the function
-(\code{sample_path = TRUE}) or not (\code{sample_path = FALSE}). This is
-quite a large object! Can be used for local decoding purposes.}
 }
 \value{
 \code{mHMM} returns an object (list) of the class \code{mHMM}.
@@ -109,13 +106,27 @@ quite a large object! Can be used for local decoding purposes.}
 }
 }
 \description{
-\code{mHMM} analyses (intense longitudinal) data from multiple subjects
-using a multilevel hidden Markov model. By using a multilevel framework, one
-general 'population' HMM is estimated, while heterogeneity between subjects
-is accommodated. The function can handle covariates at the subject level
-(unlimited number), uses a hybrid metropolis within gibs sampler, and
-performs the forward backward algorithm for all subjects in a sequential
-manner. Can handle varying observation length over subjects.
+\code{mHMM} fits a multilevel hidden Markov model (HMM) using Bayesian
+estimation, and creates an object of class mHMM. The function can handle
+covariates at level 2 (e.g., the subject level) and varying
+observation lengths over subjects. For a short description of the package see
+\link{mHMMbayes}. See the vignette \code{tutorial-mHMM} for an introduction
+to multilevel hidden Markov models and the package, and see the vignette
+\code{estimation-mHMM} for an overview of the used estimation algorithms.
+}
+\details{
+Covariates specified in \code{xx} can either be dichotomous or continuous
+variables. Dichotomous variables have to be coded as 0/1 variables.
+Categroical or factor variables can as yet not be used as predictor
+covariates. The user can however break up the categorical variable in
+multiple dummy variables (i.e., dichotomous variables), which can be used
+simultaneously in the analysis. Continuous predictors are automatically
+centered. That is, the mean value of the covariate is subtracted from all
+values of the covariate such that the new mean equals zero. This is done such
+that the presented probabilities in the output (i.e., for the population
+transiton probability matrix and population emission probabilities)
+correspond to the predicted probabilities at the average value of the
+covariate(s).
 }
 \examples{
 ###### Example on package data
@@ -141,16 +152,16 @@ start_EM <- list(matrix(c(0.05, 0.90, 0.05,
                         ncol = q_emiss[4])) # looking therapist
 
 # Run a model without covariate(s):
-out1 <- mHMM(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
-                q_emiss = q_emiss), start_val = c(list(start_TM), start_EM),
+out_2st <- mHMM(s_data = nonverbal,
+                gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                start_val = c(list(start_TM), start_EM),
                 mcmc = list(J = 11, burn_in = 5))
 
+out_2st
+summary(out_2st)
+
 # plot the posterior densities for the transition and emission probabilities
-plot(out1, component = "gamma")
-plot(out1, component = "emiss", dep = 1)
-plot(out1, component = "emiss", dep = 2)
-plot(out1, component = "emiss", dep = 3)
-plot(out1, component = "emiss", dep = 4)
+plot(out_2st, component = "gamma", col =c("darkslategray3", "goldenrod"))
 
 # Run a model including a covariate. Here, the covariate (standardized CDI
 # change) predicts the emission distribution for each of the 4 dependent
@@ -160,9 +171,10 @@ xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), (n_dep + 1))
 for(i in 2:(n_dep + 1)){
   xx[[i]] <- cbind(xx[[i]], nonverbal_cov$std_CDI_change)
 }
-out2 <- mHMM(s_data = nonverbal, xx = xx, gen = list(m = m, n_dep = n_dep,
-                q_emiss = q_emiss), start_val = c(list(start_TM), start_EM),
-                mcmc = list(J = 11, burn_in = 5))
+out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
+                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                  start_val = c(list(start_TM), start_EM),
+                  mcmc = list(J = 11, burn_in = 5))
 
 
 ###### Example on simulated data
@@ -184,7 +196,7 @@ n_dep <- 1
 q_emiss <- 3
 
 # Run the model on the simulated data:
-out3 <- mHMM(s_data = data1$obs,
+out_2st_sim <- mHMM(s_data = data1$obs,
                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                  start_val = list(gamma, emiss_distr),
                  mcmc = list(J = 11, burn_in = 5))
