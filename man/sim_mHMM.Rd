@@ -187,7 +187,8 @@ emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
 data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
                   emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
-
+head(data1$obs)
+head(data1$states)
 
 # including a covariate to predict (only) the transition probability matrix gamma
 beta      <- rep(list(NULL), 2)
