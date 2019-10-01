@@ -55,7 +55,7 @@
 #'   covariates.
 #' @param start_val List containing the start values for the transition
 #'   probability matrix gamma and the emission distribuition(s). The first
-#'   element of the list contains a \code{m} by \code {m} matrix with the start
+#'   element of the list contains a \code{m} by \code{m} matrix with the start
 #'   values for gamma. The subsequent elements contain \code{m} by
 #'   \code{q_emiss[k]} matrices for the start values for each of the \code{k}
 #'   conditional distribution(s): one element containing one matrix for each
@@ -66,8 +66,8 @@
 #'   containing the following elements:
 #'   \itemize{\item{\code{J}: numeric vector with length 1 denoting the number of iterations of the
 #'   MCMC algorithm}
-#'   \item{\code{burn_in}: Burn in period for the MCMC algorithm}
-#'   }
+#'   \item{\code{burn_in}: numeric vector with length 1 denoting the
+#'   burn-in period for the MCMC algorithm.}}
 #' @param return_path A logical scalar. Should the sampled state sequence
 #'   obtained at each iteration and for each subject be returned by the function
 #'   (\code{sample_path = TRUE}) or not (\code{sample_path = FALSE}). This is
