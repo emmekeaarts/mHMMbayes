@@ -21,6 +21,24 @@
 #' correspond to the predicted probabilities at the average value of the
 #' covariate(s).
 #'
+#' If covariates are specified and the user wants to set the values for the
+#' parameters of the hyper-prior distributions manually, the specification of
+#' the elements in the arguments of the hyper-prior parameter values of the
+#' normal distribution on the means change as follows: the number of rows in the
+#' matrices \code{gamma_mu0} and \code{emiss_mu0} are equal to 1 + the number of
+#' covariates used to predict the transition probability matrix for
+#' \code{gamma_mu0} and the emission distribution for \code{emiss_mu0} (i.e.,
+#' the first row correspond to the hyper-prior mean values of the intercepts,
+#' the subsequent rows correspond to the hyper-prior mean values of the
+#' regression coefficients connected to each of the covariates), and
+#' \code{gamma_K0} and \code{emiss_K0} are now a matrix with the number of
+#' hypothetical prior subjects on which the vectors of means (i.e., the rows in
+#' \code{gamma_mu0} or \code{emiss_mu0}) are based on the diagnonal, and
+#' off-diagonal elements equal to 0. Note that the hyper-prior parameter values
+#' of the inverse Wishart distribution on the covariance matrix remains
+#' unchanged, as the estimates of the regression coefficients for the covariates
+#' are fixed over subjects.
+#'
 #' @param s_data A matrix containing the observations to be modelled, where the
 #'   rows represent the observations over time. In the \code{s_data} matrix, the
 #'   first column indicates subject id number. Hence, the id number is repeated
@@ -32,7 +50,7 @@
 #' @param gen List containing the following elements denoting the general model
 #'   properties:
 #'   \itemize{\item{\code{m}: numeric vector with length 1 denoting the number
-#'   of states}
+#'   of hidden states}
 #'   \item{\code{n_dep}: numeric vector with length 1 denoting the
 #'   number of dependent variables}
 #'   \item{\code{q_emiss}: numeric vector with length \code{n_dep} denoting the
@@ -45,7 +63,7 @@
 #'   number of rows equal to the number of subjects. The first column of each
 #'   matrix represents the intercept, that is, a column only consisting of ones.
 #'   Subsequent columns correspond to covariates used to predict the transition
-#'   matrix / emission distribution. See \emph{details} for more information on
+#'   matrix / emission distribution. See \emph{Details} for more information on
 #'   the use of covariates.
 #'
 #'   If \code{xx} is omitted completely, \code{xx} defaults to \code{NULL},
@@ -58,77 +76,232 @@
 #'   element of the list contains a \code{m} by \code{m} matrix with the start
 #'   values for gamma. The subsequent elements contain \code{m} by
 #'   \code{q_emiss[k]} matrices for the start values for each of the \code{k}
-#'   conditional distribution(s): one element containing one matrix for each
+#'   emission distribution(s): one element containing one matrix for each
 #'   emission distribtution of dependent variable \code{k}. Note that
 #'   \code{start_val} should not contain nested lists (i.e., lists within
 #'   lists).
-#' @param mcmc List of Markov chain Monte Carlo (MCMC) algorithm arguments,
-#'   containing the following elements:
-#'   \itemize{\item{\code{J}: numeric vector with length 1 denoting the number of iterations of the
-#'   MCMC algorithm}
+#' @param mcmc List of Markov chain Monte Carlo (MCMC) arguments, containing the
+#'   following elements:
+#'   \itemize{\item{\code{J}: numeric vector with length 1 denoting the number
+#'   of iterations of the MCMC algorithm}
 #'   \item{\code{burn_in}: numeric vector with length 1 denoting the
 #'   burn-in period for the MCMC algorithm.}}
 #' @param return_path A logical scalar. Should the sampled state sequence
 #'   obtained at each iteration and for each subject be returned by the function
-#'   (\code{sample_path = TRUE}) or not (\code{sample_path = FALSE}). This is
-#'   quite a large object! Can be used for local decoding purposes. Default
-#'   setting is \code{sample_path = FALSE}.
-#' @param gamma_sampler An optional list containing start values for mle estimates of pooled
-#'   data for gamma: \code{gamma_int_mle0}, \code{gamma_scalar}, and weight for the overall ll in the
-#'   fractional likelihood, \code{gamma_w}.
-#' @param emiss_sampler An optional list containing start values for mle estimates of pooled
-#'   data for emiss, emiss_int_mle0, emiss_scalar and weight for the overall ll in the
-#'   fractional likelihood, emiss_w
-#' @param gamma_hyp_prior An optional list containing \code{gamma_mu0}, \code{gamma_K0}, \code{gamma_nu} and \code{gamma_V}, see details below
-#' @param emiss_hyp_prior An optional list containing \code{emiss_mu0}, \code{emiss_K0}, \code{emiss_nu} and \code{emiss_V}, see details below
+#'   (\code{sample_path = TRUE}) or not (\code{sample_path = FALSE}). Note that
+#'   the sampled state sequence is quite a large object, hence the default
+#'   setting is \code{sample_path = FALSE}. Can be used for local decoding
+#'   purposes.
+#'@param gamma_hyp_prior An optional list containing user specified parameters
+#'  of the hyper-prior distribution on on the multivariate normal distribution
+#'  of the intercepts (and regression coefficients given that covariates are
+#'  used) of the multinomial regression model of the transition probability
+#'  matrix gamma. The hyper-prior for the mean intercepts is a multivariate
+#'  Normal distribution, the hyper-prior for the covariance matrix between the
+#'  set of (state specific) intercepts is an Inverse Wishart distribution.
 #'
-# @details Here are the details of the function
-# \subsection{Equations}{
-#   The following hyper prior is used on each row \eqn{i} of gamma (\eqn{\Gamma_i}) at the population level:
-#   \deqn{\Gamma_i ~ (idd) MNL(gamma_int_i)}
-#   \deqn{gamma_int_i ~ N(gamma_mu_int_bar, gamma_V_int)}
-#   \deqn{gamma_mu_int_bar ~ N(gamma_mu0, \frac{1}{gamma_K0} * gamma_V_int)}
-#   \deqn{gamma_V_int ~ IW(gamma_nu, gamma_V)}
-#   where \eqn{\alpha_i} denotes \code{gamma_int_i}, \eqn{\bar{\mu}_\alpha} denotes \code{gamma_mu_int_bar},  \code{} \code{} \code{} \code{} \code{}
-#
-#   The following hyper prior is used for the conditional emission distribution of each state at the population level:
-#   \deqn{\theta_i ~ (idd) MNL(emiss_int_i)}
-#   \deqn{emiss_int ~ N(emiss_mu_int_bar, emiss_V_int)}
-#   \deqn{emiss_mu_int_bar ~ N(emiss_mu0, (1 / emiss_K0) * emiss_V_int)}
-#   \deqn{emiss_V_int 					~ IW(emiss_nu, emiss_V)}
-#
-# check thesis for correct notation and stuff
-# }
-#
-#
-#' @return \code{mHMM} returns an object (list) of the class \code{mHMM}.
-#'   The list contains the following components:
+#'  Hence, the list \code{gamma_hyp_prior} contains the following elements:
+#'  \itemize{\item{\code{gamma_mu0}: a list containing m matrices; one matrix
+#'  for each row of the transition probability matrix gamma. Each matrix
+#'  contains the hypothesized mean values of the intercepts. Hence, each matrix
+#'  consists of one row (when not including covariates in the model) and
+#'  \code{m} - 1 columns}
+#'  \item{\code{gamma_K0}: numeric vector with length 1 denoting the number of
+#'  hypothetical prior subjects on which the vector of means \code{gamma_mu0} is
+#'  based}
+#'  \item{\code{gamma_nu}: numeric vector with length 1 denoting the degrees of
+#'  freedom of the Inverse Wishart distribution}
+#'  \item{\code{gamma_V}: matrix of \code{m} - 1 by \code{m} - 1 containing the
+#'  hypothesized variance-covariance matrix between the set of intercepts.}}
+#'  Note that \code{gamma_K0}, \code{gamma_nu} and \code{gamma_V} are assumed
+#'  equal over the states. The mean values of the intercepts (and regression
+#'  coefficients of the covariates) denoted by \code{gamma_mu0} are allowed to
+#'  vary over the states.
+#'
+#'  The default values for the hyper-prior on gamma are: all elements of the
+#'  matrices contained in \code{gamma_K0} set to 0, \code{gamma_K0} set to 1,
+#'  \code{gamma_nu} set to 3 + m - 1, and the diagonal of \code{gamma_V} (i.e.,
+#'  the variance) set to 3 + m - 1 and the off-diagonal elements (i.e., the
+#'  covariance) set to 0.
+#'
+#'  See \emph{Details} below if covariates are used for changes in the settings
+#'  of the arguments of \code{gamma_hyp_prior}.
+#' @param emiss_hyp_prior An optional list containing user specified parameters
+#'  of the hyper-prior distribution on on the multivariate normal distribution
+#'  of the intercepts (and regression coefficients given that covariates are
+#'  used) of the multinomial regression model of the emission distribution.
+#'  The hyper-prior for the mean intercepts is a multivariate
+#'  Normal distribution, the hyper-prior for the covariance matrix between the
+#'  set of (state specific) intercepts is an Inverse Wishart distribution.
+#'
+#'  Hence, the list \code{emiss_hyp_prior} contains the following elements:
+#'  \itemize{\item{\code{emiss_mu0}: a list of lists: \code{emiss_mu0} contains
+#'  \code{ndep} lists, i.e., one list for each dependent variable \code{k}. Each
+#'  of the top lists contains m matrices; one matrix for each set of emission
+#'  probabilities within a state. The matrices contain the hypothesized mean
+#'  values of the intercepts. Hence, each matrix consists of one row (when not
+#'  including covariates in the model) and \code{q_emiss[k]} - 1 columns}
+#'  \item{\code{emiss_K0}: a list containing \code{ndep} elements corresponding
+#'  to each of the dependent variables, where each element is a numeric vector
+#'  with length 1 denoting the number of hypothetical prior subjects on which
+#'  the vector of means \code{emiss_mu0} is based}
+#'  \item{\code{emiss_nu}: a list containing \code{ndep} elements corresponding
+#'  to each of the dependent variables, where each element is a numeric vector
+#'  with length 1 denoting the degrees of freedom of the Inverse Wishart
+#'  distribution}
+#'  \item{\code{emiss_V}: a list containing \code{ndep} elements corresponding
+#'  to each of the dependent variables \code{k}, where each element is a matrix
+#'  of \code{q_emiss[k]} - 1 by \code{q_emiss[k]} - 1 containing the
+#'  hypothesized variance-covariance matrix between the set of intercepts.}}
+#'  Note that \code{emiss_K0}, \code{emiss_nu} and \code{emiss_V} are assumed
+#'  equal over the states. The mean values of the intercepts (and regression
+#'  coefficients of the covariates) denoted by \code{emiss_mu0} are allowed to
+#'  vary over the states.
+#'
+#'  The default values for the hyper-prior on the emission distribution(s) are:
+#'  all elements of the matrices contained in \code{emiss_K0} set to 0,
+#'  \code{emiss_K0} set to 1, \code{emiss_nu} set to 3 + \code{q_emiss[k]} - 1,
+#'  and the diagonal of \code{gamma_V} (i.e., the variance) set to 3 +
+#'  \code{q_emiss[k]} - 1 and the off-diagonal elements (i.e., the covariance)
+#'  set to 0.
+#'
+#'  See \emph{Details} below if covariates are used for changes in the settings
+#'  of the arguments of \code{emiss_hyp_prior}.
+#' @param gamma_sampler An optional list containing user specified settings for
+#'   the proposal distribution of the random walk (RW) Metropolis sampler for
+#'   the subject level parameter estimates of the intercepts modeling the
+#'   transition probability matrix. The list \code{gamma_sampler} contains the
+#'   following elements:
+#'  \itemize{\item{\code{gamma_int_mle0}: a numeric vector with lenght \code{m}
+#'  - 1 denoting the start values for the maximum likelihood estimates of the
+#'  intercepts for the transition probability matrix gamma, based on the poolded
+#'  data (data over all subjects)}
+#'  \item{\code{gamma_scalar}: a numeric vector with length 1 denoting the scale
+#'  factor \code{s}. That is, The scale of the proposal distribution is composed
+#'  of a covariance matrix Sigma, which is then tuned by multiplying it by a
+#'  scaling factor \code{s}^2}
+#'  \item{\code{gamma_w}: a numeric vector with length 1 denoting the weight for
+#'  the overall log likelihood (i.e., log likelihood based on the pooled data
+#'  over all subjects) in the fractional likelihood.}}
+#'   Default settings are: all elements in \code{gamma_int_mle0} set to 0,
+#'   \code{gamma_scalar} set to 2.93 / sqrt(\code{m} - 1), and \code{w} set to
+#'   0.1. See the section \emph{Scaling the proposal distribution of the RW
+#'   Metropolis sampler} in the vignette \code{estimation-mhmm} for details.
+#' @param emiss_sampler An optional list containing user specified settings for
+#'   the proposal distribution of the random walk (RW) Metropolis sampler for
+#'   the subject level parameter estimates of the intercepts modeling the
+#'   emission distributions of the dependent variables \code{k}. The list
+#'   \code{emiss_sampler} contains the following elements:
+#'  \itemize{\item{\code{emiss_int_mle0}: a list containing \code{ndep} elements
+#'  corresponding to each of the dependent variables \code{k}, where each
+#'  element is a a numeric vector with lenght \code{q_emiss[k]} - 1 denoting the
+#'  start values for the maximum likelihood estimates of the the intercepts for
+#'  the emission distribution, based on the poolded data (data over all
+#'  subjects)}
+#'  \item{\code{emiss_scalar}: a list containing \code{ndep} elements
+#'  corresponding to each of the dependent variables, where each element is a
+#'  numeric vector with length 1 denoting the scale factor \code{s}. That is,
+#'  The scale of the proposal distribution is composed of a covariance matrix
+#'  Sigma, which is then tuned by multiplying it by a scaling factor \code{s}^2}
+#'  \item{\code{emiss_w}: a list containing \code{ndep} elements corresponding
+#'  to each of the dependent variables, where each element is a numeric vector
+#'  with length 1 denoting the weight for the overall log likelihood (i.e., log
+#'  likelihood based on the pooled data over all subjects) in the fractional
+#'  likelihood.}}
+#'   Default settings are: all elements in \code{emiss_int_mle0} set to 0,
+#'   \code{emiss_scalar} set to 2.93 / sqrt(\code{q_emiss[k]} - 1), and
+#'   \code{emiss_w} set to 0.1. See the section \emph{Scaling the proposal
+#'   distribution of the RW Metropolis sampler} in the vignette
+#'   \code{estimation-mhmm} for details.
+#'
+#' @return \code{mHMM} returns an object of class \code{mHMM}, which has
+#'   \code{print} and \code{summary} methods to see the results.
+#'   The object contains the following components:
 #'   \describe{
-#'   \item{\code{PD_subj}}{A list with one matrix per subject containing the xx,
-#'   log likelihood}
-#'   \item{\code{emiss_prob_bar}}{A matrix containing XX, with
-#'   one row per XX. The columns ... }
-#'   \item{\code{emiss_int_bar}}{A matrix containing XX, with
-#'   one row per XX. The columns ... }
-#'   \item{\code{emiss_int_subj}}{A matrix containing XX, with
-#'   one row per XX. The columns ... }
-#'   \item{\code{emiss_naccept}}{A matrix containing XX, with
-#'   one row per XX. The columns ... }
-#'   \item{\code{gamma_prob_bar}}{A matrix containing XX, with
-#'   one row per XX. The columns ... }
-#'   \item{\code{gamma_int_bar}}{A matrix containing XX, with
-#'   one row per XX. The columns ... }
-#'   \item{\code{gamma_int_subj}}{A matrix containing XX, with
-#'   one row per XX. The columns ... }
-#'   \item{\code{gamma_naccept}}{A matrix containing XX, with
-#'   one row per XX. The columns ... }
-#'   \item{\code{input}}{Overview of used input specifications. Namely, ...}
+#'   \item{\code{PD_subj}}{A list containing one matrix per subject containing
+#'   the subject level parameter estimates over the iteratins of the hybrid
+#'   Metropolis within Gibbs sampler of the multilevel HMM and the log
+#'   likelihood. Each matrix has one row per iteration of the sampler, and the
+#'   columns contain the subject level (parameter) estimates of subsequently the
+#'   probabilities of the emission distribution(s), the transition probability
+#'   matrix and the log likelihood.}
+#'   \item{\code{emiss_prob_bar}}{A list contaning one matrix per dependent
+#'   variable, denoting the group level emission probabilities of each dependent
+#'   variable over the iterations of the hybrid Metropolis within Gibbs sampler.
+#'   Each matrix has one row per iteration of the sampler, and the columns
+#'   contain the group level emission probabilities. If covariates were included
+#'   in the analysis, the group level probabilities represent the predicted
+#'   probability given that the covariate has an average value for continuous
+#'   covariates, or given that the covariate has the value zero for dichotomous
+#'   covariates.}
+#'   \item{\code{emiss_int_bar}}{A list contaning one matrix per dependent
+#'   variable, denoting the group level intercepts of each dependent variable of
+#'   the multinomial logistic regression modeling the probabilities of the
+#'   emission distribuion over the iterations of the hybrid Metropolis within
+#'   Gibbs sampler. Each matrix has one row per iteration of the sampler, and
+#'   the columns contain the group level intercepts.}
+#'   \item{\code{emiss_cov_bar}}{A list contaning one matrix per dependent
+#'   variable, denoting the group level regression coefficients of the
+#'   multinomial logistic regression predicting the emission probabilites within
+#'   each of the dependent variables over the iterations of the hybrid
+#'   Metropolis within Gibbs sampler. Each matrix has one row per iteration of
+#'   the sampler, and the columns contain the group level regression
+#'   coefficients.}
+#'   \item{\code{emiss_int_subj}}{A list contaning one list per subject denoting
+#'   the subject level intercepts of each dependent variable of the multinomial
+#'   logistic regression modeling the probabilities of the emission distribuion
+#'   over the iterations of the hybrid Metropolis within Gibbs sampler. Each
+#'   lower level list contains one matrix per dependent variable, where each
+#'   matrix has one row per iteration of the sampler, and the columns contain
+#'   the subject level intercepts.}
+#'   \item{\code{emiss_naccept}}{A list containing one matrix per dependent
+#'   variable, containing the number of accepted draws at the subject level for
+#'   each set of parameters of the emission distribution. Each subject is
+#'   represented by a row, and the columns represent the sets of parameters.}
+#'   \item{\code{gamma_prob_bar}}{A matrix containing the group level parameters
+#'   of the transition probabilities over the iterations of the hybrid
+#'   Metropolis within Gibbs sampler. Each matrix has one row per iteration of
+#'   the sampler, and the columns contain the group level paremter estimates. If
+#'   covariates were included in the analysis, the group level probabilities
+#'   represent the predicted probability given that the covariate has an average
+#'   value for continuous covariates, or given that the covariate has the value
+#'   zero for dichotomous covariates.}
+#'   \item{\code{gamma_int_bar}}{A matrix containing the group level intercepts
+#'   of the multinomial logistic regression modeling the transition
+#'   probabilities over the iterations of the hybrid Metropolis within Gibbs
+#'   sampler. Each matrix has one row per iteration of the sampler, and the
+#'   columns contain the group level intercepts.}
+#'   \item{\code{gamma_cov_bar}}{A matrix containing the group level regression
+#'   coefficients of the multinomial logistic regression predicting the
+#'   transition probabilites over the iterations of the hybrid Metropolis within
+#'   Gibbs sampler. Each matrix has one row per iteration of the sampler, and
+#'   the columns contain the group level regression coefficients.}
+#'   \item{\code{gamma_int_subj}}{A list contaning one matrix per subject
+#'   denoting the subject level intercepts of the multinomial logistic
+#'   regression modeling the transition probabilities over the iterations of the
+#'   hybrid Metropolis within Gibbs sampler. Each matrix has one row per
+#'   iteration of the sampler, and the columns contain the subject level
+#'   intercepts.}
+#'   \item{\code{gamma_naccept}}{A matrix containing the number of accepted
+#'   draws at the subject level for each set of parameters of the transition
+#'   probabilities. Each subject is represented by a row, and the columns
+#'   represent the sets of parameters.}
+#'   \item{\code{input}}{Overview of used input specifications. Namely, the
+#'   number of states \code{m}, the number of used dependent variables
+#'   \code{n_dep}, the number of output categories for each of the dependent
+#'   variables \code{q_emiss}, the number of iterations \code{J} and the
+#'   specified burn in period \code{burn_in} of the hybrid Metropolis within
+#'   Gibbs sampler, the number of subjects in the used data set \code{n_subj},
+#'   the observation length for each subject \code{n_vary}, and the column names
+#'   of the dependent variables \code{dep_labels}.}
 #'   \item{\code{sample_path}}{Only returned if .. }
 #' }
 #'
 #' @seealso \code{\link{sim_mHMM}} for simulating multilevel hidden Markov data
 #'   and \code{\link{vit_mHMM}} for obtaining the most likely hidden state
 #'   sequence for each subject using the Viterbi algorithm.
+#'
+#' @references references here
 #'
 #' @examples
 #' ###### Example on package data
@@ -282,12 +455,11 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
   # Initalize priors and hyper priors --------------------------------
   # Initialize gamma sampler
   if(is.null(gamma_sampler)) {
-    gamma_int_mle0  <- gamma_mu_prop <- rep(0, m - 1)
+    gamma_int_mle0  <- rep(0, m - 1)
     gamma_scalar    <- 2.93 / sqrt(m - 1)
     gamma_w         <- .1
   } else {
     gamma_int_mle0  <- gamma_sampler$gamma_int_mle0
-    gamma_mu_prop   <- gamma_sampler$gamma_mu_prop
     gamma_scalar    <- gamma_sampler$gamma_scalar
     gamma_w         <- gamma_sampler$gamma_w
   }
@@ -296,22 +468,20 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
   if(is.null(emiss_sampler)){
     emiss_int_mle0 <- rep(list(NULL), n_dep)
     emiss_scalar	<- rep(list(NULL), n_dep)
-    emiss_mu_prop 	<-  rep(list(NULL), n_dep)
     for(q in 1:n_dep){
-      emiss_int_mle0[[q]]	<- emiss_mu_prop[[q]] <- rep(0, q_emiss[q] - 1)
+      emiss_int_mle0[[q]] <- rep(0, q_emiss[q] - 1)
       emiss_scalar[[q]] 	<- 2.93 / sqrt(q_emiss[q] - 1)
     }
     emiss_w		<- .1
   } else {
     emiss_int_mle0	<- emiss_sampler$emiss_int_mle0
-    emiss_mu_prop 	<- emiss_sampler$emiss_mu_prop
     emiss_scalar 	<- emiss_sampler$emiss_scalar
     emiss_w    		<- emiss_sampler$emiss_w
   }
 
   # Initialize Gamma hyper prior
   if(is.null(gamma_hyp_prior)){
-    gamma_mu0			<- matrix(0,nrow = nx, ncol = m - 1)
+    gamma_mu0	  <- rep(list(matrix(0,nrow = nx[1], ncol = m - 1)), m)
     gamma_K0			<- diag(1, nx[1])
     gamma_nu			<- 3 + m - 1
     gamma_V			  <- gamma_nu * diag(m - 1)
@@ -548,8 +718,8 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
 
       # Sample pouplaton values for gamma and conditional probabilities using Gibbs sampler -----------
       # gamma_mu0_n and gamma_mu_int_bar are matrices, with the number of rows equal to the number of covariates, and ncol equal to number of intercepts estimated
-      gamma_mu0_n           <- solve(t(xx[[1]]) %*% xx[[1]] + gamma_K0)  %*% (t(xx[[1]]) %*% gamma_c_int[[i]] + gamma_K0 %*% gamma_mu0)
-      gamma_V_n             <- gamma_V + t(gamma_c_int[[i]] - xx[[1]] %*% gamma_mu0_n) %*% (gamma_c_int[[i]] - xx[[1]] %*% gamma_mu0_n) + t(gamma_mu0_n - gamma_mu0) %*% gamma_K0 %*% (gamma_mu0_n - gamma_mu0)
+      gamma_mu0_n           <- solve(t(xx[[1]]) %*% xx[[1]] + gamma_K0)  %*% (t(xx[[1]]) %*% gamma_c_int[[i]] + gamma_K0 %*% gamma_mu0[[i]])
+      gamma_V_n             <- gamma_V + t(gamma_c_int[[i]] - xx[[1]] %*% gamma_mu0_n) %*% (gamma_c_int[[i]] - xx[[1]] %*% gamma_mu0_n) + t(gamma_mu0_n - gamma_mu0[[i]]) %*% gamma_K0 %*% (gamma_mu0_n - gamma_mu0[[i]])
       gamma_V_int[[i]]      <- solve(rwish(S = solve(gamma_V_n), v = gamma_nu + n_subj))
       gamma_mu_int_bar[[i]] <- gamma_mu0_n + solve(chol(t(xx[[1]]) %*% xx[[1]] + gamma_K0)) %*% matrix(rnorm((m - 1) * nx[1]), nrow = nx[1]) %*% t(solve(chol(solve(gamma_V_int[[i]]))))
       gamma_exp_int				  <- matrix(exp(c(0, gamma_mu_int_bar[[i]][1,] )), nrow  = 1)
