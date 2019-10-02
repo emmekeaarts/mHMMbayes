@@ -1,12 +1,12 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.9.25)  26 SEP 2019 17:04
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.9.25)  2 OCT 2019 10:47
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**/private/var/folders/6n/00n34yg975b31kg66_f7hprw0000gn/T/RtmpNJVFrD/preview-2
-3657889b05.dir/estimation-mhmm.tex
+**/private/var/folders/6n/00n34yg975b31kg66_f7hprw0000gn/T/RtmpGRMkVd/preview-2
+7bb69c5e4.dir/estimation-mhmm.tex
 
-(/private/var/folders/6n/00n34yg975b31kg66_f7hprw0000gn/T/RtmpNJVFrD/preview-23
-657889b05.dir/estimation-mhmm.tex
+(/private/var/folders/6n/00n34yg975b31kg66_f7hprw0000gn/T/RtmpGRMkVd/preview-27
+bb69c5e4.dir/estimation-mhmm.tex
 LaTeX2e <2018-12-01>
 (/usr/local/texlive/2019/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2018/09/03 v1.4i Standard LaTeX document class
@@ -1482,12 +1482,12 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1126.
  ) 
 Here is how much of TeX's memory you used:
  12750 strings out of 492616
- 185496 string characters out of 6129481
+ 185493 string characters out of 6129481
  307776 words of memory out of 5000000
  16218 multiletter control sequences out of 15000+600000
  99006 words of font info for 163 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 37i,19n,43p,1628b,412s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 37i,19n,43p,1627b,412s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
 texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/local/texlive/2019/
 texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2019/texmf-dist/fon
@@ -1515,7 +1515,7 @@ onts/type1/public/lm/lmri12.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1
 lmro10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmsy10.pfb
 ></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmsy5.pfb></usr/loca
 l/texlive/2019/texmf-dist/fonts/type1/public/lm/lmsy7.pfb>
-Output written on estimation-mhmm.pdf (14 pages, 460709 bytes).
+Output written on estimation-mhmm.pdf (14 pages, 459188 bytes).
 PDF statistics:
  337 PDF objects out of 1000 (max. 8388607)
  293 compressed objects within 3 object streams
