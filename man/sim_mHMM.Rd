@@ -220,5 +220,5 @@ data4 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
 data4
 }
 \seealso{
-\code{\link{mHMM_mnl}} for analyzing multilevel hidden Markov data.
+\code{\link{mHMM}} for analyzing multilevel hidden Markov data.
 }

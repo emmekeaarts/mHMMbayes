@@ -41,6 +41,7 @@ fitted multilevel hidden Markov model, for either the group level, i.e.,
 }
 \examples{
 ###### Example on package data
+\dontrun{
 # specifying general model properties:
 m <- 2
 n_dep <- 4
@@ -74,6 +75,8 @@ summary(out_2st)
 # obtaining the transition probabilities at the group and subject level
 obtain_gamma(out_2st, level = "group")
 obtain_gamma(out_2st, level = "subject")
+
+}
 
 }
 \seealso{

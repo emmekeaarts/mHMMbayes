@@ -36,6 +36,7 @@
 #'
 #' @examples
 #' ###### Example on package data
+#' \dontrun{
 #' # specifying general model properties:
 #' m <- 2
 #' n_dep <- 4
@@ -69,6 +70,8 @@
 #' # obtaining the transition probabilities at the group and subject level
 #' obtain_gamma(out_2st, level = "group")
 #' obtain_gamma(out_2st, level = "subject")
+#'
+#' }
 #'
 #' @export
 #'

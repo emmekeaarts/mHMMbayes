@@ -56,6 +56,7 @@
 #'
 #' @examples
 #' ###### First run the function mHMM on the nonverbal data
+#' \dontrun{
 #' # specifying general model properties:
 #' m <- 2
 #' n_dep <- 4
@@ -80,7 +81,7 @@
 #'
 #' ## plot the posterior densities for gamma
 #' plot(out_2st, component = "gamma")
-#'
+#' }
 #'
 #' @export
 #'

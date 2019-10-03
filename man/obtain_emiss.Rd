@@ -41,6 +41,7 @@ returning the emission distribution probabilities for each subject.
 }
 \examples{
 ###### Example on package data
+\dontrun{
 # specifying general model properties:
 m <- 2
 n_dep <- 4
@@ -74,6 +75,8 @@ summary(out_2st)
 # obtaining the emission probabilities at the group and subject level
 obtain_emiss(out_2st, level = "group")
 obtain_emiss(out_2st, level = "subject")
+
+}
 
 }
 \seealso{

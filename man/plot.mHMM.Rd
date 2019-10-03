@@ -76,6 +76,7 @@ gamma, or for the emission distribution probabilities.
 }
 \examples{
 ###### First run the function mHMM on the nonverbal data
+\dontrun{
 # specifying general model properties:
 m <- 2
 n_dep <- 4
@@ -100,7 +101,7 @@ out_2st <- mHMM(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
 
 ## plot the posterior densities for gamma
 plot(out_2st, component = "gamma")
-
+}
 
 }
 \seealso{

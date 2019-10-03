@@ -48,6 +48,7 @@ has to specify for which subject the transition probability matrix should be
 plotted.
 }
 \examples{
+\dontrun{
 #' ###### Example on package data
 # specifying general model properties:
 m <- 2
@@ -84,6 +85,8 @@ est_gamma_group <- obtain_gamma(out_2st, level = "group")
 
 # plot the obtained transition probabilities
 plot(est_gamma_group, col = rep(c("green", "blue"), each = m))
+
+}
 
 }
 \seealso{
