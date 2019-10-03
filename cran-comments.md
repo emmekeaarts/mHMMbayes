@@ -1,13 +1,8 @@
 ## Test environments
-* local OS X install, R 3.xxx.xx
-* local Windows install, R 3.xx.xx
+* local OS X install, R 3.6.1
+* win-builder (devel and release), results can be obtained from: xx and xx 
 
 ## R CMD check results
-There were no ERRORs or WARNINGs. 
+There were no ERRORs, no WARNINGs and no NOTEs. 
 
-There was 1 NOTE:
-
-* xx
-
-## Downstream dependencies 
-Not sure if have to add this section.. 
+This is my FIRST submission
