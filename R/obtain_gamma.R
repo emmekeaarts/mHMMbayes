@@ -1,7 +1,7 @@
-#' Obtain the transition proabilities gamma for a fitted multilevel HMM
+#' Obtain the transition probabilities gamma for a fitted multilevel HMM
 #'
-#' \code{obtain_gamma} obtains the tranisitoin probability matrix for a
-#' fitted multilevel hidden markov model, for either the group level, i.e.,
+#' \code{obtain_gamma} obtains the transition probability matrix for a
+#' fitted multilevel hidden Markov model, for either the group level, i.e.,
 #'   representing the average transition probability matrix over all subjects,
 #'   or at the subject level, returning the transition probability matrices for
 #'   each subject.
@@ -11,10 +11,8 @@
 #' @param level String specifying if the returned transition probability matrix
 #'   gamma should be at the group level (\code{level = "group"}), i.e.,
 #'   representing the average transition probability matrix over all subjects,
-#'   or at the subject level (\code{level = "subject"}). When the latter is
-#'   specified, the returned gamma is a list with the number of elements equal
-#'   to the number of subjects analyzed.
-#' @param burn_in An integer wich specifies the number of iterations to discard
+#'   or at the subject level (\code{level = "subject"}).
+#' @param burn_in An integer which specifies the number of iterations to discard
 #'   when obtaining the model parameter summary statistics. When left
 #'   unspecified (\code{burn_in = NULL}), the burn in period specified when
 #'   creating the \code{mHMM} object with the function \code{\link{mHMM}}
@@ -24,14 +22,53 @@
 #'   \code{mHMM_gamma}. This object can be directly plotted using the function
 #'   \code{plot.mHMM_gamma()}, or simply \code{plot()}. Depending on the
 #'   specification at the input variable \code{level}, \code{est_gamma} is
-#'   either a matrix with the transiton probabilities at the group level (if
+#'   either a matrix with the transition probabilities at the group level (if
 #'   \code{level = "group"}), or a list of matrices (with the number of elements
 #'   equal to the number of subjects analyzed, if \code{level = 'subject'}),
 #'   where each matrix in the list represents a subject specific transition
 #'   probability matrix.
 #'
-#' #' @seealso \code{\link{mHMM}} for fitting the multilevel hidden Markov
-#' model, creating the object \code{mHMM}.
+#' @seealso \code{\link{mHMM}} for fitting the multilevel hidden Markov
+#' model, creating the object \code{mHMM}, and \code{\link{plot.mHMM_gamma}} for
+#' plotting the obtained transition probabilities.
+#'
+#'
+#'
+#' @examples
+#' ###### Example on package data
+#' # specifying general model properties:
+#' m <- 2
+#' n_dep <- 4
+#' q_emiss <- c(3, 2, 3, 2)
+#'
+#' # specifying starting values
+#' start_TM <- diag(.8, m)
+#' start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+#' start_EM <- list(matrix(c(0.05, 0.90, 0.05,
+#'                           0.90, 0.05, 0.05), byrow = TRUE,
+#'                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
+#'                  matrix(c(0.1, 0.9,
+#'                           0.1, 0.9), byrow = TRUE, nrow = m,
+#'                         ncol = q_emiss[2]), # looking patient
+#'                  matrix(c(0.90, 0.05, 0.05,
+#'                           0.05, 0.90, 0.05), byrow = TRUE,
+#'                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+#'                  matrix(c(0.1, 0.9,
+#'                           0.1, 0.9), byrow = TRUE, nrow = m,
+#'                         ncol = q_emiss[4])) # looking therapist
+#'
+#' # Run a model without covariate(s):
+#' out_2st <- mHMM(s_data = nonverbal,
+#'                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                 start_val = c(list(start_TM), start_EM),
+#'                 mcmc = list(J = 11, burn_in = 5))
+#'
+#' out_2st
+#' summary(out_2st)
+#'
+#' # obtaining the transition probabilities at the group and subject level
+#' obtain_gamma(out_2st, level = "group")
+#' obtain_gamma(out_2st, level = "subject")
 #'
 #' @export
 #'

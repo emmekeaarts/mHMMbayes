@@ -2,7 +2,7 @@
 % Please edit documentation in R/obtain_emiss.R
 \name{obtain_emiss}
 \alias{obtain_emiss}
-\title{Obtain the emission distribution proabilities for a fitted multilevel HMM}
+\title{Obtain the emission distribution probabilities for a fitted multilevel HMM}
 \usage{
 obtain_emiss(object, level = "group", burn_in = NULL)
 }
@@ -11,14 +11,11 @@ obtain_emiss(object, level = "group", burn_in = NULL)
 \code{\link{mHMM}}.}
 
 \item{level}{String specifying if the returned emission distribution
-proabilities should be at the group level (\code{level = "group"}), i.e.,
-representing the average emission distribution proabilities over all
-subjects, or at the subject level (\code{level = "subject"}). When the
-latter is specified, the returned emission distribution proabilities are
-given in a list with the number of elements equal to the number of subjects
-analyzed.}
+probabilities should be at the group level (\code{level = "group"}), i.e.,
+representing the average emission distribution probabilities over all
+subjects, or at the subject level (\code{level = "subject"}).}
 
-\item{burn_in}{An integer wich specifies the number of iterations to discard
+\item{burn_in}{An integer which specifies the number of iterations to discard
 when obtaining the model parameter summary statistics. When left
 unspecified (\code{burn_in = NULL}), the burn in period specified when
 creating the \code{mHMM} object with the function \code{\link{mHMM}}
@@ -27,21 +24,59 @@ will be used.}
 \value{
 \code{obtain_emiss} returns the object \code{est_emiss}. Depending on
   the specification at the input variable \code{level}, \code{est_emiss} is
-  either a list of matrices with the emission distribution proabilities at
+  either a list of matrices with the emission distribution probabilities at
   the group level (if \code{level = "group"}) for each dependent variable, or
   a list of lists, where for each dependent variable a list is returned with
   the number of elements equal to the number of subjects analyzed, if
   \code{level = 'subject'}). In the latter scenario, each matrix in the lower
   level list represents the subject specific emission distribution
-  proabilities for a specific dependent variable.
-
-#' @seealso \code{\link{mHMM}} for fitting the multilevel hidden Markov
-model, creating the object \code{mHMM}.
+  probabilities for a specific dependent variable.
 }
 \description{
-\code{obtain_emiss} obtains the emission distribution proabilities (also
-known as conditional probabilities) for a fitted multilevel hidden markov
+\code{obtain_emiss} obtains the emission distribution probabilities (also
+known as conditional probabilities) for a fitted multilevel hidden Markov
 model, for either the group level, i.e., representing the average emission
-distribution proabilities over all subjects, or at the subject level,
-returning the emission distribution proabilities for each subject.
+distribution probabilities over all subjects, or at the subject level,
+returning the emission distribution probabilities for each subject.
+}
+\examples{
+###### Example on package data
+# specifying general model properties:
+m <- 2
+n_dep <- 4
+q_emiss <- c(3, 2, 3, 2)
+
+# specifying starting values
+start_TM <- diag(.8, m)
+start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+start_EM <- list(matrix(c(0.05, 0.90, 0.05,
+                          0.90, 0.05, 0.05), byrow = TRUE,
+                        nrow = m, ncol = q_emiss[1]), # vocalizing patient
+                 matrix(c(0.1, 0.9,
+                          0.1, 0.9), byrow = TRUE, nrow = m,
+                        ncol = q_emiss[2]), # looking patient
+                 matrix(c(0.90, 0.05, 0.05,
+                          0.05, 0.90, 0.05), byrow = TRUE,
+                        nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+                 matrix(c(0.1, 0.9,
+                          0.1, 0.9), byrow = TRUE, nrow = m,
+                        ncol = q_emiss[4])) # looking therapist
+
+# Run a model without covariate(s):
+out_2st <- mHMM(s_data = nonverbal,
+                gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                start_val = c(list(start_TM), start_EM),
+                mcmc = list(J = 11, burn_in = 5))
+
+out_2st
+summary(out_2st)
+
+# obtaining the emission probabilities at the group and subject level
+obtain_emiss(out_2st, level = "group")
+obtain_emiss(out_2st, level = "subject")
+
+}
+\seealso{
+\code{\link{mHMM}} for fitting the multilevel hidden Markov
+model, creating the object \code{mHMM}.
 }

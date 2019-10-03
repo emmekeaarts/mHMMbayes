@@ -2,7 +2,7 @@
 % Please edit documentation in R/vit_mHMM.R
 \name{vit_mHMM}
 \alias{vit_mHMM}
-\title{Obtain hidden state sequence for each subject using the viterbi
+\title{Obtain hidden state sequence for each subject using the Viterbi
 algorithm}
 \usage{
 vit_mHMM(object, s_data, burn_in = NULL)
@@ -12,7 +12,7 @@ vit_mHMM(object, s_data, burn_in = NULL)
 \code{\link{mHMM}}.}
 
 \item{s_data}{A matrix containing the observations to be modelled, where the
-rows represent the observations over time. In the \code{s_data} matrix, the
+rows represent the observations over time. In \code{s_data}, the
 first column indicates subject id number. Hence, the id number is repeated
 over rows equal to the number of observations for that subject. The
 subsequent columns contain the dependent variable(s). The total number of
@@ -23,15 +23,15 @@ and the number of columns are equal to the number of dependent variables
 \item{burn_in}{The number of iterations to be discarded from the MCMC
 algorithm when inferring the transition probability matrix gamma and the
 emission distribution of (each of) the dependent variable(s) for each
-subject from \code{s_data}. If omitted, defaults to \code{NULL} and the
-burn_in period specified at \code{mHMM} will be used.}
+subject from \code{s_data}. If omitted, defaults to \code{NULL} and
+\code{burn_in} specified at the function \code{mHMM} will be used.}
 }
 \value{
-The function \code{vit_mHMM} returns the matrix \code{state_seq} that
-  denotes the most likely state at each point in time. Each column represents
-  a subject, and each row represents a point in time. If sequence lenghts
-  differ over subjects, states for none existing time points for subjects are
-  filled with \code{NA}.
+The function \code{vit_mHMM} returns a matrix containing the most
+  likely state at each point in time. Each column represents a subject, and
+  each row represents a point in time. If sequence lengths differ over
+  subjects, states for none existing time points for subjects are filled with
+  \code{NA}.
 }
 \description{
 \code{vit_mHMM} obtains the most likely state sequence for each subject from
@@ -42,8 +42,8 @@ global decoding.
 \details{
 Note that local decoding is also possible, by inferring the most frequent
 state at each point in time for each subject from the sampled state path at
-each iteration of the MCMC algorithm \code{return_path} of the function
-\code{mHMM}.
+each iteration of the MCMC algorithm. This information is contained in the
+output object \code{return_path} of the function \code{mHMM}.
 }
 \examples{
 ###### First run the function mHMM on the nonverbal data
@@ -73,6 +73,11 @@ out_2st <- mHMM(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
 states <- vit_mHMM(s_data = nonverbal, object = out_2st)
 
 
+}
+\references{
+\insertRef{viterbi1967}{mHMMbayes}
+
+ \insertRef{rabiner1989}{mHMMbayes}
 }
 \seealso{
 \code{\link{mHMM}} for analyzing multilevel hidden Markov data

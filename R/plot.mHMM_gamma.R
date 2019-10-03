@@ -1,8 +1,8 @@
 #' Plotting the transition proabilities gamma for a fitted multilevel HMM
 #'
-#' \code{plot.mHMM_gamma} plots the tranisitoin probability matrix for a fitted
-#' multilevel hidden markov model, by means of an alluvial plot (also known as
-#' sankey diagram or riverplot) using the R package \code{alluvial}. The plotted
+#' \code{plot.mHMM_gamma} plots the transition probability matrix for a fitted
+#' multilevel hidden Markov model, by means of an alluvial plot (also known as
+#' Sankey diagram or riverplot) using the R package \code{alluvial}. The plotted
 #' transition probability matrix either represents the probabilities at the
 #' group level, i.e., representing the average transition probability matrix
 #' over all subjects, or at the subject level. In case of the latter, the user
@@ -14,24 +14,68 @@
 #' @param subj_nr An integer specifying for which specific subject the
 #'   transition probability matrix should be plotted. Only required if the input
 #'   object represents the subject specific transition probability matrices.
-#' @param cex numeric, scaling of fonts of category labels. When not specified,
-#' defaults to \code{cex = 0.8}.
-#' @param col vector of colors of the stripes.
-#' @param hide logical, should particlular stripe be plotted. When not
-#' specified, omits the lines representing a value of exactly zero.
-#' @param ... Arguments to be passed to alluvial (see \code{\link[alluvial]{alluvial}})
+#' @param cex An integer specifying scaling of fonts of category labels. When
+#'   not specified, defaults to \code{cex = 0.8}.
+#' @param col An optional vector with length \code{m} * \code{m} (i.e., where
+#'   \code{m} denotes the number of hidden states) specifying the used colors in
+#'   the alluvial plot.
+#' @param hide An optional logical vector with  length \code{m} * \code{m}
+#'   (i.e., where \code{m} denotes the number of hidden states) specifying
+#'   whether particular stripes should be plotted. When not specified, omits
+#'   the lines representing a value of exactly zero.
+#' @param ... Arguments to be passed to alluvial (see
+#'   \code{\link[alluvial]{alluvial}})
 #'
 #' @return \code{plot.mHMM_gamma} returns a plot of the transition probability
-#'   matrix. Depending on whether the input object represents the transiton
+#'   matrix. Depending on whether the input object represents the transition
 #'   probabilities at the group level or the subject specific transition
 #'   probability matrices, the returned plot represents either the group
-#'   transition probality matrix, or the transition probability matrix for a
+#'   transition probability matrix, or the transition probability matrix for a
 #'   given subject, specified by \code{subject_nr}.
 #'
 #' @seealso \code{\link{mHMM}} for fitting the multilevel hidden Markov
 #'   model, creating the object \code{mHMM}, and \code{\link{obtain_gamma}} to
-#'   obtain the the transition proabilities gamma for a fitted multilevel HMM,
+#'   obtain the transition probabilities gamma for a fitted multilevel HMM,
 #'   creating the object \code{mHMM_gamma}.
+#'
+#'
+#' @examples
+#' #' ###### Example on package data
+#' # specifying general model properties:
+#' m <- 2
+#' n_dep <- 4
+#' q_emiss <- c(3, 2, 3, 2)
+#'
+#' # specifying starting values
+#' start_TM <- diag(.8, m)
+#' start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+#' start_EM <- list(matrix(c(0.05, 0.90, 0.05,
+#'                           0.90, 0.05, 0.05), byrow = TRUE,
+#'                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
+#'                  matrix(c(0.1, 0.9,
+#'                           0.1, 0.9), byrow = TRUE, nrow = m,
+#'                         ncol = q_emiss[2]), # looking patient
+#'                  matrix(c(0.90, 0.05, 0.05,
+#'                           0.05, 0.90, 0.05), byrow = TRUE,
+#'                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+#'                  matrix(c(0.1, 0.9,
+#'                           0.1, 0.9), byrow = TRUE, nrow = m,
+#'                         ncol = q_emiss[4])) # looking therapist
+#'
+#' # Run a model without covariate(s):
+#' out_2st <- mHMM(s_data = nonverbal,
+#'                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                 start_val = c(list(start_TM), start_EM),
+#'                 mcmc = list(J = 11, burn_in = 5))
+#'
+#' out_2st
+#' summary(out_2st)
+#'
+#' # obtaining the transition probabilities at the group and subject level
+#' est_gamma_group <- obtain_gamma(out_2st, level = "group")
+#'
+#' # plot the obtained transition probabilities
+#' plot(est_gamma_group, col = rep(c("green", "blue"), each = m))
 #'
 #' @export
 

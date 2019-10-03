@@ -2,7 +2,7 @@
 % Please edit documentation in R/sim_mHMM.R
 \name{sim_mHMM}
 \alias{sim_mHMM}
-\title{Simulate data using a multilevel hidden markov model}
+\title{Simulate data using a multilevel hidden Markov model}
 \usage{
 sim_mHMM(n_t, n, m, q_emiss, gamma, emiss_distr, beta = NULL,
   xx_vec = NULL, var_gamma = 1, var_emiss = 1,
@@ -33,9 +33,9 @@ probability of observing category \emph{k} (column \emph{k}) in state
 
 \item{beta}{List of two matrices containing the regression parameters to
 predict \code{gamma} and/or \code{emiss_distr} in combination with
-\code{xx_vec} using multinomial logisitc regression. The first matrix is
-used to to predict the transition probability matrix \code{gamma}. The
-second matrix is used to to predict the emission distribution
+\code{xx_vec} using multinomial logistic regression. The first matrix is
+used to predict the transition probability matrix \code{gamma}. The
+second matrix is used to predict the emission distribution
 \code{emiss_distr} of the dependent variable. In both matrices, one
 regression parameter is specified for each element in \code{gamma} and
 \code{emiss_distr}, with the following exception. The first element in each
@@ -108,13 +108,13 @@ The following components are returned by the function \code{sim_mHMM}:
   sequences, with one row per hidden state per subject. The first column
   indicates subject id number. The second column contains the simulated
   hidden state sequence, consecutively for all subjects. Hence, the id number
-  is repeated over the rows (with the number of repeats equal to the lenght
+  is repeated over the rows (with the number of repeats equal to the length
   of the simulated hidden state sequence \code{T} for each subject).}
   \item{\code{obs}}{A matrix containing the simulated observed outputs, with
   one row per simulated observation per subject. The first column indicates
   subject id number. The second column contains the simulated observation
   sequence, consecutively for all subjects. Hence, the id number is repeated
-  over rows (with the number of repeats equal to the lenght of the simulated
+  over rows (with the number of repeats equal to the length of the simulated
   observation sequence \code{T} for each subject).}
   \item{\code{gamma}}{A list containing \code{n} elements with the simulated
   subject specific transition probability matrices \code{gamma}. Only
@@ -129,7 +129,7 @@ The following components are returned by the function \code{sim_mHMM}:
 \code{sim_mHMM} simulates data for multiple subjects, for which the data have
 categorical observations that follow a hidden Markov model (HMM) with an
 multilevel structure. The multilevel structure implies that each subject is
-allowed to have it's own set of parameters, and that the parameters at the
+allowed to have its own set of parameters, and that the parameters at the
 subject level (level 1) are tied together by a population distribution at
 level 2 for each of the corresponding parameters. The shape of the population
 distribution for each of the parameters is a normal (i.e., Gaussian)
@@ -145,8 +145,8 @@ population distribution for each parameter: the average population transition
 probability matrix and its variance, and the average population emission
 distribution and its variance. For now, the variance is assumed fixed for all
 components of the transition probability matrix and for all components of the
-emissiondistribution, and the simulated data can only consist of one
-dependent variable. In additon, at this point only one dependent variable can
+emission distribution, and the simulated data can only consist of one
+dependent variable. In addition, at this point only one dependent variable can
 be simulated. That is, the hidden Markov model is a univariate hidden Markov
 model.
 
@@ -155,23 +155,21 @@ probability of each of the states at the first time point) needed to simulate
 the data are obtained from the stationary distributions of the subject
 specific transition probability matrices gamma.
 
-\subsection{Covariates}{ Here is some info on using covariates ... (to be
-completed)
-
-\code{beta}: The first element in the list \code{beta} to predict
-\code{gamma} consist of a matrix with the number of rows equal to \code{m}
+\code{beta}: As the first element in each row of \code{gamma} is used as reference category
+  in the multinomial logistic regression, the first matrix in the list \code{beta} used to predict
+transition probability matrix \code{gamma} has a number of rows equal to \code{m}
 and the number of columns equal to \code{m} - 1. The first element in the
 first row corresponds to the probability of switching from state one to state
 two. The second element in the first row corresponds to the probability of
 switching from state one to state three, and so on. The last element in the
 first row corresponds to the probability of switching from state one to the
-last state. For \code{emiss_distr}, the first element
+last state. The same principle holds for the second matrix in the list
+\code{beta} used to predict the emission distribution \code{emiss_distr}: the first element
 in the first row corresponds to the probability of observing category two in
 state one. The second element in the first row corresponds to the probability
 of observing category three is state one, and so on. The last element in the
 first row corresponds to the probability of observing the last category in
 state one.
-}
 }
 \examples{
 # simulating data for 10 subjects with each 100 observations

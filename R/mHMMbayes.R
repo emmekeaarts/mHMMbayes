@@ -53,6 +53,8 @@
 #' @importFrom mvtnorm dmvnorm rmvnorm dmvt rmvt
 #' @importFrom MCMCpack rdirichlet rwish
 #' @importFrom stats optim rnorm runif median
+# to include bib references in help file
+#' @importFrom Rdpack reprompt
 #'
 #'
 #' @docType package

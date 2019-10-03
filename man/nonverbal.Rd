@@ -6,11 +6,16 @@
 \title{Nonverbal communication of patients and therapist}
 \format{A matrix with 10 * 900 rows and 5 variables:
 \describe{
-\item{id}{id variable of patient - therapis couple to distinguish which observation belongs to which couple}
-\item{p_verbalizing}{verbalizing behavior of the patient, consisiting of 1 = not verbalizing, 2 = verbalizing, 3 = back chanelling}
-\item{p_looking}{looking behavior of the patient, consisting of 1 = not looking at therapist, 2 = looking at therapist}
-\item{t_verbalizing}{verbalizing behavior of the therapist, consisiting of 1 = not verbalizing, 2 = verbalizing, 3 = back chanelling}
-\item{t_looking}{looking behavior of the therapist, consisting of 1 = not looking at patient, 2 = looking at patient}
+\item{id}{id variable of patient - therapist couple to distinguish which
+observation belongs to which couple}
+\item{p_verbalizing}{verbalizing behavior of the patient, consisting of 1 =
+not verbalizing, 2 = verbalizing, 3 = back channeling}
+\item{p_looking}{looking behavior of the patient, consisting of 1 = not
+looking at therapist, 2 = looking at therapist}
+\item{t_verbalizing}{verbalizing behavior of the therapist, consisting of 1
+= not verbalizing, 2 = verbalizing, 3 = back channeling}
+\item{t_looking}{looking behavior of the therapist, consisting of 1 = not
+looking at patient, 2 = looking at patient}
 }}
 \usage{
 nonverbal
