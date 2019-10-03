@@ -153,7 +153,7 @@
 #' }
 #'
 #'
-#' @seealso \code{\link{mHMM_mnl}} for analyzing multilevel hidden Markov data.
+#' @seealso \code{\link{mHMM}} for analyzing multilevel hidden Markov data.
 #'
 #'
 #' @examples
