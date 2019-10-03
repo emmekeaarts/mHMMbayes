@@ -258,7 +258,7 @@
 #'   draws at the subject level RW Metropolis step for each set of parameters of
 #'   the transition probabilities. The subjects are contained in the rows, and
 #'   the columns contain the sets of parameters.}
-#'   \item{\code{emiss_prob_bar}}{A list contaning one matrix per dependent
+#'   \item{\code{emiss_prob_bar}}{A list containing one matrix per dependent
 #'   variable, denoting the group level emission probabilities of each dependent
 #'   variable over the iterations of the hybrid Metropolis within Gibbs sampler.
 #'   The iterations of the sampler are contained in the rows of the matrix, and
@@ -356,7 +356,7 @@
 #' out_2st <- mHMM(s_data = nonverbal,
 #'                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
 #'                 start_val = c(list(start_TM), start_EM),
-#'                 mcmc = list(J = 3, burn_in = 1))
+#'                 mcmc = list(J = 5, burn_in = 2))
 #'
 #' out_2st
 #' summary(out_2st)

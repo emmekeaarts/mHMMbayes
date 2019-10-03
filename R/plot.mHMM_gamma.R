@@ -1,4 +1,4 @@
-#' Plotting the transition proabilities gamma for a fitted multilevel HMM
+#' Plotting the transition probabilities gamma for a fitted multilevel HMM
 #'
 #' \code{plot.mHMM_gamma} plots the transition probability matrix for a fitted
 #' multilevel hidden Markov model, by means of an alluvial plot (also known as

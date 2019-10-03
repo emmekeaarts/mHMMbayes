@@ -27,8 +27,8 @@
 #' multilevel framework, one general 'population' HMM is estimated, while
 #' heterogeneity between subjects is accommodated. The function can handle
 #' covariates at the subject level varying observation lengths over
-#' subjects. Estimation is performed using a hybrid metropolis
-#' within gibs sampler, and completes the forward backward algorithm for all
+#' subjects. Estimation is performed using a hybrid Metropolis
+#' within Gibbs sampler, and completes the forward backward algorithm for all
 #' subjects in a sequential manner.
 #'
 #' @section \code{sim_mHMM}:

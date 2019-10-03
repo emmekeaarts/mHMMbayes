@@ -352,10 +352,13 @@ start_EM <- list(matrix(c(0.05, 0.90, 0.05,
                         ncol = q_emiss[4])) # looking therapist
 
 # Run a model without covariate(s):
+# Note that for reasons of running time, J is set at a ridiculous low value.
+# One would typically use a number of iterations J of at least 1000,
+# and a burn_in of 200.
 out_2st <- mHMM(s_data = nonverbal,
                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                 start_val = c(list(start_TM), start_EM),
-                mcmc = list(J = 11, burn_in = 5))
+                mcmc = list(J = 3, burn_in = 1))
 
 out_2st
 summary(out_2st)
@@ -366,6 +369,7 @@ plot(out_2st, component = "gamma", col =c("darkslategray3", "goldenrod"))
 # Run a model including a covariate. Here, the covariate (standardized CDI
 # change) predicts the emission distribution for each of the 4 dependent
 # variables:
+\dontrun{
 n_subj <- 10
 xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), (n_dep + 1))
 for(i in 2:(n_dep + 1)){
@@ -400,6 +404,8 @@ out_2st_sim <- mHMM(s_data = data1$obs,
                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                  start_val = list(gamma, emiss_distr),
                  mcmc = list(J = 11, burn_in = 5))
+
+}
 
 }
 \references{

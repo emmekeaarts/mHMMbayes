@@ -51,7 +51,7 @@
 #' # and a burn_in of 200.
 #' out_2st <- mHMM(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
 #'                 q_emiss = q_emiss), start_val = c(list(start_TM), start_EM),
-#'                 mcmc = list(J = 3, burn_in = 1))
+#'                 mcmc = list(J = 5, burn_in = 2))
 #'
 #' ###### obtain the most likely state sequence with the Viterbi algorithm
 #' states <- vit_mHMM(s_data = nonverbal, object = out_2st)

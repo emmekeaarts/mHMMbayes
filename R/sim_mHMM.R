@@ -120,7 +120,7 @@
 #'   distribution, hence the variance is assumed fixed across all components.
 #'   The default equals 1, which corresponds to quite some variation between
 #'   subjects. A less extreme value would be 0.5. If one wants to simulate data
-#'   from exactly the same HMM for all subjects, var_emmis should be set to
+#'   from exactly the same HMM for all subjects, var_emiss should be set to
 #'   0.
 #' @param return_ind_par A logical scalar. Should the subject specific
 #'   transition probability matrix \code{gamma} and emission probability matrix
@@ -315,8 +315,8 @@ sim_mHMM <- function(n_t, n, m, q_emiss, gamma, emiss_distr, beta = NULL, xx_vec
   if (return_ind_par == FALSE & n_t != 0){
     return(list(states = states, obs = obs))
   } else if (return_ind_par == TRUE & n_t != 0){
-    return(list(states = states, obs = obs, subject_gamma = sub_gamma, subject_emmis = sub_emiss))
+    return(list(states = states, obs = obs, subject_gamma = sub_gamma, subject_emiss = sub_emiss))
   } else if (n_t == 0){
-    return(list(subject_gamma = sub_gamma, subject_emmis = sub_emiss))
+    return(list(subject_gamma = sub_gamma, subject_emiss = sub_emiss))
   }
 }
