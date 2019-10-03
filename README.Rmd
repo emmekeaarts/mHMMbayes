@@ -45,7 +45,7 @@ devtools::install_github("emmekeaarts/mHMMbayes")
 
 This is a basic example which shows you how to run the model using example data 
 included with the package, and how to simulate data. For a more elaborate
-introduction, see the vignette "tutorial-mHMMbayes" accompanying the package.
+introduction, see the vignette "tutorial-mhmm" accompanying the package.
 
 ```{r example}
 library(mHMMbayes)
@@ -82,10 +82,6 @@ start_EM <- list(matrix(c(0.05, 0.90, 0.05,
  
 out_2st
 summary(out_2st)
-
-# One can also plot the posterior densities for the transition and 
-# emission probabilities, for example:
-plot(out_2st, component = "gamma", col = c("darkslategray3", "goldenrod"))
 
 # Run a model including a covariate 
 # Here, the covariate (standardized CDI change) predicts the emission 

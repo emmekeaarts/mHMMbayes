@@ -1,14 +1,29 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-mHMMbayes
-=========
 
-With the package mHMMbayes you can fit multilevel hidden Markov models. The multilevel hidden Markov model (HMM) is a generalization of the well-known hidden Markov model, tailored to accommodate (intense) longitudinal data of multiple individuals simultaneously. Using a multilevel framework, we allow for heterogeneity in the model parameters (transition probability matrix and conditional distribution), while estimating one overall HMM. The model has a great potential of application in many fields, such as the social sciences and medicine. The model can be fitted on multivariate data with a categorical distribution, and include individual level covariates (allowing for e.g., group comparisons on model parameters). Parameters are estimated using Bayesian estimation utilizing the forward-backward recursion within a hybrid Metropolis within Gibbs sampler. The package also includes various options for model visualization, a function to simulate data and a function to obtain the most likely hidden state sequence for each individual using the Viterbi algorithm.
+# mHMMbayes
 
-Please do not hesitate to contact me if you have any questions regarding the package.
+With the  package mHMMbayes you can fit multilevel hidden Markov models.
+The multilevel hidden Markov model (HMM) is a generalization of the
+well-known hidden Markov model, tailored to accommodate (intense)
+longitudinal data of multiple individuals simultaneously. Using a
+multilevel framework, we allow for heterogeneity in the model parameters
+(transition probability matrix and conditional distribution), while
+estimating one overall HMM. The model has a great potential of
+application in many fields, such as the social sciences and medicine.
+The model can be fitted on multivariate data with a categorical
+distribution, and include individual level covariates (allowing for
+e.g., group comparisons on model parameters). Parameters are estimated
+using Bayesian estimation utilizing the forward-backward recursion
+within a hybrid Metropolis within Gibbs sampler. The package also
+includes various options for model visualization, a function to simulate
+data and a function to obtain the most likely hidden state sequence for
+each individual using the Viterbi algorithm.
 
-Installation
-------------
+Please do not hesitate to contact me if you have any questions regarding
+the package.
+
+## Installation
 
 You can install mHMMbayes from github with:
 
@@ -17,10 +32,12 @@ You can install mHMMbayes from github with:
 devtools::install_github("emmekeaarts/mHMMbayes")
 ```
 
-Usage
------
+## Usage
 
-This is a basic example which shows you how to run the model using example data included with the package, and how to simulate data. For a more elaborate introduction, see the vignette "tutorial-mHMMbayes" accompanying the package.
+This is a basic example which shows you how to run the model using
+example data included with the package, and how to simulate data. For a
+more elaborate introduction, see the vignette “tutorial-mhmm”
+accompanying the package.
 
 ``` r
 library(mHMMbayes)
@@ -55,7 +72,7 @@ start_EM <- list(matrix(c(0.05, 0.90, 0.05,
               start_val = c(list(start_TM), start_EM),
               mcmc = list(J = 11, burn_in = 5))
 #> [1] 10
-#> [1] "total time elapsed in minutes 0.41"
+#> [1] "total time elapsed in minutes 0.42"
  
 out_2st
 #> Number of subjects: 10 
@@ -99,15 +116,6 @@ summary(out_2st)
 #> State 1      0.041      0.959
 #> State 2      0.292      0.708
 
-# One can also plot the posterior densities for the transition and 
-# emission probabilities, for example:
-plot(out_2st, component = "gamma", col = c("darkslategray3", "goldenrod"))
-```
-
-![](README-example-1.png)
-
-``` r
-
 # Run a model including a covariate 
 # Here, the covariate (standardized CDI change) predicts the emission 
 # distribution for each of the 4 dependent variables:
@@ -121,7 +129,7 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
                  start_val = c(list(start_TM), start_EM),
                  mcmc = list(J = 11, burn_in = 5))
 #> [1] 10
-#> [1] "total time elapsed in minutes 0.4"
+#> [1] "total time elapsed in minutes 0.42"
 
  
  ### Simulating data
