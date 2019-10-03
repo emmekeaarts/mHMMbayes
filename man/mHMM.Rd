@@ -10,13 +10,15 @@ mHMM(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
 }
 \arguments{
 \item{s_data}{A matrix containing the observations to be modelled, where the
-rows represent the observations over time. In \code{s_data}, the
-first column indicates subject id number. Hence, the id number is repeated
-over rows equal to the number of observations for that subject. The
-subsequent columns contain the dependent variable(s). The total number of
-rows are equal to the sum over the number of observations of each subject,
-and the number of columns are equal to the number of dependent variables
-(\code{n_dep}) + 1. The number of observations can vary over subjects.}
+rows represent the observations over time. In \code{s_data}, the first
+column indicates subject id number. Hence, the id number is repeated over
+rows equal to the number of observations for that subject. The subsequent
+columns contain the dependent variable(s). Note that the dependent
+variables have to be numeric, i.e., they cannot be a (set of) factor
+variable(s). The total number of rows are equal to the sum over the number
+of observations of each subject, and the number of columns are equal to the
+number of dependent variables (\code{n_dep}) + 1. The number of
+observations can vary over subjects.}
 
 \item{gen}{List containing the following elements denoting the general model
 properties:
