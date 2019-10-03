@@ -6,7 +6,8 @@ Depends: R (>= 3.0.1)
 Imports:
     MCMCpack,
     mvtnorm,
-    stats
+    stats,
+    Rdpack
 Authors@R: person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
                   role = c("aut", "cre"))
 Maintainer: Emmeke Aarts <e.aarts@uu.nl>
@@ -37,3 +38,4 @@ Suggests:
     grDevices,
     RColorBrewer
 VignetteBuilder: knitr
+RdMacros: Rdpack
