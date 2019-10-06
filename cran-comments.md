@@ -1,7 +1,7 @@
 ## Resubmission
 This is a resubmission. In this version I have:
 
-* Reduced the size of the package to xx by adjusting the datasets used in te vignette.
+* Reduced the size of the package to 2,351,535 bytes by adjusting the datasets used in te vignette.
 
 ## Test environments
 * local OS X install, R 3.6.1
