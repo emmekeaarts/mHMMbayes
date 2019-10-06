@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.mHMM_gamma.R
 \name{plot.mHMM_gamma}
 \alias{plot.mHMM_gamma}
-\title{Plotting the transition proabilities gamma for a fitted multilevel HMM}
+\title{Plotting the transition probabilities gamma for a fitted multilevel HMM}
 \usage{
 \method{plot}{mHMM_gamma}(x, subj_nr = NULL, cex = 0.8, col, hide, ...)
 }

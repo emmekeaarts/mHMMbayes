@@ -92,7 +92,7 @@ only one variance value can be specified for the complete emission
 distribution, hence the variance is assumed fixed across all components.
 The default equals 1, which corresponds to quite some variation between
 subjects. A less extreme value would be 0.5. If one wants to simulate data
-from exactly the same HMM for all subjects, var_emmis should be set to
+from exactly the same HMM for all subjects, var_emiss should be set to
 0.}
 
 \item{return_ind_par}{A logical scalar. Should the subject specific
