@@ -356,7 +356,7 @@
 #' out_2st <- mHMM(s_data = nonverbal,
 #'                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
 #'                 start_val = c(list(start_TM), start_EM),
-#'                 mcmc = list(J = 5, burn_in = 2))
+#'                 mcmc = list(J = 3, burn_in = 2))
 #'
 #' out_2st
 #' summary(out_2st)
