@@ -48,7 +48,7 @@ has to specify for which subject the transition probability matrix should be
 plotted.
 }
 \examples{
-\dontrun{
+\donttest{
 #' ###### Example on package data
 # specifying general model properties:
 m <- 2

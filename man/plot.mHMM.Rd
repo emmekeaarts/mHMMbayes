@@ -76,7 +76,7 @@ gamma, or for the emission distribution probabilities.
 }
 \examples{
 ###### First run the function mHMM on the nonverbal data
-\dontrun{
+\donttest{
 # specifying general model properties:
 m <- 2
 n_dep <- 4

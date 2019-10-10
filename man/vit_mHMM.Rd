@@ -80,7 +80,7 @@ states <- vit_mHMM(s_data = data1$obs, object = out_2st_sim)
 
 ###### Example on package example data
 ###### First fit the multilevel HMM on the nonverbal data
-\dontrun{
+\donttest{
 # specifying general model properties:
 m <- 2
 n_dep <- 4

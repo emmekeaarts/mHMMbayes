@@ -354,7 +354,7 @@ out_2st_sim <- mHMM(s_data = data1$obs,
                  mcmc = list(J = 11, burn_in = 5))
 
 ###### Example on package example data
-\dontrun{
+\donttest{
 # specifying general model properties:
 m <- 2
 n_dep <- 4

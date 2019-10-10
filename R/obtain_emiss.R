@@ -34,7 +34,7 @@
 #'
 #' @examples
 #' ###### Example on package data
-#' \dontrun{
+#' \donttest{
 #' # specifying general model properties:
 #' m <- 2
 #' n_dep <- 4

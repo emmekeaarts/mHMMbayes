@@ -27,6 +27,37 @@
 #'   \code{NA}.
 #'
 #' @examples
+#' ###### Example on package example data
+#' ###### First fit the multilevel HMM on the nonverbal data
+#' \donttest{
+#' # specifying general model properties:
+#' m <- 2
+#' n_dep <- 4
+#' q_emiss <- c(3, 2, 3, 2)
+#'
+#' # specifying starting values
+#' start_TM <- diag(.8, m)
+#' start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+#' start_EM <- list(matrix(c(0.05, 0.90, 0.05, 0.90, 0.05, 0.05), byrow = TRUE,
+#'                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
+#'                  matrix(c(0.1, 0.9, 0.1, 0.9), byrow = TRUE, nrow = m,
+#'                         ncol = q_emiss[2]), # looking patient
+#'                  matrix(c(0.90, 0.05, 0.05, 0.05, 0.90, 0.05), byrow = TRUE,
+#'                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+#'                  matrix(c(0.1, 0.9, 0.1, 0.9), byrow = TRUE, nrow = m,
+#'                         ncol = q_emiss[4])) # looking therapist
+#'
+#' # Fit the multilevel HMM model:
+#' # Note that for reasons of running time, J is set at a ridiculous low value.
+#' # One would typically use a number of iterations J of at least 1000,
+#' # and a burn_in of 200.
+#' out_2st <- mHMM(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
+#'                 q_emiss = q_emiss), start_val = c(list(start_TM), start_EM),
+#'                 mcmc = list(J = 3, burn_in = 1))
+#'
+#' ###### obtain the most likely state sequence with the Viterbi algorithm
+#' states <- vit_mHMM(s_data = nonverbal, object = out_2st)
+#' }
 #' ###### Example on simulated data
 #' # Simulate data for 10 subjects with each 100 observations:
 #' n_t <- 100
@@ -57,37 +88,6 @@
 #' ###### obtain the most likely state sequence with the Viterbi algorithm
 #' states <- vit_mHMM(s_data = data1$obs, object = out_2st_sim)
 #'
-#' ###### Example on package example data
-#' ###### First fit the multilevel HMM on the nonverbal data
-#' \dontrun{
-#' # specifying general model properties:
-#' m <- 2
-#' n_dep <- 4
-#' q_emiss <- c(3, 2, 3, 2)
-#'
-#' # specifying starting values
-#' start_TM <- diag(.8, m)
-#' start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
-#' start_EM <- list(matrix(c(0.05, 0.90, 0.05, 0.90, 0.05, 0.05), byrow = TRUE,
-#'                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
-#'                  matrix(c(0.1, 0.9, 0.1, 0.9), byrow = TRUE, nrow = m,
-#'                         ncol = q_emiss[2]), # looking patient
-#'                  matrix(c(0.90, 0.05, 0.05, 0.05, 0.90, 0.05), byrow = TRUE,
-#'                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-#'                  matrix(c(0.1, 0.9, 0.1, 0.9), byrow = TRUE, nrow = m,
-#'                         ncol = q_emiss[4])) # looking therapist
-#'
-#' # Fit the multilevel HMM model:
-#' # Note that for reasons of running time, J is set at a ridiculous low value.
-#' # One would typically use a number of iterations J of at least 1000,
-#' # and a burn_in of 200.
-#' out_2st <- mHMM(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
-#'                 q_emiss = q_emiss), start_val = c(list(start_TM), start_EM),
-#'                 mcmc = list(J = 3, burn_in = 1))
-#'
-#' ###### obtain the most likely state sequence with the Viterbi algorithm
-#' states <- vit_mHMM(s_data = nonverbal, object = out_2st)
-#' }
 #'
 #' @seealso \code{\link{mHMM}} for analyzing multilevel hidden Markov data
 #'   and obtaining the input needed for \code{vit_mHMM}, and
