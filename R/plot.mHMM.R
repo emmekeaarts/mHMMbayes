@@ -56,7 +56,7 @@
 #'
 #' @examples
 #' ###### First run the function mHMM on the nonverbal data
-#' \dontrun{
+#' \donttest{
 #' # specifying general model properties:
 #' m <- 2
 #' n_dep <- 4
@@ -102,6 +102,8 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
     stop(paste("The specified burn in period should be at least 2 points smaller
                compared to the number of iterations J, J =", J))
   }
+  old_par <- par(no.readonly =TRUE)
+  on.exit(par(old_par))
   m       <- input$m
   q_emiss <- input$q_emiss
   n_dep   <- input$n_dep
