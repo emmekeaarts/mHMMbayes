@@ -7,10 +7,10 @@
 #' the model parameters between subjects, while estimating one overall HMM. The
 #' function includes the possibility to add covariates at level 2 (i.e., at the
 #' subject level) and have varying observation lengths over subjects. For a
-#' short description of the package see \link{mHMMbayes}. See the vignette
-#' \code{tutorial-mHMM} for an introduction to multilevel hidden Markov models
-#' and the package, and see the vignette \code{estimation-mHMM} for an overview
-#' of the used estimation algorithms.
+#' short description of the package see \link{mHMMbayes}. See
+#' \code{vignette("tutorial-mhmm")} for an introduction to multilevel hidden
+#' Markov models and the package, and see \code{vignette("estimation-mhmm")} for
+#' an overview of the used estimation algorithms.
 #'
 #' Covariates specified in \code{xx} can either be dichotomous or continuous
 #' variables. Dichotomous variables have to be coded as 0/1 variables.
@@ -192,7 +192,7 @@
 #'   Default settings are: all elements in \code{gamma_int_mle0} set to 0,
 #'   \code{gamma_scalar} set to 2.93 / sqrt(\code{m} - 1), and \code{gamma_w} set to
 #'   0.1. See the section \emph{Scaling the proposal distribution of the RW
-#'   Metropolis sampler} in the vignette \code{estimation-mhmm} for details.
+#'   Metropolis sampler} in \code{vignette("estimation-mhmm")} for details.
 #' @param emiss_sampler An optional list containing user specified settings for
 #'   the proposal distribution of the random walk (RW) Metropolis sampler for
 #'   the subject level parameter estimates of the intercepts modeling the
@@ -217,8 +217,8 @@
 #'   Default settings are: all elements in \code{emiss_int_mle0} set to 0,
 #'   \code{emiss_scalar} set to 2.93 / sqrt(\code{q_emiss[k]} - 1), and
 #'   \code{emiss_w} set to 0.1. See the section \emph{Scaling the proposal
-#'   distribution of the RW Metropolis sampler} in the vignette
-#'   \code{estimation-mhmm} for details.
+#'   distribution of the RW Metropolis sampler} in
+#'   \code{vignette("estimation-mhmm")} for details.
 #'
 #' @return \code{mHMM} returns an object of class \code{mHMM}, which has
 #'   \code{print} and \code{summary} methods to see the results.
@@ -327,32 +327,8 @@
 #' \insertRef{zucchini2017}{mHMMbayes}
 #'
 #' @examples
-#' ###### Example on simulated data
-#' # Simulate data for 10 subjects with each 100 observations:
-#' n_t <- 100
-#' n <- 10
-#' m <- 2
-#' q_emiss <- 3
-#' gamma <- matrix(c(0.8, 0.2,
-#'                   0.3, 0.7), ncol = m, byrow = TRUE)
-#' emiss_distr <- matrix(c(0.5, 0.5, 0.0,
-#'                         0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE)
-#' data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
-#'                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
-#'
-#' # Specify remaining required analysis input (for the example, we use simulation
-#' # input as starting values):
-#' n_dep <- 1
-#' q_emiss <- 3
-#'
-#' # Run the model on the simulated data:
-#' out_2st_sim <- mHMM(s_data = data1$obs,
-#'                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-#'                  start_val = list(gamma, emiss_distr),
-#'                  mcmc = list(J = 11, burn_in = 5))
-#'
 #' ###### Example on package example data
-#' \dontrun{
+#' \donttest{
 #' # specifying general model properties:
 #' m <- 2
 #' n_dep <- 4
@@ -404,6 +380,30 @@
 #'                   mcmc = list(J = 11, burn_in = 5))
 #'
 #' }
+#' ###### Example on simulated data
+#' # Simulate data for 10 subjects with each 100 observations:
+#' n_t <- 100
+#' n <- 10
+#' m <- 2
+#' q_emiss <- 3
+#' gamma <- matrix(c(0.8, 0.2,
+#'                   0.3, 0.7), ncol = m, byrow = TRUE)
+#' emiss_distr <- matrix(c(0.5, 0.5, 0.0,
+#'                         0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE)
+#' data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+#'                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
+#'
+#' # Specify remaining required analysis input (for the example, we use simulation
+#' # input as starting values):
+#' n_dep <- 1
+#' q_emiss <- 3
+#'
+#' # Run the model on the simulated data:
+#' out_2st_sim <- mHMM(s_data = data1$obs,
+#'                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                  start_val = list(gamma, emiss_distr),
+#'                  mcmc = list(J = 11, burn_in = 5))
+#'
 #'
 #' @export
 #'
@@ -453,6 +453,9 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
     xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), n_dep1)
     nx[] <- 1
   } else {
+    if(!is.list(xx) | length(xx) != n_dep1){
+      stop("If xx is specified, xx should be a list, with the number of elements equal to the number of dependent variables + 1")
+    }
     for(i in 1:n_dep1){
       if (is.null(xx[[i]])){
         xx[[i]] <- matrix(1, ncol = 1, nrow = n_subj)
