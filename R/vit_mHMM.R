@@ -102,9 +102,6 @@
 #'
 #'
 vit_mHMM <- function(object, s_data, burn_in = NULL){
-  # input should be output object from mHMM, change output to class 3 type, such that we can check this here
-  # number of iterations and burn_in used should be inherited from mHMM, with the option to change burn_in
-
   if (!is.mHMM(object)){
     stop("The input object used should be from the class mHMM, obtained by using the function mHMM.")
   }
@@ -126,6 +123,10 @@ vit_mHMM <- function(object, s_data, burn_in = NULL){
     burn_in  <- input$burn_in
   }
   J          <- input$J
+  if (burn_in >= (J-1)){
+    stop(paste("The specified burn in period should be at least 2 points smaller
+               compared to the number of iterations J, J =", J))
+  }
   est_emiss  <- rep(list(lapply(q_emiss, dif_matrix, rows = m)), n_subj)
   start <- c(0, q_emiss * m)
   for(i in 1:n_subj){
