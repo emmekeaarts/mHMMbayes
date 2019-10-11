@@ -119,18 +119,21 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
                        col = col,
                        hide = hide, ...)
   } else {
-  m <- dim(x)[1]
-  From <- paste("State", rep(1:m, each = m))
-  To <-  paste("State", rep(1:m, m))
-  trans <- as.vector(t(x))
-  foo <- data.frame(From, To, trans)
-  if(missing(col)){
-    col <- c(rep(grDevices::rainbow(m), eac = m))
-  }
-  if (missing(hide)){
-    hide <- foo$trans == 0
-  }
-  alluvial::alluvial(foo[,1:2], freq=foo$trans,
+    if(!is.null(subj_nr)){
+      warning("The subject number can only be specified when plotting the subject level transition probabilities. Currently, the group level transition probabilities are plotted.")
+    }
+    m <- dim(x)[1]
+    From <- paste("State", rep(1:m, each = m))
+    To <-  paste("State", rep(1:m, m))
+    trans <- as.vector(t(x))
+    foo <- data.frame(From, To, trans)
+    if(missing(col)){
+      col <- c(rep(grDevices::rainbow(m), eac = m))
+    }
+    if (missing(hide)){
+      hide <- foo$trans == 0
+    }
+    alluvial::alluvial(foo[,1:2], freq=foo$trans,
                      cex = cex,
                      col = col,
                      hide =  hide, ...)
