@@ -91,6 +91,9 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
   if (!is.mHMM(x)){
     stop("The input object x should be from the class mHMM, obtained with the function mHMM.")
   }
+  if (component != "gamma" & component != "emiss"){
+    stop("The input specified under component should be a string, restrectid to state either gamma or emiss.")
+  }
   object <- x
   input   <- x$input
   n_subj  <- input$n_subj
@@ -98,7 +101,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
     burn_in <- input$burn_in
   }
   J       <- input$J
-  if (burn_in >= J){
+  if (burn_in >= (J-1)){
     stop(paste("The specified burn in period should be at least 2 points smaller
                compared to the number of iterations J, J =", J))
   }
@@ -169,7 +172,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
       # set plotting area
       graphics::plot.default(x = 1, ylim = c(0, max), xlim = c(0,1), type = "n",
            main = paste(dep_lab, ", state", i),
-           yaxt = "n", ylab = "", xlab = "Conditional probability")
+           yaxt = "n", ylab = "", xlab = "Conditional probability", ...)
       graphics::title(ylab="Density", line=.5)
       for(q in 1:q_emiss[dep]){
         # add density curve for population level posterior distribution
