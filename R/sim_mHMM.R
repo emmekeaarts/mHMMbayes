@@ -216,11 +216,19 @@ sim_mHMM <- function(n_t, n, m, q_emiss, gamma, emiss_distr, beta = NULL, xx_vec
   if (dim(gamma)[2] != m){
     stop(paste("The transiton probability matrix gamma should be a", m, "by", m, "matrix."))
   }
+  if(any(apply(gamma,1,sum)!= 1)){
+    stop("The elements in each row of the transition probability matrix gamma should sum up to 1")
+  }
   if (dim(emiss_distr)[1] != m){
-    stop(paste("The number of rows of the emission distribution matrix should be equal to the number of states, which is", m, "."))
+    stop(paste("The number of rows of the emission distribution matrix should be
+               equal to the number of states, which is", m, "."))
   }
   if (dim(emiss_distr)[2] != q_emiss){
-    stop(paste("The number of columns of the emission distribution matrix should be equal to the number of observable categories, which is", q_emiss, "."))
+    stop(paste("The number of columns of the emission distribution matrix should be
+               equal to the number of observable categories, which is", q_emiss, "."))
+  }
+  if(any(apply(emiss_distr,1,sum)!= 1)){
+    stop("The elements in each row of the emission distribution matrix should sum up to 1")
   }
   if((is.null(xx_vec) & !is.null(beta)) | (!is.null(xx_vec) & is.null(beta))){
     stop("Either only xx_vec or only beta is specified. Please specify both 1) the values for the covariate
