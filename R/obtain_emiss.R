@@ -78,7 +78,7 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
     stop("The input object used should be from the class mHMM, obtained by using the function mHMM.")
   }
   if (level != "group" & level != "subject"){
-    stop("The specification at the input variable -level- should be set to either -group- or -subject-")
+    stop("The specification at the input variable -level- should be set to either group or subject")
   }
   input   <- object$input
   dep_labels <- input$dep_labels
@@ -87,7 +87,7 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
     burn_in <- input$burn_in
   }
   J       <- input$J
-  if (burn_in >= J){
+  if (burn_in >= (J-1)){
     stop(paste("The specified burn in period should be at least 2 points smaller
                compared to the number of iterations J, J =", J))
   }
