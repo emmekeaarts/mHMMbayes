@@ -48,36 +48,6 @@ each iteration of the MCMC algorithm. This information is contained in the
 output object \code{return_path} of the function \code{mHMM}.
 }
 \examples{
-###### Example on simulated data
-# Simulate data for 10 subjects with each 100 observations:
-n_t <- 100
-n <- 10
-m <- 2
-q_emiss <- 3
-gamma <- matrix(c(0.8, 0.2,
-                  0.3, 0.7), ncol = m, byrow = TRUE)
-emiss_distr <- matrix(c(0.5, 0.5, 0.0,
-                        0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE)
-data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
-                  emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
-
-# Specify remaining required analysis input (for the example, we use simulation
-# input as starting values):
-n_dep <- 1
-q_emiss <- 3
-
-# Fit the model on the simulated data:
-# Note that for reasons of running time, J is set at a ridiculous low value.
-# One would typically use a number of iterations J of at least 1000,
-# and a burn_in of 200.
-out_2st_sim <- mHMM(s_data = data1$obs,
-                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                 start_val = list(gamma, emiss_distr),
-                 mcmc = list(J = 11, burn_in = 5))
-
-###### obtain the most likely state sequence with the Viterbi algorithm
-states <- vit_mHMM(s_data = data1$obs, object = out_2st_sim)
-
 ###### Example on package example data
 ###### First fit the multilevel HMM on the nonverbal data
 \donttest{
@@ -109,6 +79,36 @@ out_2st <- mHMM(s_data = nonverbal, gen = list(m = m, n_dep = n_dep,
 ###### obtain the most likely state sequence with the Viterbi algorithm
 states <- vit_mHMM(s_data = nonverbal, object = out_2st)
 }
+###### Example on simulated data
+# Simulate data for 10 subjects with each 100 observations:
+n_t <- 100
+n <- 10
+m <- 2
+q_emiss <- 3
+gamma <- matrix(c(0.8, 0.2,
+                  0.3, 0.7), ncol = m, byrow = TRUE)
+emiss_distr <- matrix(c(0.5, 0.5, 0.0,
+                        0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE)
+data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+                  emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
+
+# Specify remaining required analysis input (for the example, we use simulation
+# input as starting values):
+n_dep <- 1
+q_emiss <- 3
+
+# Fit the model on the simulated data:
+# Note that for reasons of running time, J is set at a ridiculous low value.
+# One would typically use a number of iterations J of at least 1000,
+# and a burn_in of 200.
+out_2st_sim <- mHMM(s_data = data1$obs,
+                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                 start_val = list(gamma, emiss_distr),
+                 mcmc = list(J = 11, burn_in = 5))
+
+###### obtain the most likely state sequence with the Viterbi algorithm
+states <- vit_mHMM(s_data = data1$obs, object = out_2st_sim)
+
 
 }
 \references{
