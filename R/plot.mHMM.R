@@ -105,8 +105,8 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
     stop(paste("The specified burn in period should be at least 2 points smaller
                compared to the number of iterations J, J =", J))
   }
-  old_par <- par(no.readonly =TRUE)
-  on.exit(par(old_par))
+  old_par <- graphics::par(no.readonly =TRUE)
+  on.exit(graphics::par(old_par))
   m       <- input$m
   q_emiss <- input$q_emiss
   n_dep   <- input$n_dep

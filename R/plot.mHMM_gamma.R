@@ -95,8 +95,8 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
   if (!is.mHMM_gamma(x)){
     stop("The input object x should be from the class mHMM_gamma, obtained with the function obtain_gamma.")
   }
-  old_par <- par(no.readonly =TRUE)
-  on.exit(par(old_par))
+  old_par <- graphics::par(no.readonly =TRUE)
+  on.exit(graphics::par(old_par))
   if (is.list(x)){
     if (is.null(subj_nr)){
       stop("When the input object x represents the subject specific transition
