@@ -263,12 +263,12 @@ sim_mHMM <- function(n_t, n, m, q_emiss, gamma, emiss_distr, beta = NULL, xx_vec
   if (!is.null(beta)){
     if (!is.null(beta[[1]])){
       if ((dim(beta[[1]])[1] != (m)) | (dim(beta[[1]])[2] != (m-1))){
-      stop(paste("The first element of beta to predict the transiton probability matrix gamma should be a", m, "by", m - 1, "matrix."))
+      stop(paste("The first element of beta to predict the transiton probability matrix gamma should be a m (", m, " ) by m - 1 (", m - 1, ") matrix."))
       }
     }
     if (!is.null(beta[[2]])){
       if((dim(beta[[2]])[1] != (m)) | (dim(beta[[2]])[2] != (q_emiss-1))){
-      stop(paste("The second element of beta to predict the emission distribution should be a", m, "by", q_emiss - 1, "matrix."))
+      stop(paste("The second element of beta to predict the emission distribution should be a m (", m, ") by q_emiss - 1 (", q_emiss - 1, ") matrix."))
       }
     }
   }
