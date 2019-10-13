@@ -1,14 +1,34 @@
 ## Resubmission
 This is a resubmission. In this version I have:
 
-* Reduced the size of the package to about 2 MB by adjusting the datasets used 
-  in te vignette.
+* Added references to the Description field that describe the general method that is used. As yet, there are no references that describe the exact algorithm that is used. When this is published, I will add it to the Description field. 
+* \dontrun{} is replaced by \donttest{}, and I wrote unit tests to test the package using testthat. 
+* An immediate call of on.exit() is added to the plot functions such that the users par() settings are reset.
 
 ## Test environments
 * local OS X install, R 3.6.1
-* win-builder (devel and release), results can be obtained from (updated for 
-  resubmission): https://win-builder.r-project.org/xQe4gl2nljot/00check.log
-  and https://win-builder.r-project.org/RKrvaBM1K64m/00check.log
+* win-builder (devel and release), results can be obtained from (updated for resubmission): https://win-builder.r-project.org/xQe4gl2nljot/00check.log and https://win-builder.r-project.org/RKrvaBM1K64m/00check.log
+
+## R CMD check results
+There were no ERRORs or WARNINGs. 
+
+There are 2 NOTEs:
+
+* Possibly mis-spelled words in DESCRIPTION: Viterbi -> This is not mis-spelled, it refers to the Viterbi algorithm. 
+* New submission (this is my FIRST package submission)
+
+
+
+# OLD
+
+## Resubmission
+This is a resubmission. In this version I have:
+
+* Reduced the size of the package to about 2 MB by adjusting the datasets used in te vignette.
+
+## Test environments
+* local OS X install, R 3.6.1
+* win-builder (devel and release), results can be obtained from (updated for resubmission): https://win-builder.r-project.org/xQe4gl2nljot/00check.log and https://win-builder.r-project.org/RKrvaBM1K64m/00check.log
  
 
 ## R CMD check results
@@ -16,6 +36,5 @@ There were no ERRORs or WARNINGs.
 
 There are 2 NOTEs:
 
-* Possibly mis-spelled words in DESCRIPTION: Viterbi -> This is not mis-spelled,
-  it refers to the Viterbi algorithm. 
+* Possibly mis-spelled words in DESCRIPTION: Viterbi -> This is not mis-spelled, it refers to the Viterbi algorithm. 
 * New submission (this is my FIRST package submission)
