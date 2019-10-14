@@ -2,7 +2,7 @@
 This is a resubmission. In this version I have:
 
 * Added references to the Description field that describe the general method that is used. As yet, there are no references that describe the exact algorithm that is used. When this is published, I will add it to the Description field. 
-* \dontrun{} is replaced by \donttest{}, and I wrote unit tests to test the package using testthat. 
+* \dontrun{} is replaced by \donttest{}, and I wrote unit tests for each (external) function using testthat. 
 * An immediate call of on.exit() is added to the plot functions such that the users par() settings are reset.
 
 ## Test environments
@@ -14,7 +14,14 @@ There were no ERRORs or WARNINGs.
 
 There are 2 NOTEs:
 
-* Possibly mis-spelled words in DESCRIPTION: Viterbi -> This is not mis-spelled, it refers to the Viterbi algorithm. 
+* Possibly mis-spelled words in DESCRIPTION: 
+    Haan (15:55) -> name of an author
+    Rabiner (13:38) -> name of an author
+    Rietdijk (15:60) -> name of an author
+    Viterbi (25:44) -> refers to the Viterbi algorithm 
+    al (15:72) -> part of reference
+    de (15:52) -> (part of) name of an author
+    et (15:69) -> part of reference
 * New submission (this is my FIRST package submission)
 
 
