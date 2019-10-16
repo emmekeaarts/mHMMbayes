@@ -3,11 +3,11 @@ This is a resubmission. In this version I have:
 
 * Added references to the Description field that describe the general method that is used. As yet, there are no references that describe the exact algorithm that is used. When this is published, I will add it to the Description field. 
 * \dontrun{} is replaced by \donttest{}, and I wrote unit tests for each (external) function using testthat. 
-* An immediate call of on.exit() is added to the plot functions such that the users par() settings are reset.
+* An immediate call of on.exit() is added to the plot functions such that the user's par() settings are reset.
 
 ## Test environments
 * local OS X install, R 3.6.1
-* win-builder (devel and release), results can be obtained from (updated for resubmission): https://win-builder.r-project.org/xQe4gl2nljot/00check.log and https://win-builder.r-project.org/RKrvaBM1K64m/00check.log
+* win-builder (devel and release), results can be obtained from (updated for resubmission): https://win-builder.r-project.org/i1Lv3T784hIt/00check.log and https://win-builder.r-project.org/5bt84GS7v4tZ/00check.log
 
 ## R CMD check results
 There were no ERRORs or WARNINGs. 
