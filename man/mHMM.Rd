@@ -5,7 +5,7 @@
 \title{Multilevel hidden  Markov model using Bayesian estimation}
 \usage{
 mHMM(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
-  gamma_hyp_prior = NULL, emiss_hyp_prior = NULL,
+  print_iter = FALSE, gamma_hyp_prior = NULL, emiss_hyp_prior = NULL,
   gamma_sampler = NULL, emiss_sampler = NULL)
 }
 \arguments{
@@ -69,6 +69,11 @@ obtained at each iteration and for each subject be returned by the function
 the sampled state sequence is quite a large object, hence the default
 setting is \code{sample_path = FALSE}. Can be used for local decoding
 purposes.}
+
+\item{print_iter}{A logical scaler. Should the function print the progress of
+the algorithm by returning the current iteration number at every 10th
+iteration (\code{print_iter = TRUE}) or not (\code{print_iter = FALSE}).
+Defaults to \code{print_iter = FALSE}.}
 
 \item{gamma_hyp_prior}{An optional list containing user specified parameters
  of the hyper-prior distribution on the multivariate normal distribution

@@ -98,7 +98,11 @@
 #'   the sampled state sequence is quite a large object, hence the default
 #'   setting is \code{sample_path = FALSE}. Can be used for local decoding
 #'   purposes.
-#'@param gamma_hyp_prior An optional list containing user specified parameters
+#' @param print_iter A logical scaler. Should the function print the progress of
+#'   the algorithm by returning the current iteration number at every 10th
+#'   iteration (\code{print_iter = TRUE}) or not (\code{print_iter = FALSE}).
+#'   Defaults to \code{print_iter = FALSE}.
+#' @param gamma_hyp_prior An optional list containing user specified parameters
 #'  of the hyper-prior distribution on the multivariate normal distribution
 #'  of the intercepts (and regression coefficients given that covariates are
 #'  used) of the multinomial regression model of the transition probability
@@ -409,7 +413,7 @@
 #'
 #'
 
-mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
+mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, print_iter = FALSE,
                  gamma_hyp_prior = NULL, emiss_hyp_prior = NULL,
                  gamma_sampler = NULL, emiss_sampler = NULL){
 
@@ -813,15 +817,18 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
       }
       emiss_prob_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_mu_prob_bar, "[[", q)))
     }
-    if(is.whole(iter/10)){
-      print(c(iter))
+    if(is.whole(iter/10) & print_iter == TRUE){
+      if(iter == 10){
+       cat("Iteration:", "\n")
+      }
+      cat(c(iter), "\n")
     }
   }
 
 
   # End of function, return output values --------
   ctime = proc.time()[3]
-  print(paste("total time elapsed in minutes", round((ctime-itime) / 60, 2)))
+  message(paste("Total time elapsed (hh:mm:ss):", hms(ctime-itime)))
   if(return_path == TRUE){
     out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
                              burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
