@@ -28,3 +28,11 @@ is.mHMM <- function(x) {
 is.mHMM_gamma <- function(x) {
   inherits(x, "mHMM_gamma")
 }
+
+#' @keywords internal
+hms <- function(t){
+  paste(formatC(t %/% (60*60) %% 24, width = 2, format = "d", flag = "0"),
+        formatC(t %/% 60 %% 60, width = 2, format = "d", flag = "0"),
+        formatC(t %% 60, width = 2, format = "d", flag = "0"),
+        sep = ":")
+}
