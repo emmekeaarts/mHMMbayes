@@ -86,6 +86,7 @@ The top 6 rows of the dataset are provided below.
 library(mHMMbayes)
 nonverbal <- data.frame(nonverbal)
 head(nonverbal)
+old_par <- graphics::par(no.readonly =TRUE)
 ```
 
 When we plot the data of the first 5 minutes (= the first 300 observations) of the first couple, we get the following: 
@@ -119,6 +120,8 @@ for(j in 2:5){
 
 legend("topright", bty = "n", fill = Voc_col, legend = Voc_lab)
 legend("topleft", bty = "n", fill = Look_col, legend = Look_lab)
+
+graphics::par(old_par)
 
 ```
 
@@ -312,6 +315,8 @@ legend("topright", bty = "n", fill = c(Look_col, "white", Voc_col), legend = c(L
        ncol = 2, border = c(rep("black", 2), "white", rep("black", 3)))
 legend("topleft", bty = "n", fill = State_col, legend = c("State 1", "State 2"))
 
+graphics::par(old_par)
+
 ```
 
 ### Checking model convergence and label switching
@@ -387,8 +392,12 @@ for(i in 1:m){
   }
 }
 ```
+
 It can be observed that the parameter estimates converge to the same parameter space, and that the chains mix well. Also, there is no evidence of label switching. 
 
 
+```{r, include = FALSE}
+graphics::par(old_par)
+```
 ## References
 
