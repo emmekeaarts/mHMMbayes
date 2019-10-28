@@ -1,6 +1,7 @@
 # mHMMbayes (development version)
 ## Speed
-This release mostly focusses on increasing the speed of the \code{mHMM()} algorithm. 
+This release mostly focusses on increasing the speed of the `mHMM()` algorithm. 
+* ..
 
 ## Plots
 
