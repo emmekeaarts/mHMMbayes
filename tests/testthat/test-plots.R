@@ -41,7 +41,7 @@ set.seed(3523)
 out_2st_simb <- mHMM(s_data = data3$obs,
                      gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                      start_val = list(gamma, emiss_distr1, emiss_distr2),
-                     mcmc = list(J = J, burn_in = burn_in))
+                     mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
 
 
 ####################
