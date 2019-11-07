@@ -42,7 +42,7 @@ set.seed(3523)
 out_2st_simb <- mHMM(s_data = data3$obs,
                      gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                      start_val = list(gamma, emiss_distr1, emiss_distr2),
-                     mcmc = list(J = J, burn_in = burn_in))
+                     mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
 
 
 ##### Create model with covariates
@@ -54,7 +54,7 @@ set.seed(3523)
 out_2st_sim_cov1 <- mHMM(s_data = data3$obs, xx = xx,
                      gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                      start_val = list(gamma, emiss_distr1, emiss_distr2),
-                     mcmc = list(J = J, burn_in = burn_in))
+                     mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
 
 xx_gamma_only <- rep(list(matrix(1, ncol = 1, nrow = n)), (n_dep2 + 1))
 xx_gamma_only[[1]] <- cbind(xx_gamma_only[[i]], nonverbal_cov$std_CDI_change)
@@ -62,7 +62,7 @@ set.seed(3523)
 out_2st_sim_cov2 <- mHMM(s_data = data3$obs, xx = xx_gamma_only,
                          gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                          start_val = list(gamma, emiss_distr1, emiss_distr2),
-                         mcmc = list(J = J, burn_in = burn_in))
+                         mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
 
 xx_gamma_only_V2 <- rep(list(NULL),  (n_dep2 + 1))
 xx_gamma_only_V2[[1]] <- cbind(rep(1,n), nonverbal_cov$std_CDI_change)
@@ -70,7 +70,7 @@ set.seed(3523)
 out_2st_sim_cov3 <- mHMM(s_data = data3$obs, xx = xx_gamma_only_V2,
                          gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                          start_val = list(gamma, emiss_distr1, emiss_distr2),
-                         mcmc = list(J = J, burn_in = burn_in))
+                         mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
 
 xx_dep1_only <- rep(list(matrix(1, ncol = 1, nrow = n)), (n_dep2 + 1))
 xx_dep1_only[[2]] <- cbind(xx_dep1_only[[i]], nonverbal_cov$std_CDI_change)
@@ -78,7 +78,7 @@ set.seed(3523)
 out_2st_sim_cov4 <- mHMM(s_data = data3$obs, xx = xx_dep1_only,
                          gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                          start_val = list(gamma, emiss_distr1, emiss_distr2),
-                         mcmc = list(J = J, burn_in = burn_in))
+                         mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
 
 xx_wrong1 <- rep(list(NULL),  (n_dep2 + 1))
 for(i in 2:(n_dep2 + 1)){
@@ -102,35 +102,43 @@ test_that("errors mHMM input", {
   expect_error(mHMM(s_data = data3$obs,
                     gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                     start_val = list(gamma, list(emiss_distr1, emiss_distr2)),
-                    mcmc = list(J = J, burn_in = burn_in)), "number of elements in the list start_val")
+                    mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE),
+               "number of elements in the list start_val")
   expect_error(mHMM(s_data = data.frame(data3$obs[,1], as.factor(data3$obs[,2]), data3$obs[,3]),
                     gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                     start_val = list(gamma, emiss_distr1, emiss_distr2),
-                    mcmc = list(J = J, burn_in = burn_in)), "factorial variables")
+                    mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE),
+               "factorial variables")
   expect_error(mHMM(s_data = data3$obs, xx = xx_wrong1,
                     gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                     start_val = list(gamma, emiss_distr1, emiss_distr2),
-                    mcmc = list(J = J, burn_in = burn_in)), "first column in each element of xx has to represent the intercept")
+                    mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE),
+               "first column in each element of xx has to represent the intercept")
   expect_error(mHMM(s_data = data3$obs, xx = xx_wrong2,
                     gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                     start_val = list(gamma, emiss_distr1, emiss_distr2),
-                    mcmc = list(J = J, burn_in = burn_in)), "first column in each element of xx has to represent the intercept")
+                    mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE),
+               "first column in each element of xx has to represent the intercept")
   expect_error(mHMM(s_data = data3$obs, xx = xx_wrong3,
                     gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                     start_val = list(gamma, emiss_distr1, emiss_distr2),
-                    mcmc = list(J = J, burn_in = burn_in)), "xx should be a list, with the number of elements")
+                    mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE),
+               "xx should be a list, with the number of elements")
   expect_error(mHMM(s_data = data3$obs, xx = xx_wrong4,
                     gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                     start_val = list(gamma, emiss_distr1, emiss_distr2),
-                    mcmc = list(J = J, burn_in = burn_in)), "xx should be a list, with the number of elements")
+                    mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE),
+               "xx should be a list, with the number of elements")
   expect_error(mHMM(s_data = data3$obs, xx = xx_wrong5,
                     gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                     start_val = list(gamma, emiss_distr1, emiss_distr2),
-                    mcmc = list(J = J, burn_in = burn_in)), "Dichotomous covariates")
+                    mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE),
+               "Dichotomous covariates")
   expect_error(mHMM(s_data = data3$obs, xx = xx_wrong6,
                     gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
                     start_val = list(gamma, emiss_distr1, emiss_distr2),
-                    mcmc = list(J = J, burn_in = burn_in)), "Factors currently cannot be used as covariates")
+                    mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE),
+               "Factors currently cannot be used as covariates")
 })
 
 

@@ -53,10 +53,14 @@
 #' @importFrom mvtnorm dmvnorm rmvnorm dmvt rmvt
 #' @importFrom MCMCpack rdirichlet rwish
 #' @importFrom stats optim rnorm runif median
+#' @importFrom Rcpp sourceCpp
 # to include bib references in help file
 #' @importFrom Rdpack reprompt
 #'
-#'
+#'## usethis namespace: start
+#' @useDynLib mHMMbayes, .registration = TRUE
+## usethis namespace: end
+NULL
 #' @docType package
 #' @name mHMMbayes
 NULL

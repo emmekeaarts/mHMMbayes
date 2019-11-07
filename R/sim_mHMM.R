@@ -216,7 +216,7 @@ sim_mHMM <- function(n_t, n, m, q_emiss, gamma, emiss_distr, beta = NULL, xx_vec
   if (dim(gamma)[2] != m){
     stop(paste("The transiton probability matrix gamma should be a", m, "by", m, "matrix."))
   }
-  if(any(apply(gamma,1,sum)!= 1)){
+  if(!isTRUE(all.equal(apply(gamma,1,sum), rep(1,m)))){
     stop("The elements in each row of the transition probability matrix gamma should sum up to 1")
   }
   if (dim(emiss_distr)[1] != m){
@@ -227,7 +227,7 @@ sim_mHMM <- function(n_t, n, m, q_emiss, gamma, emiss_distr, beta = NULL, xx_vec
     stop(paste("The number of columns of the emission distribution matrix should be
                equal to the number of observable categories, which is", q_emiss, "."))
   }
-  if(any(apply(emiss_distr,1,sum)!= 1)){
+  if(!isTRUE(all.equal(apply(emiss_distr, 1, sum), rep(1, m)))){
     stop("The elements in each row of the emission distribution matrix should sum up to 1")
   }
   if((is.null(xx_vec) & !is.null(beta)) | (!is.null(xx_vec) & is.null(beta))){

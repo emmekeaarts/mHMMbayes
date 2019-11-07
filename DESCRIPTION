@@ -1,13 +1,14 @@
 Package: mHMMbayes
 Type: Package
 Title: Multilevel Hidden Markov Models Using Bayesian Estimation
-Version: 0.1.0.9000
+Version: 0.1.1.9000
 Depends: R (>= 3.5.0)
 Imports:
     MCMCpack,
     mvtnorm,
     stats,
-    Rdpack
+    Rdpack,
+    Rcpp
 Authors@R: person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
                   role = c("aut", "cre"))
 Maintainer: Emmeke Aarts <e.aarts@uu.nl>
@@ -42,3 +43,5 @@ Suggests:
     testthat (>= 2.1.0)
 VignetteBuilder: knitr
 RdMacros: Rdpack
+LinkingTo: 
+    Rcpp

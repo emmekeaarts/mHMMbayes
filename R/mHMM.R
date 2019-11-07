@@ -98,10 +98,12 @@
 #'   the sampled state sequence is quite a large object, hence the default
 #'   setting is \code{sample_path = FALSE}. Can be used for local decoding
 #'   purposes.
-#' @param print_iter A logical scaler. Should the function print the progress of
-#'   the algorithm by returning the current iteration number at every 10th
-#'   iteration (\code{print_iter = TRUE}) or not (\code{print_iter = FALSE}).
-#'   Defaults to \code{print_iter = FALSE}.
+#' @param print_iter The argument print_iter is depricated; please use
+#'   show_progress instead to show the progress of the algorithm.
+#' @param show_progress A logical scaler. Should the function show a text
+#'   progress bar in the \code{R} console to represent the progress of the
+#'   algorithm (\code{show_progress = TRUE}) or not (\code{show_progress =
+#'   FALSE}). Defaults to \code{show_progress = TRUE}.
 #' @param gamma_hyp_prior An optional list containing user specified parameters
 #'  of the hyper-prior distribution on the multivariate normal distribution
 #'  of the intercepts (and regression coefficients given that covariates are
@@ -413,10 +415,12 @@
 #'
 #'
 
-mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, print_iter = FALSE,
-                 gamma_hyp_prior = NULL, emiss_hyp_prior = NULL,
-                 gamma_sampler = NULL, emiss_sampler = NULL){
+mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, print_iter, show_progress = TRUE,
+                 gamma_hyp_prior = NULL, emiss_hyp_prior = NULL, gamma_sampler = NULL, emiss_sampler = NULL){
 
+  if(!missing(print_iter)){
+    warning("The argument print_iter is depricated; please use show_progress instead to show the progress of the algorithm.")
+  }
   # Initialize data -----------------------------------
   # dependent variable(s), sample size, dimensions gamma and conditional distribuiton
   n_dep			 <- gen$n_dep
@@ -663,6 +667,10 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   # Start analysis --------------------------------------------
   # Run the MCMC algorithm
   itime <- proc.time()[3]
+  if(show_progress == TRUE){
+    cat("Progress of the mHMM algorithm:", "\n")
+    pb <- utils::txtProgressBar(min = 2, max = J, style = 3)
+  }
   for (iter in 2 : J){
 
     # For each subject, obtain sampled state sequence with subject individual parameters ----------
@@ -817,14 +825,13 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
       }
       emiss_prob_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_mu_prob_bar, "[[", q)))
     }
-    if(is.whole(iter/10) & print_iter == TRUE){
-      if(iter == 10){
-       cat("Iteration:", "\n")
-      }
-      cat(c(iter), "\n")
+    if(show_progress == TRUE){
+      utils::setTxtProgressBar(pb, iter)
     }
   }
-
+  if(show_progress == TRUE){
+     close(pb)
+  }
 
   # End of function, return output values --------
   ctime = proc.time()[3]

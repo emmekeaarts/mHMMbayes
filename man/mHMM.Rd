@@ -5,8 +5,8 @@
 \title{Multilevel hidden  Markov model using Bayesian estimation}
 \usage{
 mHMM(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
-  print_iter = FALSE, gamma_hyp_prior = NULL, emiss_hyp_prior = NULL,
-  gamma_sampler = NULL, emiss_sampler = NULL)
+  print_iter, show_progress = TRUE, gamma_hyp_prior = NULL,
+  emiss_hyp_prior = NULL, gamma_sampler = NULL, emiss_sampler = NULL)
 }
 \arguments{
 \item{s_data}{A matrix containing the observations to be modelled, where the
@@ -70,10 +70,13 @@ the sampled state sequence is quite a large object, hence the default
 setting is \code{sample_path = FALSE}. Can be used for local decoding
 purposes.}
 
-\item{print_iter}{A logical scaler. Should the function print the progress of
-the algorithm by returning the current iteration number at every 10th
-iteration (\code{print_iter = TRUE}) or not (\code{print_iter = FALSE}).
-Defaults to \code{print_iter = FALSE}.}
+\item{print_iter}{The argument print_iter is depricated; please use
+show_progress instead to show the progress of the algorithm.}
+
+\item{show_progress}{A logical scaler. Should the function show a text
+progress bar in the \code{R} console to represent the progress of the
+algorithm (\code{show_progress = TRUE}) or not (\code{show_progress =
+FALSE}). Defaults to \code{show_progress = TRUE}.}
 
 \item{gamma_hyp_prior}{An optional list containing user specified parameters
  of the hyper-prior distribution on the multivariate normal distribution
