@@ -7,8 +7,7 @@ Imports:
     MCMCpack,
     mvtnorm,
     stats,
-    Rdpack,
-    Rcpp
+    Rdpack
 Authors@R: person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
                   role = c("aut", "cre"))
 Maintainer: Emmeke Aarts <e.aarts@uu.nl>
@@ -43,5 +42,3 @@ Suggests:
     testthat (>= 2.1.0)
 VignetteBuilder: knitr
 RdMacros: Rdpack
-LinkingTo: 
-    Rcpp
