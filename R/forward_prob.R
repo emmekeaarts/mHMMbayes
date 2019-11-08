@@ -13,7 +13,7 @@ cat_Mult_HMM_fw <- function(x, m, emiss, n_dep, gamma, delta = NULL){
   for(q in 1:n_dep){
     inp[[q]] <- t(emiss[[q]][,x[,q]])
   }
-  allprobs <- Reduce("*", try)
+  allprobs <- Reduce("*", inp)
   foo             <- delta * allprobs[1, ]
   sumfoo          <- sum(foo)
   alpha_prob[, 1] <- foo/sumfoo

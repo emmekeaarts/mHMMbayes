@@ -237,7 +237,7 @@ Voc_col <- c(brewer.pal(3,"PuBuGn")[c(1,3,2)])
 Voc_lab <- c("Not Speaking", "Speaking", "Back channeling")
 
 plot(out_2st, component = "emiss", dep = 1, col = Voc_col, 
-     parameter = "emiss", dep_lab = c("Patient vocalizing"), cat_lab = Voc_lab)
+     dep_lab = c("Patient vocalizing"), cat_lab = Voc_lab)
 ```
 Here, `component` specifies whether we want to visualize the posterior densities for the transition probability matrix gamma (`component = "gamma"`) or for the emission distribution probabilities (`component = "emiss"`), when using `component = "emiss"` the input variable `dep` specifies which dependent variable we want to inspect (as the variable `p_vocolizing` is the first variable in the set, we set `dep = 1`), `col` specifies the colors to be used when plotting the lines, `dep_lab` denotes the label of the dependent variable we are plotting, and `cat_lab` denotes the labels of the categorical outcomes in the dependent variable. In the plot, the solid line visualizes the posterior density at the group level, while each of the dotted lines visualizes the posterior density of one subject. \
 Second, one can plot the transition probabilities obtained with the function `obtain_gamma` with a riverplot: 
