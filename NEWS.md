@@ -8,6 +8,7 @@ This release mostly focusses on increasing the speed of the `mHMM()` algorithm.
 * ..
 
 ## Other minor improvements and bug fixes
+* fixed error in tutorial vignette, section 'Graphically displaying outcomes'.
 * ..
 
 
