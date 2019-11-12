@@ -676,10 +676,10 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
     # For each subject, obtain sampled state sequence with subject individual parameters ----------
     for(s in 1:n_subj){
       # Run forward algorithm, obtain subject specific forward proababilities and log likelihood
-      forward				<- cat_Mult_HMM_fw(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], gamma = gamma[[s]], n_dep = n_dep, delta=NULL)
-      alpha         <- forward$forward_p
-      c             <- max(forward$la[, subj_data[[s]]$n])
-      llk           <- c + log(sum(exp(forward$la[, subj_data[[s]]$n] - c)))
+      forward				<- cat_mult_fw_r_to_cpp(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], gamma = gamma[[s]], n_dep = n_dep, delta=NULL)
+      alpha         <- forward[[1]]
+      c             <- max(forward[[2]][, subj_data[[s]]$n])
+      llk           <- c + log(sum(exp(forward[[2]][, subj_data[[s]]$n] - c)))
       PD_subj[[s]][iter, sum(m * q_emiss) + m * m + 1] <- llk
 
       # Using the forward probabilites, sample the state sequence in a backward manner.
