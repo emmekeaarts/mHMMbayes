@@ -10,7 +10,6 @@ List cat_mult_fw_cpp(NumericMatrix allprobs, NumericMatrix gamma, int m, int n, 
 RcppExport SEXP _mHMMbayes_cat_mult_fw_cpp(SEXP allprobsSEXP, SEXP gammaSEXP, SEXP mSEXP, SEXP nSEXP, SEXP deltaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type allprobs(allprobsSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< int >::type m(mSEXP);

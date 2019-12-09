@@ -415,7 +415,7 @@
 #'
 #'
 
-mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, print_iter, show_progress = TRUE,
+mHMM2 <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, print_iter, show_progress = TRUE,
                  gamma_hyp_prior = NULL, emiss_hyp_prior = NULL, gamma_sampler = NULL, emiss_sampler = NULL){
 
   if(!missing(print_iter)){
@@ -572,9 +572,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   trans <- rep(list(vector("list", m)), n_subj)
 
   # gamma
-  optim_pooled_gamma <- rep(list(matrix(, nrow = J, ncol = (m + m - 1 + 1))), m)
-  optim_subj_gamma <- rep(list(matrix(, nrow = (J-1) * n_subj, ncol = (m + m - 1 + 1))), m)
-  gamma_int_mle_pooled <- gamma_pooled_ll <- vector("list", m)
+  gamma_mle_pooled <-gamma_int_mle_pooled <- gamma_mhess_pooled <- gamma_pooled_ll <- vector("list", m)
   gamma_c_int <- rep(list(matrix(, n_subj, (m-1))), m)
   gamma_mu_int_bar <- gamma_V_int <- vector("list", m)
   gamma_mu_prob_bar <- rep(list(numeric(m)), m)
@@ -582,10 +580,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
 
   # emiss
   cond_y <- lapply(rep(n_dep, n_subj), nested_list, m = m)
-  optim_subj_emiss <- rep(list(lapply(q_emiss + q_emiss - 1 + 1, dif_matrix, rows = (J-1) * n_subj)), each = m)
-  optim_pooled_emiss <- rep(list(lapply(q_emiss + q_emiss - 1 + 1, dif_matrix, rows = J)), each = m)
-  pasted_optim_subj_emiss <- rep(list(NULL), n_dep)
-  emiss_int_mle_pooled <- emiss_pooled_ll <- rep(list(vector("list", n_dep)), m)
+  emiss_mle_pooled <- emiss_int_mle_pooled <- emiss_mhess_pooled <- emiss_pooled_ll <- rep(list(vector("list", n_dep)), m)
   emiss_c_int <- rep(list(lapply(q_emiss - 1, dif_matrix, rows = n_subj)), m)
   emiss_mu_int_bar <- emiss_V_int <- rep(list(vector("list", n_dep)), m)
   emiss_mu_prob_bar <- rep(list(lapply(q_emiss, dif_vector)), m)
@@ -712,19 +707,9 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
 
       # population level, transition matrix
       trans_pooled			  <- factor(c(unlist(sapply(trans, "[[", i)), c(1:m)))
-      ind <- which(paste(table(trans_pooled), collapse = "") ==
-                     do.call(paste,(c(as.data.frame(optim_pooled_gamma[[i]][,1:m]), sep = ""))))
-      if(length(ind) != 0){
-        gamma_int_mle_pooled[[i]]  <- optim_pooled_gamma[[i]][ind, (m + 1): (m + m - 1)]
-        gamma_pooled_ll[[i]]			<- optim_pooled_gamma[[i]][ind, (m + m - 1 + 1)]
-      } else {
-        gamma_mle_pooled		<- optim(gamma_int_mle0, llmnl_int, Obs = trans_pooled,
-                                   n_cat = m, method = "BFGS", hessian = TRUE,
-                                   control = list(fnscale = -1))
-        optim_pooled_gamma[[i]][iter, 1:m] <- table(trans_pooled)
-        optim_pooled_gamma[[i]][iter, (m + 1): (m + m - 1)] <- gamma_int_mle_pooled[[i]]  <- gamma_mle_pooled$par
-        optim_pooled_gamma[[i]][iter, (m + m - 1 + 1)] <- gamma_pooled_ll[[i]]			<- gamma_mle_pooled$value
-      }
+      gamma_mle_pooled[[i]] 		<- optim(gamma_int_mle0, llmnl_int, Obs = trans_pooled, n_cat = m, method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
+      gamma_int_mle_pooled[[i]] <- gamma_mle_pooled[[i]]$par
+      gamma_pooled_ll[[i]]			<- gamma_mle_pooled[[i]]$value
 
       # population level, conditional probabilities, seperate for each dependent variable
       for(q in 1:n_dep){
@@ -733,59 +718,25 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
         for(s in 1:n_subj){
           cond_y_pooled             <- c(cond_y_pooled, cond_y[[s]][[i]][[q]])
         }
-        ind <-     ind <-  which(paste(table(cond_y_pooled), collapse = "") ==
-                                   do.call(paste,(c(as.data.frame(optim_pooled_emiss[[i]][[q]][,1:q_emiss[q]]), sep = ""))))
-        if(length(ind) != 0){
-          emiss_int_mle_pooled[[i]][[q]] <- optim_pooled_emiss[[i]][[q]][ind, (q_emiss[q] + 1): (q_emiss[q] + q_emiss[q] - 1)]
-          emiss_pooled_ll[[i]][[q]]				<- optim_pooled_emiss[[i]][[q]][ind, (q_emiss[q] + q_emiss[q] - 1 + 1)]
-        } else {
-          emiss_mle_pooled		<- optim(emiss_int_mle0[[q]], llmnl_int, Obs = c(cond_y_pooled, c(1:q_emiss[q])),
-                                     n_cat = q_emiss[q], method = "BFGS", hessian = TRUE,
-                                     control = list(fnscale = -1))
-          optim_pooled_emiss[[i]][[q]][iter, 1:q_emiss[q]] <- table(cond_y_pooled)
-          optim_pooled_emiss[[i]][[q]][iter, (q_emiss[q] + 1): (q_emiss[q] + q_emiss[q] - 1)] <-
-            emiss_int_mle_pooled[[i]][[q]]  <- emiss_mle_pooled$par
-          optim_pooled_emiss[[i]][[q]][iter, (q_emiss[q] + q_emiss[q] - 1 + 1)] <-
-            emiss_pooled_ll[[i]][[q]]				<- emiss_mle_pooled$value
-        }
+        emiss_mle_pooled[[i]][[q]]		  <- optim(emiss_int_mle0[[q]], llmnl_int, Obs = c(cond_y_pooled, c(1:q_emiss[q])), n_cat = q_emiss[q],
+                                               method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
+        emiss_int_mle_pooled[[i]][[q]]	<- emiss_mle_pooled[[i]][[q]]$par
+        emiss_pooled_ll[[i]][[q]]			<- emiss_mle_pooled[[i]][[q]]$value
       }
 
-      # subject level
-      pasted_optim_subj_gamma <- do.call(paste,(c(as.data.frame(optim_subj_gamma[[i]][1:(n_subj * (iter - 1)), 1:m]), sep = "")))
-      for(q in 1:n_dep){
-        pasted_optim_subj_emiss[[q]] <- do.call(paste,(c(as.data.frame(optim_subj_emiss[[i]][[q]][1:(n_subj * (iter - 1)), 1:q_emiss[q]]), sep = "")))
-      }
-
+      # subject level, transition matrix
       for (s in 1:n_subj){
         wgt 				<- subj_data[[s]]$n / n_total
-
-        # subject level, transition matrix
-        ind <- which(paste(table(c(trans[[s]][[i]], c(1:m))), collapse = "") == pasted_optim_subj_gamma)
-        if(length(ind) != 0){
-          ind <- ind[1]
-          subj_data[[s]]$gamma_int_mle[i,]  <- optim_subj_gamma[[i]][ind, (m + 1): (m + m - 1)]
-          subj_data[[s]]$gamma_converge[i]  <- optim_subj_gamma[[i]][ind, (m + m - 1 + 1)]
-          if (subj_data[[s]]$gamma_converge[i] == 1){
-            subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<-
-              mnlHess_int(int = subj_data[[s]]$gamma_int_mle[i,], Obs = c(trans[[s]][[i]], c(1:m)), n_cat =  m)
-          } else {
-            subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)),]	<- diag(m-1)
-          }
+        gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_int_frac, Obs = c(trans[[s]][[i]], c(1:m)), n_cat = m,
+                               pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt, method="BFGS", hessian = TRUE, control = list(fnscale = -1))
+        if(gamma_out$convergence == 0){
+          subj_data[[s]]$gamma_converge[i]									<- 1
+          subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<- mnlHess_int(int = gamma_out$par, Obs = c(trans[[s]][[i]], c(1:m)), n_cat =  m)
+          subj_data[[s]]$gamma_int_mle[i,]									<- gamma_out$par
         } else {
-          gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_int_frac, Obs = c(trans[[s]][[i]], c(1:m)),
-                                 n_cat = m, pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt,
-                                 method="BFGS", hessian = TRUE, control = list(fnscale = -1))
-          optim_subj_gamma[[i]][((iter - 2) * n_subj + s), 1:m] <- table(c(trans[[s]][[i]], c(1:m)))
-          if(gamma_out$convergence == 0){
-            subj_data[[s]]$gamma_converge[i] <- optim_subj_gamma[[i]][((iter - 2) * n_subj + s), (m + m - 1 + 1)] <- 1
-            subj_data[[s]]$gamma_int_mle[i,] <- optim_subj_gamma[[i]][((iter - 2) * n_subj + s), (m + 1): (m + m - 1)] <- gamma_out$par
-            subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<-
-              mnlHess_int(int = gamma_out$par, Obs = c(trans[[s]][[i]], c(1:m)), n_cat =  m)
-          } else {
-            subj_data[[s]]$gamma_converge[i] <- optim_subj_gamma[[i]][((iter - 2) * n_subj + s), (m + m - 1 + 1)] <- 0
-            subj_data[[s]]$gamma_int_mle[i,] <- optim_subj_gamma[[i]][((iter - 2) * n_subj + s), (m + 1): (m + m - 1)] <- rep(0, m - 1)
-            subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<- diag(m-1)
-          }
+          subj_data[[s]]$gamma_converge[i]									<- 0
+          subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)),]	<- diag(m-1)
+          subj_data[[s]]$gamma_int_mle[i,]									<- rep(0, m - 1)
         }
         # if this is first iteration, use MLE for current values RW metropolis sampler
         if (iter == 2){
@@ -794,32 +745,16 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
 
         # subject level, conditional probabilities, seperate for each dependent variable
         for(q in 1:n_dep){
-          ind <- which(paste(table(c(cond_y[[s]][[i]][[q]], c(1:q_emiss[q]))), collapse = "") == pasted_optim_subj_emiss)
-          if(length(ind) != 0){
-            ind <- ind[1]
-            subj_data[[s]]$emiss_int_mle[[q]][i,]	  <- optim_subj_emiss[[i]][[q]][ind, (q_emiss[q] + 1): (q_emiss[q] + q_emiss[q] - 1)]
-            subj_data[[s]]$emiss_converge[[q]][i]	  <- optim_subj_emiss[[i]][[q]][ind, (q_emiss[q] + q_emiss[q] - 1 + 1)]
-            if (subj_data[[s]]$emiss_converge[[q]][i] == 1){
-              subj_data[[s]]$emiss_mhess[[q]][(1 + (i - 1) * (q_emiss[q] - 1)):((q_emiss[q] - 1) + (i - 1) * (q_emiss[q] - 1)), ]		<-
-                mnlHess_int(int = subj_data[[s]]$emiss_int_mle[[q]][i,], Obs = c(cond_y[[s]][[i]][[q]], c(1:q_emiss[q])), n_cat =  q_emiss[q])
-            } else {
-              subj_data[[s]]$emiss_mhess[[q]][(1 + (i - 1) * (q_emiss[q] - 1)):((q_emiss[q] - 1) + (i - 1) * (q_emiss[q] - 1)), ]	<- diag(q_emiss[q] - 1)
-            }
+          emiss_out				<- optim(emiss_int_mle_pooled[[i]][[q]], llmnl_int_frac, Obs = c(cond_y[[s]][[i]][[q]], c(1:q_emiss[q])),
+                                n_cat = q_emiss[q], pooled_likel = emiss_pooled_ll[[i]][[q]], w = emiss_w, wgt = wgt, method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
+          if(emiss_out$convergence == 0){
+            subj_data[[s]]$emiss_converge[[q]][i]									<- 1
+            subj_data[[s]]$emiss_mhess[[q]][(1 + (i - 1) * (q_emiss[q] - 1)):((q_emiss[q] - 1) + (i - 1) * (q_emiss[q] - 1)), ]	<- mnlHess_int(int = emiss_out$par, Obs = c(cond_y[[s]][[i]][[q]], c(1:q_emiss[q])), n_cat =  q_emiss[q])
+            subj_data[[s]]$emiss_int_mle[[q]][i,]									<- emiss_out$par
           } else {
-            emiss_out				<- optim(emiss_int_mle_pooled[[i]][[q]], llmnl_int_frac, Obs = c(cond_y[[s]][[i]][[q]], c(1:q_emiss[q])),
-                                  n_cat = q_emiss[q], pooled_likel = emiss_pooled_ll[[i]][[q]],
-                                  w = emiss_w, wgt = wgt, method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
-            optim_subj_emiss[[i]][[q]][((iter - 2) * n_subj + s), 1:q_emiss[q]] <- table(c(cond_y[[s]][[i]][[q]], c(1:q_emiss[q])))
-            if(emiss_out$convergence == 0){
-              subj_data[[s]]$emiss_converge[[q]][i]	 <- optim_subj_emiss[[i]][[q]][((iter - 2) * n_subj + s), (q_emiss[q] + q_emiss[q] - 1 + 1)] <- 1
-              subj_data[[s]]$emiss_int_mle[[q]][i,] <- optim_subj_emiss[[i]][[q]][((iter - 2) * n_subj + s), (q_emiss[q] + 1): (q_emiss[q] + q_emiss[q] - 1)] <- emiss_out$par
-              subj_data[[s]]$emiss_mhess[[q]][(1 + (i - 1) * (q_emiss[q] - 1)):((q_emiss[q] - 1) + (i - 1) * (q_emiss[q] - 1)), ]		<-
-                mnlHess_int(int = subj_data[[s]]$emiss_int_mle[[q]][i,], Obs = c(cond_y[[s]][[i]][[q]], c(1:q_emiss[q])), n_cat =  q_emiss[q])
-            } else {
-              subj_data[[s]]$emiss_converge[[q]][i]	 <- optim_subj_emiss[[i]][[q]][((iter - 2) * n_subj + s), (q_emiss[q] + q_emiss[q] - 1 + 1)] <- 0
-              subj_data[[s]]$emiss_int_mle[[q]][i,] <- optim_subj_emiss[[i]][[q]][((iter - 2) * n_subj + s), (q_emiss[q] + 1): (q_emiss[q] + q_emiss[q] - 1)]  <- rep(0, q_emiss[q] - 1)
-              subj_data[[s]]$emiss_mhess[[q]][(1 + (i - 1) * (q_emiss[q] - 1)):((q_emiss[q] - 1) + (i - 1) * (q_emiss[q] - 1)), ]	<- diag(q_emiss[q] - 1)
-            }
+            subj_data[[s]]$emiss_converge[[q]][i]										<- 0
+            subj_data[[s]]$emiss_mhess[[q]][(1 + (i - 1) * (q_emiss[q] - 1)):((q_emiss[q] - 1) + (i - 1) * (q_emiss[q] - 1)), ]	<- diag(q_emiss[q] - 1)
+            subj_data[[s]]$emiss_int_mle[[q]][i,]									<- rep(0, q_emiss[q] - 1)
           }
           # if this is first iteration, use MLE for current values RW metropolis sampler
           if (iter == 2){
@@ -827,7 +762,6 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
           }
         }
       }
-
 
       # Sample pouplaton values for gamma and conditional probabilities using Gibbs sampler -----------
       # gamma_mu0_n and gamma_mu_int_bar are matrices, with the number of rows equal to the number of covariates, and ncol equal to number of intercepts estimated
@@ -891,17 +825,17 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
       }
       emiss_prob_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_mu_prob_bar, "[[", q)))
     }
-     if(show_progress == TRUE){
+    if(show_progress == TRUE){
       utils::setTxtProgressBar(pb, iter)
-     }
+    }
   }
   if(show_progress == TRUE){
-     close(pb)
+    close(pb)
   }
 
   # End of function, return output values --------
   ctime = proc.time()[3]
-  message(paste("mHMM new, n:", n_subj, ", n_t:", n_vary[1], "Total time elapsed (hh:mm:ss):", hms(ctime-itime)))
+  message(paste("mHMM old, n:", n_subj, ", n_t:", n_vary[1], "Total time elapsed (hh:mm:ss):", hms(ctime-itime)))
   if(return_path == TRUE){
     out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
                              burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
@@ -920,4 +854,4 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   }
   class(out) <- append(class(out), "mHMM")
   return(out)
-  }
+}
