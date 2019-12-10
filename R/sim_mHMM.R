@@ -100,28 +100,30 @@
 #'   two elements in the list can also be left empty (i.e., set to \code{NULL})
 #'   to signify that either the transition probability matrix or the emission
 #'   distribution is not predicted by covariates.
-#' @param var_gamma An integer denoting the variance between subjects in the
-#'   transition probability matrix. Note that this value corresponds to the
+#' @param var_gamma A number denoting the amount of variance between subjects in
+#'   the transition probability matrix. Note that this value corresponds to the
 #'   variance of the parameters of the multinomial distribution (i.e., the
 #'   intercepts of the regression equation of the multinomial distribution used
 #'   to sample the transition probability matrix), see details below. In
 #'   addition, only one variance value can be specified for the complete
 #'   transition probability matrix, hence the variance is assumed fixed across
-#'   all components. The default equals 1, which corresponds to quite some
-#'   variation between subjects. A less extreme value would be 0.5. If one wants
-#'   to simulate data from exactly the same HMM for all subjects, var_gamma
-#'   should be set to 0.
-#' @param var_emiss An integer denoting the variance between subjects in the
-#'   emission distribution. Note that this value corresponds to the variance of
-#'   the parameters of the multinomial distribution (i.e., the intercepts of the
-#'   regression equation of the multinomial distribution used to sample the
+#'   all components. The default equals 0.1, which corresponds to litlle
+#'   variation between subjects. If one wants to simulate data from exactly the
+#'   same HMM for all subjects, var_gamma should be set to 0. Note that if data
+#'   for only 1 subject is simulated (i.e., n = 1), \code{var_gamma} is set to
+#'   0.
+#' @param var_emiss A number denoting the amount of variance between subjects in
+#'   the emission distribution. Note that this value corresponds to the variance
+#'   of the parameters of the multinomial distribution (i.e., the intercepts of
+#'   the regression equation of the multinomial distribution used to sample the
 #'   components of the emission distribution), see details below.  In addition,
 #'   only one variance value can be specified for the complete emission
 #'   distribution, hence the variance is assumed fixed across all components.
-#'   The default equals 1, which corresponds to quite some variation between
+#'   The default equals 0.1, which corresponds to little variation between
 #'   subjects. A less extreme value would be 0.5. If one wants to simulate data
-#'   from exactly the same HMM for all subjects, var_emiss should be set to
-#'   0.
+#'   from exactly the same HMM for all subjects, var_emiss should be set to 0.
+#'   Note that if data for only 1 subject is simulated (i.e., n = 1),
+#'   \code{var_emiss} is set to 0.
 #' @param return_ind_par A logical scalar. Should the subject specific
 #'   transition probability matrix \code{gamma} and emission probability matrix
 #'   \code{emiss_distr} be returned by the function (\code{return_ind_par =
@@ -206,7 +208,7 @@
 #' @export
 
 sim_mHMM <- function(n_t, n, m, q_emiss, gamma, emiss_distr, beta = NULL, xx_vec = NULL,
-                     var_gamma = 1, var_emiss = 1, return_ind_par = FALSE){
+                     var_gamma = 0.1, var_emiss = 0.1, return_ind_par = FALSE){
 
   # Inbuild checks for correct specification of parameters ---------------------
 
@@ -291,7 +293,10 @@ sim_mHMM <- function(n_t, n, m, q_emiss, gamma, emiss_distr, beta = NULL, xx_vec
   } else if (is.null(beta[[2]])) {
     beta[[2]] <- matrix(0, ncol = q_emiss - 1, nrow = m)
   }
-
+  if(n == 1){
+    var_gamma <- 0
+    var_emiss <- 0
+  }
 
   # Simulating the data ---------------------
 
