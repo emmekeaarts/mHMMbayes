@@ -2,31 +2,65 @@
 % Please edit documentation in R/HMM.R
 \name{HMM}
 \alias{HMM}
-\title{Onelevel hidden  Markov model using Bayesian estimation}
+\title{Onelevel (fixed) hidden  Markov model using Bayesian estimation}
 \usage{
-HMM(s_data, gen, start_val, mcmc, return_path = FALSE,
+HMM(one_s_data, gen, start_val, mcmc, return_path = FALSE,
   show_progress = TRUE, gamma_prior = NULL, emiss_prior = NULL)
 }
 \arguments{
-\item{s_data}{A matrix containing the observations to be modelled, where the
-rows represent the observations over time. In \code{s_data}, the first
-column indicates subject id number. Hence, the id number is repeated over
-rows equal to the number of observations for that subject. The subsequent
-columns contain the dependent variable(s). Note that the dependent
-variables have to be numeric, i.e., they cannot be a (set of) factor
-variable(s). The total number of rows are equal to the sum over the number
-of observations of each subject, and the number of columns are equal to the
-number of dependent variables (\code{n_dep}) + 1. The number of
-observations can vary over subjects.}
+\item{one_s_data}{A matrix containing the observations to be modelled of one
+subject or sequence, where the rows represent the observations over time,
+and the column(s) contain the dependent variable(s). Note that the
+dependent variables have to be numeric, i.e., they cannot be a (set of)
+factor variable(s).}
 
-\item{xx}{sfsfd}
+\item{gen}{List containing the following elements denoting the general model
+properties:
+\itemize{\item{\code{m}: numeric vector with length 1 denoting the number
+of hidden states}
+\item{\code{n_dep}: numeric vector with length 1 denoting the
+number of dependent variables}
+\item{\code{q_emiss}: numeric vector with length \code{n_dep} denoting the
+number of observed categories for the categorical emission distribution
+for each of the dependent variables.}}}
+
+\item{start_val}{List containing the start values for the transition
+probability matrix gamma and the emission distribution(s). The first
+element of the list contains a \code{m} by \code{m} matrix with the start
+values for gamma. The subsequent elements contain \code{m} by
+\code{q_emiss[k]} matrices for the start values for each of the \code{k}
+emission distribution(s). Note that \code{start_val} should not contain
+nested lists (i.e., lists within lists).}
+
+\item{mcmc}{List of Markov chain Monte Carlo (MCMC) arguments, containing the
+following elements:
+\itemize{\item{\code{J}: numeric vector with length 1 denoting the number
+of iterations of the MCMC algorithm}
+\item{\code{burn_in}: numeric vector with length 1 denoting the
+burn-in period for the MCMC algorithm.}}}
+
+\item{return_path}{A logical scalar. Should the sampled state sequence
+obtained at each iteration and for each subject be returned by the function
+(\code{sample_path = TRUE}) or not (\code{sample_path = FALSE}). Note that
+the sampled state sequence is quite a large object, hence the default
+setting is \code{sample_path = FALSE}. Can be used for local decoding
+purposes.}
+
+\item{show_progress}{A logical scaler. Should the function show a text
+progress bar in the \code{R} console to represent the progress of the
+algorithm (\code{show_progress = TRUE}) or not (\code{show_progress =
+FALSE}). Defaults to \code{show_progress = TRUE}.}
+
+\item{gamma_prior}{sfsfd}
+
+\item{emiss_prior}{sf}
 }
 \value{
 \code{HMM} returns an object of class \code{HMM}, which has
   \code{print} and \code{summary} methods to see the results.
   The object contains the following components:
   \describe{
-  \item{\code{xx}}{A .. containing ...}
+  \item{\code{PD}}{A .. containing ...}
 }
 }
 \description{
@@ -39,6 +73,36 @@ introduction to multilevel hidden Markov models and the package, and see
 algorithms.
 }
 \examples{
+### first simulate data
+# One subject with each n_t observations:
+n <- 1
+n_t <- 300
+
+# specifying general model properties:
+m <- 2
+q_emiss <- 3
+n_dep <- 1
+gamma <- matrix(c(0.8, 0.2,
+                  0.2, 0.8), ncol = m, byrow = TRUE)
+emiss_distr <- matrix(c(0.50, 0.45, 0.05,
+                        0.05, 0.05, 0.90), nrow = m, ncol = q_emiss, byrow = TRUE)
+
+# simulate data
+data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss,
+                  gamma = gamma, emiss_distr = emiss_distr)
+
+### analysis of data
+# specifying starting values
+st_gamma <- matrix(c(0.7, 0.3,
+                     0.3, 0.7), ncol = m, byrow = TRUE)
+st_emiss_distr <- matrix(c(0.40, 0.40, 0.20,
+                           0.20, 0.20, 0.60), nrow = m, ncol = q_emiss, byrow = TRUE)
+
+# run the model
+out_2st_sim <- HMM(one_s_data = matrix(data1$obs[,2], ncol = 1),
+                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                    start_val = list(st_gamma, st_emiss_distr),
+                    mcmc = list(J = 4000, burn_in = 200), show_progress = TRUE)
 
 }
 \seealso{
