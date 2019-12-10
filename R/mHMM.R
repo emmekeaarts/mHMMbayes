@@ -673,7 +673,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   # Run the MCMC algorithm
   itime <- proc.time()[3]
   if(show_progress == TRUE){
-    cat("Progress of the mHMM algorithm:", "\n")
+    cat("Progress of the Bayesian mHMM algorithm:", "\n")
     pb <- utils::txtProgressBar(min = 2, max = J, style = 3)
   }
   for (iter in 2 : J){
@@ -891,9 +891,9 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
       }
       emiss_prob_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_mu_prob_bar, "[[", q)))
     }
-     if(show_progress == TRUE){
+    if(show_progress == TRUE){
       utils::setTxtProgressBar(pb, iter)
-     }
+    }
   }
   if(show_progress == TRUE){
      close(pb)
