@@ -4,14 +4,17 @@
 \alias{HMM}
 \title{Onelevel (fixed) hidden  Markov model using Bayesian estimation}
 \usage{
-HMM(one_s_data, gen, start_val, mcmc, return_path = FALSE,
+HMM(s_data, gen, start_val, mcmc, return_path = FALSE,
   show_progress = TRUE, gamma_prior = NULL, emiss_prior = NULL)
 }
 \arguments{
-\item{one_s_data}{A matrix containing the observations to be modelled of one
-subject or sequence, where the rows represent the observations over time,
-and the column(s) contain the dependent variable(s). Note that the
-dependent variables have to be numeric, i.e., they cannot be a (set of)
+\item{s_data}{A matrix containing the observations to be modelled of one
+subject or sequence, where the rows represent the observations over time.
+In \code{s_data}, the first column indicates subject id number, which
+should be identitical over the rows for \code{HMM()}. The subsequent
+columns contain the dependent variable(s). Hence, the number of columns are
+equal to the number of dependent variables (\code{n_dep}) + 1. Note that
+the dependent variables have to be numeric, i.e., they cannot be a (set of)
 factor variable(s).}
 
 \item{gen}{List containing the following elements denoting the general model
@@ -66,7 +69,22 @@ of the matrix equal 1).}
   \code{print} and \code{summary} methods to see the results.
   The object contains the following components:
   \describe{
-  \item{\code{PD}}{A .. containing ...}
+  \item{\code{PD}}{A matrix containing the posterior distribution of the
+  parameter estimates and the log likelihood over the iterations of the MCMC
+  sampler. The iterations of the sampler are contained in the rows, and the
+  columns contain the estimates of subsequently the emission probabilities,
+  the transition probabilities and the log likelihood.}
+  \item{\code{input}}{Overview of used input specifications: the number of
+  states \code{m}, the number of used dependent variables \code{n_dep}, the
+  number of output categories for each of the dependent variables
+  \code{q_emiss}, the number of iterations \code{J} and the specified burn in
+  period \code{burn_in} of the MCMC sampler, the observation length
+  \code{n_t}, and the column names of the dependent variables
+  \code{dep_labels}.}
+  \item{\code{sample_path}}{A matrix containing the sampled hidden state
+  sequence over the MCMC sampler. The time points of the dataset are
+  contained in the rows, and the sampled paths over the iterations are
+  contained in the columns. Only returned if \code{return_path = TRUE}. }
 }
 }
 \description{
@@ -108,12 +126,23 @@ st_emiss_distr <- matrix(c(0.40, 0.40, 0.20,
                            0.20, 0.20, 0.60), nrow = m, ncol = q_emiss, byrow = TRUE)
 
 # run the model
-out_2st_sim <- HMM(one_s_data = matrix(data1$obs[,2], ncol = 1),
+out_2st_sim <- HMM(one_s_data = matrix(data1$obs, ncol = 1),
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = list(st_gamma, st_emiss_distr),
                     mcmc = list(J = 4000, burn_in = 200), show_progress = TRUE)
 
 }
-\seealso{
+\references{
+\insertRef{rabiner1989}{mHMMbayes}
 
+\insertRef{scott2002}{mHMMbayes}
+
+\insertRef{zucchini2017}{mHMMbayes}
+}
+\seealso{
+\code{\link{sim_mHMM}} for simulating (multilevel) hidden Markov data,
+  \code{\link{vit_mHMM}} for obtaining the most likely hidden state sequence
+  using the Viterbi algorithm, \code{\link{obtain_gamma}}
+  and \code{\link{obtain_emiss}} for obtaining the transition or emission
+  distribution probabilities of a fitted model.
 }
