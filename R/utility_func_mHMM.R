@@ -7,8 +7,8 @@
 
 #' @keywords internal
 # simple functions used in mHMM
-dif_matrix <- function(rows, cols){
-  return(matrix(, ncol = cols, nrow = rows))
+dif_matrix <- function(rows, cols, data = NA){
+  return(matrix(data, ncol = cols, nrow = rows))
 }
 
 #' @keywords internal

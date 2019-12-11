@@ -51,9 +51,15 @@ progress bar in the \code{R} console to represent the progress of the
 algorithm (\code{show_progress = TRUE}) or not (\code{show_progress =
 FALSE}). Defaults to \code{show_progress = TRUE}.}
 
-\item{gamma_prior}{sfsfd}
+\item{gamma_prior}{A \code{m} by \code{m} matrix containing the parameters of
+the Dirichlet prior distribution on the transition probability matrix. When
+left unspecified, defaults to an uninformative prior (that is, all entries
+of the matrix equal 1).}
 
-\item{emiss_prior}{sf}
+\item{emiss_prior}{A \code{m} by \code{q_emiss} matrix containing the parameters of
+the Dirichlet prior distribution on the categrical emission distribution. When
+left unspecified, defaults to an uninformative prior (that is, all entries
+of the matrix equal 1).}
 }
 \value{
 \code{HMM} returns an object of class \code{HMM}, which has
@@ -66,7 +72,10 @@ FALSE}). Defaults to \code{show_progress = TRUE}.}
 \description{
 \code{HMM} fits a onelevel (i.e., fixed parameter) hidden Markov model (HMM)
 to intense longitudinal data with categorical observations using Bayesian
-estimation, and creates an object of class HMM. For a short description of
+estimation, and creates an object of class HMM.
+}
+\details{
+For a short description of
 the package see \link{mHMMbayes}. See \code{vignette("tutorial-mhmm")} for an
 introduction to multilevel hidden Markov models and the package, and see
 \code{vignette("estimation-mhmm")} for an overview of the used estimation
