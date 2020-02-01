@@ -83,8 +83,8 @@
 #'   probability matrix gamma and the emission distribution(s). The first
 #'   element of the list contains a \code{m} by \code{m} matrix with the start
 #'   values for gamma. The subsequent elements contain \code{m} by
-#'   \code{q_emiss[k]} matrices for the start values for each of the \code{k}
-#'   emission distribution(s). Note that \code{start_val} should not contain
+#'   \code{q_emiss[k]} matrices for the start values for each of the \code{k} in
+#'   \code{n_dep} emission distribution(s). Note that \code{start_val} should not contain
 #'   nested lists (i.e., lists within lists).
 #' @param mcmc List of Markov chain Monte Carlo (MCMC) arguments, containing the
 #'   following elements:
@@ -148,20 +148,20 @@
 #'
 #'  Hence, the list \code{emiss_hyp_prior} contains the following elements:
 #'  \itemize{\item{\code{emiss_mu0}: a list of lists: \code{emiss_mu0} contains
-#'  \code{ndep} lists, i.e., one list for each dependent variable \code{k}. Each
+#'  \code{n_dep} lists, i.e., one list for each dependent variable \code{k}. Each
 #'  of these lists contains m matrices; one matrix for each set of emission
 #'  probabilities within a state. The matrices contain the hypothesized mean
 #'  values of the intercepts. Hence, each matrix consists of one row (when not
 #'  including covariates in the model) and \code{q_emiss[k]} - 1 columns}
-#'  \item{\code{emiss_K0}: a list containing \code{ndep} elements corresponding
+#'  \item{\code{emiss_K0}: a list containing \code{n_dep} elements corresponding
 #'  to each of the dependent variables, where each element is a numeric vector
 #'  with length 1 denoting the number of hypothetical prior subjects on which
 #'  the vector of means \code{emiss_mu0} is based}
-#'  \item{\code{emiss_nu}: a list containing \code{ndep} elements corresponding
+#'  \item{\code{emiss_nu}: a list containing \code{n_dep} elements corresponding
 #'  to each of the dependent variables, where each element is a numeric vector
 #'  with length 1 denoting the degrees of freedom of the Inverse Wishart
 #'  distribution}
-#'  \item{\code{emiss_V}: a list containing \code{ndep} elements corresponding
+#'  \item{\code{emiss_V}: a list containing \code{n_dep} elements corresponding
 #'  to each of the dependent variables \code{k}, where each element is a matrix
 #'  of \code{q_emiss[k]} - 1 by \code{q_emiss[k]} - 1 containing the
 #'  hypothesized variance-covariance matrix between the set of intercepts.}}
@@ -204,18 +204,18 @@
 #'   the subject level parameter estimates of the intercepts modeling the
 #'   emission distributions of the dependent variables \code{k}. The list
 #'   \code{emiss_sampler} contains the following elements:
-#'  \itemize{\item{\code{emiss_int_mle0}: a list containing \code{ndep} elements
+#'  \itemize{\item{\code{emiss_int_mle0}: a list containing \code{n_dep} elements
 #'  corresponding to each of the dependent variables \code{k}, where each
 #'  element is a a numeric vector with length \code{q_emiss[k]} - 1 denoting the
 #'  start values for the maximum likelihood estimates of the intercepts for
 #'  the emission distribution, based on the pooled data (data over all
 #'  subjects)}
-#'  \item{\code{emiss_scalar}: a list containing \code{ndep} elements
+#'  \item{\code{emiss_scalar}: a list containing \code{n_dep} elements
 #'  corresponding to each of the dependent variables, where each element is a
 #'  numeric vector with length 1 denoting the scale factor \code{s}. That is,
 #'  The scale of the proposal distribution is composed of a covariance matrix
 #'  Sigma, which is then tuned by multiplying it by a scaling factor \code{s}^2}
-#'  \item{\code{emiss_w}: a list containing \code{ndep} elements corresponding
+#'  \item{\code{emiss_w}: a list containing \code{n_dep} elements corresponding
 #'  to each of the dependent variables, where each element is a numeric vector
 #'  with length 1 denoting the weight for the overall log likelihood (i.e., log
 #'  likelihood based on the pooled data over all subjects) in the fractional

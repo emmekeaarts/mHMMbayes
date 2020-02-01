@@ -31,8 +31,8 @@ for each of the dependent variables.}}}
 probability matrix gamma and the emission distribution(s). The first
 element of the list contains a \code{m} by \code{m} matrix with the start
 values for gamma. The subsequent elements contain \code{m} by
-\code{q_emiss[k]} matrices for the start values for each of the \code{k}
-emission distribution(s). Note that \code{start_val} should not contain
+\code{q_emiss[k]} matrices for the start values for each of the \code{k} in
+\code{n_dep} emission distribution(s). Note that \code{start_val} should not contain
 nested lists (i.e., lists within lists).}
 
 \item{mcmc}{List of Markov chain Monte Carlo (MCMC) arguments, containing the
