@@ -171,7 +171,7 @@
 #'  vary over the states.
 #'
 #'  The default values for the hyper-prior on the emission distribution(s) are:
-#'  all elements of the matrices contained in \code{emiss_K0} set to 0,
+#'  all elements of the matrices contained in \code{emiss_mu0} set to 0,
 #'  \code{emiss_K0} set to 1, \code{emiss_nu} set to 3 + \code{q_emiss[k]} - 1,
 #'  and the diagonal of \code{gamma_V} (i.e., the variance) set to 3 +
 #'  \code{q_emiss[k]} - 1 and the off-diagonal elements (i.e., the covariance)
