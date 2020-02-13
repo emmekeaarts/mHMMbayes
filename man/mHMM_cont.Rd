@@ -193,7 +193,7 @@ over all subjects) in the fractional likelihood.}}
   subject level parameter estimates and the log likelihood over the
   iterations of the hybrid Metropolis within Gibbs sampler. The iterations of
   the sampler are contained in the rows, and the columns contain the subject
-  level (parameter) estimates of subsequently the emission means, the
+  level estimates of subsequently the emission means, the (fixed over subjects)
   emission variances, the transition probabilities and the log likelihood.}
   \item{\code{gamma_prob_bar}}{A matrix containing the group level parameter
   estimates of the transition probabilities over the iterations of the hybrid
@@ -248,12 +248,6 @@ over all subjects) in the fractional likelihood.}}
   of the Gibbs sampler. The iterations of the sampler are contained in the
   rows  of the matrix, and the columns contain the group level regression
   coefficients.}
-  \item{\code{emiss_mean_subj}}{A list containing one list per subject
-  denoting the subject level means of each dependent variable of the the
-  Normal emission distribution over the iterations of the Gibbs sampler. Each
-  lower level list contains one matrix per dependent variable, in which
-  iterations of the sampler are contained in the rows, and the columns
-  contain the subject level means.}
   \item{\code{input}}{Overview of used input specifications: the number of
   states \code{m}, the number of used dependent variables \code{n_dep}, the
   number of iterations \code{J} and the specified burn in period

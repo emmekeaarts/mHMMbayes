@@ -149,22 +149,20 @@
 #'   known mean).
 #'
 #'  Hence, the list \code{emiss_hyp_prior} contains the following elements:
-#'  \itemize{\item{\code{emiss_mu0}: a list containing
-#'  \code{n_dep} vectors with length \code{m}, i.e., one for each dependent variable \code{k}. Each
-#'  matrix for each set of emission
-#'  probabilities within a state. The matrices contain the hypothesized mean
-#'  values of the intercepts. Hence, each matrix consists of one row (when not
-#'  including covariates in the model) and \code{q_emiss[k]} - 1 columns}
+#'  \itemize{\item{\code{emiss_mu0}: a list containing \code{n_dep} matrices
+#'  with one row (when not including covariates in the model) and \code{m}
+#'  columns denoting the hypothesized mean values of the Normal emission
+#'  distributions in each of the states for each dependent variable \code{k}.
 #'  \item{\code{emiss_K0}: a list containing \code{n_dep} elements corresponding
-#'  to each of the dependent variables, where each element is a numeric vector
-#'  with length 1 denoting the number of hypothetical prior subjects on which
-#'  the vector of means \code{emiss_mu0} is based}
+#'  to each of the dependent variables, where each element is an integer denoting
+#'  the number of hypothetical prior subjects on which the vector of means
+#'  \code{emiss_mu0} is based}.
 #'  \item{\code{emiss_nu}: a list containing \code{n_dep} elements corresponding
-#'  to each of the dependent variables, where each element is a numeric vector
-#'  with length 1 denoting the degrees of freedom of the Inverse Gamma
-#'  hyper-prior distribution connected to the emission distribution means (note:
-#'  here, the Inverse Gamma hyper-prior distribution is parametrized as a
-#'  scaled inverse chi-squared distribution).}
+#'  to each of the dependent variables, where each element is an integer
+#'  denoting the degrees of freedom of the Inverse Gamma hyper-prior
+#'  distribution connected to the emission distribution means (note: here, the
+#'  Inverse Gamma hyper-prior distribution is parametrized as a scaled inverse
+#'  chi-squared distribution).}
 #'  \item{\code{emiss_V}: a list containing \code{n_dep} elements corresponding
 #'  to each of the dependent variables \code{k}, where each element is a vector
 #'  with lenght \code{m} containing the hypothesized variances between the
@@ -576,21 +574,19 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   } else{
     gamma_cov_bar <- "No covariates where used to predict the transition probability matrix"
   }
-
-############# TOT HIER
-
-  emiss_int_bar			<- lapply((q_emiss-1) * m, dif_matrix, rows = J)
-  names(emiss_int_bar) <- dep_labels
+  emiss_varmu_bar			<- rep(list(matrix(, ncol = m, nrow = J, dimnames = list(NULL, c(paste("varmu_", 1:m, sep = ""))))), n_dep)
+  names(emiss_varmu_bar) <- dep_labels
+  emiss_var_bar			<- rep(list(matrix(, ncol = m, nrow = J, dimnames = list(NULL, c(paste("var_", 1:m, sep = ""))))), n_dep)
+  names(emiss_var_bar) <- dep_labels
   for(q in 1:n_dep){
-    colnames(emiss_int_bar[[q]]) <-  paste("int_Emiss", rep(2:q_emiss[q], m), "_S", rep(1:m, each = q_emiss[q] - 1), sep = "")
-    emiss_int_bar[[q]][1,] <- as.vector(prob_to_int(matrix(emiss_prob_bar[[q]][1,], byrow = TRUE, ncol = q_emiss[q], nrow = m)))
+    emiss_var_bar[[q]][1,] <- PD[1, (n_dep * m + (q-1) * m + 1):(n_dep * m + q * m)]
   }
   if(sum(nx[-1]) > n_dep){
-    emiss_cov_bar			<- lapply((q_emiss-1) * m * (nx[-1] - 1 ), dif_matrix, rows = J)
+    emiss_cov_bar			<- lapply(m * (nx[-1] - 1 ), dif_matrix, rows = J)
     names(emiss_cov_bar) <- dep_labels
     for(q in 1:n_dep){
       if(nx[1 + q] > 1){
-        colnames(emiss_cov_bar[[q]]) <-  paste( paste("cov", 1 : (nx[1 + q] - 1), "_", sep = ""), "emiss", rep(2:q_emiss[q], m * (nx[1 + q] - 1)), "_S", rep(1:m, each = (q_emiss[q] - 1) * (nx[1 + q] - 1)), sep = "")
+        colnames(emiss_cov_bar[[q]]) <-  paste( paste("cov", 1 : (nx[1 + q] - 1), "_", sep = ""), "mu_S", rep(1:m, each = (nx[1 + q] - 1)), sep = "")
         emiss_cov_bar[[q]][1,] <- 0
       } else {
         emiss_cov_bar[[q]] <- "No covariates where used to predict the emission probabilities for this outcome"
@@ -599,6 +595,12 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   } else{
     emiss_cov_bar <- "No covariates where used to predict the emission probabilities"
   }
+
+  ############# TOT HIER
+
+
+
+
 
   # Define object for subject specific posterior density (regression coefficients parameterization )
   gamma_int_subj			<- rep(list(gamma_int_bar), n_subj)
