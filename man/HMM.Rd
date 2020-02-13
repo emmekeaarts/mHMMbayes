@@ -2,7 +2,7 @@
 % Please edit documentation in R/HMM.R
 \name{HMM}
 \alias{HMM}
-\title{Onelevel (fixed) hidden  Markov model using Bayesian estimation}
+\title{Single-level (i.e., fixed) hidden  Markov model using Bayesian estimation}
 \usage{
 HMM(s_data, gen, start_val, mcmc, return_path = FALSE,
   show_progress = TRUE, gamma_prior = NULL, emiss_prior = NULL)
@@ -126,7 +126,7 @@ st_emiss_distr <- matrix(c(0.40, 0.40, 0.20,
                            0.20, 0.20, 0.60), nrow = m, ncol = q_emiss, byrow = TRUE)
 
 # run the model
-out_2st_sim <- HMM(one_s_data = matrix(data1$obs, ncol = 1),
+out_2st_sim <- HMM(s_data = data1$obs,
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = list(st_gamma, st_emiss_distr),
                     mcmc = list(J = 4000, burn_in = 200), show_progress = TRUE)

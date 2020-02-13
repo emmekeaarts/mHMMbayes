@@ -1,4 +1,4 @@
-#' Onelevel (fixed) hidden  Markov model using Bayesian estimation
+#' Single-level (i.e., fixed) hidden  Markov model using Bayesian estimation
 #'
 #' \code{HMM} fits a onelevel (i.e., fixed parameter) hidden Markov model (HMM)
 #' to intense longitudinal data with categorical observations using Bayesian
@@ -93,7 +93,7 @@
 #'                            0.20, 0.20, 0.60), nrow = m, ncol = q_emiss, byrow = TRUE)
 #'
 #' # run the model
-#' out_2st_sim <- HMM(one_s_data = matrix(data1$obs, ncol = 1),
+#' out_2st_sim <- HMM(s_data = data1$obs,
 #'                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
 #'                     start_val = list(st_gamma, st_emiss_distr),
 #'                     mcmc = list(J = 4000, burn_in = 200), show_progress = TRUE)
@@ -109,6 +109,9 @@
 # gamma_next and emiss_next are obsolete, delete.
 # vit_mHMM compatible maken
 # obtain_gamma en obtain_emiss compatible maken
+# build tests, at least include instance with only one dependent var, and multiple dependent var,
+# check each of the error messages.
+
 
 HMM <- function(s_data, gen, start_val, mcmc, return_path = FALSE, show_progress = TRUE,
                  gamma_prior = NULL, emiss_prior = NULL){
@@ -120,11 +123,11 @@ HMM <- function(s_data, gen, start_val, mcmc, return_path = FALSE, show_progress
   if(dim(s_data)[2] != n_dep + 1 ){
     stop("The number of columns in the dataset provided should equal the number of dependent variables n_dep + 1.")
   }
-  one_s_data   <- s_data[,-1]
+  one_s_data   <- as.matrix(s_data[,-1], ncol = n_dep)
   m            <- gen$m
   q_emiss 		 <- gen$q_emiss
   start        <- c(0, q_emiss * m)
-  dep_labels   <- colnames(one_s_data[,1:(n_dep)])
+  dep_labels   <- colnames(s_data)[2:(1+n_dep)]
   n_t 	       <- dim(one_s_data)[1] # Creating a var reflecting the length of the sequence
   J 			     <- mcmc$J
   burn_in			 <- mcmc$burn_in
