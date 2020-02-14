@@ -82,8 +82,8 @@
 #'   probability matrix gamma and the emission distribution(s). The first
 #'   element of the list contains a \code{m} by \code{m} matrix with the start
 #'   values for gamma. The subsequent elements are matrices with \code{m} rows
-#'   and 2 columns; the first column denoting the mean of state \emph(i) (row
-#'   \emph{i}) and the second column denoting the variance of state \emph(i)
+#'   and 2 columns; the first column denoting the mean of state \emph{i} (row
+#'   \emph{i}) and the second column denoting the variance of state \emph{i}
 #'   (row \emph{i}) of the Normal distribution. Note that \code{start_val}
 #'   should not contain nested lists (i.e., lists within lists).
 #' @param mcmc List of Markov chain Monte Carlo (MCMC) arguments, containing the
@@ -505,12 +505,12 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   for(q in 1:n_dep){
     # emiss_hyp_prior[[q]]$emiss_mu0 has to contain a list with lenght equal to m, and each list contains matrix with number of rows equal to number of covariates for that dep. var.
     # stil build in a CHECK, with warning / stop / switch to default prior
-    emiss_mu0[[q]]	 <- emiss_hyp_prior[[q]]$emiss_mu0
-    emiss_nu[[q]]	 <- emiss_hyp_prior[[q]]$emiss_nu
-    emiss_V[[q]]		 <- emiss_hyp_prior[[q]]$emiss_V
+    emiss_mu0[[q]]	 <- emiss_hyp_prior$emiss_mu0[[q]]
+    emiss_nu[[q]]	 <- emiss_hyp_prior$emiss_nu[[q]]
+    emiss_V[[q]]		 <- emiss_hyp_prior$emiss_V[[q]]
     emiss_K0[[q]]	 <- diag(emiss_hyp_prior$emiss_K0, nx[1 + q])
-    emiss_a0[[q]] <- emiss_hyp_prior[[q]]$emiss_a0
-    emiss_b0[[q]] <- emiss_hyp_prior[[q]]$emiss_b0
+    emiss_a0[[q]] <- emiss_hyp_prior$emiss_a0[[q]]
+    emiss_b0[[q]] <- emiss_hyp_prior$emiss_b0[[q]]
   }
 
 
