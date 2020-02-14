@@ -557,9 +557,9 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
     for(q in 1:n_dep){
       # emiss_hyp_prior[[q]]$emiss_mu0 has to contain a list with lenght equal to m, and each list contains matrix with number of rows equal to number of covariates for that dep. var.
       # stil build in a CHECK, with warning / stop / switch to default prior
-      emiss_mu0[[q]]	 <- emiss_hyp_prior[[q]]$emiss_mu0
-      emiss_nu[[q]]	 <- emiss_hyp_prior[[q]]$emiss_nu
-      emiss_V[[q]]		 <- emiss_hyp_prior[[q]]$emiss_V
+      emiss_mu0[[q]]	 <- emiss_hyp_prior$emiss_mu0[[q]]
+      emiss_nu[[q]]	 <- emiss_hyp_prior$emiss_nu[[q]]
+      emiss_V[[q]]		 <- emiss_hyp_prior$emiss_V[[q]]
       emiss_K0[[q]]	 <- diag(emiss_hyp_prior$emiss_K0, nx[1 + q])
     }
   }
