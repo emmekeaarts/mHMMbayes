@@ -50,8 +50,8 @@ number of dependent variables}}}
 probability matrix gamma and the emission distribution(s). The first
 element of the list contains a \code{m} by \code{m} matrix with the start
 values for gamma. The subsequent elements are matrices with \code{m} rows
-and 2 columns; the first column denoting the mean of state \emph(i) (row
-\emph{i}) and the second column denoting the variance of state \emph(i)
+and 2 columns; the first column denoting the mean of state \emph{i} (row
+\emph{i}) and the second column denoting the variance of state \emph{i}
 (row \emph{i}) of the Normal distribution. Note that \code{start_val}
 should not contain nested lists (i.e., lists within lists).}
 
@@ -66,22 +66,20 @@ should not contain nested lists (i.e., lists within lists).}
   known mean).
 
  Hence, the list \code{emiss_hyp_prior} contains the following elements:
- \itemize{\item{\code{emiss_mu0}: a list containing
- \code{n_dep} vectors with length \code{m}, i.e., one for each dependent variable \code{k}. Each
- matrix for each set of emission
- probabilities within a state. The matrices contain the hypothesized mean
- values of the intercepts. Hence, each matrix consists of one row (when not
- including covariates in the model) and \code{q_emiss[k]} - 1 columns}
+ \itemize{\item{\code{emiss_mu0}: a list containing \code{n_dep} matrices
+ with one row (when not including covariates in the model) and \code{m}
+ columns denoting the hypothesized mean values of the Normal emission
+ distributions in each of the states for each dependent variable \code{k}}.
  \item{\code{emiss_K0}: a list containing \code{n_dep} elements corresponding
- to each of the dependent variables, where each element is a numeric vector
- with length 1 denoting the number of hypothetical prior subjects on which
- the vector of means \code{emiss_mu0} is based}
+ to each of the dependent variables, where each element is an integer denoting
+ the number of hypothetical prior subjects on which the vector of means
+ \code{emiss_mu0} is based}.
  \item{\code{emiss_nu}: a list containing \code{n_dep} elements corresponding
- to each of the dependent variables, where each element is a numeric vector
- with length 1 denoting the degrees of freedom of the Inverse Gamma
- hyper-prior distribution connected to the emission distribution means (note:
- here, the Inverse Gamma hyper-prior distribution is parametrized as a
- scaled inverse chi-squared distribution).}
+ to each of the dependent variables, where each element is an integer
+ denoting the degrees of freedom of the Inverse Gamma hyper-prior
+ distribution connected to the emission distribution means (note: here, the
+ Inverse Gamma hyper-prior distribution is parametrized as a scaled inverse
+ chi-squared distribution).}
  \item{\code{emiss_V}: a list containing \code{n_dep} elements corresponding
  to each of the dependent variables \code{k}, where each element is a vector
  with lenght \code{m} containing the hypothesized variances between the
@@ -309,82 +307,42 @@ unchanged, as the estimates of the regression coefficients for the covariates
 are fixed over subjects.
 }
 \examples{
-###### Example on package example data
-\donttest{
-# specifying general model properties:
-m <- 2
-n_dep <- 4
-q_emiss <- c(3, 2, 3, 2)
-
-# specifying starting values
-start_TM <- diag(.8, m)
-start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
-start_EM <- list(matrix(c(0.05, 0.90, 0.05,
-                          0.90, 0.05, 0.05), byrow = TRUE,
-                        nrow = m, ncol = q_emiss[1]), # vocalizing patient
-                 matrix(c(0.1, 0.9,
-                          0.1, 0.9), byrow = TRUE, nrow = m,
-                        ncol = q_emiss[2]), # looking patient
-                 matrix(c(0.90, 0.05, 0.05,
-                          0.05, 0.90, 0.05), byrow = TRUE,
-                        nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-                 matrix(c(0.1, 0.9,
-                          0.1, 0.9), byrow = TRUE, nrow = m,
-                        ncol = q_emiss[4])) # looking therapist
-
-# Run a model without covariate(s):
-# Note that for reasons of running time, J is set at a ridiculous low value.
-# One would typically use a number of iterations J of at least 1000,
-# and a burn_in of 200.
-out_2st <- mHMM(s_data = nonverbal,
-                gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                start_val = c(list(start_TM), start_EM),
-                mcmc = list(J = 11, burn_in = 5))
-
-out_2st
-summary(out_2st)
-
-# plot the posterior densities for the transition and emission probabilities
-plot(out_2st, component = "gamma", col =c("darkslategray3", "goldenrod"))
-
-# Run a model including a covariate. Here, the covariate (standardized CDI
-# change) predicts the emission distribution for each of the 4 dependent
-# variables:
-
-n_subj <- 10
-xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), (n_dep + 1))
-for(i in 2:(n_dep + 1)){
-  xx[[i]] <- cbind(xx[[i]], nonverbal_cov$std_CDI_change)
-}
-out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
-                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                  start_val = c(list(start_TM), start_EM),
-                  mcmc = list(J = 11, burn_in = 5))
-
-}
 ###### Example on simulated data
-# Simulate data for 10 subjects with each 100 observations:
-n_t <- 100
-n <- 10
-m <- 2
-q_emiss <- 3
-gamma <- matrix(c(0.8, 0.2,
-                  0.3, 0.7), ncol = m, byrow = TRUE)
-emiss_distr <- matrix(c(0.5, 0.5, 0.0,
-                        0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE)
-data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
-                  emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
+# simulating multivariate continuous data
+n_t     <- 100
+n       <- 10
+m       <- 3
+n_dep   <- 2
 
-# Specify remaining required analysis input (for the example, we use simulation
-# input as starting values):
-n_dep <- 1
-q_emiss <- 3
+gamma   <- matrix(c(0.8, 0.1, 0.1,
+                    0.2, 0.7, 0.1,
+                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
+
+emiss_distr <- list(matrix(c( 5, 1,
+                              10, 1,
+                              15, 1), nrow = m, byrow = TRUE),
+                    matrix(c(0.5, 0.1,
+                             1.0, 0.2,
+                             2.0, 0.1), nrow = m, byrow = TRUE))
+
+data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
+                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
+
+# Specify hyper-prior for the continuous emission distribution
+hyp_pr <- list(
+               emiss_mu0 = list(matrix(c(3,7,17), nrow = 1), matrix(c(0.7, 0.8, 1.8), nrow = 1)),
+               emiss_K0  = list(1, 1),
+               emiss_nu  = list(1, 1),
+               emiss_V   = list(rep(2, m), rep(1, m)),
+               emiss_a0  = list(rep(1, m), rep(1, m)),
+               emiss_b0  = list(rep(1, m), rep(1, m)))
 
 # Run the model on the simulated data:
-out_2st_sim <- mHMM(s_data = data1$obs,
-                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                 start_val = list(gamma, emiss_distr),
-                 mcmc = list(J = 11, burn_in = 5))
+out_3st_cont_sim <- mHMM_cont(s_data = data5$obs,
+                    gen = list(m = m, n_dep = n_dep),
+                    start_val = c(list(gamma), emiss_distr),
+                    emiss_hyp_prior = hyp_pr,
+                    mcmc = list(J = 11, burn_in = 5))
 
 
 }
