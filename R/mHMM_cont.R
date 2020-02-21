@@ -347,7 +347,7 @@
 #'
 
 mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, return_path = FALSE, print_iter, show_progress = TRUE,
-                 gamma_hyp_prior = NULL, gamma_sampler = NULL){
+                      gamma_hyp_prior = NULL, gamma_sampler = NULL){
 
   if(!missing(print_iter)){
     warning("The argument print_iter is depricated; please use show_progress instead to show the progress of the algorithm.")
@@ -697,22 +697,27 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
       # sample population mean of the Normal emission distribution, and it's variance (so the variance between the subject specific means)
       for(q in 1:n_dep){
         emiss_mu0_n                 <- solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*%
-                                       (t(xx[[1 + q]]) %*% emiss_c_mu[[i]][[q]] + emiss_K0[[q]] %*% emiss_mu0[[q]][i])
+          (t(xx[[1 + q]]) %*% emiss_c_mu[[i]][[q]] + emiss_K0[[q]] %*% emiss_mu0[[q]][i])
         emiss_a_n                   <- (emiss_nu[[q]] + n_subj) / 2
-        emiss_b_n                   <- (emiss_nu[[q]] * emiss_V[[q]][i]) / 2 + (t(emiss_c_mu[[i]][[q]]) %*% emiss_c_mu[[i]][[q]] + t(emiss_mu0[[q]][i]) %*% emiss_K0[[q]] %*% emiss_mu0[[q]][i] - t(emiss_mu0_n) %*%  (t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% emiss_mu0_n) / 2
-        emiss_V_mu[[i]][[q]]       <- solve(rgamma(1, shape = emiss_a_n, scale = emiss_b_n))
-        emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1, mean = 0, sd = sqrt(emiss_V_int[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
+        emiss_b_n                   <- (emiss_nu[[q]] * emiss_V[[q]][i]) / 2 + (t(emiss_c_mu[[i]][[q]]) %*% emiss_c_mu[[i]][[q]] + t(emiss_mu0[[q]][i]) %*% emiss_K0[[q]] %*% emiss_mu0[[q]][i] - t(emiss_mu0_n) %*%
+                                                                                  (t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% emiss_mu0_n) / 2
+        emiss_V_mu[[i]][[q]]       <- solve(rgamma(1, shape = emiss_a_n, rate = emiss_b_n))
+        emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
       }
 
       # Sample subject values  -----------
       for (s in 1:n_subj){
-      # Sample subject values for gamma using RW Metropolis sampler   ---------
+        # Sample subject values for gamma using RW Metropolis sampler   ---------
         gamma_candcov_comb 			<- chol2inv(chol(subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ] + chol2inv(chol(gamma_V_int[[i]]))))
         gamma_RWout					    <- mnl_RW_once(int1 = gamma_c_int[[i]][s,], Obs = trans[[s]][[i]], n_cat = m, mu_int_bar1 = c(t(gamma_mu_int_bar[[i]]) %*% xx[[1]][s,]), V_int1 = gamma_V_int[[i]], scalar = gamma_scalar, candcov1 = gamma_candcov_comb)
-        gamma[[s]][i,]  	<- PD_subj[[s]][iter, c((sum(m * q_emiss) + 1 + (i - 1) * m):(sum(m * q_emiss) + (i - 1) * m + m))] <- gamma_RWout$prob
+        gamma[[s]][i,]  	      <- PD_subj[[s]][iter, c((n_dep * 2 * m + 1 + (i - 1) * m):(n_dep * 2 * m + (i - 1) * m + m))] <- gamma_RWout$prob
         gamma_naccept[s, i]			<- gamma_naccept[s, i] + gamma_RWout$accept
         gamma_c_int[[i]][s,]		<- gamma_RWout$draw_int
         gamma_int_subj[[s]][iter, (1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1))] <- gamma_c_int[[i]][s,]
+
+        if(i == m){
+          delta[[s]] 		<- solve(t(diag(m) - gamma[[s]] + 1), rep(1, m))
+        }
       }
       # Sample subject values for normal emission distribution using Gibbs sampler   ---------
       for(q in 1:n_dep){
@@ -728,39 +733,64 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
         emiss_c_V[[i]][[q]] <- sum((n_cond_y - 1) * ss_subj) / (sum(n_cond_y) - n_subj)
       }
 
-
-      ################# TOT HIER
-
-
-         emiss[[s]][[q]][i,1] <-
-         emiss[[s]][[q]][i,2] <- emiss_c_V[[i]][[q]]
+      # Sample subject values for normal emission distribution using Gibbs sampler   ---------
+      for(q in 1:n_dep){
+        for (s in 1:n_subj){
+          ss_subj[s] <- (matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], nrow = 1) %*%
+                           matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], ncol = 1))
+          n_cond_y[s]       <- length(cond_y[[s]][[i]][[q]])
         }
+        alpha_cc <- sum(n_cond_y) + emiss_a0[[q]][i]
+        beta_cc <- (sum(ss_subj) + 2 * emiss_b0[[q]][i])/2
+        emiss_c_V[[i]][[q]] <- emiss_var_bar[[q]][iter, i] <- solve(rgamma(1, shape = alpha_cc, rate = beta_cc))
 
-        if(i == m){
-          delta[[s]] 		<- solve(t(diag(m) - gamma[[s]] + 1), rep(1, m))
+#        for (s in 1:n_subj){
+          # Sample the fixed (= POOLED) over subjects variance of the Normal emission distribution
+          # Is this correct? if calculate variance over all observations of one state var gets tooo small
+          # But double check if this is correct / other way
+#          n_cond_y[s]       <- length(cond_y[[s]][[i]][[q]])
+#          emiss_var_a_n     <- emiss_a0[[q]][i] + n_cond_y[s] / 2
+#          emiss_var_b_n     <- emiss_b0[[q]][i] + (matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], nrow = 1) %*% matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], ncol = 1)) / 2
+#          ss_subj[s]        <- solve(rgamma(1, shape = emiss_var_a_n, scale = emiss_var_b_n))
+#        }
+#       emiss_c_V[[i]][[q]] <- sum((n_cond_y - 1) * ss_subj) / (sum(n_cond_y) - n_subj)
+#        emiss_var_bar[[q]][iter, i] <-  emiss_c_V[[i]][[q]]
+      }
+
+
+      ### DOUBLE CHECK BELOW PART!!
+      for(q in 1:n_dep){
+        for (s in 1:n_subj){
+          n_cond_y[s]       <- length(cond_y[[s]][[i]][[q]])
+          emiss_mu0_subj_n  <- (n_subj * emiss_c_mu_bar[[i]][[q]] + sum(cond_y[[s]][[i]][[q]])) / (n_subj + n_cond_y[s])
+          emiss[[s]][[q]][i,1] <- PD_subj[[s]][iter, ((q - 1) * m + i)] <- rnorm(1, emiss_mu0_subj_n, sqrt(emiss_V_mu[[i]][[q]]))
+          emiss[[s]][[q]][i,2] <- PD_subj[[s]][iter, (n_dep * m + (q - 1) * m + i)] <- emiss_c_V[[i]][[q]]
         }
       }
+
     }
 
 
-    # End of 1 MCMC iteration, save output values --------
+
+
+    # End of MCMC iteration, save output values --------
     gamma_int_bar[iter, ]				   	<- unlist(lapply(gamma_mu_int_bar, "[",1,))
     if(nx[1] > 1){
       gamma_cov_bar[iter, ]      	<- unlist(lapply(gamma_mu_int_bar, "[",-1,))
     }
     gamma_prob_bar[iter,]			<- unlist(gamma_mu_prob_bar)
     for(q in 1:n_dep){
-      emiss_int_bar[[q]][iter, ]	<- as.vector(unlist(lapply(
-        lapply(emiss_mu_int_bar, "[[", q), "[",1,)
+      emiss_mu_bar[[q]][iter, ]	<- as.vector(unlist(lapply(
+        lapply(emiss_c_mu_bar, "[[", q), "[",1,)
       ))
       if(nx[1+q] > 1){
         emiss_cov_bar[[q]][iter, ]  <- as.vector(unlist(lapply(
           lapply(emiss_mu_int_bar, "[[", q), "[",-1,)
         ))
       }
-      emiss_prob_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_mu_prob_bar, "[[", q)))
+      emiss_varmu_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_V_mu, "[[", q)))
     }
-    if(show_progress == TRUE){
+      if(show_progress == TRUE){
       utils::setTxtProgressBar(pb, iter)
     }
   }
@@ -772,21 +802,23 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   ctime = proc.time()[3]
   message(paste("mHMM new, n:", n_subj, ", n_t:", n_vary[1], "Total time elapsed (hh:mm:ss):", hms(ctime-itime)))
   if(return_path == TRUE){
-    out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
-                             burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
-                PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
-                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, emiss_int_bar = emiss_int_bar,
-                emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
-                emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept,
-                sample_path = sample_path)
+    out <- list(input = list(m = m, n_dep = n_dep, J = J,
+                           burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
+              PD_subj = PD_subj, gamma_int_subj = gamma_int_subj,
+              gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
+              emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
+              emiss_mu_bar = emiss_mu_bar, gamma_naccept = gamma_naccept,
+              emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar,
+              sample_path = sample_path)
   } else {
-    out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
-                             burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
-                PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
-                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, emiss_int_bar = emiss_int_bar,
+    out <- list(input = list(m = m, n_dep = n_dep, J = J,
+                           burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
+                PD_subj = PD_subj, gamma_int_subj = gamma_int_subj,
+                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
                 emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
-                emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept)
+                emiss_mu_bar = emiss_mu_bar, gamma_naccept = gamma_naccept,
+                emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar)
   }
-  class(out) <- append(class(out), "mHMM")
+  class(out) <- append(class(out), "mHMM_cont")
   return(out)
 }

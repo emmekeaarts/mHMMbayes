@@ -330,13 +330,18 @@ data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'cont
 
 # Specify hyper-prior for the continuous emission distribution
 hyp_pr <- list(
-               emiss_mu0 = list())
+               emiss_mu0 = list(matrix(c(3,7,17), nrow = 1), matrix(c(0.7, 0.8, 1.8), nrow = 1)),
+               emiss_K0  = list(1, 1),
+               emiss_nu  = list(1, 1),
+               emiss_V   = list(rep(2, m), rep(1, m)),
+               emiss_a0  = list(rep(1, m), rep(1, m)),
+               emiss_b0  = list(rep(1, m), rep(1, m)))
 
 # Run the model on the simulated data:
 out_3st_cont_sim <- mHMM_cont(s_data = data5$obs,
                     gen = list(m = m, n_dep = n_dep),
-                    start_val = list(gamma, emiss_distr),
-                    emiss_hyp_prior = hyp_pr
+                    start_val = c(list(gamma), emiss_distr),
+                    emiss_hyp_prior = hyp_pr,
                     mcmc = list(J = 11, burn_in = 5))
 
 
