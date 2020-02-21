@@ -845,7 +845,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
 
   # End of function, return output values --------
   ctime = proc.time()[3]
-  message(paste("mHMM new, n:", n_subj, ", n_t:", n_vary[1], "Total time elapsed (hh:mm:ss):", hms(ctime-itime)))
+  message(paste("Total time elapsed (hh:mm:ss):", hms(ctime-itime)))
   if(return_path == TRUE){
     out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
                              burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
