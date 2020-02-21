@@ -32,6 +32,11 @@ is.mHMM <- function(x) {
 }
 
 #' @keywords internal
+is.mHMM_cont <- function(x) {
+  inherits(x, "mHMM_cont")
+}
+
+#' @keywords internal
 is.mHMM_gamma <- function(x) {
   inherits(x, "mHMM_gamma")
 }
