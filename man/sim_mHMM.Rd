@@ -47,8 +47,8 @@ states for each of the dependent variables. If \code{data_distr =
 distribution(s). That is, the probability of observing category \emph{q}
 (column \emph{q}) in state \emph{i} (row \emph{i}). If \code{data_distr =
 'continuous'}, each element is a matrix with \code{m} rows and 2 columns;
-the first column denoting the mean of state \emph(i) (row \emph{i}) and the
-second column denoting the variance of state \emph(i) (row \emph{i}) of the
+the first column denoting the mean of state \emph{i} (row \emph{i}) and the
+second column denoting the variance of state \emph{i} (row \emph{i}) of the
 Normal distribution.}
 
 \item{xx_vec}{List of 1 + \code{n_dep} vectors containing the covariate(s) to
