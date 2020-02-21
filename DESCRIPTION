@@ -9,8 +9,9 @@ Imports:
     stats,
     Rdpack,
     Rcpp
-Authors@R: person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
-                  role = c("aut", "cre"))
+Authors@R: c(person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
+                  role = c("aut", "cre")),
+             person("Sebastian", "Mildiner Moraga", role = "ctb"))      
 Maintainer: Emmeke Aarts <e.aarts@uu.nl>
 Description: An implementation of the multilevel (also known as mixed or random 
     effects) hidden Markov model using Bayesian estimation in R. The multilevel 
