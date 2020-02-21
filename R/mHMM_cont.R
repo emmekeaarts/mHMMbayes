@@ -335,7 +335,7 @@
 #'                emiss_b0  = list(rep(1, m), rep(1, m)))
 #'
 #' # Run the model on the simulated data:
-#' out_3st_cont_sim <- mHMM_cont(s_data = data5$obs,
+#' out_3st_cont_sim <- mHMM_cont(s_data = data_cont$obs,
 #'                     gen = list(m = m, n_dep = n_dep),
 #'                     start_val = c(list(gamma), emiss_distr),
 #'                     emiss_hyp_prior = hyp_pr,
@@ -482,8 +482,6 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   trans <- rep(list(vector("list", m)), n_subj)
 
   # gamma
-  optim_pooled_gamma <- rep(list(matrix(, nrow = J, ncol = (m + m - 1 + 1))), m)
-  optim_subj_gamma <- rep(list(matrix(, nrow = (J-1) * n_subj, ncol = (m + m - 1 + 1))), m)
   gamma_int_mle_pooled <- gamma_pooled_ll <- vector("list", m)
   gamma_c_int <- rep(list(matrix(, n_subj, (m-1))), m)
   gamma_mu_int_bar <- gamma_V_int <- vector("list", m)
@@ -620,19 +618,11 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
 
       # population level, transition matrix
       trans_pooled			  <- factor(c(unlist(sapply(trans, "[[", i)), c(1:m)))
-      ind <- which(paste(table(trans_pooled), collapse = "") ==
-                     do.call(paste,(c(as.data.frame(optim_pooled_gamma[[i]][,1:m]), sep = ""))))
-      if(length(ind) != 0){
-        gamma_int_mle_pooled[[i]]  <- optim_pooled_gamma[[i]][ind, (m + 1): (m + m - 1)]
-        gamma_pooled_ll[[i]]			<- optim_pooled_gamma[[i]][ind, (m + m - 1 + 1)]
-      } else {
-        gamma_mle_pooled		<- optim(gamma_int_mle0, llmnl_int, Obs = trans_pooled,
+      gamma_mle_pooled		<- optim(gamma_int_mle0, llmnl_int, Obs = trans_pooled,
                                    n_cat = m, method = "BFGS", hessian = TRUE,
                                    control = list(fnscale = -1))
-        optim_pooled_gamma[[i]][iter, 1:m] <- table(trans_pooled)
-        optim_pooled_gamma[[i]][iter, (m + 1): (m + m - 1)] <- gamma_int_mle_pooled[[i]]  <- gamma_mle_pooled$par
-        optim_pooled_gamma[[i]][iter, (m + m - 1 + 1)] <- gamma_pooled_ll[[i]]			<- gamma_mle_pooled$value
-      }
+      gamma_int_mle_pooled[[i]]  <- gamma_mle_pooled$par
+      gamma_pooled_ll[[i]]			<- gamma_mle_pooled$value
 
       # population level, conditional probabilities, seperate for each dependent variable
       for(q in 1:n_dep){
@@ -645,39 +635,24 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
 
 
       # subject level
-      pasted_optim_subj_gamma <- do.call(paste,(c(as.data.frame(optim_subj_gamma[[i]][1:(n_subj * (iter - 1)), 1:m]), sep = "")))
-
       for (s in 1:n_subj){
         wgt 				<- subj_data[[s]]$n / n_total
 
         # subject level, transition matrix
-        ind <- which(paste(table(c(trans[[s]][[i]], c(1:m))), collapse = "") == pasted_optim_subj_gamma)
-        if(length(ind) != 0){
-          ind <- ind[1]
-          subj_data[[s]]$gamma_int_mle[i,]  <- optim_subj_gamma[[i]][ind, (m + 1): (m + m - 1)]
-          subj_data[[s]]$gamma_converge[i]  <- optim_subj_gamma[[i]][ind, (m + m - 1 + 1)]
-          if (subj_data[[s]]$gamma_converge[i] == 1){
-            subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<-
-              mnlHess_int(int = subj_data[[s]]$gamma_int_mle[i,], Obs = c(trans[[s]][[i]], c(1:m)), n_cat =  m)
-          } else {
-            subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)),]	<- diag(m-1)
-          }
-        } else {
-          gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_int_frac, Obs = c(trans[[s]][[i]], c(1:m)),
+        gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_int_frac, Obs = c(trans[[s]][[i]], c(1:m)),
                                  n_cat = m, pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt,
                                  method="BFGS", hessian = TRUE, control = list(fnscale = -1))
-          optim_subj_gamma[[i]][((iter - 2) * n_subj + s), 1:m] <- table(c(trans[[s]][[i]], c(1:m)))
-          if(gamma_out$convergence == 0){
-            subj_data[[s]]$gamma_converge[i] <- optim_subj_gamma[[i]][((iter - 2) * n_subj + s), (m + m - 1 + 1)] <- 1
-            subj_data[[s]]$gamma_int_mle[i,] <- optim_subj_gamma[[i]][((iter - 2) * n_subj + s), (m + 1): (m + m - 1)] <- gamma_out$par
-            subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<-
+        if(gamma_out$convergence == 0){
+           subj_data[[s]]$gamma_converge[i] <- 1
+           subj_data[[s]]$gamma_int_mle[i,] <- gamma_out$par
+           subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<-
               mnlHess_int(int = gamma_out$par, Obs = c(trans[[s]][[i]], c(1:m)), n_cat =  m)
-          } else {
-            subj_data[[s]]$gamma_converge[i] <- optim_subj_gamma[[i]][((iter - 2) * n_subj + s), (m + m - 1 + 1)] <- 0
-            subj_data[[s]]$gamma_int_mle[i,] <- optim_subj_gamma[[i]][((iter - 2) * n_subj + s), (m + 1): (m + m - 1)] <- rep(0, m - 1)
-            subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<- diag(m-1)
-          }
+        } else {
+          subj_data[[s]]$gamma_converge[i] <- 0
+          subj_data[[s]]$gamma_int_mle[i,] <- rep(0, m - 1)
+          subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<- diag(m-1)
         }
+
         # if this is first iteration, use MLE for current values RW metropolis sampler
         if (iter == 2){
           gamma_c_int[[i]][s,]		<- gamma_out$par
