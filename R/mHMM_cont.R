@@ -624,16 +624,6 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
       gamma_int_mle_pooled[[i]]  <- gamma_mle_pooled$par
       gamma_pooled_ll[[i]]			<- gamma_mle_pooled$value
 
-      # population level, conditional probabilities, seperate for each dependent variable
-      for(q in 1:n_dep){
-        cond_y_pooled[[i]][[q]]					      <- numeric()
-        ### MOET OOK ECHT BETER KUNNEN, eerst # cond_y_pooled				<- unlist(sapply(cond_y, "[[", m))
-        for(s in 1:n_subj){
-          cond_y_pooled[[i]][[q]]             <- c(cond_y_pooled[[i]][[q]], cond_y[[s]][[i]][[q]])
-        }
-      }
-
-
       # subject level
       for (s in 1:n_subj){
         wgt 				<- subj_data[[s]]$n / n_total
@@ -659,7 +649,6 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
         }
       }
 
-
       # Sample pouplaton values for gamma and conditional probabilities using Gibbs sampler -----------
       # gamma_mu0_n and gamma_mu_int_bar are matrices, with the number of rows equal to the number of covariates, and ncol equal to number of intercepts estimated
       gamma_mu0_n           <- solve(t(xx[[1]]) %*% xx[[1]] + gamma_K0)  %*% (t(xx[[1]]) %*% gamma_c_int[[i]] + gamma_K0 %*% gamma_mu0[[i]])
@@ -669,15 +658,16 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
       gamma_exp_int				  <- matrix(exp(c(0, gamma_mu_int_bar[[i]][1,] )), nrow  = 1)
       gamma_mu_prob_bar[[i]] 	<- gamma_exp_int / as.vector(gamma_exp_int %*% c(rep(1,(m))))
 
-      # sample population mean of the Normal emission distribution, and it's variance (so the variance between the subject specific means)
+      # sample population mean (and regression parameters if covariates) of the Normal emission distribution, and it's variance (so the variance between the subject specific means)
+      # note: the posterior is thus one of a Bayesian linear regression because of the optional regression parameters
       for(q in 1:n_dep){
-        emiss_mu0_n                 <- solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*%
-          (t(xx[[1 + q]]) %*% emiss_c_mu[[i]][[q]] + emiss_K0[[q]] %*% emiss_mu0[[q]][i])
-        emiss_a_n                   <- (emiss_nu[[q]] + n_subj) / 2
-        emiss_b_n                   <- (emiss_nu[[q]] * emiss_V[[q]][i]) / 2 + (t(emiss_c_mu[[i]][[q]]) %*% emiss_c_mu[[i]][[q]] + t(emiss_mu0[[q]][i]) %*% emiss_K0[[q]] %*% emiss_mu0[[q]][i] - t(emiss_mu0_n) %*%
-                                                                                  (t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% emiss_mu0_n) / 2
-        emiss_V_mu[[i]][[q]]       <- solve(rgamma(1, shape = emiss_a_n, rate = emiss_b_n))
-        emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
+        emiss_mu0_n                    <- solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% (t(xx[[1 + q]]) %*% emiss_c_mu[[i]][[q]] + emiss_K0[[q]] %*% emiss_mu0[[q]][i])
+        emiss_a_mu_n                   <- (emiss_K0[[q]] + n_subj) / 2
+        emiss_b_mu_n                   <- (emiss_nu[[q]] * emiss_V[[q]][i]) / 2 + (t(emiss_c_mu[[i]][[q]]) %*% emiss_c_mu[[i]][[q]] +
+                                                                                t(emiss_mu0[[q]][,i]) %*% emiss_K0[[q]] %*% emiss_mu0[[q]][,i] -
+                                                                                t(emiss_mu0_n) %*% (t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% emiss_mu0_n) / 2
+        emiss_V_mu[[i]][[q]]       <- solve(rgamma(1, shape = emiss_a_mu_n, rate = emiss_b_mu_n))
+        emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
       }
 
       # Sample subject values  -----------
@@ -695,54 +685,29 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
         }
       }
       # Sample subject values for normal emission distribution using Gibbs sampler   ---------
-      for(q in 1:n_dep){
-        for (s in 1:n_subj){
-          # Sample the fixed (= POOLED) over subjects variance of the Normal emission distribution
-          # Is this correct? if calculate variance over all observations of one state var gets tooo small
-          # But double check if this is correct / other way
-          n_cond_y[s]       <- length(cond_y[[s]][[i]][[q]])
-          emiss_var_a_n     <- emiss_a0[[q]][i] / 2 + n_cond_y[s]
-          emiss_var_b_n     <- emiss_b0[[q]][i] + matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], nrow = 1) %*% matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], ncol = 1) / 2
-          ss_subj[s]        <- solve(rgamma(1, shape = emiss_var_a_n, scale = emiss_var_b_n))
-        }
-        emiss_c_V[[i]][[q]] <- sum((n_cond_y - 1) * ss_subj) / (sum(n_cond_y) - n_subj)
-      }
 
-      # Sample subject values for normal emission distribution using Gibbs sampler   ---------
+      # population level, conditional probabilities, seperate for each dependent variable
       for(q in 1:n_dep){
         for (s in 1:n_subj){
-          ss_subj[s] <- (matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], nrow = 1) %*%
+          ss_subj[s] <- t(matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], nrow = 1) %*%
                            matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], ncol = 1))
           n_cond_y[s]       <- length(cond_y[[s]][[i]][[q]])
         }
-        alpha_cc <- sum(n_cond_y) + emiss_a0[[q]][i]
-        beta_cc <- (sum(ss_subj) + 2 * emiss_b0[[q]][i])/2
-        emiss_c_V[[i]][[q]] <- emiss_var_bar[[q]][iter, i] <- solve(rgamma(1, shape = alpha_cc, rate = beta_cc))
-
-#        for (s in 1:n_subj){
-          # Sample the fixed (= POOLED) over subjects variance of the Normal emission distribution
-          # Is this correct? if calculate variance over all observations of one state var gets tooo small
-          # But double check if this is correct / other way
-#          n_cond_y[s]       <- length(cond_y[[s]][[i]][[q]])
-#          emiss_var_a_n     <- emiss_a0[[q]][i] + n_cond_y[s] / 2
-#          emiss_var_b_n     <- emiss_b0[[q]][i] + (matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], nrow = 1) %*% matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], ncol = 1)) / 2
-#          ss_subj[s]        <- solve(rgamma(1, shape = emiss_var_a_n, scale = emiss_var_b_n))
-#        }
-#       emiss_c_V[[i]][[q]] <- sum((n_cond_y - 1) * ss_subj) / (sum(n_cond_y) - n_subj)
-#        emiss_var_bar[[q]][iter, i] <-  emiss_c_V[[i]][[q]]
+        emiss_a_resvar_n <- sum(n_cond_y) / 2 + emiss_a0[[q]][i]
+        emiss_b_resvar_n <- (sum(ss_subj) + 2 * emiss_b0[[q]][i]) / 2
+        emiss_c_V[[i]][[q]] <- emiss_var_bar[[q]][iter, i] <- solve(rgamma(1, shape = emiss_a_resvar_n, rate = emiss_b_resvar_n))
       }
 
-
-      ### DOUBLE CHECK BELOW PART!!
+      ### sampling subject specific means for the emission distributions, assuming known mean and var, see Lynch p. 244
       for(q in 1:n_dep){
+        emiss_c_V_subj    <- (emiss_V_mu[[i]][[q]] * emiss_c_V[[i]][[q]]) / (2 * emiss_V_mu[[i]][[q]] + emiss_c_V[[i]][[q]])
         for (s in 1:n_subj){
-          n_cond_y[s]       <- length(cond_y[[s]][[i]][[q]])
-          emiss_mu0_subj_n  <- (n_subj * emiss_c_mu_bar[[i]][[q]] + sum(cond_y[[s]][[i]][[q]])) / (n_subj + n_cond_y[s])
-          emiss[[s]][[q]][i,1] <- PD_subj[[s]][iter, ((q - 1) * m + i)] <- rnorm(1, emiss_mu0_subj_n, sqrt(emiss_V_mu[[i]][[q]]))
+          emiss_mu0_subj_n  <- (emiss_V_mu[[i]][[q]] * sum(cond_y[[s]][[i]][[q]]) +  emiss_c_V[[i]][[q]] * c(t(emiss_c_mu_bar[[i]][[q]]) %*% xx[[q+1]][s,])) /
+                               (n_cond_y[s] * emiss_V_mu[[i]][[q]] + emiss_c_V[[i]][[q]])
+          emiss[[s]][[q]][i,1] <- PD_subj[[s]][iter, ((q - 1) * m + i)] <- emiss_c_mu[[i]][[q]][s,1] <- rnorm(1, emiss_mu0_subj_n, sqrt(emiss_c_V_subj))
           emiss[[s]][[q]][i,2] <- PD_subj[[s]][iter, (n_dep * m + (q - 1) * m + i)] <- emiss_c_V[[i]][[q]]
         }
       }
-
     }
 
 
