@@ -5,8 +5,9 @@
 \title{Simulate data using a multilevel hidden Markov model}
 \usage{
 sim_mHMM(n_t, n, data_distr = "categorical", m, n_dep = 1,
-  q_emiss = NULL, gamma, emiss_distr, xx_vec = NULL, beta = NULL,
-  var_gamma = 0.1, var_emiss = NULL, return_ind_par = FALSE)
+  start_state = NULL, q_emiss = NULL, gamma, emiss_distr,
+  xx_vec = NULL, beta = NULL, var_gamma = 0.1, var_emiss = NULL,
+  return_ind_par = FALSE)
 }
 \arguments{
 \item{n_t}{Numeric vector with length 1 denoting the length of the observed
@@ -28,6 +29,12 @@ of hidden states.}
 
 \item{n_dep}{Numeric vector with length 1 denoting the
 number of dependent variables}
+
+\item{start_state}{Optional numeric vector with length 1 denoting in which
+state the simulated state sequence should start. If left unspecified, the
+simulated state for time point 1 is sampled from the initial state
+distribution (which is derived from the transition probability matrix
+gamma).}
 
 \item{q_emiss}{Only to be specified if the data to be simulated represents
 categorical data. Numeric vector with length \code{n_dep} denoting the
@@ -277,7 +284,7 @@ emiss_distr <- list(matrix(c( 5, 1,
                               1.0, 0.2,
                               2.0, 0.1), nrow = m, byrow = TRUE))
 
-data5 <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
+data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.01))
 
 head(data5$states)

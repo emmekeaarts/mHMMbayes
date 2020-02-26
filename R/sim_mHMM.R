@@ -65,6 +65,11 @@
 #'   of hidden states.
 #' @param n_dep Numeric vector with length 1 denoting the
 #'   number of dependent variables
+#' @param start_state Optional numeric vector with length 1 denoting in which
+#'   state the simulated state sequence should start. If left unspecified, the
+#'   simulated state for time point 1 is sampled from the initial state
+#'   distribution (which is derived from the transition probability matrix
+#'   gamma).
 #' @param q_emiss Only to be specified if the data to be simulated represents
 #'   categorical data. Numeric vector with length \code{n_dep} denoting the
 #'   number of observed categories for the categorical emission distribution for
@@ -275,7 +280,7 @@
 #   specified in xx (besides checking that both of them are present)
 
 sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1,
-                     q_emiss = NULL, gamma, emiss_distr, xx_vec = NULL, beta = NULL,
+                     start_state = NULL, q_emiss = NULL, gamma, emiss_distr, xx_vec = NULL, beta = NULL,
                      var_gamma = 0.1, var_emiss = NULL, return_ind_par = FALSE){
 
   #############
@@ -444,7 +449,11 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1,
 
     if(n_t != 0){
       init <- solve(t(diag(m) - sub_gamma[[j]] + 1), rep(1, m))
-      states[((j-1) * n_t + 1), 2] <- sample(x = 1:m, size = 1, prob = init)
+      if (is.null(start_state)){
+        states[((j-1) * n_t + 1), 2] <- sample(x = 1:m, size = 1, prob = init)
+      } else {
+        states[((j-1) * n_t + 1), 2] <- start_state
+      }
       if(data_distr == "categorical"){
         for(i in 1:n_dep){
           obs[((j-1) * n_t + 1), (1+i)] <- sample(x = 1:q_emiss[i], size = 1, prob = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],])
