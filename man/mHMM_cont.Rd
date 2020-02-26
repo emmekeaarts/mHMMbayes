@@ -338,7 +338,7 @@ hyp_pr <- list(
                emiss_b0  = list(rep(1, m), rep(1, m)))
 
 # Run the model on the simulated data:
-out_3st_cont_sim <- mHMM_cont(s_data = data5$obs,
+out_3st_cont_sim <- mHMM_cont(s_data = data_cont$obs,
                     gen = list(m = m, n_dep = n_dep),
                     start_val = c(list(gamma), emiss_distr),
                     emiss_hyp_prior = hyp_pr,
