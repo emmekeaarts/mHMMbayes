@@ -270,6 +270,15 @@
 #'   of the Gibbs sampler. The iterations of the sampler are contained in the
 #'   rows  of the matrix, and the columns contain the group level regression
 #'   coefficients.}
+#'   \item{\code{label_switch}}{A matrix of \code{m} rows and \code{n_dep}
+#'   columns containing the percentage of times the group mean of the emission
+#'   distriubion of state \code{i} was sampled to be a smaller value compared to
+#'   the group mean of of the emission distriubion of state \code{i-1}. If the
+#'   state dependent means of the emission distributions were given in a ranked
+#'   order (low to high) to both the start values and hyper-priors, a high
+#'   percentage in \code{label_switch} indicates that label switching possibly
+#'   poses a problem in the analysis, and further diagnostics (e.g.,
+#'   traceplots and posterior distributions) should be inspected.}
 #'   \item{\code{input}}{Overview of used input specifications: the number of
 #'   states \code{m}, the number of used dependent variables \code{n_dep}, the
 #'   number of iterations \code{J} and the specified burn in period
@@ -499,6 +508,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   }
   emiss_V_mu <- emiss_c_mu_bar <- emiss_c_V <- rep(list(rep(list(NULL),n_dep)), m)
   ss_subj <- n_cond_y <- numeric(n_subj)
+  label_switch <- matrix(0, ncol = n_dep, nrow = m, dimnames = list(c(paste("mu_S", 1:m, sep = "")), dep_labels))
 
 
   # Define objects that are returned from mcmc algorithm ----------------------------
@@ -668,6 +678,12 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
                                                                                 t(emiss_mu0_n) %*% (t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% emiss_mu0_n) / 2
         emiss_V_mu[[i]][[q]]       <- solve(rgamma(1, shape = emiss_a_mu_n, rate = emiss_b_mu_n))
         emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
+        if(i > 1){
+          if(emiss_c_mu_bar[[i]][[q]] < emiss_c_mu_bar[[i-1]][[q]]){
+            label_switch[i,q] <- label_switch[i,q] + 1
+
+          }
+        }
       }
 
       # Sample subject values  -----------
@@ -737,6 +753,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   if(show_progress == TRUE){
     close(pb)
   }
+  label_switch <- round(label_switch / J * 100, 2)
 
   # End of function, return output values --------
   ctime = proc.time()[3]
@@ -749,7 +766,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
               emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
               emiss_mu_bar = emiss_mu_bar, gamma_naccept = gamma_naccept,
               emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar,
-              sample_path = sample_path)
+              sample_path = sample_path, label_switch = label_switch)
   } else {
     out <- list(input = list(m = m, n_dep = n_dep, J = J,
                            burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
@@ -757,7 +774,8 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
                 gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
                 emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
                 emiss_mu_bar = emiss_mu_bar, gamma_naccept = gamma_naccept,
-                emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar)
+                emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar,
+                label_switch = label_switch)
   }
   class(out) <- append(class(out), "mHMM_cont")
   return(out)
