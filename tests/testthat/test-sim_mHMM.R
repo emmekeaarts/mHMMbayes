@@ -9,9 +9,9 @@ q_emiss <- 4
 gamma   <- matrix(c(0.8, 0.1, 0.1,
                     0.2, 0.7, 0.1,
                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
-emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
+emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
                         0.1, 0.1, 0.8, 0.0,
-                        0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
+                        0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
 
 beta      <- rep(list(NULL), 2)
 beta[[1]] <- matrix(c(0.5, 1.0,

@@ -29,11 +29,11 @@ emiss_distr2 <- matrix(c(0.7, 0.3,
 # (small workaround as cannot simulate multivariate data yet)
 set.seed(4231)
 data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss2[1], gamma = gamma,
-                  emiss_distr = emiss_distr1, var_gamma = .5, var_emiss = .5)
+                  emiss_distr = list(emiss_distr1=emiss_distr1), var_gamma = .5, var_emiss = .5)
 
 set.seed(4231)
 data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss2[2], gamma = gamma,
-                  emiss_distr = emiss_distr2, var_gamma = .5, var_emiss = .5)
+                  emiss_distr = list(emiss_distr2=emiss_distr2), var_gamma = .5, var_emiss = .5)
 data3 <- list(states = data1$states, obs = cbind(data1$obs, data2$obs[,2]))
 colnames(data3$obs) <- c("subj", "output_1", "output_2")
 
