@@ -4,9 +4,20 @@
 \alias{mHMM}
 \title{Multilevel hidden  Markov model using Bayesian estimation}
 \usage{
-mHMM(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
-  print_iter, show_progress = TRUE, gamma_hyp_prior = NULL,
-  emiss_hyp_prior = NULL, gamma_sampler = NULL, emiss_sampler = NULL)
+mHMM(
+  s_data,
+  gen,
+  xx = NULL,
+  start_val,
+  mcmc,
+  return_path = FALSE,
+  print_iter,
+  show_progress = TRUE,
+  gamma_hyp_prior = NULL,
+  emiss_hyp_prior = NULL,
+  gamma_sampler = NULL,
+  emiss_sampler = NULL
+)
 }
 \arguments{
 \item{s_data}{A matrix containing the observations to be modelled, where the

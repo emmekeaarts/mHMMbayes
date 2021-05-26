@@ -4,8 +4,16 @@
 \alias{HMM}
 \title{Single-level (i.e., fixed) hidden  Markov model using Bayesian estimation}
 \usage{
-HMM(s_data, gen, start_val, mcmc, return_path = FALSE,
-  show_progress = TRUE, gamma_prior = NULL, emiss_prior = NULL)
+HMM(
+  s_data,
+  gen,
+  start_val,
+  mcmc,
+  return_path = FALSE,
+  show_progress = TRUE,
+  gamma_prior = NULL,
+  emiss_prior = NULL
+)
 }
 \arguments{
 \item{s_data}{A matrix containing the observations to be modelled of one
