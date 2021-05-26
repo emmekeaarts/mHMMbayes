@@ -47,10 +47,10 @@ out_2st_simb <- mHMM(s_data = data3$obs,
 test_that("expected errors obtain gamma and emiss", {
   expect_error(obtain_gamma(out_2st_simb, level = 'a'), " should be set to either group or subject")
   ab <- c(2,3,4)
-  expect_error(obtain_gamma(ab), "should be from the class mHMM")
+  expect_error(obtain_gamma(ab), "should either be from the class mHMM or mHMM_cont")
   expect_error(obtain_gamma(out_2st_simb, burn_in = 10), "burn in period should be at least 2 points smaller")
   expect_error(obtain_emiss(out_2st_simb, level = 'a'), " should be set to either group or subject")
-  expect_error(obtain_emiss(ab), "should be from the class mHMM")
+  expect_error(obtain_emiss(ab), "should either be from the class mHMM or mHMM_cont")
   expect_error(obtain_emiss(out_2st_simb, burn_in = 10), "burn in period should be at least 2 points smaller")
 })
 

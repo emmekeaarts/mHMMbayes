@@ -75,9 +75,9 @@ test_that("expected errors simulating data", {
                         emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1),
                "row of the transition probability matrix gamma should sum up to 1")
   expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
-                        emiss_distr = matrix(c(0.5, 0.5, 0.0, 0.0,
+                        emiss_distr = list(matrix(c(0.5, 0.5, 0.0, 0.0,
                                         0.1, 0.1, 0.8, 0.2,
-                                        0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE),
+                                        0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)),
                         var_gamma = 1, var_emiss = 1),
                "row of the emission distribution matrix should sum up to 1")
   expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma =
@@ -86,14 +86,14 @@ test_that("expected errors simulating data", {
                         emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1),
                paste("matrix gamma should be a", m, "by", m, "matrix"))
   expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
-                        emiss_distr = matrix(c(0.5, 0.5, 0.0, 0.0,
-                                               0.1, 0.1, 0.8, 0.2), nrow = m-1, ncol = q_emiss, byrow = TRUE),
+                        emiss_distr = list(matrix(c(0.5, 0.5, 0.0, 0.0,
+                                               0.1, 0.1, 0.8, 0.2), nrow = m-1, ncol = q_emiss, byrow = TRUE)),
                         var_gamma = 1, var_emiss = 1),
                "rows of the emission distribution matrix should be")
   expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
-                        emiss_distr = matrix(c(0.5, 0.5, 0.0,
+                        emiss_distr = list(matrix(c(0.5, 0.5, 0.0,
                                                0.1, 0.1, 0.8,
-                                               0.1, 0.1, 0.8), nrow = m, ncol = q_emiss-1, byrow = TRUE),
+                                               0.1, 0.1, 0.8), nrow = m, ncol = q_emiss-1, byrow = TRUE)),
                         var_gamma = 1, var_emiss = 1),
                "columns of the emission distribution matrix should be")
 
