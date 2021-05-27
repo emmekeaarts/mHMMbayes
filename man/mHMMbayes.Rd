@@ -3,7 +3,6 @@
 \docType{package}
 \name{mHMMbayes}
 \alias{mHMMbayes}
-\alias{mHMMbayes-package}
 \title{mHMMbayes: multilevel hidden Markov models using Bayesian estimation.}
 \description{
 With the \code{R} package \code{mHMMbayes} you can fit multilevel hidden

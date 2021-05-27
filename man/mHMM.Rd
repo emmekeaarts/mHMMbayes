@@ -4,9 +4,20 @@
 \alias{mHMM}
 \title{Multilevel hidden  Markov model using Bayesian estimation}
 \usage{
-mHMM(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
-  print_iter, show_progress = TRUE, gamma_hyp_prior = NULL,
-  emiss_hyp_prior = NULL, gamma_sampler = NULL, emiss_sampler = NULL)
+mHMM(
+  s_data,
+  gen,
+  xx = NULL,
+  start_val,
+  mcmc,
+  return_path = FALSE,
+  print_iter,
+  show_progress = TRUE,
+  gamma_hyp_prior = NULL,
+  emiss_hyp_prior = NULL,
+  gamma_sampler = NULL,
+  emiss_sampler = NULL
+)
 }
 \arguments{
 \item{s_data}{A matrix containing the observations to be modelled, where the
@@ -398,8 +409,8 @@ m <- 2
 q_emiss <- 3
 gamma <- matrix(c(0.8, 0.2,
                   0.3, 0.7), ncol = m, byrow = TRUE)
-emiss_distr <- matrix(c(0.5, 0.5, 0.0,
-                        0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE)
+emiss_distr <- list(matrix(c(0.5, 0.5, 0.0,
+                        0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE))
 data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 

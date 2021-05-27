@@ -4,10 +4,22 @@
 \alias{sim_mHMM}
 \title{Simulate data using a multilevel hidden Markov model}
 \usage{
-sim_mHMM(n_t, n, data_distr = "categorical", m, n_dep = 1,
-  start_state = NULL, q_emiss = NULL, gamma, emiss_distr,
-  xx_vec = NULL, beta = NULL, var_gamma = 0.1, var_emiss = NULL,
-  return_ind_par = FALSE)
+sim_mHMM(
+  n_t,
+  n,
+  data_distr = "categorical",
+  m,
+  n_dep = 1,
+  start_state = NULL,
+  q_emiss = NULL,
+  gamma,
+  emiss_distr,
+  xx_vec = NULL,
+  beta = NULL,
+  var_gamma = 0.1,
+  var_emiss = NULL,
+  return_ind_par = FALSE
+)
 }
 \arguments{
 \item{n_t}{Numeric vector with length 1 denoting the length of the observed
@@ -201,6 +213,7 @@ Note: the subject specific) initial state distributions (i.e., the
 probability of each of the states at the first time point) needed to simulate
 the data are obtained from the stationary distributions of the subject
 specific transition probability matrices gamma.
+
 
 \code{beta}: As the first element in each row of \code{gamma} is used as
 reference category in the multinomial logistic regression, the first matrix

@@ -5,9 +5,19 @@
 \title{Multilevel hidden  Markov model using Bayesian estimation for continuous
 observations}
 \usage{
-mHMM_cont(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc,
-  return_path = FALSE, print_iter, show_progress = TRUE,
-  gamma_hyp_prior = NULL, gamma_sampler = NULL)
+mHMM_cont(
+  s_data,
+  gen,
+  xx = NULL,
+  start_val,
+  emiss_hyp_prior,
+  mcmc,
+  return_path = FALSE,
+  print_iter,
+  show_progress = TRUE,
+  gamma_hyp_prior = NULL,
+  gamma_sampler = NULL
+)
 }
 \arguments{
 \item{s_data}{A matrix containing the observations to be modelled, where the
