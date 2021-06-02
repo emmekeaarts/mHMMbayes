@@ -451,7 +451,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   } else {
     ###### BUILD in a warning / check if gamma_mu0 is a matrix when given, with  nrows equal to the number of covariates
     gamma_mu0			<- gamma_hyp_prior$gamma_mu0
-    gamma_K0			<- gamma_hyp_prior$gamma_K0
+    gamma_K0			<- diag(gamma_hyp_prior$gamma_K0, nx[1])
     gamma_nu			<- gamma_hyp_prior$gamma_nu
     gamma_V			  <- gamma_hyp_prior$gamma_V
   }
@@ -462,13 +462,13 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
     stop("The hyper-prior values for the Normal emission distribution(s) denoted by emiss_hyp_prior needs to be specified")
   }
 
-  # emiss_mu0: for each dependent variable, emiss_mu0 is a list, with one element for each state.
-  # Each element is a matrix, with number of rows equal to the number of covariates (with the intercept being one cov),
-  # and the number of columns equal to q_emiss[q] - 1.
-  emiss_mu0	  <- rep(list(vector("list", m)), n_dep)
-  emiss_a0	  <- rep(list(vector("list", m)), n_dep)
-  emiss_b0	  <- rep(list(vector("list", m)), n_dep)
-  emiss_V	  <- rep(list(vector("list", m)), n_dep)
+  # emiss_mu0: a list containing n_dep matrices with in the first row the hypothesized mean values of the Normal emission
+  # distributions in each of the states over the m coloumns. Subsequent rows contain the hypothesised regression
+  # coefficients for covariates influencing the state dependent mean value of the normal distribution
+  emiss_mu0	  <- rep(list(NULL), n_dep)
+  emiss_a0	  <- rep(list(NULL), n_dep)
+  emiss_b0	  <- rep(list(NULL), n_dep)
+  emiss_V	  <- rep(list(NULL), n_dep)
   emiss_nu	    <- rep(list(NULL), n_dep)
   emiss_K0     <- rep(list(NULL), n_dep)
   for(q in 1:n_dep){
@@ -673,8 +673,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
       # sample population mean (and regression parameters if covariates) of the Normal emission distribution, and it's variance (so the variance between the subject specific means)
       # note: the posterior is thus one of a Bayesian linear regression because of the optional regression parameters
       for(q in 1:n_dep){
-        # emiss_mu0_n                    <- solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% (t(xx[[1 + q]]) %*% emiss_c_mu[[i]][[q]] + emiss_K0[[q]] %*% emiss_mu0[[q]][i])
-        emiss_mu0_n                    <- solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% (t(xx[[1 + q]]) %*% emiss_c_mu[[i]][[q]] + emiss_K0[[q]] %*% emiss_mu0[[q]][,i]) # CHECK THIS
+        emiss_mu0_n                    <- solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% (t(xx[[1 + q]]) %*% emiss_c_mu[[i]][[q]] + emiss_K0[[q]] %*% emiss_mu0[[q]][,i])
         emiss_a_mu_n                   <- (emiss_K0[[q]] + n_subj) / 2
         emiss_b_mu_n                   <- (emiss_nu[[q]] * emiss_V[[q]][i]) / 2 + (t(emiss_c_mu[[i]][[q]]) %*% emiss_c_mu[[i]][[q]] +
                                                                                      t(emiss_mu0[[q]][,i]) %*% emiss_K0[[q]] %*% emiss_mu0[[q]][,i] -
