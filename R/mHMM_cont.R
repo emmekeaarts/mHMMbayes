@@ -451,7 +451,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   } else {
     ###### BUILD in a warning / check if gamma_mu0 is a matrix when given, with  nrows equal to the number of covariates
     gamma_mu0			<- gamma_hyp_prior$gamma_mu0
-    gamma_K0			<- gamma_hyp_prior$gamma_K0
+    gamma_K0			<- diag(gamma_hyp_prior$gamma_K0, nx[1])
     gamma_nu			<- gamma_hyp_prior$gamma_nu
     gamma_V			  <- gamma_hyp_prior$gamma_V
   }
@@ -462,13 +462,13 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
     stop("The hyper-prior values for the Normal emission distribution(s) denoted by emiss_hyp_prior needs to be specified")
   }
 
-  # emiss_mu0: for each dependent variable, emiss_mu0 is a list, with one element for each state.
-  # Each element is a matrix, with number of rows equal to the number of covariates (with the intercept being one cov),
-  # and the number of columns equal to q_emiss[q] - 1.
-  emiss_mu0	  <- rep(list(vector("list", m)), n_dep)
-  emiss_a0	  <- rep(list(vector("list", m)), n_dep)
-  emiss_b0	  <- rep(list(vector("list", m)), n_dep)
-  emiss_V	  <- rep(list(vector("list", m)), n_dep)
+  # emiss_mu0: a list containing n_dep matrices with in the first row the hypothesized mean values of the Normal emission
+  # distributions in each of the states over the m coloumns. Subsequent rows contain the hypothesised regression
+  # coefficients for covariates influencing the state dependent mean value of the normal distribution
+  emiss_mu0	  <- rep(list(NULL), n_dep)
+  emiss_a0	  <- rep(list(NULL), n_dep)
+  emiss_b0	  <- rep(list(NULL), n_dep)
+  emiss_V	  <- rep(list(NULL), n_dep)
   emiss_nu	    <- rep(list(NULL), n_dep)
   emiss_K0     <- rep(list(NULL), n_dep)
   for(q in 1:n_dep){
@@ -544,7 +544,8 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   gamma_int_bar[1,] <- as.vector(prob_to_int(matrix(gamma_prob_bar[1,], byrow = TRUE, ncol = m, nrow = m)))
   if(nx[1] > 1){
     gamma_cov_bar				<- matrix(, nrow = J, ncol = ((m-1) * m) * (nx[1] - 1))
-    colnames(gamma_cov_bar) <- paste( paste("cov", 1 : (nx[1] - 1), "_", sep = ""), "S", rep(1:m, each = (m-1) * (nx[1] - 1)), "toS", rep(2:m, m * (nx[1] - 1)), sep = "")
+    # colnames(gamma_cov_bar) <- paste( paste("cov", rep(1 : (nx[1] - 1),each = nx[1]-1), "_", sep = ""), "S", rep(1:m, each = (m-1) * (nx[1] - 1)), "toS", rep(2:m, m * (nx[1] - 1)), sep = "")
+    colnames(gamma_cov_bar) <- paste( paste("cov", rep(1 : (nx[1] - 1),each = (m-1)), "_", sep = ""), "S", rep(1:m, each = (m-1) * (nx[1] - 1)), "toS", rep(2:m, m * (nx[1] - 1)), sep = "")
     gamma_cov_bar[1,] <- 0
   } else{
     gamma_cov_bar <- "No covariates where used to predict the transition probability matrix"
@@ -561,7 +562,8 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
     names(emiss_cov_bar) <- dep_labels
     for(q in 1:n_dep){
       if(nx[1 + q] > 1){
-        colnames(emiss_cov_bar[[q]]) <-  paste( paste("cov", 1 : (nx[1 + q] - 1), "_", sep = ""), "mu_S", rep(1:m, each = (nx[1 + q] - 1)), sep = "")
+        # colnames(emiss_cov_bar[[q]]) <-  paste( paste("cov", rep(1 : (nx[1+q] - 1),each = nx[1+q]-1), "_", sep = ""), "mu_S", rep(1:m, each = (nx[1 + q] - 1)), sep = "")
+        colnames(emiss_cov_bar[[q]]) <-  paste( paste("cov", 1 : (nx[1+q] - 1), "_", sep = ""), "mu_S", rep(1:m, each = (nx[1 + q] - 1)), sep = "")
         emiss_cov_bar[[q]][1,] <- 0
       } else {
         emiss_cov_bar[[q]] <- "No covariates where used to predict the emission probabilities for this outcome"
@@ -629,8 +631,8 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
       # population level, transition matrix
       trans_pooled			  <- factor(c(unlist(sapply(trans, "[[", i)), c(1:m)))
       gamma_mle_pooled		<- optim(gamma_int_mle0, llmnl_int, Obs = trans_pooled,
-                                   n_cat = m, method = "BFGS", hessian = TRUE,
-                                   control = list(fnscale = -1))
+                                 n_cat = m, method = "BFGS", hessian = TRUE,
+                                 control = list(fnscale = -1))
       gamma_int_mle_pooled[[i]]  <- gamma_mle_pooled$par
       gamma_pooled_ll[[i]]			<- gamma_mle_pooled$value
 
@@ -640,13 +642,13 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
 
         # subject level, transition matrix
         gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_int_frac, Obs = c(trans[[s]][[i]], c(1:m)),
-                                 n_cat = m, pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt,
-                                 method="BFGS", hessian = TRUE, control = list(fnscale = -1))
+                               n_cat = m, pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt,
+                               method="BFGS", hessian = TRUE, control = list(fnscale = -1))
         if(gamma_out$convergence == 0){
-           subj_data[[s]]$gamma_converge[i] <- 1
-           subj_data[[s]]$gamma_int_mle[i,] <- gamma_out$par
-           subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<-
-              mnlHess_int(int = gamma_out$par, Obs = c(trans[[s]][[i]], c(1:m)), n_cat =  m)
+          subj_data[[s]]$gamma_converge[i] <- 1
+          subj_data[[s]]$gamma_int_mle[i,] <- gamma_out$par
+          subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<-
+            mnlHess_int(int = gamma_out$par, Obs = c(trans[[s]][[i]], c(1:m)), n_cat =  m)
         } else {
           subj_data[[s]]$gamma_converge[i] <- 0
           subj_data[[s]]$gamma_int_mle[i,] <- rep(0, m - 1)
@@ -671,19 +673,26 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
       # sample population mean (and regression parameters if covariates) of the Normal emission distribution, and it's variance (so the variance between the subject specific means)
       # note: the posterior is thus one of a Bayesian linear regression because of the optional regression parameters
       for(q in 1:n_dep){
-        emiss_mu0_n                    <- solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% (t(xx[[1 + q]]) %*% emiss_c_mu[[i]][[q]] + emiss_K0[[q]] %*% emiss_mu0[[q]][i])
+        emiss_mu0_n                    <- solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% (t(xx[[1 + q]]) %*% emiss_c_mu[[i]][[q]] + emiss_K0[[q]] %*% emiss_mu0[[q]][,i])
         emiss_a_mu_n                   <- (emiss_K0[[q]] + n_subj) / 2
         emiss_b_mu_n                   <- (emiss_nu[[q]] * emiss_V[[q]][i]) / 2 + (t(emiss_c_mu[[i]][[q]]) %*% emiss_c_mu[[i]][[q]] +
-                                                                                t(emiss_mu0[[q]][,i]) %*% emiss_K0[[q]] %*% emiss_mu0[[q]][,i] -
-                                                                                t(emiss_mu0_n) %*% (t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% emiss_mu0_n) / 2
+                                                                                     t(emiss_mu0[[q]][,i]) %*% emiss_K0[[q]] %*% emiss_mu0[[q]][,i] -
+                                                                                     t(emiss_mu0_n) %*% (t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% emiss_mu0_n) / 2
         emiss_V_mu[[i]][[q]]       <- solve(rgamma(1, shape = emiss_a_mu_n, rate = emiss_b_mu_n))
-        emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
-        if(i > 1){
-          if(emiss_c_mu_bar[[i]][[q]] < emiss_c_mu_bar[[i-1]][[q]]){
-            label_switch[i,q] <- label_switch[i,q] + 1
-
-          }
+        if(all(dim(emiss_V_mu[[i]][[q]]) == c(1,1))){ # CHECH THIS
+          # emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(as.numeric(emiss_V_mu[[i]][[q]]) * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))) # This step may produce negative values which is not acceptable
+          emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(diag(as.numeric(emiss_V_mu[[i]][[q]]) * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))))
+        } else {
+          # emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
+          emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(diag(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))))
         }
+        # emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
+        # if(i > 1){
+        #   if(emiss_c_mu_bar[[i]][[q]] < emiss_c_mu_bar[[i-1]][[q]]){
+        #     label_switch[i,q] <- label_switch[i,q] + 1
+        #
+        #   }
+        # }
       }
 
       # Sample subject values  -----------
@@ -706,7 +715,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
       for(q in 1:n_dep){
         for (s in 1:n_subj){
           ss_subj[s] <- t(matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], nrow = 1) %*%
-                           matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], ncol = 1))
+                            matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], ncol = 1))
           n_cond_y[s]       <- length(cond_y[[s]][[i]][[q]])
         }
         emiss_a_resvar_n <- sum(n_cond_y) / 2 + emiss_a0[[q]][i]
@@ -719,7 +728,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
         emiss_c_V_subj    <- (emiss_V_mu[[i]][[q]] * emiss_c_V[[i]][[q]]) / (2 * emiss_V_mu[[i]][[q]] + emiss_c_V[[i]][[q]])
         for (s in 1:n_subj){
           emiss_mu0_subj_n  <- (emiss_V_mu[[i]][[q]] * sum(cond_y[[s]][[i]][[q]]) +  emiss_c_V[[i]][[q]] * c(t(emiss_c_mu_bar[[i]][[q]]) %*% xx[[q+1]][s,])) /
-                               (n_cond_y[s] * emiss_V_mu[[i]][[q]] + emiss_c_V[[i]][[q]])
+            (n_cond_y[s] * emiss_V_mu[[i]][[q]] + emiss_c_V[[i]][[q]])
           emiss[[s]][[q]][i,1] <- PD_subj[[s]][iter, ((q - 1) * m + i)] <- emiss_c_mu[[i]][[q]][s,1] <- rnorm(1, emiss_mu0_subj_n, sqrt(emiss_c_V_subj))
           emiss[[s]][[q]][i,2] <- PD_subj[[s]][iter, (n_dep * m + (q - 1) * m + i)] <- emiss_c_V[[i]][[q]]
         }
@@ -741,12 +750,13 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
       ))
       if(nx[1+q] > 1){
         emiss_cov_bar[[q]][iter, ]  <- as.vector(unlist(lapply(
-          lapply(emiss_mu_int_bar, "[[", q), "[",-1,)
+          # lapply(emiss_mu_int_bar, "[[", q), "[",-1,)
+          lapply(emiss_c_mu_bar, "[[", q), "[",-1,) # CHECK THIS
         ))
       }
       emiss_varmu_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_V_mu, "[[", q)))
     }
-      if(show_progress == TRUE){
+    if(show_progress == TRUE){
       utils::setTxtProgressBar(pb, iter)
     }
   }
@@ -760,16 +770,16 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   message(paste("Total time elapsed (hh:mm:ss):", hms(ctime-itime)))
   if(return_path == TRUE){
     out <- list(input = list(m = m, n_dep = n_dep, J = J,
-                           burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
-              PD_subj = PD_subj, gamma_int_subj = gamma_int_subj,
-              gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
-              emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
-              emiss_mu_bar = emiss_mu_bar, gamma_naccept = gamma_naccept,
-              emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar,
-              sample_path = sample_path, label_switch = label_switch)
+                             burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
+                PD_subj = PD_subj, gamma_int_subj = gamma_int_subj,
+                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
+                emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
+                emiss_mu_bar = emiss_mu_bar, gamma_naccept = gamma_naccept,
+                emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar,
+                sample_path = sample_path, label_switch = label_switch)
   } else {
     out <- list(input = list(m = m, n_dep = n_dep, J = J,
-                           burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
+                             burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                 PD_subj = PD_subj, gamma_int_subj = gamma_int_subj,
                 gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
                 emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,

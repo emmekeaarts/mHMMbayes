@@ -119,8 +119,8 @@ q_emiss <- 3
 n_dep <- 1
 gamma <- matrix(c(0.8, 0.2,
                   0.2, 0.8), ncol = m, byrow = TRUE)
-emiss_distr <- matrix(c(0.50, 0.45, 0.05,
-                        0.05, 0.05, 0.90), nrow = m, ncol = q_emiss, byrow = TRUE)
+emiss_distr <- list(matrix(c(0.50, 0.45, 0.05,
+                        0.05, 0.05, 0.90), nrow = m, ncol = q_emiss, byrow = TRUE))
 
 # simulate data
 data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss,

@@ -24,11 +24,11 @@ emiss_distr2 <- matrix(c(0.7, 0.3,
 # (small workaround as cannot simulate multivariate data yet)
 set.seed(4231)
 data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss2[1], gamma = gamma,
-                  emiss_distr = emiss_distr1, var_gamma = .5, var_emiss = .5)
+                  emiss_distr = list(emiss_distr1=emiss_distr1), var_gamma = .5, var_emiss = .5)
 
 set.seed(4231)
 data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss2[2], gamma = gamma,
-                  emiss_distr = emiss_distr2, var_gamma = .5, var_emiss = .5)
+                  emiss_distr = list(emiss_distr2=emiss_distr2), var_gamma = .5, var_emiss = .5)
 data3 <- list(states = data1$states, obs = cbind(data1$obs, data2$obs[,2]))
 colnames(data3$obs) <- c("subj", "output_1", "output_2")
 
@@ -47,10 +47,10 @@ out_2st_simb <- mHMM(s_data = data3$obs,
 test_that("expected errors obtain gamma and emiss", {
   expect_error(obtain_gamma(out_2st_simb, level = 'a'), " should be set to either group or subject")
   ab <- c(2,3,4)
-  expect_error(obtain_gamma(ab), "should be from the class mHMM")
+  expect_error(obtain_gamma(ab), "should either be from the class mHMM or mHMM_cont")
   expect_error(obtain_gamma(out_2st_simb, burn_in = 10), "burn in period should be at least 2 points smaller")
   expect_error(obtain_emiss(out_2st_simb, level = 'a'), " should be set to either group or subject")
-  expect_error(obtain_emiss(ab), "should be from the class mHMM")
+  expect_error(obtain_emiss(ab), "should either be from the class mHMM or mHMM_cont")
   expect_error(obtain_emiss(out_2st_simb, burn_in = 10), "burn in period should be at least 2 points smaller")
 })
 
