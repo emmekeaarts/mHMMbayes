@@ -10,7 +10,7 @@ all1 <- function(x, emiss, n_dep, data_distr){
     }
   } else if (data_distr == "continuous"){
     for(q in 1:n_dep){
-      inp[[q]] <- outer(x[,q], Y = emiss[[q]][,1], FUN = dnorm, sd = rep(sqrt(emiss[[q]][,2]), each = dim(x)[1]))
+      inp[[q]] <- outer(x[,q], Y = emiss[[q]][,1], FUN = stats::dnorm, sd = rep(sqrt(emiss[[q]][,2]), each = dim(x)[1]))
     }
   }
   allprobs <- Reduce("*", inp)

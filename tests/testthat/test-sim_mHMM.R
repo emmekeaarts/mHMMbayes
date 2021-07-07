@@ -89,7 +89,7 @@ test_that("expected errors simulating data", {
                         emiss_distr = list(matrix(c(0.5, 0.5, 0.0, 0.0,
                                                0.1, 0.1, 0.8, 0.2), nrow = m-1, ncol = q_emiss, byrow = TRUE)),
                         var_gamma = 1, var_emiss = 1),
-               "rows of the emission distribution matrix should be")
+               "rows of emission distribution matrix in element")
   expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
                         emiss_distr = list(matrix(c(0.5, 0.5, 0.0,
                                                0.1, 0.1, 0.8,

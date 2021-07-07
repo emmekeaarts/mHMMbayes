@@ -300,8 +300,8 @@ emiss_distr <- list(matrix(c( 5, 1,
 data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.01))
 
-head(data5$states)
-head(data5$obs)
+head(data_cont$states)
+head(data_cont$obs)
 }
 \seealso{
 \code{\link{mHMM}} for analyzing multilevel hidden Markov data.
