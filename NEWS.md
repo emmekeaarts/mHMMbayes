@@ -1,3 +1,9 @@
+# mHMM bayes (vary emiss version)
+This release focusses on the possibility to model data with different distributions (categorical and continuous) using the multilevel HMM. 
+* The function sim_mHMM to simulate multivel HMM data is extended such that data with varying types of emission distributions can be simulated
+* new function: mHMM_vary 
+     * the structure of the returned object PD_subj is changed. PD_subj contains the subject level paremter estimates and log likelihood over the iterations of the MCMC sampler. Instead of a list containing one matrix per subject containing all parameters, PD_subj is now a list of lists, one list per subject containing the elements `trans_prob`, `cat_emiss`, `cont_emiss`, and `log_likl` which contain the parameter esimates over the iterations of the transition probabilities gamma, the categorical emission distribution, and the continious emission distribuituion, respectiviely, and the log likelihood over the iterations. 
+
 
 # mHMMbayes (development version)
 ## Speed

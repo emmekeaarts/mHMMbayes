@@ -30,11 +30,12 @@ specific transition probability matrices gamma and emission distributions
 \item{n}{Numeric vector with length 1 denoting the number of subjects for
 which data is simulated.}
 
-\item{data_distr}{String vector with lenght 1 denoting the observation type
-of the data to be simulated. Should be set to either \code{'categorical'}
-or \code{'continuous'}. Note that when simulating multivariate data, all
-dependent variables are assumed to be of the same observation type. The
-default equals to \code{data_distr = 'categorical'}.}
+\item{data_distr}{String vector with either length 1 or length \code{n_dep}
+describing the observation type of the data to be simulated. Currently
+supported are \code{'categorical'} and \code{'continuous'}. When
+\code{'data_distr'} contains 1 value, the observation type is assumed equal
+over all dependent variables. The default equals to \code{data_distr =
+'categorical'}.}
 
 \item{m}{Numeric vector with length 1 denoting the number
 of hidden states.}
@@ -48,10 +49,12 @@ simulated state for time point 1 is sampled from the initial state
 distribution (which is derived from the transition probability matrix
 gamma).}
 
-\item{q_emiss}{Only to be specified if the data to be simulated represents
+\item{q_emiss}{Only to be specified if the data to be simulated contains
 categorical data. Numeric vector with length \code{n_dep} denoting the
-number of observed categories for the categorical emission distribution for
-each of the dependent variables.}
+number of observed categories for dependent variables with a categorical
+emission distribution. When dependent variables are a mix of catagorical
+and continous distributions, the vector equals 0 for continous dependent
+variables.}
 
 \item{gamma}{A matrix with \code{m} rows and \code{m} columns containing the
 average population transition probability matrix used for simulating the
@@ -182,8 +185,8 @@ The following components are returned by the function \code{sim_mHMM}:
 }
 }
 \description{
-\code{sim_mHMM} simulates data for multiple subjects, for which the data have
-either categorical or continuous (i.e., normally distributed)
+\code{sim_mHMM} simulates data for multiple subjects, for which the data can have
+(a combination of) a categorical or continuous (i.e., normally distributed)
 observations that follow a hidden Markov model (HMM) with a multilevel
 structure. The multilevel structure implies that each subject is allowed to
 have its own set of parameters, and that the parameters at the subject level
@@ -300,8 +303,8 @@ emiss_distr <- list(matrix(c( 5, 1,
 data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.01))
 
-head(data5$states)
-head(data5$obs)
+head(data_cont$states)
+head(data_cont$obs)
 }
 \seealso{
 \code{\link{mHMM}} for analyzing multilevel hidden Markov data.
