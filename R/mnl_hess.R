@@ -1,6 +1,7 @@
 #' @keywords internal
 # Obtain mnl -Expected[Hessian]  for intercept only model, bassed on P.Rossi 2004
-mnlHess_int <- function(int, Obs, n_cat){
+# saved below one for use when implementing time varying covariates
+mnlHess_int_old <- function(int, Obs, n_cat){
   k 			<- n_cat - 1
   n_Obs 	<- length(Obs)
   Xint 		<- matrix(c(0, int), byrow = T, ncol = n_cat, nrow = n_Obs)
@@ -20,11 +21,10 @@ mnlHess_int <- function(int, Obs, n_cat){
 
 
 #' @keywords internal
-# faster version but dus not work for n_cat = 2, still repair
-mnlHess_int2 <- function(int, Obs, n_cat){
+mnlHess_int <- function(int, Obs, n_cat){
   n_Obs 	<- length(Obs)
-  betas   <- c(0, int)
+  betas   <- matrix(c(0, int), byrow = T, ncol = n_cat)
   prob    <- exp(betas) / sum(exp(betas))
-  Hess    <- (diag(prob[-1]) - outer(prob[-1],prob[-1])) * n_Obs
+  Hess    <- (diag(x = prob[-1], nrow = n_cat-1) - outer(prob[-1],prob[-1])) * n_Obs
   return(Hess)
 }
