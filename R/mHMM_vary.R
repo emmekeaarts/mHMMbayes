@@ -1140,7 +1140,7 @@ mHMM_vary <- function(s_data, gen, data_distr, xx = NULL, start_val, emiss_cont_
                   sample_path = sample_path)
     } else if (n_cont == n_dep){
       out <- list(input = list(m = m, n_dep = n_dep, J = J,
-                               burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
+                               burn_in = burn_in, , data_distr = data_distr, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                   PD_subj = PD_subj, gamma_int_subj = gamma_int_subj,
                   gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
                   emiss_cont_cov_bar = emiss_cont_cov_bar, gamma_prob_bar = gamma_prob_bar,
@@ -1171,7 +1171,7 @@ mHMM_vary <- function(s_data, gen, data_distr, xx = NULL, start_val, emiss_cont_
                   emiss_naccept = emiss_naccept)
     } else if (n_cont == n_dep){
       out <- list(input = list(m = m, n_dep = n_dep, J = J,
-                               burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
+                               burn_in = burn_in, data_distr = data_distr, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                   PD_subj = PD_subj, gamma_int_subj = gamma_int_subj,
                   gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
                   emiss_cont_cov_bar = emiss_cont_cov_bar, gamma_prob_bar = gamma_prob_bar,
