@@ -1,16 +1,19 @@
-#' Multilevel hidden  Markov model using Bayesian estimation
+#' Multilevel hidden  Markov model with time varying covariate to predict gamma using Bayesian estimation
 #'
-#' \code{mHMM} fits a multilevel (also known as mixed or random effects) hidden
-#' Markov model (HMM) to intense longitudinal data with categorical observations
-#' of multiple subjects using Bayesian estimation, and creates an object of
-#' class mHMM. By using a multilevel framework, we allow for heterogeneity in
-#' the model parameters between subjects, while estimating one overall HMM. The
-#' function includes the possibility to add covariates at level 2 (i.e., at the
-#' subject level) and have varying observation lengths over subjects. For a
-#' short description of the package see \link{mHMMbayes}. See
-#' \code{vignette("tutorial-mhmm")} for an introduction to multilevel hidden
-#' Markov models and the package, and see \code{vignette("estimation-mhmm")} for
-#' an overview of the used estimation algorithms.
+#' \code{mHMM_cat_tv} fits a multilevel (also known as mixed or random effects)
+#' hidden Markov model (HMM) with ONE time varying covariate to predict gamma.
+#' The model is designed to be used on intense longitudinal data with
+#' categorical observations of multiple subjects and is fitted using Bayesian
+#' estimation. The function \code{mHMM_cat_tv} creates an object of class mHMM.
+#' By using a multilevel framework, we allow for heterogeneity in the model
+#' parameters between subjects, while estimating one overall HMM. In addition to
+#' one time varying covariate, the function includes the possibility to add time
+#' invariant covariates at level 2 (i.e., at the subject level) and have varying
+#' observation lengths over subjects. For a short description of the package see
+#' \link{mHMMbayes}. See \code{vignette("tutorial-mhmm")} for an introduction to
+#' multilevel hidden Markov models and the package, and see
+#' \code{vignette("estimation-mhmm")} for an overview of the used estimation
+#' algorithms.
 #'
 #' Covariates specified in \code{xx} can either be dichotomous or continuous
 #' variables. Dichotomous variables have to be coded as 0/1 variables.
@@ -47,12 +50,14 @@
 #'   rows represent the observations over time. In \code{s_data}, the first
 #'   column indicates subject id number. Hence, the id number is repeated over
 #'   rows equal to the number of observations for that subject. The subsequent
-#'   columns contain the dependent variable(s). Note that the dependent
-#'   variables have to be numeric, i.e., they cannot be a (set of) factor
-#'   variable(s). The total number of rows are equal to the sum over the number
-#'   of observations of each subject, and the number of columns are equal to the
-#'   number of dependent variables (\code{n_dep}) + 1. The number of
-#'   observations can vary over subjects.
+#'   \code{n_dep} columns contain the dependent variable(s). The last column
+#'   contains the time varying covariate used to predict the transition
+#'   probability matrix gamma. Note that the dependent variables have to be
+#'   numeric, i.e., they cannot be a (set of) factor variable(s). The total
+#'   number of rows are equal to the sum over the number of observations of each
+#'   subject, and the number of columns are equal to the number of dependent
+#'   variables (\code{n_dep}) + 1. The number of observations can vary over
+#'   subjects.
 #' @param gen List containing the following elements denoting the general model
 #'   properties:
 #'   \itemize{\item{\code{m}: numeric vector with length 1 denoting the number
@@ -424,6 +429,9 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   # Initialize data -----------------------------------
   # dependent variable(s), sample size, dimensions gamma and conditional distribuiton
   n_dep			 <- gen$n_dep
+  if(ncol(s_data) != n_dep + 2){
+    stop(paste("The number of columns in s_data should equal ", n_dep + 2, ":", "\n", "first column denoting subject id, subsequently ", n_dep, " column(s) for the dependent variable(s), and a final column denoting the time varying covariate.", sep = ""))
+  }
   dep_labels <- colnames(s_data[,2:(n_dep+1)])
   id         <- unique(s_data[,1])
   n_subj     <- length(id)
@@ -432,7 +440,8 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
     stop("Your data contains factorial variables, which cannot be used as input in the function mHMM. All variables have to be numerical.")
   }
   for(s in 1:n_subj){
-    subj_data[[s]]$y <- as.matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep)
+    subj_data[[s]]$y <- as.matrix(s_data[s_data[,1] == id[s],][,2:(n_dep + 1)], ncol = n_dep)
+    subj_data[[s]]$xx_t <- as.matrix(s_data[s_data[,1] == id[s],][, n_dep + 2], ncol = 1)
   }
   ypooled    <- n <- NULL
   n_vary     <- numeric(n_subj)
@@ -569,7 +578,8 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   # overall
   c <- llk <- numeric(1)
   sample_path <- lapply(n_vary, dif_matrix, cols = J)
-  trans <- rep(list(vector("list", m)), n_subj)
+  trans <- xx_t_state <- rep(list(vector("list", m)), n_subj)
+
 
   # gamma
   gamma_int_mle_pooled <- gamma_pooled_ll <- vector("list", m)
@@ -683,16 +693,20 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
       PD_subj[[s]][iter, sum(m * q_emiss) + m * m + 1] <- llk
 
       # Using the forward probabilites, sample the state sequence in a backward manner.
-      # In addition, saves state transitions in trans, and conditional observations within states in cond_y
+      # In addition, saves:
+        # state transitions in trans,
+        # conditional observations within states in cond_y
+        # time points of sampeld states in time_trans
       trans[[s]]					                  <- vector("list", m)
+      time_trans[[s]]                       <- vector("list", m)
       sample_path[[s]][n_vary[[s]], iter] 	<- sample(1:m, 1, prob = c(alpha[, n_vary[[s]]]))
       for(t in (subj_data[[s]]$n - 1):1){
         sample_path[[s]][t,iter] 	              <- sample(1:m, 1, prob = (alpha[, t] * gamma[[s]][,sample_path[[s]][t + 1, iter]]))
         trans[[s]][[sample_path[[s]][t,iter]]]	<- c(trans[[s]][[sample_path[[s]][t, iter]]], sample_path[[s]][t + 1, iter])
       }
       for (i in 1:m){
-        trans[[s]][[i]] <- c(trans[[s]][[i]], 1:m)
-        trans[[s]][[i]] <- rev(trans[[s]][[i]])
+        trans[[s]][[i]] <- c(rev(trans[[s]][[i]]), 1:m)
+        xx_t_state[[s]][[i]] <- subj_data[[s]]$xx_t[which(sample_path[[s]][,iter] == i)]
         for(q in 1:n_dep){
           cond_y[[s]][[i]][[q]] <- c(subj_data[[s]]$y[sample_path[[s]][, iter] == i, q], 1:q_emiss[q])
         }
