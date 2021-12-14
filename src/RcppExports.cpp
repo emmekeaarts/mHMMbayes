@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // cat_mult_fw_cpp
 List cat_mult_fw_cpp(NumericMatrix allprobs, NumericMatrix gamma, int m, int n, NumericVector delta);
 RcppExport SEXP _mHMMbayes_cat_mult_fw_cpp(SEXP allprobsSEXP, SEXP gammaSEXP, SEXP mSEXP, SEXP nSEXP, SEXP deltaSEXP) {
