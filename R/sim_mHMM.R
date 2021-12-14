@@ -190,12 +190,12 @@
 #'   sequence, consecutively for all subjects. Hence, the id number is repeated
 #'   over rows (with the number of repeats equal to the length of the simulated
 #'   observation sequence \code{T} for each subject).}
-#'   \item{\code{gamma}}{A list containing \code{n} elements with the simulated
+#'   \item{\code{subject_gamma}}{A list containing \code{n} elements with the simulated
 #'   subject specific transition probability matrices \code{gamma}. Only
 #'   returned if \code{return_ind_par} is set to \code{TRUE}.}
-#'   \item{\code{emiss_distr}}{A list containing \code{n} elements with the
+#'   \item{\code{subject_emiss}}{A list containing \code{n} elements with the
 #'   simulated subject specific emission probability matrices
-#'   \code{emiss_distr}. Only returned if \code{return_ind_par} is set to
+#'   \code{subject_emiss}. Only returned if \code{return_ind_par} is set to
 #'   \code{TRUE}.}
 #' }
 #'
