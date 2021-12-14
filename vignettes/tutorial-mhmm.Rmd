@@ -369,7 +369,7 @@ data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
 data2$subject_gamma
 
 ```
-Comamnd *data2$subject_gamma* returns a list containing n elements with the simulated subject specific transition probability matrices gamma.
+Command *data2$subject_gamma* returns a list containing n elements with the simulated subject specific transition probability matrices gamma.
 
 
 Lastly you would like to account for continuous distribution of multiple dependent variables :
