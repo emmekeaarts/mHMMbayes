@@ -319,6 +319,85 @@ graphics::par(old_par)
 
 ```
 
+### Simulating data 
+Knowing that our data follows a hidden Markov model (HMM) with a multilevel structure, we could also want to simulate data for multiple subjects.
+In the multilevel structure each subject is allowed to have its own set of parameters. These parameters at the subject level(level 1) are tied together by normally distributed population distribution at level 2 for each of corresponding parameters. The package provides `sim_mHMM` function that allows a user to simulate data accounting for both heterogeneity between subjects that can be natural and/or unexplained and the fact that subjects parameters can depend on a covariate. 
+Using the function we can simulate either specific number of observations **n_t** for specified number of subjects **n** or simulate
+the transition probability and/or emission distribution matrices for *n* number of subjects(we obtain the later simulation by setting *return_ind_par=TRUE*). The data can be simulated for **n_dep** dependent variables which distribution can be either 'categorical' or 'continuous'(we specify it in **data_distr** variable). 
+
+To simulate desirable data we specify the average population emission distribution(s) of the observations given the hidden states for each of the dependent variables(see examples below for different coding for categorical and continuous distributions) and average transition probability matrix. One could also specify **var_gamma** and/or **var_emiss** representing respectively variance between subjects in transition probability matrix and variance between subjects in the emission distribution(s). The default of both variables is set to *0.1* corresponding yo little variation between subjects.
+Here we can see an example of simulating data for 10 subjects with each 100 observations for *m=3* state hidden Markov Model (HMM). This is done for one dependent variable with *q_emiss=4* categorical outcomes with average emission probability distribution matrix **emiss_distr**. 
+
+```{r simulating states and observations, eval=T }
+n_t     <- 100
+n       <- 10
+m       <- 3
+q_emiss <- 4
+
+#A matrix containing the average population transition probability matrix 
+
+gamma   <- matrix(c(0.8, 0.1, 0.1,
+                  0.2, 0.7, 0.1,
+                  0.2, 0.2, 0.6), ncol = m, byrow = TRUE) 
+emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
+                        0.1, 0.1, 0.8, 0.0,
+                        0.0, 0.0, 0.1, 0.9), 
+                                        nrow = m, ncol = q_emiss, byrow = TRUE) 
+
+data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+                  emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
+head(data1$obs) 
+head(data1$states)
+
+```
+
+We could also want to add covariates matrices for simulating gamma and/or emission probability distribution matrices. We do that by simply including list of covariance matrices *xx_vec* with the first element on the list representing covariance matrix for transition probability matrix and rest representing covariance for each of dependent variables. When specifying covariates we also need to include a list of the regression parameters to predict gamma and/or emission distribution in combination with xx_vec using (multinomial logistic) regression. Here same as with **x_vec** the first element in the list is matrix used to predict the transition probability matrix gamma. The subsequent matrices are used to predict the emission distributions of the dependent variables. To simulate only selected objects using given set of covariates and beta coefficients we can include them in *xx_vec* and *beta* lists positions corresponding to them and set objects the rest as NULL. For coding covariance for continuous data see example below or type '?sim_mHMM' in console. 
+ 
+Here we simulate data including a covariate to predict (only) the transition probability matrix (*Note that it is continuation of example above with univariate cathegorical data*): 
+```{r including a covariate to predict (only) the transition probability matrix, eval=TRUE}
+
+beta      <- rep(list(NULL), 2)
+beta[[1]] <- matrix(c(0.5, 1.0,
+                     -0.5, 0.5,
+                      0.0, 1.0), byrow = TRUE, ncol = 2)
+xx_vec      <- rep(list(NULL),2)
+xx_vec[[1]] <-  c(rep(0,5), rep(1,5))
+data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+                  emiss_distr = emiss_distr, beta = beta, xx_vec = xx_vec,
+                  var_gamma = 1, var_emiss = 1,return_ind_par=TRUE) 
+
+data2$subject_gamma
+
+```
+Comamnd *data2$subject_gamma* returns a list containing n elements with the simulated subject specific transition probability matrices gamma.
+
+
+Lastly you would like to account for continuous distribution of multiple dependent variables :
+```{r simulating multivariate continuous data, eval=F}
+n_t     <- 100
+n       <- 10
+m       <- 3
+n_dep   <- 2
+
+gamma   <- matrix(c(0.8, 0.1, 0.1,
+                    0.2, 0.7, 0.1,
+                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
+
+emiss_distr <- list(matrix(c( 5, 1,
+                             10, 1,
+                             15, 1), nrow = m, byrow = TRUE),
+                     matrix(c(0.5, 0.1,
+                              1.0, 0.2,
+                              2.0, 0.1), nrow = m, byrow = TRUE))
+
+data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
+                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.01))
+
+head(data_cont$states)
+head(data_cont$obs)
+```
+
+
 ### Checking model convergence and label switching
 When using Bayesian estimation procedures, it is strongly advised to check model convergence and label switching. That is, one should check if the algorithm reaches the same solution when a set of different (but often conceptually similar) starting values are used, and if label switching is not a problem. With label switching, the label (i.e., which state represents what) ordering of the states switches over the iterations of the estimation algorithm. For example, what started out as state 1, now becomes state 2. One can check model convergence and label switching visually by inspecting the trace plots of parameters of a set of identical models that used varying starting values. Trace plots are plots of the sampled parameter values over the iterations. First, we fit the model with 2 states again, but with different starting values:
 ```{r loading model convergence, include = FALSE}
