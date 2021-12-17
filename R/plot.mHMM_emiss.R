@@ -60,16 +60,21 @@
 #'                          0.5, 0.5), byrow = TRUE, nrow = m,
 #'                        ncol = q_emiss[4])) # looking therapist
 #'
-#' out_3st <- mHMM(s_data = nonverbal, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),start_val = c(list(start_TM), start_EM),mcmc = list(J = 100, burn_in = 5))
+#' out_3st <- mHMM(s_data = nonverbal,
+#'                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                 start_val = c(list(start_TM), start_EM),
+#'                 mcmc = list(J = 10, burn_in = 5))
 #'
 #' group_emiss3<-obtain_emiss(out_3st,level = "group")
 #' subject_emiss3<-obtain_emiss(out_3st,level = "subject")
 #'
 #' group_labs<-c("voc_patient","look_patient","voc_therapist","look_therapist")
 #'
-#' plot.mHMM_emiss(emiss=subject_emiss3,q_emiss =q_emiss,m=m,n_dep =n_dep,group_labs = group_labs,color = coul,nr_sub = 2)
+#' plot.mHMM_emiss(emiss=subject_emiss3,q_emiss =q_emiss,m=m,n_dep =n_dep,
+#'                 group_labs = group_labs,subj_nr = 2)
 #'
-#' plot.mHMM_emiss(emiss=group_emiss3,q_emiss = q_emiss,m=m,n_dep=n_dep,group_labs = group_labs,color = coul)
+#' plot.mHMM_emiss(emiss=group_emiss3,q_emiss = q_emiss,m=m,n_dep=n_dep,
+#'                 group_labs = group_labs)
 #'
 #'
 #' }
@@ -200,5 +205,4 @@ plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL){
   }
   par(mfrow=c(1,1))
 }
-
 
