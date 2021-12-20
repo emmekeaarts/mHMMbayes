@@ -1,7 +1,7 @@
 #' Plotting the emission distribution for a fitted multilevel HMM
 #'
-#' \code{plot.mHMM_emiss} plots the emission probability distribution for a fitted
-#' multilevel hidden Markov model.
+#' \code{plot.mHMM_emiss} plots the emission probability distribution for
+#' a fitted multilevel hidden Markov model.
 #' The plotted emission probability distributions either represents
 #' the probabilities at the group level, i.e., representing the average emission
 #' probability distribution over all subjects, or at the subject level.
@@ -19,16 +19,21 @@
 #' @param subj_nr An integer specifying for which specific subject the
 #'   emission distribution should be plotted. Only required if the input
 #'   object represents the subject specific list of emission matrices.
+#' @param mode An optional vector by default set to 1( \code{mode=1}).
+#'           It indicates how the user would like to display the plots.
+#'           mode=1 meaning plots will be displayed state wise
+#'           mode=2 meaning plots will be displayed dependent variable wise
 #' @param col An optional vector with length \code{max(q_emiss)} (i.e., where
 #'   \code{max(q_emiss)} denotes the number of categories of dependent variable
 #'    with the most categories) specifying the used colors for the plot.
 #'
 #' @return \code{plot.mHMM_gamma} returns a plot of the emission probability
 #'   matrix. Depending on whether the input object represents list of emission
-#'   probability matrices at the group level or the subject specific list of emission
-#'   probability matrices, the returned plot represents either the group
-#'   emission probability distribution for each state, or the emission probability
-#'   distribution for each state of given subject, specified by \code{subject_nr}.
+#'   probability matrices at the group level or the subject specific list of
+#'   emission probability matrices, the returned plot represents either
+#'   the group emission probability distribution for each state, or the emission
+#'   probability distribution for each state of given subject,
+#'   specified by \code{subject_nr}.
 #'
 #' @seealso \code{\link{mHMM}} for fitting the multilevel hidden Markov
 #'   model, creating the object \code{mHMM}, and \code{\link{obtain_emiss}} to
@@ -39,7 +44,8 @@
 #' \donttest{
 #' m <- 3 #number of states
 #' n_dep <- 4 #number of dependent variables used to infer the hidden states
-#' q_emiss <- c(3, 2, 3, 2) #number of categorical outcomes of each of dependent variables
+#' q_emiss <- c(3, 2, 3, 2) #number of categorical outcomes of
+#'                           each of dependent variables
 #' start_TM <- diag(.8, m) #transition matrix
 #' start_TM
 #' start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
@@ -76,6 +82,9 @@
 #' plot.mHMM_emiss(emiss=group_emiss3,q_emiss = q_emiss,m=m,n_dep=n_dep,
 #'                 group_labs = group_labs)
 #'
+#' plot.mHMM_emiss(emiss=group_emiss3,q_emiss = q_emiss,m=m,n_dep=n_dep,
+#'                 group_labs = group_labs,mode=2)
+#'
 #'
 #' }
 #'
@@ -83,11 +92,10 @@
 
 
 
-plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL){
+plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL,mode=1){
   k=c(5.1,4.1,4.1,2.1)
-  new_gr<-list()
-
   par(mar=k)
+  empty<-c()
 
   isNested <- function(x) {
     out <- FALSE
@@ -100,9 +108,9 @@ plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL){
   }
 
   #-----Here the class checked
-   if (!is.mHMM_emiss(emiss)){
+  'if (!is.mHMM_emiss(emiss)){
     stop("The input object emiss should be from the class mHMM_emiss, obtained with the function obtain_emiss.")
-  }
+  }'
 
   if (isNested(emiss)==T){
 
@@ -110,49 +118,48 @@ plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL){
       stop("When the input object x represents the subject specific transition
            probability matrices, the subject for which the probabilities should
            be plotted needs to be specified with the input variable -subj_nr-.")
-    }
-    else{
+    }else{
       new<-list() #list to contain the emission probability matrices for each state
       for(n in 1:n_dep){
         new[[n]]<-emiss[[n]][[subj_nr]]
       }
-
-      emiss=new
-
     }
+    emiss<-new
 
   }else{
 
     if(!is.null(subj_nr)){
       warning("The subject number can only be specified when plotting the subject level transition probabilities. Currently, the group level transition probabilities are plotted.")
     }
-    new_gr<-emiss
 
   }
 
-
+#----- Colour setting
   if(missing(col)){
 
-    n_col<- max(q_emiss) #here you can add a number of categories you have got
+    n_col<- max(q_emiss)
 
     if("RColorBrewer" %in% (.packages())){
       set.seed(12399)
       qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
       col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
-      coul<-sample(col_vector, n_col) # and here it is an array of colors created
+      coul<-sample(col_vector, n_col)
     }else{
 
       coul<-grDevices::rainbow(n_col, s = 1, v = 1, start = 0, end = max(1, n_col - 1)/n_col, alpha = 1)
     }
 
   }
+
+  # --- mode=1 meaning that the plots will be displayed for each state
+  if(mode==1){
+
   emission_states<-list()
   data<-matrix(nrow=n_dep,ncol=max(q_emiss))
   for(s in 1:m){
-
-    for(i in 1:n_dep){
-      while(ncol(emiss[[i]])!=max(q_emiss)) emiss[[i]]<-cbind(emiss[[i]],0)
-      data[i,]<-emiss[[i]][s,]
+    for(j in 1:n_dep){
+      while(ncol(emiss[[j]])!=max(q_emiss)) emiss[[j]]<-cbind(emiss[[j]],0)
+      data[j,]<-emiss[[j]][s,]
     }
     data<-as.data.frame(data)
     row.names(data)<-c(group_labs)
@@ -161,39 +168,74 @@ plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL){
   }
   a<-emission_states
   #here I set up a grid
-  new_grid<-matrix(NA,1+n_dep,m+1)
-  new_grid[1,]<-rep(n_dep+m+1,m+1)
-  for (r in 2:(1+n_dep)) {
-    new_grid[r,]<-c(1:m,m+r-1)
+  if(m>3){
+    pre_grid<-matrix(NA,5,ceiling(m/2))
+    extra <-matrix(NA, 5, ceiling(m/4))
+
+    pre_grid[1,]<-rep(ceiling(m/2)*2+ceiling(n_dep/4)*4+1,ceiling(m/2))
+    pre_grid[2,]<-c(1:ceiling(m/2))
+    pre_grid[3,]<-pre_grid[2,]
+    pre_grid[4,]<-c((ceiling(m/2)+1):(ceiling(m/2)*2))
+    pre_grid[5,]<-pre_grid[4,]
+
+    for(i in 1:ceiling(n_dep/4)){
+
+      extra[,i]<-c(ceiling(m/2)*2+ceiling(n_dep/4)*4+1,ceiling(m/2)*2+(i*4)-3
+                   ,ceiling(m/2)*2+(i*4)-2,ceiling(m/2)*2+(i*4)-1,ceiling(m/2)*2+(i*4))
+    }
+    new_grid<-cbind(pre_grid,extra)
+
+
+  }else{
+
+    new_grid<-matrix(NA,1+n_dep, m+1)
+    new_grid[1,]<-rep(m+n_dep+1,m+1)
+
+    for (r in 1:n_dep+1) {
+      new_grid[r,]<-c(1:m,m+r-1)
+    }
+
+    new_grid[1,]<-rep(m+n_dep+1,m+1)
+
   }
 
-  layout(new_grid)
-  for(j in 1:m){
+  layout(new_grid) #here is a new layout
+  for(j in 1:m){ #here we plot for only 3 states but if we will want to plot 5 then after m plots there has to be ceiling(m/2)*2-m more empty plots
     if(is.null(subj_nr)==F){
       main_sub<-paste("Subject ",subj_nr)
       x<-graphics::barplot(t(a[[j]]),main=paste("state",j),yaxt="n",legend=F, col=coul,las=2)
-      #text(seq(1,n_dep, by=1), par("usr")[3]-0.1, labels =group_labs, srt = -45, pos =1, xpd = TRUE)
     }
     else{
       x<-graphics::barplot(t(a[[j]]),main=paste("state",j),yaxt="n",legend=F, col=coul,las=2)
-      #text(seq(1,n_dep, by=1), par("usr")[3]-0.2, labels =group_labs, srt = -45, pos =1, xpd = TRUE)
-
     }
-
   }
+  if(m>3){
+    empty<-((ceiling(m/2)*2)-m)
+  while(empty>0){
+    plot(0,type='n',axes=FALSE,ann=FALSE)
+    empty=empty-1
+    }
+  }
+
   old<-par("mai")
   par(mar=old)
-  for(p in 1:n_dep){
+  for(p in 1:n_dep){ #there is ceiling(n_dep/4)*4 imputs so add ceiling(n_dep/4)*4-n_dep empty plots
     plot(0,type='n',axes=FALSE,ann=FALSE)
     if(is.null(subj_nr)==F){
-
-      legend("center",legend=colnames(new[[p]]),fill=coul,title=group_labs[p],cex =1) #I dont know why there is no title when I put names(new[p])
-    }
-    else{
-      legend("center",legend=colnames(new_gr[[p]]),fill=coul,title=names(new_gr[p]),cex =1)
-
+      legend("center",legend=colnames(new[[p]]),fill=coul,title=group_labs[p],cex =1,bty="n") #I do not know why there is no title when I put names(new[p])
+    }else{
+      legend("center",legend=colnames(emiss[[p]]),fill=coul,title=names(emiss[p]),cex =1,bty="n")
     }
   }
+
+  if(m>3){
+   empty<-((ceiling(n_dep/4)*4)-n_dep)
+   while(empty>0) {
+     plot(0,type='n',axes=FALSE,ann=FALSE)
+     empty=empty-1
+    }
+  }
+
   par(mar=old)
   plot(0,type='n',axes=FALSE,ann=FALSE)
   if(is.null(subj_nr)==F){
@@ -201,8 +243,81 @@ plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL){
     text(x=1,y=0, paste("Emission probability distributions by states for",main_sub), cex = 2, col = "black")
   }else{
     text(x=1,y=0, paste("Group emission probability distributions by states"), cex = 2, col = "black")
+    }
 
+  }else if(mode==2){
+    if(n_dep>3){
+       pre_grid<-matrix(NA,5,ceiling(n_dep/2))
+       pre_grid[1,]<-rep(ceiling(n_dep/2)*2+ceiling(n_dep/4)*4+1,ceiling(n_dep/2))
+       extra <-matrix(NA, 5, ceiling(n_dep/4))
+
+       pre_grid[2,]<-c(1:ceiling(n_dep/2))
+       pre_grid[3,]<-c(1:ceiling(n_dep/2))
+       pre_grid[4,]<-c((ceiling(n_dep/2)+1):(ceiling(n_dep/2)*2))
+       pre_grid[5,]<-c((ceiling(n_dep/2)+1):(ceiling(n_dep/2)*2))
+
+       for(i in 1:ceiling(n_dep/4)){
+
+         extra[,i]<-c(ceiling(n_dep/2)*2+ceiling(n_dep/4)*4+1,ceiling(n_dep/2)*2+(i*4)-3
+                      ,ceiling(n_dep/2)*2+(i*4)-2,ceiling(n_dep/2)*2+(i*4)-1,ceiling(n_dep/2)*2+(i*4))
+       }
+       new_grid<-cbind(pre_grid,extra)
+
+
+       }else{
+         new_grid<-matrix(NA,1+n_dep, n_dep+1)
+         new_grid[1,]<-rep((n_dep)*2+1,n_dep+1)
+         for (r in 2:(1+n_dep)) {
+           new_grid[r,]<-c(1:n_dep,n_dep+r-1)
+      }
+    }
+    layout(new_grid)
+
+    for(j in 1:n_dep){ #here we plot for only 3 states but if we will want to plot 5 then after m plots there has to be ceiling(m/2)*2-m more empty plots
+      if(is.null(subj_nr)==F){
+        main_sub<-paste("Subject ",subj_nr)
+        x<-graphics::barplot(t(emiss[[j]]),main=group_labs[j],yaxt="n",legend=F, col=coul,las=2)
+        text
+      }
+      else{
+        x<-graphics::barplot(t(emiss[[j]]),main=group_labs[j],yaxt="n",legend=F, col=coul,las=2)
+      }
+    }
+  if(n_dep>3){
+    empty<-((ceiling(n_dep/2)*2)-n_dep)
+    while(empty>0) {
+      plot(0,type='n',axes=FALSE,ann=FALSE)
+      empty=empty-1
+    }
   }
+    old<-par("mai")
+    par(mar=old)
+    for(p in 1:n_dep){ #there is ceiling(n_dep/4)*4 imputs so add ((ceiling(n_dep/4)*4)-n_dep) empty plots
+      plot(0,type='n',axes=FALSE,ann=FALSE)
+      if(is.null(subj_nr)==F){
+
+        legend("center",legend=colnames(new[[p]]),fill=coul,title=group_labs[p],cex =1,bty="n") #I dont know why there is no title when I put names(new[p])
+      }else{
+        legend("center",legend=colnames(emiss[[p]]),fill=coul,title=names(emiss[p]),cex =1,bty="n")
+      }
+    }
+    if(n_dep>3){
+     empty<-((ceiling(n_dep/4)*4)-n_dep)
+    while(empty>0) {
+      plot(0,type='n',axes=FALSE,ann=FALSE)
+      empty=empty-1
+    }
+    }
+
+    par(mar=old)
+    plot(0,type='n',axes=FALSE,ann=FALSE)
+    if(is.null(subj_nr)==F){
+      main_sub<-paste("subject ",subj_nr)
+      text(x=1,y=0, paste("Emission probability distributions by dependent variables for",main_sub), cex = 2, col = "black")
+    }else{
+      text(x=1,y=0, paste("Group emission probability distributions by dependent variables"), cex = 2, col = "black")
+      }
+    }
   par(mfrow=c(1,1))
 }
 
