@@ -114,24 +114,20 @@ obtain_gamma <- function(object, level = "group", burn_in = NULL){
   colnames(est) <- paste("To state", 1:m)
   rownames(est) <- paste("From state", 1:m)
   if (level == "group"){
-    est[] <- matrix(round(apply(object$gamma_prob_bar[((burn_in + 1): J),], 2, median),3),
-                    byrow = TRUE, ncol = m, nrow = m)
+    gamma_int_est <- matrix(apply(object$gamma_int_bar[((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = m-1, nrow = m)
+    est[]<-round(int_to_prob(gamma_int_est),3)
     est_gamma <- est
   }
   if (level == "subject"){
-  est_gamma <- rep(list(est), n_subj)
-  names(est_gamma) <- paste("Subject", 1:n_subj)
+    est_pre<-matrix(, ncol = m-1, nrow = m)
+    gamma_int_est<-rep(list(est_pre),n_subj)
+    est_gamma <- rep(list(est), n_subj)
+    names(est_gamma) <- paste("Subject", 1:n_subj)
    for(i in 1:n_subj){
-     if(is.mHMM(object)){
-       est_gamma[[i]][] <- matrix(round(apply(object$PD_subj[[i]][burn_in:J, (1 + sum(m * q_emiss)) : (sum(m * q_emiss) + m*m)], 2, median), 3),
-                                  byrow = TRUE, ncol = m, nrow = m)
-     } else if (is.mHMM_cont(object)){
-       est_gamma[[i]][] <- matrix(round(apply(object$PD_subj[[i]][burn_in:J, (1 + m * 2 * n_dep) : (m * 2 * n_dep + m * m)], 2, median), 3),
-                                  byrow = TRUE, ncol = m, nrow = m)
-     } else if (is.mHMM_vary(object)){
-       est_gamma[[i]][] <- matrix(round(apply(object$PD_subj[[i]]$trans_prob[burn_in:J, ], 2, median), 3),
-                                  byrow = TRUE, ncol = m, nrow = m)
-     }
+       gamma_int_est[[i]][] <- matrix(apply(object$gamma_int_subj[[i]][((burn_in + 1): J),], 2, median),
+                                  byrow = TRUE, ncol = m-1, nrow = m)
+       est_gamma[[i]][] <-round(int_to_prob(gamma_int_est[[i]]),3)
+
    }
   }
   class(est_gamma) <- append(class(est_gamma), "mHMM_gamma")

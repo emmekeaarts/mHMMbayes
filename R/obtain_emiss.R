@@ -98,14 +98,16 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
   if (level == "group"){
     if(is.mHMM(object)){
       est <- lapply(q_emiss, dif_matrix, rows = m)
+      emiss_int_est<-lapply(q_emiss-1, dif_matrix, rows = m)
       for(j in 1:n_dep){
         colnames(est[[j]]) <- paste("Category", 1:q_emiss[j])
         rownames(est[[j]]) <- paste("State", 1:m)
       }
       names(est) <- dep_labels
       for(j in 1: n_dep){
-        est[[j]][] <- matrix(round(apply(object$emiss_prob_bar[[j]][((burn_in + 1): J),], 2, median),3),
-                             byrow = TRUE, ncol = q_emiss[j], nrow = m)
+        emiss_int_est[[j]][] <- matrix(apply(object$emiss_int_bar[[j]][((burn_in+1) : J),], 2, median),
+                             byrow = TRUE, ncol = q_emiss[j]-1, nrow = m)
+        est[[j]][]<-round(int_to_prob(emiss_int_est[[j]]),3)
       }
     } else if (is.mHMM_vary(object)){
       est <- lapply(q_emiss, dif_matrix, rows = m)
@@ -117,8 +119,9 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
       if(n_cat > 0){
         for(q in 1:n_cat){
           ind <- which_cat[q]
-          est[[ind]][] <- matrix(round(apply(object$emiss_prob_bar[[q]][((burn_in + 1): J),], 2, median),3),
-                               byrow = TRUE, ncol = q_emiss[ind], nrow = m)
+          emiss_int_est[[ind]][] <- matrix(apply(object$emiss_int_bar[[j]][((burn_in + 1): J),], 2, median), #not sure if I should do anything to it
+                                         byrow = TRUE, ncol = q_emiss[ind]-1, nrow = m)
+          est[[ind]][] <- round(int_to_prob(emiss_int_est[[q]]),3)
         }
       }
       if(n_cont > 0){
@@ -140,6 +143,7 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
   }
   if (level == "subject"){
     est_emiss <- vector("list", n_dep)
+    emiss_int_est<- vector("list", n_dep)
     names(est_emiss) <- dep_labels
     if(is.mHMM(object)){
       for(j in 1:n_dep){
@@ -148,15 +152,20 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
                                        paste("Category", 1:q_emiss[j])))
         est_emiss[[j]] <- rep(list(est), n_subj)
         names(est_emiss[[j]]) <- paste("Subject", 1:n_subj)
+
+        est_int<-matrix(,ncol = q_emiss[j]-1, nrow = m)
+        emiss_int_est[[j]] <- rep(list(est_int), n_subj)
+        names(emiss_int_est[[j]]) <- paste("Subject", 1:n_subj)
+
       }
-      start <- c(0, q_emiss * m)
       for(i in 1:n_subj){
         for(j in 1:n_dep){
-          est_emiss[[j]][[i]][] <- matrix(round(apply(object$PD_subj[[i]][burn_in:J, (sum(start[1:j]) + 1) : sum(start[1:(j+1)])], 2, median), 3),
-                                          byrow = TRUE, ncol = q_emiss[j], nrow = m)
+          emiss_int_est[[j]][[i]][] <- matrix(apply(object$emiss_int_subj[[i]][[j]][((burn_in+1):J),], 2, median),
+                                          byrow = TRUE, ncol = q_emiss[j]-1, nrow = m)
+          est_emiss[[j]][[i]][]<-round(int_to_prob(emiss_int_est[[j]][[i]]),3)
         }
-      }
-    } else if (is.mHMM_vary(object)){
+        }
+    }else if (is.mHMM_vary(object)){
       if(n_cat > 0){
         start <- c(0, q_emiss * m)
         for(q in 1:n_cat){
