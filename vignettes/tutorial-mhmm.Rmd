@@ -248,6 +248,29 @@ plot(gamma_subj, subj_nr = 1, col = rep(rev(brewer.pal(3,"PiYG"))[-2], each = m)
 ```
 
 Note that graphically displaying the transition probabilities becomes more informative as the number of states increase. \
+Lastly, user can also plot the posterior emission probability distribution related to each state of a model. As an input we use objects coming from `obtain_emiss` function:
+```{r emission distributions objects}
+# Group level emission probability distribution list:
+emiss_pop <- obtain_emiss(out_2st)
+# Subject specific parameter estimates:
+emiss_subj <- obtain_emiss(out_2st, level = "subject")
+
+```
+
+We can display distributions grouped by dependent variables showing how for each `n_dep` dependent variable its probabilities are distributed for each  `m` states, or grouped by states, showing how for each of `m` states the `n_dep` dependent variables are distributed:
+
+```{r show barplots of emission probability distribution}
+
+# Emission probability distribution at the group level displayed by states and for subject number 2 displayed by dependent variable  
+
+group_labs<-c("voc_patient","look_patient","voc_therapist","look_therapist")
+
+
+plot(emiss_pop,q_emiss =q_emiss,m=m,n_dep =n_dep, group_labs = group_labs)
+
+plot(emiss_subj,q_emiss =q_emiss,m=m,n_dep =n_dep,group_labs = group_labs,subj_nr = 2,mode=2)
+
+```
 
 
 
@@ -321,12 +344,13 @@ graphics::par(old_par)
 
 ### Simulating data 
 Knowing that our data follows a hidden Markov model (HMM) with a multilevel structure, we could also want to simulate data for multiple subjects.
-In the multilevel structure each subject is allowed to have its own set of parameters. These parameters at the subject level(level 1) are tied together by normally distributed population distribution at level 2 for each of corresponding parameters. The package provides `sim_mHMM` function that allows a user to simulate data accounting for both heterogeneity between subjects that can be natural and/or unexplained and the fact that subjects parameters can depend on a covariate. 
-Using the function we can simulate either specific number of observations **n_t** for specified number of subjects **n** or simulate
-the transition probability and/or emission distribution matrices for *n* number of subjects(we obtain the later simulation by setting *return_ind_par=TRUE*). The data can be simulated for **n_dep** dependent variables which distribution can be either 'categorical' or 'continuous'(we specify it in **data_distr** variable). 
+In the multilevel structure each subject is allowed to have its own set of parameters. These parameters at the subject level(level 1) are tied together by normally distributed population distribution at level 2 for each of corresponding parameters. The package provides `sim_mHMM` function that allows a user to simulate data accounting for both heterogeneity between subjects that can be natural and/or unexplained and the fact that subjects parameters can depend on a covariate(s). 
+Using the function we can simulate specific number of observations `n_t` for specified number of subjects `n`. Moreover, we can simulate
+the transition probability and/or emission distribution matrices for `n` number of subjects(we obtain the simulation only by setting `return_ind_par=TRUE`). 
+Another feature is that the data can be simulated, for `n_dep` dependent variables which distribution can be either 'categorical' or 'continuous'(we specify it in `data_distr` variable). 
 
-To simulate desirable data we specify the average population emission distribution(s) of the observations given the hidden states for each of the dependent variables(see examples below for different coding for categorical and continuous distributions) and average transition probability matrix. One could also specify **var_gamma** and/or **var_emiss** representing respectively variance between subjects in transition probability matrix and variance between subjects in the emission distribution(s). The default of both variables is set to *0.1* corresponding yo little variation between subjects.
-Here we can see an example of simulating data for 10 subjects with each 100 observations for *m=3* state hidden Markov Model (HMM). This is done for one dependent variable with *q_emiss=4* categorical outcomes with average emission probability distribution matrix **emiss_distr**. 
+To simulate desirable data we specify the average population emission distribution(s) of the observations given the hidden states for each of the dependent variables(see examples below for different coding for categorical and continuous distributions) and average transition probability matrix. One could also specify `var_gamma` and/or `var_emiss` representing respectively variance between subjects in transition probability matrix and variance between subjects in the emission distribution(s). The default of both variables is set to $0.1$ corresponding yo little variation between subjects.
+Here we can see an example of simulating data for $10$ subjects with each $100$ observations for `m=3` state hidden Markov Model (HMM). This is done for one dependent variable with `q_emiss=4` categorical outcomes with average emission probability distribution matrix `emiss_distr`. 
 
 ```{r simulating states and observations, eval=T }
 n_t     <- 100
@@ -351,7 +375,9 @@ head(data1$states)
 
 ```
 
-We could also want to add covariates matrices for simulating gamma and/or emission probability distribution matrices. We do that by simply including list of covariance matrices *xx_vec* with the first element on the list representing covariance matrix for transition probability matrix and rest representing covariance for each of dependent variables. When specifying covariates we also need to include a list of the regression parameters to predict gamma and/or emission distribution in combination with xx_vec using (multinomial logistic) regression. Here same as with **x_vec** the first element in the list is matrix used to predict the transition probability matrix gamma. The subsequent matrices are used to predict the emission distributions of the dependent variables. To simulate only selected objects using given set of covariates and beta coefficients we can include them in *xx_vec* and *beta* lists positions corresponding to them and set objects the rest as NULL. For coding covariance for continuous data see example below or type '?sim_mHMM' in console. 
+We could also want to add covariates matrices for simulating gamma and/or emission probability distribution matrices. We do that by simply including list of covariance matrices `xx_vec` with the first element on the list representing covariance matrix for transition probability matrix and rest representing covariance for each of dependent variables. When specifying covariates we also need to include a list of the regression parameters `beta` to predict gamma and/or emission distribution in combination with `xx_vec` using (multinomial logistic) regression. Here same as with `x_vec` the first element in the list is matrix used to predict the transition probability matrix gamma. The subsequent matrices are used to predict the emission distributions of the dependent variables. 
+To simulate only selected objects we include covariates and beta coefficients in positions corresponding in `xx_vec` and `beta` lists. The rest of inputs that we are not interested in should be set to $0$. 
+For coding covariance for continuous data see example below or type '?sim_mHMM' in console. 
  
 Here we simulate data including a covariate to predict (only) the transition probability matrix (*Note that it is continuation of example above with univariate cathegorical data*): 
 ```{r including a covariate to predict (only) the transition probability matrix, eval=TRUE}
@@ -369,10 +395,12 @@ data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
 data2$subject_gamma
 
 ```
-Command *data2$subject_gamma* returns a list containing n elements with the simulated subject specific transition probability matrices gamma.
+
+Command *data2$subject_gamma* returns a list containing $n$ elements with the simulated subject specific transition probability matrices gamma.
 
 
-Lastly you would like to account for continuous distribution of multiple dependent variables :
+Lastly, you could also account for continuous distribution of multiple dependent variables. 
+In the example below `n_dep`(representing number of dependent variables) is set to $2$. We know that dependent variables are continuous and so the matrices we plug to `emiss_distr`(average population emission distributions for each of the dependent variables) are matrices of $m$ rows and $2$ columns(in example we perform simulation for model with `m=2` hidden states). The structure is that in first column in each row i we got the mean of each state i and in the second column includes in each row i the variance of state i of the Normal distribution. We also need to set the observation type of the data `data_distr = 'continuous'` in `sim_mHMM` function.
 ```{r simulating multivariate continuous data, eval=F}
 n_t     <- 100
 n       <- 10
@@ -396,7 +424,7 @@ data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'cont
 head(data_cont$states)
 head(data_cont$obs)
 ```
-
+The output is the first 6 rows of simulated observations and the first 6 rows of simulated states. You could also call *data_cont$subject_gamma* or *data_cont$emiss_distr* to check simulated subject specific transition or emission probability. However, remember that these will be returned only if `return_ind_par` is set to `TRUE` in `sim_mHMM` function.
 
 ### Checking model convergence and label switching
 When using Bayesian estimation procedures, it is strongly advised to check model convergence and label switching. That is, one should check if the algorithm reaches the same solution when a set of different (but often conceptually similar) starting values are used, and if label switching is not a problem. With label switching, the label (i.e., which state represents what) ordering of the states switches over the iterations of the estimation algorithm. For example, what started out as state 1, now becomes state 2. One can check model convergence and label switching visually by inspecting the trace plots of parameters of a set of identical models that used varying starting values. Trace plots are plots of the sampled parameter values over the iterations. First, we fit the model with 2 states again, but with different starting values:
