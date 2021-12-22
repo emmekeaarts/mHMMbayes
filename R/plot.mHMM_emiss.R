@@ -108,9 +108,9 @@ plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL,mod
   }
 
   #-----Here the class checked
-  'if (!is.mHMM_emiss(emiss)){
+  if (!is.mHMM_emiss(emiss)){
     stop("The input object emiss should be from the class mHMM_emiss, obtained with the function obtain_emiss.")
-  }'
+  }
 
   if (isNested(emiss)==T){
 
