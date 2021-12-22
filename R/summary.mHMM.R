@@ -9,7 +9,8 @@ summary.mHMM <- function(object, ...){
   m       <- input$m
   q_emiss <- input$q_emiss
   n_dep   <- input$n_dep
-  gamma_pop <- matrix(round(apply(object$gamma_prob_bar[((burn_in + 1): J),], 2, median),3), byrow = TRUE, ncol = m, nrow = m)
+  gamma_int <- matrix(apply(object$gamma_int_bar[((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = m-1, nrow = m)
+  gamma_pop <- round(int_to_prob(gamma_int),3)
   colnames(gamma_pop) <- paste("To state", 1:m)
   rownames(gamma_pop) <- paste("From state", 1:m)
   cat("State transition probability matrix","\n",  "(at the group level):", "\n", "\n")
