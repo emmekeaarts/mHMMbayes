@@ -92,7 +92,7 @@
 
 
 
-plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL,mode=1){
+plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL,mode=1){ # x instead of emiss , by default
   k=c(5.1,4.1,4.1,2.1)
   par(mar=k)
   empty<-c()
@@ -162,6 +162,7 @@ plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL,mod
       data[j,]<-emiss[[j]][s,]
     }
     data<-as.data.frame(data)
+    #add alternative colnames
     row.names(data)<-c(group_labs)
     emission_states[[s]]<-as.data.frame(data)
     data<-matrix(nrow=n_dep,ncol=max(q_emiss))
@@ -262,7 +263,7 @@ plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL,mod
                       ,ceiling(n_dep/2)*2+(i*4)-2,ceiling(n_dep/2)*2+(i*4)-1,ceiling(n_dep/2)*2+(i*4))
        }
        new_grid<-cbind(pre_grid,extra)
-
+layout.show(new_grid)
 
        }else{
          new_grid<-matrix(NA,1+n_dep, n_dep+1)
@@ -275,7 +276,7 @@ plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL,mod
 
     for(j in 1:n_dep){ #here we plot for only 3 states but if we will want to plot 5 then after m plots there has to be ceiling(m/2)*2-m more empty plots
       if(is.null(subj_nr)==F){
-        main_sub<-paste("Subject ",subj_nr)
+        main_sub<-paste("Subject ",subj_nr) # change the source of title
         x<-graphics::barplot(t(emiss[[j]]),main=group_labs[j],yaxt="n",legend=F, col=coul,las=2)
         text
       }
@@ -295,7 +296,7 @@ plot.mHMM_emiss<- function(emiss,q_emiss,m,n_dep,group_labs,col,subj_nr=NULL,mod
     for(p in 1:n_dep){ #there is ceiling(n_dep/4)*4 imputs so add ((ceiling(n_dep/4)*4)-n_dep) empty plots
       plot(0,type='n',axes=FALSE,ann=FALSE)
       if(is.null(subj_nr)==F){
-
+                                                                  #change it
         legend("center",legend=colnames(new[[p]]),fill=coul,title=group_labs[p],cex =1,bty="n") #I dont know why there is no title when I put names(new[p])
       }else{
         legend("center",legend=colnames(emiss[[p]]),fill=coul,title=names(emiss[p]),cex =1,bty="n")
