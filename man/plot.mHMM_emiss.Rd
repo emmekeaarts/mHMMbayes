@@ -17,11 +17,17 @@ object represents the subject specific transition probability matrices.}
 \item{by_state}{An optional logic variable. It indicates how user would like
 to display the plots. It is set to \code{TRUE} by default and it
 display plots state wise. If dependent variable wise presentation
-is prefered \code{by_state} should be set to \code{FALSE}
+is preferred \code{by_state} should be set to \code{FALSE}
 (\code{by_state=FALSE})}
 
 \item{group_labs}{An optional vector of length \code{n_dep} with names
 for each dependent variable}
+
+\item{cat_labs}{A list of length \code{n_dep} representing labels of
+of categories for each of dependent variable. The list
+consist of \code{n_dep} objects each being a vector
+of size representing the number of dependent variables'
+categories}
 
 \item{col}{An optional vector of length \code{max(q_emiss)} (i.e., where
 \code{max(q_emiss)} denotes the number of categories of dependent variable

@@ -22,7 +22,7 @@
 #' @param by_state An optional logic variable. It indicates how user would like
 #'           to display the plots. It is set to \code{TRUE} by default and it
 #'           display plots state wise. If dependent variable wise presentation
-#'           is prefered \code{by_state} should be set to \code{FALSE}
+#'           is preferred \code{by_state} should be set to \code{FALSE}
 #'           (\code{by_state=FALSE})
 #' @param col An optional vector of length \code{max(q_emiss)} (i.e., where
 #'   \code{max(q_emiss)} denotes the number of categories of dependent variable
@@ -166,17 +166,13 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,group_labs,cat_labs,col)
     new<-x
 
     }
-  group_labs<-vector(mode = "vector", length = n_dep)
+
   #Plugging specified by user dependent variable labels
   if(!missing(group_labs) && length(group_labs)==max(n_dep)){
-    for (k in 1:n_dep) {
-      if (group_labs==""){
-        skip()
-      }else{
+    for (k in which(!is.na(group_labs))) {
         names(x)[k]<-group_labs[k]
       }
 
-    }
     }else if(!missing(group_labs) && length(group_labs)!=max(n_dep)){
     stop("When specifying group labels for the model the length of the vector
            has to be equal to the number of dependent variables.")
@@ -190,11 +186,11 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,group_labs,cat_labs,col)
            cathegories for each of dependent variable")
     }
 
-    for(q in 1:n_dep){
+    for(q in which(!is.na(cat_labs))){
       if(length(cat_labs[[q]])!=q_emiss[q]){
         stop("The vector length is not of the same lenght as the number of cathegories of ", q,"th dependent variable")
       }else
-        colnames(new[[q]])<-cat_labs[[q]]
+        colnames(new[[q]]) <-cat_labs[[q]] #I dont know why it does not work
     }
   }
 
