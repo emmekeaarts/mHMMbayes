@@ -18,7 +18,8 @@
 #'                 of categories for each of dependent variable. The list
 #'                 consist of \code{n_dep} objects each being a vector
 #'                 of size representing the number of dependent variables'
-#'                 categories
+#'                 categories. First object represent labels for first dependent
+#'                 varaibles
 #' @param by_state An optional logic variable. It indicates how user would like
 #'           to display the plots. It is set to \code{TRUE} by default and it
 #'           display plots state wise. If dependent variable wise presentation
@@ -77,9 +78,6 @@
 #'
 #' subject_emiss3<-obtain_emiss(out_3st,level = "subject")
 #'
-#' # setting new dependent variables' labels
-#' group_labs<-c("voc_pat","look_pat","voc_ther","look_ther")
-#'
 #' #plotting
 #' plot(x=subject_emiss3, group_labs = group_labs,subj_nr = 2)
 #'
@@ -88,7 +86,7 @@
 #' plot(x=group_emiss3,group_labs=group_labs,by_state=FALSE)
 #'
 #'
-#' }
+#'
 #'
 #' @export
 
@@ -181,21 +179,17 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,group_labs,cat_labs,col)
   #Plugging specified by user category labels
   if(!missing(cat_labs) && is.list(cat_labs)==F){
       stop("The variable -cat_labs- has to be of a list type")
-    if(length(cat_labs)!=n_dep){
-      stop("The -cat_labs- need to contain n_dep elements of lenght of number of
+  }
+  if(length(cat_labs)!=n_dep){
+    stop("The -cat_labs- need to contain n_dep elements of lenght of number of
            cathegories for each of dependent variable")
     }
-
-    for(q in which(!is.na(cat_labs))){
-      if(length(cat_labs[[q]])!=q_emiss[q]){
-        stop("The vector length is not of the same lenght as the number of cathegories of ", q,"th dependent variable")
+  for(q in which(!is.na(cat_labs))){
+    if(length(cat_labs[[q]])!=q_emiss[q]){
+      stop("The vector length is not of the same lenght as the number of cathegories of ", q,"th dependent variable")
       }else
-        colnames(new[[q]]) <-cat_labs[[q]] #I dont know why it does not work
+        colnames(new[[q]]) <-cat_labs[[q]]
     }
-  }
-
-
-
 
   # Color setting
   if(missing(col)){
@@ -289,9 +283,9 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,group_labs,cat_labs,col)
   for(p in 1:n_dep){
     graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
     if(is.null(subj_nr)==F){
-      graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(x[p]),cex =1,bty="n") #here I checked
+      graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(new[p]),cex =1,bty="n") #here I checked
     }else{
-      graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(x[p]),cex =1,bty="n")
+      graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(new[p]),cex =1,bty="n")
     }
   }
 
@@ -343,10 +337,10 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,group_labs,cat_labs,col)
     for(j in 1:n_dep){ #here we plot for only 3 states but if we will want to plot 5 then after m plots there has to be ceiling(m/2)*2-m more empty plots
       if(is.null(subj_nr)==F){
         main_sub<-paste("Subject ",subj_nr) # change the source of title
-        graphics::barplot(t(x[[j]]),main=names(x)[j],yaxt="n",legend=F, col=coul,las=2)
+        graphics::barplot(t(x[[j]]),main=names(new)[j],yaxt="n",legend=F, col=coul,las=2)
       }
       else{
-        graphics::barplot(t(x[[j]]),main=names(x)[j],yaxt="n",legend=F, col=coul,las=2)
+        graphics::barplot(t(x[[j]]),main=names(new)[j],yaxt="n",legend=F, col=coul,las=2)
       }
     }
   if(n_dep>3){
@@ -363,9 +357,9 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,group_labs,cat_labs,col)
     for(p in 1:n_dep){
       graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
       if(is.null(subj_nr)==F){
-        graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(x[p]),cex =1,bty="n")
+        graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(new[p]),cex =1,bty="n")
       }else{
-        graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(x[p]),cex =1,bty="n")
+        graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(new[p]),cex =1,bty="n")
       }
     }
     if(n_dep>3){
