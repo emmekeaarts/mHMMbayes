@@ -86,7 +86,7 @@
 #' plot(x=group_emiss3,group_labs=group_labs,by_state=FALSE)
 #'
 #'
-#'
+#'}
 #'
 #' @export
 

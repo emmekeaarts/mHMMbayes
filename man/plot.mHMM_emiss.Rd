@@ -27,7 +27,8 @@ for each dependent variable}
 of categories for each of dependent variable. The list
 consist of \code{n_dep} objects each being a vector
 of size representing the number of dependent variables'
-categories}
+categories. First object represent labels for first dependent
+varaibles}
 
 \item{col}{An optional vector of length \code{max(q_emiss)} (i.e., where
 \code{max(q_emiss)} denotes the number of categories of dependent variable
@@ -89,9 +90,6 @@ out_3st <- mHMM(s_data = nonverbal,
 group_emiss3<-obtain_emiss(out_3st,level = "group")
 
 subject_emiss3<-obtain_emiss(out_3st,level = "subject")
-
-# setting new dependent variables' labels
-group_labs<-c("voc_pat","look_pat","voc_ther","look_ther")
 
 #plotting
 plot(x=subject_emiss3, group_labs = group_labs,subj_nr = 2)
