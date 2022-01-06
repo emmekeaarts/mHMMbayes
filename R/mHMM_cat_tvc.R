@@ -56,7 +56,7 @@
 #'   numeric, i.e., they cannot be a (set of) factor variable(s). The total
 #'   number of rows are equal to the sum over the number of observations of each
 #'   subject, and the number of columns are equal to the number of dependent
-#'   variables (\code{n_dep}) + 1. The number of observations can vary over
+#'   variables (\code{n_dep}) + 2. The number of observations can vary over
 #'   subjects.
 #' @param gen List containing the following elements denoting the general model
 #'   properties:
@@ -420,7 +420,7 @@
 #'
 #'
 
-mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, print_iter, show_progress = TRUE,
+mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, print_iter, show_progress = TRUE,
                  gamma_hyp_prior = NULL, emiss_hyp_prior = NULL, gamma_sampler = NULL, emiss_sampler = NULL){
 
   if(!missing(print_iter)){
@@ -686,27 +686,35 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
     # For each subject, obtain sampled state sequence with subject individual parameters ----------
     for(s in 1:n_subj){
       # Run forward algorithm, obtain subject specific forward proababilities and log likelihood
-      forward				<- cat_mult_fw_r_to_cpp(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], gamma = gamma[[s]], n_dep = n_dep, delta=NULL)
+      gamma_t       <- timevar_gamma(int = matrix(gamma_int_subj[[s]][iter,], byrow = TRUE, ncol = m-1),
+                                     bet = matrix(unlist(gamma_c_bet), byrow = TRUE, ncol = m-1),
+                                     xx_t = subj_data[[s]]$xx_t, m = m)
+      forward				<- cat_mult_fw_r_to_cpp(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], gamma = gamma_t, n_dep = n_dep, delta=NULL)
       alpha         <- forward[[1]]
       c             <- max(forward[[2]][, subj_data[[s]]$n])
       llk           <- c + log(sum(exp(forward[[2]][, subj_data[[s]]$n] - c)))
       PD_subj[[s]][iter, sum(m * q_emiss) + m * m + 1] <- llk
 
-      # Using the forward probabilites, sample the state sequence in a backward manner.
+      # Using the forward probabilities, sample the state sequence in a backward manner.
       # In addition, saves:
         # state transitions in trans,
         # conditional observations within states in cond_y
-        # time points of sampeld states in time_trans
+        # time points of sampled states in time_trans
+        # observations of the time dependent covariate per sampled state in xx_t_state
       trans[[s]]					                  <- vector("list", m)
-      time_trans[[s]]                       <- vector("list", m)
+      xx_t_state[[s]]                       <- vector("list", m)
+      # time_trans[[s]]                       <- vector("list", m)
       sample_path[[s]][n_vary[[s]], iter] 	<- sample(1:m, 1, prob = c(alpha[, n_vary[[s]]]))
+      # time_trans[[s]][[sample_path[[s]][n_vary[[s]], iter]]] <- subj_data[[s]]$n
       for(t in (subj_data[[s]]$n - 1):1){
-        sample_path[[s]][t,iter] 	              <- sample(1:m, 1, prob = (alpha[, t] * gamma[[s]][,sample_path[[s]][t + 1, iter]]))
+        sample_path[[s]][t,iter] 	              <- sample(1:m, 1, prob = (alpha[, t] * matrix(gamma_t[t+1,], byrow = TRUE, ncol = m)[,sample_path[[s]][t + 1, iter]]))
         trans[[s]][[sample_path[[s]][t,iter]]]	<- c(trans[[s]][[sample_path[[s]][t, iter]]], sample_path[[s]][t + 1, iter])
+        #  time_trans[[s]] [[sample_path[[s]][t,iter]]] <- t
       }
       for (i in 1:m){
         trans[[s]][[i]] <- c(rev(trans[[s]][[i]]), 1:m)
-        xx_t_state[[s]][[i]] <- subj_data[[s]]$xx_t[which(sample_path[[s]][,iter] == i)]
+        # time_trans[[s]][[i]] <- rev(time_trans[[s]][[i]])
+        xx_t_state[[s]][[i]] <- c(subj_data[[s]]$xx_t[which(sample_path[[s]][,iter] == i)], rep(0,m))
         for(q in 1:n_dep){
           cond_y[[s]][[i]][[q]] <- c(subj_data[[s]]$y[sample_path[[s]][, iter] == i, q], 1:q_emiss[q])
         }
@@ -814,6 +822,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
                                                              mu_int_bar1 = c(t(gamma_mu_int_bar[[i]]) %*% xx[[1]][s,]),
                                                              V_int1 = gamma_V_int[[i]], scalar = gamma_scalar, candcov1 = gamma_candcov_comb)
         gamma_c_int[[i]][s,]		<- PD_subj[[s]][iter, c((sum(m * q_emiss) + 1 + (i - 1) * (m-1)):(sum(m * q_emiss) + (i - 1) * (m-1) + (m-1)))] <- gamma_int_RWout$draw_int
+        gamma_int_subj[[s]][iter, (1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1))] <- gamma_c_int[[i]][s,]
         gamma_int_naccept[s, i]			<- gamma_int_naccept[s, i] + gamma_int_RWout$accept
         gamma_int_subj[[s]][iter, (1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1))] <- gamma_c_int[[i]][s,]
 
@@ -838,7 +847,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
                                                            xx_t_p = .., int_p = gamma_c_int[[i]],
                                                            mu_bet_bar1 = ...,
                                                            V_bet1 = gamma_V_bet[[i]], scalar = gamma_scalar, candcov2 = gamma_bet_candcov_comb)
-      gamma_c_bet[i]		<- gamma_bet_RWout$draw_int
+      gamma_c_bet[[i]]		<- gamma_bet_RWout$draw_int
       gamma_bet_naccept[i]			<- gamma_bet_naccept[i] + gamma_bet_RWout$accept
 
 
