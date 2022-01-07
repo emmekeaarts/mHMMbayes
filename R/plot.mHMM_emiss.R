@@ -199,7 +199,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
     stop("When specifying group labels, in -dep_lab-, the length of the vector
            has to be equal to the number of dependent variables ",n_dep,"and the
            variables of the vectors need to be either strings or NAs")
-    }
+
 
   #Plugging specified by user category labels
   if (missing(cat_lab)==T){
@@ -423,8 +423,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       }
     }
   graphics::par(mfrow=c(1,1))
+    }
 }
-
-
 
 
