@@ -119,7 +119,7 @@
 plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
                            dep_lab,col,legend_cex=1,...){
 
-#inside function checking if the list of class of x is nested (subject specific) or not(group specific)
+  #inside function checking if the list of class of x is nested (subject specific) or not(group specific)
 
   isNested <- function(x) {
     out <- FALSE
@@ -168,11 +168,11 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       m<-dim(x[[1]])[1]
 
       for(b in 1:n_dep){
-      q_emiss[b]<-dim(x[[b]])[2]
+        q_emiss[b]<-dim(x[[b]])[2]
+      }
     }
-  }
 
-    }else{
+  }else{
 
     if(!is.null(subj_nr)){
       warning("The subject number can only be specified when plotting the subject level transition probabilities. Currently, the group level transition probabilities are plotted.")
@@ -187,44 +187,46 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
     new<-list()
     new<-x
 
-    }
+  }
 
   #Plugging specified by user dependent variable labels
   if(!missing(dep_lab) && length(dep_lab)==max(n_dep)){
     for (k in which(!is.na(dep_lab))) {
-        names(x)[k]<-dep_lab[k]
-      }
+      names(x)[k]<-dep_lab[k]
+    }
 
-    }else if(!missing(dep_lab) && length(dep_lab)!=max(n_dep)){
+  }else if(!missing(dep_lab) && length(dep_lab)!=max(n_dep)){
     stop("When specifying group labels, in -dep_lab-, the length of the vector
            has to be equal to the number of dependent variables ",n_dep,"and the
            variables of the vectors need to be either strings or NAs")
 
+  }
 
   #Plugging specified by user category labels
   if (missing(cat_lab)==T){
     for(k in n_dep){
       colnames(new[[k]])<-colnames(new[[k]])
     }
-    }else if(!missing(cat_lab) && is.list(cat_lab)==F){
-      stop("The variable -cat_lab- has to be of a list type.")
-      }else if(length(cat_lab)!=n_dep){
-          stop("The -cat_lab- need to contain n_dep(number of dependent variables)
+  }else if(!missing(cat_lab) && is.list(cat_lab)==F){
+    stop("The variable -cat_lab- has to be of a list type.")
+  }else if(length(cat_lab)!=n_dep){
+    stop("The -cat_lab- need to contain n_dep(number of dependent variables)
            elements of lenght of number of cathegories for each of dependent
            variable.")
-    }
+  }
 
   if(!missing(cat_lab)){
     for(q in which(!is.na(cat_lab))){
       if(length(cat_lab[[q]])!=q_emiss[q]){
         stop("The vector length of the ",q,"th object of -cat_lab- list is not of the same lenght as the number of
               cathegories of ", q,"th dependent variable which is ",q_emiss[q],".")
-        }else if(is.vector(cat_lab[[q]])==F){
-          stop("The ",q,"th list object, of -cat_lab- list, need to be a vector of length equal to ",q_emiss[q]," or NA.")
-        }else{
-          colnames(new[[q]]) <-cat_lab[[q]]
+      }else if(is.vector(cat_lab[[q]])==F){
+        stop("The ",q,"th list object, of -cat_lab- list, need to be a vector of length equal to ",q_emiss[q]," or NA.")
+
+      }else{
+        colnames(new[[q]]) <-cat_lab[[q]]
       }
-      }
+    }
   }
 
 
@@ -251,127 +253,127 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
   # --- by_state==TRUE meaning that the plots will be displayed for each state
   if(by_state==TRUE){
 
-  emission_states<-list()
-  data<-matrix(nrow=n_dep,ncol=max(q_emiss))
-  for(s in 1:m){
-    for(j in 1:n_dep){
-      while(ncol(x[[j]])!=max(q_emiss)) x[[j]]<-cbind(x[[j]],0)
-      data[j,]<-x[[j]][s,]
-    }
-    data<-as.data.frame(data)
-    row.names(data)<-c(names(x))
-    emission_states[[s]]<-as.data.frame(data)
+    emission_states<-list()
     data<-matrix(nrow=n_dep,ncol=max(q_emiss))
-  }
-  a<-emission_states
-
-  #Plotting grid setting
-  if(m>3){
-    pre_grid<-matrix(NA,5,ceiling(m/2))
-    extra <-matrix(NA, 5, ceiling(m/4))
-
-    pre_grid[1,]<-rep(ceiling(m/2)*2+ceiling(n_dep/4)*4+1,ceiling(m/2))
-    pre_grid[2,]<-c(1:ceiling(m/2))
-    pre_grid[3,]<-pre_grid[2,]
-    pre_grid[4,]<-c((ceiling(m/2)+1):(ceiling(m/2)*2))
-    pre_grid[5,]<-pre_grid[4,]
-
-    for(i in 1:ceiling(n_dep/4)){
-
-      extra[,i]<-c(ceiling(m/2)*2+ceiling(n_dep/4)*4+1,ceiling(m/2)*2+(i*4)-3
-                   ,ceiling(m/2)*2+(i*4)-2,ceiling(m/2)*2+(i*4)-1,ceiling(m/2)*2+(i*4))
+    for(s in 1:m){
+      for(j in 1:n_dep){
+        while(ncol(x[[j]])!=max(q_emiss)) x[[j]]<-cbind(x[[j]],0)
+        data[j,]<-x[[j]][s,]
+      }
+      data<-as.data.frame(data)
+      row.names(data)<-c(names(x))
+      emission_states[[s]]<-as.data.frame(data)
+      data<-matrix(nrow=n_dep,ncol=max(q_emiss))
     }
-    new_grid<-cbind(pre_grid,extra)
+    a<-emission_states
+
+    #Plotting grid setting
+    if(m>3){
+      pre_grid<-matrix(NA,5,ceiling(m/2))
+      extra <-matrix(NA, 5, ceiling(m/4))
+
+      pre_grid[1,]<-rep(ceiling(m/2)*2+ceiling(n_dep/4)*4+1,ceiling(m/2))
+      pre_grid[2,]<-c(1:ceiling(m/2))
+      pre_grid[3,]<-pre_grid[2,]
+      pre_grid[4,]<-c((ceiling(m/2)+1):(ceiling(m/2)*2))
+      pre_grid[5,]<-pre_grid[4,]
+
+      for(i in 1:ceiling(n_dep/4)){
+
+        extra[,i]<-c(ceiling(m/2)*2+ceiling(n_dep/4)*4+1,ceiling(m/2)*2+(i*4)-3
+                     ,ceiling(m/2)*2+(i*4)-2,ceiling(m/2)*2+(i*4)-1,ceiling(m/2)*2+(i*4))
+      }
+      new_grid<-cbind(pre_grid,extra)
 
 
-  }else{
-
-    new_grid<-matrix(NA,1+n_dep, m+1)
-    new_grid[1,]<-rep(m+n_dep+1,m+1)
-
-    for (r in 1:n_dep+1) {
-      new_grid[r,]<-c(1:m,m+r-1)
-    }
-
-    new_grid[1,]<-rep(m+n_dep+1,m+1)
-
-  }
-  graphics::layout(new_grid)
-
-  #here we plot for only 3 states but if we will want to plot 5 then after m plots there has to be ceiling(m/2)*2-m more empty plots
-  for(j in 1:m){
-    if(is.null(subj_nr)==F){
-      main_sub<-paste("Subject ",subj_nr)
-      graphics::barplot(t(a[[j]]),main=paste("state",j),yaxt="n",legend=F, col=coul,las=2,...)
-    }
-    else{
-      graphics::barplot(t(a[[j]]),main=paste("state",j),yaxt="n",legend=F, col=coul,las=2,...)
-    }
-  }
-  if(m>3){
-    empty<-((ceiling(m/2)*2)-m)
-  while(empty>0){
-    graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
-    empty=empty-1
-    }
-  }
-
-  old<-graphics::par("mai")
-  graphics::par(mar=old)
-
-  #there is ceiling(n_dep/4)*4 inputs so add ceiling(n_dep/4)*4-n_dep empty plots
-  for(p in 1:n_dep){
-    graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
-    if(is.null(subj_nr)==F){
-      graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(x[p]),cex =legend_cex,bty="n") #here I checked
     }else{
-      graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(x[p]),cex =legend_cex,bty="n")
-    }
-  }
 
-  if(m>3){
-   empty<-((ceiling(n_dep/4)*4)-n_dep)
-   while(empty>0) {
-     graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
-     empty=empty-1
-    }
-  }
+      new_grid<-matrix(NA,1+n_dep, m+1)
+      new_grid[1,]<-rep(m+n_dep+1,m+1)
 
-  graphics::par(mar=old)
+      for (r in 1:n_dep+1) {
+        new_grid[r,]<-c(1:m,m+r-1)
+      }
 
-  graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
-  if(is.null(subj_nr)==F){
-    main_sub<-paste("subject ",subj_nr)
-    graphics::text(x=1,y=0, paste("Emission probability distributions by states for",main_sub), cex = 2, col = "black")
-  }else{
-    graphics::text(x=1,y=0, paste("Group emission probability distributions by states"), cex = 2, col = "black")
+      new_grid[1,]<-rep(m+n_dep+1,m+1)
+
     }
-# Here when we want to plot grouping by dependent variable
+    graphics::layout(new_grid)
+
+    #here we plot for only 3 states but if we will want to plot 5 then after m plots there has to be ceiling(m/2)*2-m more empty plots
+    for(j in 1:m){
+      if(is.null(subj_nr)==F){
+        main_sub<-paste("Subject ",subj_nr)
+        graphics::barplot(t(a[[j]]),main=paste("state",j),yaxt="n",legend=F, col=coul,las=2,...)
+      }
+      else{
+        graphics::barplot(t(a[[j]]),main=paste("state",j),yaxt="n",legend=F, col=coul,las=2,...)
+      }
+    }
+    if(m>3){
+      empty<-((ceiling(m/2)*2)-m)
+      while(empty>0){
+        graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
+        empty=empty-1
+      }
+    }
+
+    old<-graphics::par("mai")
+    graphics::par(mar=old)
+
+    #there is ceiling(n_dep/4)*4 inputs so add ceiling(n_dep/4)*4-n_dep empty plots
+    for(p in 1:n_dep){
+      graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
+      if(is.null(subj_nr)==F){
+        graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(x[p]),cex =legend_cex,bty="n") #here I checked
+      }else{
+        graphics::legend("center",legend=colnames(new[[p]]),fill=coul,title=names(x[p]),cex =legend_cex,bty="n")
+      }
+    }
+
+    if(m>3){
+      empty<-((ceiling(n_dep/4)*4)-n_dep)
+      while(empty>0) {
+        graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
+        empty=empty-1
+      }
+    }
+
+    graphics::par(mar=old)
+
+    graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
+    if(is.null(subj_nr)==F){
+      main_sub<-paste("subject ",subj_nr)
+      graphics::text(x=1,y=0, paste("Emission probability distributions by states for",main_sub), cex = 2, col = "black")
+    }else{
+      graphics::text(x=1,y=0, paste("Group emission probability distributions by states"), cex = 2, col = "black")
+    }
+    # Here when we want to plot grouping by dependent variable
 
   }else if(by_state==FALSE){
 
     if(n_dep>3){
-       pre_grid<-matrix(NA,5,ceiling(n_dep/2))
-       pre_grid[1,]<-rep(ceiling(n_dep/2)*2+ceiling(n_dep/4)*4+1,ceiling(n_dep/2))
-       extra <-matrix(NA, 5, ceiling(n_dep/4))
+      pre_grid<-matrix(NA,5,ceiling(n_dep/2))
+      pre_grid[1,]<-rep(ceiling(n_dep/2)*2+ceiling(n_dep/4)*4+1,ceiling(n_dep/2))
+      extra <-matrix(NA, 5, ceiling(n_dep/4))
 
-       pre_grid[2,]<-c(1:ceiling(n_dep/2))
-       pre_grid[3,]<-c(1:ceiling(n_dep/2))
-       pre_grid[4,]<-c((ceiling(n_dep/2)+1):(ceiling(n_dep/2)*2))
-       pre_grid[5,]<-c((ceiling(n_dep/2)+1):(ceiling(n_dep/2)*2))
+      pre_grid[2,]<-c(1:ceiling(n_dep/2))
+      pre_grid[3,]<-c(1:ceiling(n_dep/2))
+      pre_grid[4,]<-c((ceiling(n_dep/2)+1):(ceiling(n_dep/2)*2))
+      pre_grid[5,]<-c((ceiling(n_dep/2)+1):(ceiling(n_dep/2)*2))
 
-       for(i in 1:ceiling(n_dep/4)){
+      for(i in 1:ceiling(n_dep/4)){
 
-         extra[,i]<-c(ceiling(n_dep/2)*2+ceiling(n_dep/4)*4+1,ceiling(n_dep/2)*2+(i*4)-3
-                      ,ceiling(n_dep/2)*2+(i*4)-2,ceiling(n_dep/2)*2+(i*4)-1,ceiling(n_dep/2)*2+(i*4))
-       }
-       new_grid<-cbind(pre_grid,extra)
+        extra[,i]<-c(ceiling(n_dep/2)*2+ceiling(n_dep/4)*4+1,ceiling(n_dep/2)*2+(i*4)-3
+                     ,ceiling(n_dep/2)*2+(i*4)-2,ceiling(n_dep/2)*2+(i*4)-1,ceiling(n_dep/2)*2+(i*4))
+      }
+      new_grid<-cbind(pre_grid,extra)
 
-       }else{
-         new_grid<-matrix(NA,1+n_dep, n_dep+1)
-         new_grid[1,]<-rep((n_dep)*2+1,n_dep+1)
-         for (r in 2:(1+n_dep)) {
-           new_grid[r,]<-c(1:n_dep,n_dep+r-1)
+    }else{
+      new_grid<-matrix(NA,1+n_dep, n_dep+1)
+      new_grid[1,]<-rep((n_dep)*2+1,n_dep+1)
+      for (r in 2:(1+n_dep)) {
+        new_grid[r,]<-c(1:n_dep,n_dep+r-1)
       }
     }
     graphics::layout(new_grid)
@@ -385,13 +387,13 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
         graphics::barplot(t(x[[j]]),main=names(x)[j],yaxt="n",legend=F, col=coul,las=2,...)
       }
     }
-  if(n_dep>3){
-    empty<-((ceiling(n_dep/2)*2)-n_dep)
-    while(empty>0) {
-      graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
-      empty=empty-1
+    if(n_dep>3){
+      empty<-((ceiling(n_dep/2)*2)-n_dep)
+      while(empty>0) {
+        graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
+        empty=empty-1
+      }
     }
-  }
     old<-graphics::par("mai")
     graphics::par(mar=old)
 
@@ -405,11 +407,11 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       }
     }
     if(n_dep>3){
-     empty<-((ceiling(n_dep/4)*4)-n_dep)
-    while(empty>0) {
-      graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
-      empty=empty-1
-    }
+      empty<-((ceiling(n_dep/4)*4)-n_dep)
+      while(empty>0) {
+        graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
+        empty=empty-1
+      }
     }
 
     graphics::par(mar=old)
@@ -420,10 +422,13 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       graphics::text(x=1,y=0, paste("Emission probability distributions by dependent variables for",main_sub), cex = 2, col = "black")
     }else{
       graphics::text(x=1,y=0, paste("Group emission probability distributions by dependent variables"), cex = 2, col = "black")
-      }
     }
+  }
   graphics::par(mfrow=c(1,1))
-    }
 }
+
+
+
+
 
 
