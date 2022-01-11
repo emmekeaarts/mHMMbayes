@@ -263,14 +263,13 @@ We can display distributions grouped by dependent variables showing how for each
 
 # Emission probability distribution at the group level displayed by states and for subject number 2 displayed by dependent variable  
 
-group_labs<-c("voc_patient","look_patient","voc_therapist","look_therapist")
+plot(emiss_pop)
 
-
-plot(emiss_pop,q_emiss =q_emiss,m=m,n_dep =n_dep, group_labs = group_labs)
-
-plot(emiss_subj,q_emiss =q_emiss,m=m,n_dep =n_dep,group_labs = group_labs,subj_nr = 2,mode=2)
+plot(emiss_subj,subj_nr = 2,by_state=F)
 
 ```
+
+#need comment
 
 
 
