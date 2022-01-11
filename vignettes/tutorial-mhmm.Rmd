@@ -272,7 +272,6 @@ plot(emiss_subj,subj_nr = 2,by_state=F)
 #need comment
 
 
-
 ```{r load 3 and 4 state models, include = FALSE}
 # load("nonv_3st_1000it.rda")
 # out_3st <- out2
