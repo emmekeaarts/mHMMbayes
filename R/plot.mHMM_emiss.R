@@ -102,7 +102,7 @@
 #'
 #'
 #'}
-#'\dontrun{
+#'\dontshow{
 #' plot(x=subject_emiss3,subj_nr = 2,by_state = F,col = c("red","orange",
 #'      "green"))
 #' plot(x=subject_emiss3,subj_nr = 7,by_state = T,col = c("red","orange",
@@ -121,15 +121,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
 
   #inside function checking if the list of class of x is nested (subject specific) or not(group specific)
 
-  isNested <- function(x) {
-    out <- FALSE
-    strout <- utils::capture.output(str(x))
-    idx <- grep("\\$.*List", strout)
-    if (length(idx)) {
-      out <- TRUE
-    }
-    return(out)
-  }
+
 
   #-----Here the class checked
   if (!is.mHMM_emiss(x)){

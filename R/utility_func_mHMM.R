@@ -58,3 +58,13 @@ hms <- function(t){
         formatC(t %% 60, width = 2, format = "d", flag = "0"),
         sep = ":")
 }
+#' @keywords internal
+isNested <- function(x) {
+  out <- FALSE
+  strout <- utils::capture.output(str(x))
+  idx <- grep("\\$.*List", strout)
+  if (length(idx)) {
+    out <- TRUE
+  }
+  return(out)
+}

@@ -119,16 +119,16 @@ plot(x=group_emiss3,by_state=FALSE)
 
 
 }
-\dontrun{
+\dontshow{
 plot(x=subject_emiss3,subj_nr = 2,by_state = F,col = c("red","orange",
      "green"))
-plot(x=subject_emiss3,subj_nr = 7,by_state = T,col = c("red","orange","green"),
-    dep_lab=c("Patient Looking",NA,"Therapist Vocalizing",
+plot(x=subject_emiss3,subj_nr = 7,by_state = T,col = c("red","orange",
+ "green"),dep_lab=c("Patient Looking",NA,"Therapist Vocalizing",
                "Therapist Looking"),cat_lab=list())
 
-plot(x=subject_emiss3,subj_nr = 7,by_state = T,col = c("red","orange","green"),
-     dep_lab=c("Patient Looking",NA,"Therapist Vocalizing",
-     "Therapist Looking"),cat_lab=list(c("low","medium","high"),NA,NA,c("1","3")))
+plot(x=subject_emiss3,subj_nr = 7,by_state = T,col = c("red","orange",
+       "green"),dep_lab=c("Patient Looking",NA,"Therapist Vocalizing",
+"Therapist Looking"),cat_lab=list(c("low","medium","high"),NA,NA,c("1","3")))
 }
 
 }
