@@ -272,6 +272,8 @@ plot(emiss_subj,q_emiss =q_emiss,m=m,n_dep =n_dep,group_labs = group_labs,subj_n
 
 ```
 
+Here, `emiss` is an object of `obtain_emiss` class, `q_emiss` represents a vector of numbers of categorical outcomes of each of dependent variables,  `n_dep` is the number of dependent variables, `group_labs` is a vector to be specified that includes dependent variables' names, `subj_nr` is an indicator of a subject for which we want to obtain plot and `mode` is an indicator of the way we wish to display it(`mode=1` by default indicating output grouped by states).
+
 
 
 ```{r load 3 and 4 state models, include = FALSE}
