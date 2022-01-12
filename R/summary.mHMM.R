@@ -22,7 +22,6 @@ summary.mHMM <- function(object, ...){
 
   names(EM_pop) <- dep_labels
   for(i in 1:n_dep){
-    i=4
     EM_int_est[[i]] <- matrix(apply(object$emiss_int_bar[[i]][((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = q_emiss[i]-1, nrow = m)
     EM_pop[[i]]<-round(int_to_prob(EM_int_est[[i]]),3)
 
