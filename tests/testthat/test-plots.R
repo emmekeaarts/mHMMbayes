@@ -52,6 +52,8 @@ test_that("plotting functions don't throw unexpected errors", {
   gamma1_g <- obtain_gamma(out_2st_simb)
   gamma1_subj <- obtain_gamma(out_2st_simb, level = "subject")
   emmis1_g <- obtain_emiss(out_2st_simb)
+  emmis1_subj<-obtain_emiss(out_2st_simb, level = "subject")
+
 
   # plot.mHMM
   expect_silent(plot(out_2st_simb))
@@ -68,6 +70,7 @@ test_that("plotting functions don't throw unexpected errors", {
   expect_error(plot(out_2st_simb, burn_in = 10), "burn in period should be at least 2 points smaller")
 
   # plot.mHMM_gamma
+
   expect_silent(plot(gamma1_g))
   expect_silent(plot(gamma1_subj, subj_nr = 3))
   expect_silent(plot(gamma1_subj, subj_nr = 3, col = rep( c("goldenrod", "steelblue", "indianred"), each = 3)))
@@ -75,6 +78,12 @@ test_that("plotting functions don't throw unexpected errors", {
   expect_error(plot(gamma1_subj), "specified with the input variable -subj_nr-")
   expect_error(plot.mHMM_gamma(out_2st_simb), "should be from the class mHMM_gamma")
   expect_error(plot.mHMM_gamma(emmis1_g), "should be from the class mHMM_gamma")
+
+  #plot.mHMM_emiss
+  expect_silent(plot(emmis1_g))
+  expect_silent(plot(emmis1_subj, subj_nr = 3))
+  expect_error(plot.mHMM_emiss(out_2st_simb), "should be from the class mHMM_emiss")
+
 })
 
 
