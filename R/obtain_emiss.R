@@ -107,6 +107,10 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
         est[[j]][] <- matrix(round(apply(object$emiss_prob_bar[[j]][((burn_in + 1): J),], 2, median),3),
                              byrow = TRUE, ncol = q_emiss[j], nrow = m)
       }
+      est_emiss <- est
+      class(est_emiss) <- append(class(est_emiss), "mHMM_emiss")
+
+
     } else if (is.mHMM_vary(object)){
       est <- lapply(q_emiss, dif_matrix, rows = m)
       for(j in which_cat){
@@ -128,6 +132,7 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
                                        apply(object$emiss_var_bar[[q]][((burn_in + 1): J),], 2, median)),3),
                                ncol = 2, nrow = m, dimnames = list(paste("State", 1:m), c("Mean", "Variance")))
         }
+
       }
     } else if (is.mHMM_cont(object)){
       est <- rep(list(matrix(, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "Variance")))), n_dep)
@@ -135,8 +140,10 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
       for(j in 1:n_dep){
         est[[j]][] <-  matrix(round(c(apply(object$emiss_mu_bar[[j]][((burn_in + 1): J),], 2, median), apply(object$emiss_var_bar[[j]][((burn_in + 1): J),], 2, median)),3), ncol = 2, nrow = m)
       }
+      est_emiss <- est
+      class(est_emiss) <- append(class(est_emiss), "mHMM_emiss_cont")
     }
-    est_emiss <- est
+
   }
   if (level == "subject"){
     est_emiss <- vector("list", n_dep)
@@ -156,6 +163,8 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
                                           byrow = TRUE, ncol = q_emiss[j], nrow = m)
         }
       }
+      class(est_emiss) <- append(class(est_emiss), "mHMM_emiss")
+
     } else if (is.mHMM_vary(object)){
       if(n_cat > 0){
         start <- c(0, q_emiss * m)
@@ -193,9 +202,10 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
           est_emiss[[j]][[i]][] <- matrix(round(c(apply(object$PD_subj[[i]][((burn_in + 1): J),((j-1) * m + 1) : ((j-1) * m + m)], 2, median), apply(object$PD_subj[[i]][((burn_in + 1): J),(n_dep * m + (j-1) * m + 1) : (n_dep * m + (j-1) * m + m)], 2, median)),3), ncol = 2, nrow = m)
         }
       }
+
+      class(est_emiss) <- append(class(est_emiss), "mHMM_emiss_cont")
     }
   }
-  class(est_emiss) <- append(class(est_emiss), "mHMM_emiss")
 
   return(est_emiss)
 }
