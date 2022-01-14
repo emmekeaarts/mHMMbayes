@@ -332,6 +332,7 @@
 #'
 #' \insertRef{zucchini2017}{mHMMbayes}
 #'
+#'
 #' @examples
 #' ###### Example on package example data
 #' \donttest{

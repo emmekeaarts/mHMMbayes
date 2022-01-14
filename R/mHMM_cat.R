@@ -1,6 +1,6 @@
 #' Multilevel hidden  Markov model using Bayesian estimation
 #'
-#' \code{mHMM} fits a multilevel (also known as mixed or random effects) hidden
+#' \code{mHMM_cat} fits a multilevel (also known as mixed or random effects) hidden
 #' Markov model (HMM) to intense longitudinal data with categorical observations
 #' of multiple subjects using Bayesian estimation, and creates an object of
 #' class mHMM. By using a multilevel framework, we allow for heterogeneity in
@@ -415,7 +415,7 @@
 #'
 #'
 
-mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, print_iter, show_progress = TRUE,
+mHMM_cat <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, print_iter, show_progress = TRUE,
                  gamma_hyp_prior = NULL, emiss_hyp_prior = NULL, gamma_sampler = NULL, emiss_sampler = NULL){
 
   if(!missing(print_iter)){
