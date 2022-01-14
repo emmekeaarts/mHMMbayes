@@ -6,3 +6,8 @@ cat_mult_fw_cpp <- function(allprobs, gamma, m, n, delta) {
     .Call(`_mHMMbayes_cat_mult_fw_cpp`, allprobs, gamma, m, n, delta)
 }
 
+#' @keywords internal
+cat_tv_mult_fw_cpp <- function(allprobs, tgamma, m, n, delta) {
+    .Call(`_mHMMbayes_cat_tv_mult_fw_cpp`, allprobs, tgamma, m, n, delta)
+}
+
