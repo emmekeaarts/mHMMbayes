@@ -32,15 +32,15 @@
 #' parameters of the hyper-prior distributions manually, the specification of
 #' the elements in the arguments of the hyper-prior parameter values of the
 #' normal distribution on the means change as follows: the number of rows in the
-#' matrices \code{gamma_mu0} and \code{emiss_mu0} are equal to 1 + the number of
+#' matrices \code{gamma_mu0_int} and \code{emiss_mu0} are equal to 1 + the number of
 #' covariates used to predict the transition probability matrix for
-#' \code{gamma_mu0} and the emission distribution for \code{emiss_mu0} (i.e.,
+#' \code{gamma_mu0_int} and the emission distribution for \code{emiss_mu0} (i.e.,
 #' the first row correspond to the hyper-prior mean values of the intercepts,
 #' the subsequent rows correspond to the hyper-prior mean values of the
 #' regression coefficients connected to each of the covariates), and
-#' \code{gamma_K0} and \code{emiss_K0} are now a matrix with the number of
+#' \code{gamma_K0_int} and \code{emiss_K0} are now a matrix with the number of
 #' hypothetical prior subjects on which the vectors of means (i.e., the rows in
-#' \code{gamma_mu0} or \code{emiss_mu0}) are based on the diagonal, and
+#' \code{gamma_mu0_int} or \code{emiss_mu0}) are based on the diagonal, and
 #' off-diagonal elements equal to 0. Note that the hyper-prior parameter values
 #' of the inverse Wishart distribution on the covariance matrix remains
 #' unchanged, as the estimates of the regression coefficients for the covariates
@@ -118,26 +118,26 @@
 #'  set of (state specific) intercepts is an Inverse Wishart distribution.
 #'
 #'  Hence, the list \code{gamma_hyp_prior} contains the following elements:
-#'  \itemize{\item{\code{gamma_mu0}: a list containing m matrices; one matrix
+#'  \itemize{\item{\code{gamma_mu0_int}: a list containing m matrices; one matrix
 #'  for each row of the transition probability matrix gamma. Each matrix
 #'  contains the hypothesized mean values of the intercepts. Hence, each matrix
 #'  consists of one row (when not including covariates in the model) and
 #'  \code{m} - 1 columns}
-#'  \item{\code{gamma_K0}: numeric vector with length 1 denoting the number of
-#'  hypothetical prior subjects on which the vector of means \code{gamma_mu0} is
+#'  \item{\code{gamma_K0_int}: numeric vector with length 1 denoting the number of
+#'  hypothetical prior subjects on which the vector of means \code{gamma_mu0_int} is
 #'  based}
-#'  \item{\code{gamma_nu}: numeric vector with length 1 denoting the degrees of
+#'  \item{\code{gamma_nu_int}: numeric vector with length 1 denoting the degrees of
 #'  freedom of the Inverse Wishart distribution}
-#'  \item{\code{gamma_V}: matrix of \code{m} - 1 by \code{m} - 1 containing the
+#'  \item{\code{gamma_V0_int}: matrix of \code{m} - 1 by \code{m} - 1 containing the
 #'  hypothesized variance-covariance matrix between the set of intercepts.}}
-#'  Note that \code{gamma_K0}, \code{gamma_nu} and \code{gamma_V} are assumed
+#'  Note that \code{gamma_K0_int}, \code{gamma_nu_int} and \code{gamma_V0_int} are assumed
 #'  equal over the states. The mean values of the intercepts (and regression
-#'  coefficients of the covariates) denoted by \code{gamma_mu0} are allowed to
+#'  coefficients of the covariates) denoted by \code{gamma_mu0_int} are allowed to
 #'  vary over the states.
 #'
 #'  The default values for the hyper-prior on gamma are: all elements of the
-#'  matrices contained in \code{gamma_mu0} set to 0, \code{gamma_K0} set to 1,
-#'  \code{gamma_nu} set to 3 + m - 1, and the diagonal of \code{gamma_V} (i.e.,
+#'  matrices contained in \code{gamma_mu0_int} set to 0, \code{gamma_K0_int} set to 1,
+#'  \code{gamma_nu_int} set to 3 + m - 1, and the diagonal of \code{gamma_V0_int} (i.e.,
 #'  the variance) set to 3 + m - 1 and the off-diagonal elements (i.e., the
 #'  covariance) set to 0.
 #'
@@ -178,7 +178,7 @@
 #'  The default values for the hyper-prior on the emission distribution(s) are:
 #'  all elements of the matrices contained in \code{emiss_mu0} set to 0,
 #'  \code{emiss_K0} set to 1, \code{emiss_nu} set to 3 + \code{q_emiss[k]} - 1,
-#'  and the diagonal of \code{gamma_V} (i.e., the variance) set to 3 +
+#'  and the diagonal of \code{gamma_V0_int} (i.e., the variance) set to 3 +
 #'  \code{q_emiss[k]} - 1 and the off-diagonal elements (i.e., the covariance)
 #'  set to 0.
 #'
@@ -412,7 +412,7 @@
 #' # Run the model on the simulated data:
 #' out_2st_sim <- mHMM(s_data = data1$obs,
 #'                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-#'                  start_val = list(gamma, emiss_distr),
+#'                  start_val = c(list(gamma), emiss_distr),
 #'                  mcmc = list(J = 11, burn_in = 5))
 #'
 #'
@@ -441,7 +441,7 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
   }
   for(s in 1:n_subj){
     subj_data[[s]]$y <- as.matrix(s_data[s_data[,1] == id[s],][,2:(n_dep + 1)], ncol = n_dep)
-    subj_data[[s]]$xx_t <- as.matrix(s_data[s_data[,1] == id[s],][, n_dep + 2], ncol = 1)
+    subj_data[[s]]$xx_t <- matrix(c(rep(1, sum(s_data[,1] == id[s])), s_data[s_data[,1] == id[s],][, n_dep + 2]), ncol = 2)
   }
   ypooled    <- n <- NULL
   n_vary     <- numeric(n_subj)
@@ -457,8 +457,8 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
     ypooled   <- rbind(ypooled, subj_data[[s]]$y)
     n         <- dim(subj_data[[s]]$y)[1]
     n_vary[s] <- n
-    subj_data[[s]]	<- c(subj_data[[s]], n = n, list(gamma_converge = numeric(m), gamma_int_mle = matrix(, m, (m - 1)),
-                                                    gamma_mhess = matrix(, (m - 1) * m, (m - 1)), emiss_converge =
+    subj_data[[s]]	<- c(subj_data[[s]], n = n, list(gamma_converge = numeric(m), gamma_int_mle = matrix(, m, (m - 1) * 2),
+                                                    gamma_mhess = matrix(, (m - 1) * 2, (m - 1) * 2), emiss_converge =
                                                       rep(list(numeric(m)), n_dep), emiss_int_mle = emiss_int_mle, emiss_mhess = emiss_mhess))
   }
   n_total 		<- dim(ypooled)[1]
@@ -508,10 +508,12 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
   # Initialize gamma sampler
   if(is.null(gamma_sampler)) {
     gamma_int_mle0  <- rep(0, m - 1)
+    gamma_bet_mle0  <- rep(0, m - 1)
     gamma_scalar    <- 2.93 / sqrt(m - 1)
     gamma_w         <- .1
   } else {
     gamma_int_mle0  <- gamma_sampler$gamma_int_mle0
+    gamma_bet_mle0  <- gamma_sampler$gamma_bet_mle0
     gamma_scalar    <- gamma_sampler$gamma_scalar
     gamma_w         <- gamma_sampler$gamma_w
   }
@@ -533,16 +535,20 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
 
   # Initialize Gamma hyper prior
   if(is.null(gamma_hyp_prior)){
-    gamma_mu0	  <- rep(list(matrix(0,nrow = nx[1], ncol = m - 1)), m)
-    gamma_K0			<- diag(1, nx[1])
-    gamma_nu			<- 3 + m - 1
-    gamma_V			  <- gamma_nu * diag(m - 1)
+    gamma_mu0_int	    <- rep(list(matrix(0,nrow = nx[1], ncol = m - 1)), m)
+    gamma_K0_int			<- diag(1, nx[1])
+    gamma_nu_int			<- 3 + m - 1
+    gamma_V0_int			<- gamma_nu_int * diag(m - 1)
+    gamma_mu0_bet     <- rep(0, m-1)
+    gamma_V0_bet      <- (3 + m - 1) * diag(m-1)
   } else {
-    ###### BUILD in a warning / check if gamma_mu0 is a matrix when given, with  nrows equal to the number of covariates
-    gamma_mu0			<- gamma_hyp_prior$gamma_mu0
-    gamma_K0			<- gamma_hyp_prior$gamma_K0
-    gamma_nu			<- gamma_hyp_prior$gamma_nu
-    gamma_V			  <- gamma_hyp_prior$gamma_V
+    ###### BUILD in a warning / check if gamma_mu0_int is a matrix when given, with  nrows equal to the number of covariates
+    gamma_mu0_int			<- gamma_hyp_prior$gamma_mu0_int
+    gamma_K0_int			<- gamma_hyp_prior$gamma_K0_int
+    gamma_nu_int			<- gamma_hyp_prior$gamma_nu_int
+    gamma_V0_int			<- gamma_hyp_prior$gamma_V0_int
+    gamma_mu0_bet     <- gamma_hyp_prior$gamma_mu0_bet
+    gamma_V0_bet      <- gamma_hyp_prior$gamma_V0_bet
   }
 
   # Initialize Pr hyper prior
@@ -582,11 +588,13 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
 
 
   # gamma
-  gamma_int_mle_pooled <- gamma_pooled_ll <- vector("list", m)
+  gamma_int_mle_pooled <- gamma_pooled_ll <- gamma_hess_mle_pooled <- vector("list", m)
   gamma_c_int <- rep(list(matrix(, n_subj, (m-1))), m)
+  gamma_c_bet <- rep(list(rep(0, m-1)),m)
   gamma_mu_int_bar <- gamma_V_int <- vector("list", m)
   gamma_mu_prob_bar <- rep(list(numeric(m)), m)
   gamma_int_naccept <- matrix(0, n_subj, m)
+  gamma_bet_naccept <- matrix(0, n_subj, m)
 
   # emiss
   cond_y <- lapply(rep(n_dep, n_subj), nested_list, m = m)
@@ -613,7 +621,7 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
   colnames(PD) 	<- c(PD_emiss_names, paste("S", rep(1:m, each = m), "toS", rep(1:m, m), sep = ""), "LL")
 
   PD[1, ((sum(m * q_emiss) + 1)) :((sum(m * q_emiss) + m * m))] <- unlist(sapply(start_val, t))[1:(m*m)]
-  PD[1, 1:((sum(m * q_emiss)))] <- unlist(sapply(start_val, t))[(m*m + 1): (m*m + sum(m * q_emiss))]
+  PD[1, 1:((sum(m * q_emiss)))] <- unlist(lapply(start_val, t))[(m*m + 1): (m*m + sum(m * q_emiss))]
 
   PD_subj				<- rep(list(PD), n_subj)
 
@@ -638,6 +646,8 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
   } else{
     gamma_cov_bar <- "No covariates where used to predict the transition probability matrix"
   }
+  gamma_tv_cov         <- matrix(, ncol = (m-1)*m, nrow = J)
+  colnames(gamma_tv_cov) <- paste("tv_cov","_S", rep(1:m, each = (m-1)), "toS", rep(2:m, m), sep = "")
   emiss_int_bar			<- lapply((q_emiss-1) * m, dif_matrix, rows = J)
   names(emiss_int_bar) <- dep_labels
   for(q in 1:n_dep){
@@ -686,10 +696,10 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
     # For each subject, obtain sampled state sequence with subject individual parameters ----------
     for(s in 1:n_subj){
       # Run forward algorithm, obtain subject specific forward proababilities and log likelihood
-      gamma_t       <- timevar_gamma(int = matrix(gamma_int_subj[[s]][iter,], byrow = TRUE, ncol = m-1),
+      gamma_t       <- timevar_gamma(int = matrix(gamma_int_subj[[s]][iter-1,], byrow = TRUE, ncol = m-1),
                                      bet = matrix(unlist(gamma_c_bet), byrow = TRUE, ncol = m-1),
                                      xx_t = subj_data[[s]]$xx_t, m = m)
-      forward				<- cat_mult_fw_r_to_cpp(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], gamma = gamma_t, n_dep = n_dep, delta=NULL)
+      forward				<- cat_tv_mult_fw_r_to_cpp(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], tgamma = gamma_t, n_dep = n_dep, delta=NULL)
       alpha         <- forward[[1]]
       c             <- max(forward[[2]][, subj_data[[s]]$n])
       llk           <- c + log(sum(exp(forward[[2]][, subj_data[[s]]$n] - c)))
@@ -699,24 +709,19 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
       # In addition, saves:
         # state transitions in trans,
         # conditional observations within states in cond_y
-        # time points of sampled states in time_trans
         # observations of the time dependent covariate per sampled state in xx_t_state
       trans[[s]]					                  <- vector("list", m)
       xx_t_state[[s]]                       <- vector("list", m)
-      # time_trans[[s]]                       <- vector("list", m)
       sample_path[[s]][n_vary[[s]], iter] 	<- sample(1:m, 1, prob = c(alpha[, n_vary[[s]]]))
-      # time_trans[[s]][[sample_path[[s]][n_vary[[s]], iter]]] <- subj_data[[s]]$n
       for(t in (subj_data[[s]]$n - 1):1){
         sample_path[[s]][t,iter] 	              <- sample(1:m, 1, prob = (alpha[, t] * matrix(gamma_t[t+1,], byrow = TRUE, ncol = m)[,sample_path[[s]][t + 1, iter]]))
         trans[[s]][[sample_path[[s]][t,iter]]]	<- c(trans[[s]][[sample_path[[s]][t, iter]]], sample_path[[s]][t + 1, iter])
-        #  time_trans[[s]] [[sample_path[[s]][t,iter]]] <- t
       }
       for (i in 1:m){
-        trans[[s]][[i]] <- c(rev(trans[[s]][[i]]), 1:m)
-        # time_trans[[s]][[i]] <- rev(time_trans[[s]][[i]])
-        xx_t_state[[s]][[i]] <- c(subj_data[[s]]$xx_t[which(sample_path[[s]][,iter] == i)], rep(0,m))
+        trans[[s]][[i]] <- rev(trans[[s]][[i]])
+        xx_t_state[[s]][[i]] <- subj_data[[s]]$xx_t[-n_vary[s],][which(sample_path[[s]][-n_vary[s],iter] == i),2]
         for(q in 1:n_dep){
-          cond_y[[s]][[i]][[q]] <- c(subj_data[[s]]$y[sample_path[[s]][, iter] == i, q], 1:q_emiss[q])
+          cond_y[[s]][[i]][[q]] <- subj_data[[s]]$y[sample_path[[s]][, iter] == i, q]
         }
       }
     }
@@ -724,15 +729,24 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
     # The remainder of the mcmc algorithm is state specific
     for(i in 1:m){
 
+      # Obtain pooled over all subjects for optim and RW for beta
+      Obs_p               <- matrix(c(rep(1:n_subj, times = sapply(trans, lengths)[i,]),
+                                      unlist(sapply(trans, "[[", i))), ncol = 2)
+      xx_t_p              <- matrix(c(rep(1, sum(sapply(xx_t_state, lengths)[i,])),
+                                      unlist(sapply(xx_t_state, "[[", i))), ncol = 2)
+
       # Obtain MLE of the covariance matrices and log likelihood of gamma and emiss at subject and population level -----------------
       # used to scale the propasal distribution of the RW Metropolis sampler
 
       # population level, transition matrix
-      trans_pooled			  <- factor(c(unlist(sapply(trans, "[[", i)), c(1:m)))
-      gamma_mle_pooled		<- optim(gamma_int_mle0, llmnl_int, Obs = trans_pooled,
-                                 n_cat = m, method = "BFGS", hessian = TRUE,
+      X                   <- makeX(xx_t = matrix(c(rep(1, length(xx_t_p[,2]) + m), c(xx_t_p[,2], rep(0,m))), ncol = 2), n_cat = m)
+      gamma_mle_pooled		<- optim(c(gamma_int_mle0, gamma_bet_mle0), llmnl_bet_optim, Obs = c(Obs_p[,2], 1:m),
+                                 X = X, n_cat = m, method = "BFGS", hessian = FALSE,
                                  control = list(fnscale = -1))
       gamma_int_mle_pooled[[i]]  <- gamma_mle_pooled$par
+      gamma_hess_mle_pooled[[i]]   <- mnlHess_bet(bet = gamma_mle_pooled$par, n_cat = m,
+                                             Obs = c(Obs_p[,2], 1:m),
+                                             xx_t = rbind(xx_t_p, matrix(rep(c(0,1), each = m), ncol = 2)))
       gamma_pooled_ll[[i]]			<- gamma_mle_pooled$value
 
       # population level, conditional probabilities, seperate for each dependent variable
@@ -754,22 +768,25 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
         wgt 				<- subj_data[[s]]$n / n_total
 
         # subject level, transition matrix
-        gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_int_frac, Obs = c(trans[[s]][[i]], c(1:m)),
-                               n_cat = m, pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt,
-                               method="BFGS", hessian = TRUE, control = list(fnscale = -1))
+        X                 <- makeX(xx_t = matrix(c(rep(1, length(xx_t_state[[s]][[i]]) + m), c(xx_t_state[[s]][[i]], rep(0,m))), ncol = 2), n_cat = m)
+        gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_bet_frac, Obs = c(trans[[s]][[i]], c(1:m)),
+                               X = X, n_cat = n_cat, pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt,
+                               method="BFGS", hessian = FALSE, control = list(fnscale = -1))
         if(gamma_out$convergence == 0){
           subj_data[[s]]$gamma_converge[i] <- 1
           subj_data[[s]]$gamma_int_mle[i,] <- gamma_out$par
-          subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<-
-            mnlHess_int(int = gamma_out$par, Obs = c(trans[[s]][[i]], c(1:m)), n_cat =  m)
+          subj_data[[s]]$gamma_mhess	<- mnlHess_bet(bet = gamma_out$par, n_cat = m,
+                                                    Obs = c(trans[[s]][[i]], c(1:m)),
+                                                    xx_t = matrix(c(rep(1, length(xx_t_state[[s]][[i]]) + m),
+                                                                    c(xx_t_state[[s]][[i]], rep(0,m))), ncol = 2))
         } else {
           subj_data[[s]]$gamma_converge[i] <- 0
           subj_data[[s]]$gamma_int_mle[i,] <- rep(0, m - 1)
-          subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<- diag(m-1)
+          subj_data[[s]]$gamma_mhess	<- diag((m-1)*2)
         }
         # if this is first iteration, use MLE for current values RW metropolis sampler
         if (iter == 2){
-          gamma_c_int[[i]][s,]		<- gamma_out$par
+          gamma_c_int[[i]][s,]		<- gamma_out$par[1:(m-1)]
         }
 
         # subject level, conditional probabilities, seperate for each dependent variable
@@ -796,11 +813,11 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
 
 
       # Sample pouplaton values for gamma and conditional probabilities using Gibbs sampler -----------
-      # gamma_mu0_n and gamma_mu_int_bar are matrices, with the number of rows equal to the number of covariates, and ncol equal to number of intercepts estimated
-      gamma_mu0_n           <- solve(t(xx[[1]]) %*% xx[[1]] + gamma_K0)  %*% (t(xx[[1]]) %*% gamma_c_int[[i]] + gamma_K0 %*% gamma_mu0[[i]])
-      gamma_V_n             <- gamma_V + t(gamma_c_int[[i]] - xx[[1]] %*% gamma_mu0_n) %*% (gamma_c_int[[i]] - xx[[1]] %*% gamma_mu0_n) + t(gamma_mu0_n - gamma_mu0[[i]]) %*% gamma_K0 %*% (gamma_mu0_n - gamma_mu0[[i]])
-      gamma_V_int[[i]]      <- solve(rwish(S = solve(gamma_V_n), v = gamma_nu + n_subj))
-      gamma_mu_int_bar[[i]] <- gamma_mu0_n + solve(chol(t(xx[[1]]) %*% xx[[1]] + gamma_K0)) %*% matrix(rnorm((m - 1) * nx[1]), nrow = nx[1]) %*% t(solve(chol(solve(gamma_V_int[[i]]))))
+      # gamma_mu0_int_n and gamma_mu_int_bar are matrices, with the number of rows equal to the number of covariates, and ncol equal to number of intercepts estimated
+      gamma_mu0_int_n           <- solve(t(xx[[1]]) %*% xx[[1]] + gamma_K0_int)  %*% (t(xx[[1]]) %*% gamma_c_int[[i]] + gamma_K0_int %*% gamma_mu0_int[[i]])
+      gamma_V_int_n             <- gamma_V0_int + t(gamma_c_int[[i]] - xx[[1]] %*% gamma_mu0_int_n) %*% (gamma_c_int[[i]] - xx[[1]] %*% gamma_mu0_int_n) + t(gamma_mu0_int_n - gamma_mu0_int[[i]]) %*% gamma_K0_int %*% (gamma_mu0_int_n - gamma_mu0_int[[i]])
+      gamma_V_int[[i]]      <- solve(rwish(S = solve(gamma_V_int_n), v = gamma_nu_int + n_subj))
+      gamma_mu_int_bar[[i]] <- gamma_mu0_int_n + solve(chol(t(xx[[1]]) %*% xx[[1]] + gamma_K0_int)) %*% matrix(rnorm((m - 1) * nx[1]), nrow = nx[1]) %*% t(solve(chol(solve(gamma_V_int[[i]]))))
       gamma_exp_int				  <- matrix(exp(c(0, gamma_mu_int_bar[[i]][1,] )), nrow  = 1)
       gamma_mu_prob_bar[[i]] 	<- gamma_exp_int / as.vector(gamma_exp_int %*% c(rep(1,(m))))
 
@@ -816,13 +833,14 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
 
       # Sample subject values for the intercepts of gamma using RW Metropolis sampler -----------
       for (s in 1:n_subj){
-        gamma_int_candcov_comb 			<- chol2inv(chol(subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ] + chol2inv(chol(gamma_V_int[[i]]))))
-        gamma_int_RWout					    <- mnl_RW_once_int_fixed_bet(int1 = gamma_c_int[[i]][s,], Obs = trans[[s]][[i]], n_cat = m,
-                                                             xx_t = .., bet = ..,
-                                                             mu_int_bar1 = c(t(gamma_mu_int_bar[[i]]) %*% xx[[1]][s,]),
-                                                             V_int1 = gamma_V_int[[i]], scalar = gamma_scalar, candcov1 = gamma_candcov_comb)
-        gamma_c_int[[i]][s,]		<- PD_subj[[s]][iter, c((sum(m * q_emiss) + 1 + (i - 1) * (m-1)):(sum(m * q_emiss) + (i - 1) * (m-1) + (m-1)))] <- gamma_int_RWout$draw_int
-        gamma_int_subj[[s]][iter, (1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1))] <- gamma_c_int[[i]][s,]
+        gamma_int_candcov_comb 			<- chol2inv(chol(subj_data[[s]]$gamma_mhess[1:(m-1), 1:(m-1)] +
+                                                     chol2inv(chol(gamma_V_int[[i]]))))
+        gamma_int_RWout					    <- mnl_RW_once_int_fixed_bet(int1 = gamma_c_int[[i]][s,], Obs = c(trans[[s]][[i]], 1:m), n_cat = m,
+                                                             xx_t =  matrix(c(rep(1,length(xx_t_state[[s]][[i]]) + 2), xx_t_state[[s]][[i]], rep(0,m)), ncol = 2),
+                                                             bet = gamma_c_bet[[i]], mu_int_bar1 = c(t(gamma_mu_int_bar[[i]]) %*% xx[[1]][s,]),
+                                                             V_int1 = gamma_V_int[[i]], scalar = gamma_scalar, candcov1 = gamma_int_candcov_comb)
+        gamma_c_int[[i]][s,]		 <- gamma_int_RWout$draw_int
+        gamma[[s]][i,] <- PD_subj[[s]][iter, c((sum(m * q_emiss) + 1 + (i - 1) * m):(sum(m * q_emiss) + (i - 1) * m + m))] <- gamma_int_RWout$prob
         gamma_int_naccept[s, i]			<- gamma_int_naccept[s, i] + gamma_int_RWout$accept
         gamma_int_subj[[s]][iter, (1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1))] <- gamma_c_int[[i]][s,]
 
@@ -830,7 +848,7 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
         start <- c(0, q_emiss * m)
         for(q in 1:n_dep){
           emiss_candcov_comb		     <- chol2inv(chol(subj_data[[s]]$emiss_mhess[[q]][(1 + (i - 1) * (q_emiss[q] - 1)):((q_emiss[q] - 1) + (i - 1) * (q_emiss[q] - 1)), ] + chol2inv(chol(emiss_V_int[[i]][[q]]))))
-          emiss_RWout				       <- mnl_RW_once(int1 = emiss_c_int[[i]][[q]][s,], Obs = cond_y[[s]][[i]][[q]], n_cat = q_emiss[q], mu_int_bar1 = c(t(emiss_mu_int_bar[[i]][[q]]) %*% xx[[1 + q]][s,]), V_int1 = emiss_V_int[[i]][[q]], scalar = emiss_scalar[[q]], candcov1 = emiss_candcov_comb)
+          emiss_RWout				       <- mnl_RW_once(int1 = emiss_c_int[[i]][[q]][s,], Obs = c(cond_y[[s]][[i]][[q]], 1:q_emiss[q]), n_cat = q_emiss[q], mu_int_bar1 = c(t(emiss_mu_int_bar[[i]][[q]]) %*% xx[[1 + q]][s,]), V_int1 = emiss_V_int[[i]][[q]], scalar = emiss_scalar[[q]], candcov1 = emiss_candcov_comb)
           emiss[[s]][[q]][i,]		   <- PD_subj[[s]][iter, (sum(start[1:q]) + 1 + (i - 1) * q_emiss[q]):(sum(start[1:q]) + (i - 1) * q_emiss[q] + q_emiss[q])] <- emiss_RWout$prob
           emiss_naccept[[q]][s, i]	 <- emiss_naccept[[q]][s, i] + emiss_RWout$accept
           emiss_c_int[[i]][[q]][s,] <- emiss_RWout$draw_int
@@ -838,22 +856,20 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
         }
       }
       # Sample fixed over subjects values for beta of gamma using RW Metropolis sampler -----------
-
-      ######### HIER GEBLEVEN #########
-      gamma_bet_candcov_comb 			<- chol2inv(chol(subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ] + chol2inv(chol(gamma_V_int[[i]]))))
-      Obs_p                       <- matrix(c(rep(1:n_subj, times = sapply(trans, lengths)[i,]),
-                                              unlist(sapply(trans, "[[", i))), ncol = 2)
-      gamma_bet_RWout					    <- mnl_RW_once_fixed_bet_pooled(bet1 = gamma_c_bet[i], Obs_p = Obs_p, n_cat = m,
-                                                           xx_t_p = .., int_p = gamma_c_int[[i]],
-                                                           mu_bet_bar1 = ...,
-                                                           V_bet1 = gamma_V_bet[[i]], scalar = gamma_scalar, candcov2 = gamma_bet_candcov_comb)
+      gamma_bet_candcov_comb 			<- chol2inv(chol(gamma_hess_mle_pooled[[i]][m:(2*(m-1)), m:(2*(m-1))] +
+                                                   chol2inv(chol(gamma_V0_bet))))
+      gamma_bet_RWout					    <- mnl_RW_once_fixed_bet_pooled(bet1 = gamma_c_bet[[i]], Obs_p = Obs_p, n_cat = m,
+                                                           xx_t_p = xx_t_p, n_subj = n_subj, int_p = gamma_c_int[[i]],
+                                                           mu_bet_bar1 = gamma_mu0_bet,
+                                                           V_bet1 = gamma_V0_bet, scalar = gamma_scalar, candcov2 = gamma_bet_candcov_comb)
       gamma_c_bet[[i]]		<- gamma_bet_RWout$draw_int
       gamma_bet_naccept[i]			<- gamma_bet_naccept[i] + gamma_bet_RWout$accept
 
 
       if(i == m){
         for(s in 1:n_subj){
-          # solving for gamma at t = 1, so use observed covariates at t = 1
+          # solving for gamma when covariates equal 0
+          # note: covariates are restricted to dummies [0,1] or are centered.
           delta[[s]] 		<- solve(t(diag(m) - gamma[[s]] + 1), rep(1, m))
         }
       }
@@ -865,6 +881,7 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
     if(nx[1] > 1){
       gamma_cov_bar[iter, ]      	<- unlist(lapply(gamma_mu_int_bar, "[",-1,))
     }
+    gamma_tv_cov[iter,]               <- unlist(gamma_c_bet)
     gamma_prob_bar[iter,]			<- unlist(gamma_mu_prob_bar)
     for(q in 1:n_dep){
       emiss_int_bar[[q]][iter, ]	<- as.vector(unlist(lapply(
@@ -892,18 +909,18 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
     out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
                              burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                 PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
-                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, emiss_int_bar = emiss_int_bar,
-                emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
+                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, gamma_tv_cov = gamma_tv_cov,
+                emiss_int_bar = emiss_int_bar, emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
                 emiss_prob_bar = emiss_prob_bar, gamma_int_naccept = gamma_int_naccept, emiss_naccept = emiss_naccept,
                 sample_path = sample_path)
   } else {
     out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
                              burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                 PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
-                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, emiss_int_bar = emiss_int_bar,
-                emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
+                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, gamma_tv_cov = gamma_tv_cov,
+                emiss_int_bar = emiss_int_bar, emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
                 emiss_prob_bar = emiss_prob_bar, gamma_int_naccept = gamma_int_naccept, emiss_naccept = emiss_naccept)
   }
-  class(out) <- append(class(out), "mHMM")
+  class(out) <- append(class(out), "mHMM_cat_tvc")
   return(out)
 }
