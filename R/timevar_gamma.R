@@ -9,22 +9,22 @@
 # bet is a list with number of elements equal to m,
 # each element contains a vector with the beta's relating to the time varying covariates,
 # where the i^th element corresponds to the i^th row in the transition probability matrix
-# xx_t is a vector with the time varying covariates
+# xx_t is a matrix, with the first column a vector of 1's denoting the intercept, and
+# the remaining column the time varying covariate(s)
 # m denotes the number of states
 
 timevar_gamma <- function(int, bet, xx_t, m){
 
-  n_xx_t <- length(xx_t)
-  xx_t_int <- cbind(rep(1, n_xx_t), xx_t)
+  n_xx_t <- dim(xx_t)[1]
   out <- matrix(, nrow = n_xx_t, ncol = m*m)
 
   for(i in 1:m){
-    int_bet <- c(int[[i]], bet[[i]])
+    int_bet <- matrix(c(int[i,], bet[i,]), ncol = 1)
     Imod <- matrix(0, m, m - 1)
     Imod[-1,] <-  diag(m - 1)
-    X <- xx_t_int %x% Imod
+    X <- xx_t %x% Imod
     k <- ncol(X)
-    Xbeta <- X %*% t(int_bet)
+    Xbeta <- X %*% int_bet
     Xbeta <- matrix(Xbeta, byrow = T, ncol = m)
     Xbeta <- exp(Xbeta)
     iota <- c(rep(1, m))
