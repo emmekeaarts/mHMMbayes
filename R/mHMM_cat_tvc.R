@@ -770,7 +770,7 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
         # subject level, transition matrix
         X                 <- makeX(xx_t = matrix(c(rep(1, length(xx_t_state[[s]][[i]]) + m), c(xx_t_state[[s]][[i]], rep(0,m))), ncol = 2), n_cat = m)
         gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_bet_frac, Obs = c(trans[[s]][[i]], c(1:m)),
-                               X = X, n_cat = n_cat, pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt,
+                               X = X, n_cat = m, pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt,
                                method="BFGS", hessian = FALSE, control = list(fnscale = -1))
         if(gamma_out$convergence == 0){
           subj_data[[s]]$gamma_converge[i] <- 1
@@ -865,14 +865,6 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
       gamma_c_bet[[i]]		<- gamma_bet_RWout$draw_int
       gamma_bet_naccept[i]			<- gamma_bet_naccept[i] + gamma_bet_RWout$accept
 
-
-      if(i == m){
-        for(s in 1:n_subj){
-          # solving for gamma when covariates equal 0
-          # note: covariates are restricted to dummies [0,1] or are centered.
-          delta[[s]] 		<- solve(t(diag(m) - gamma[[s]] + 1), rep(1, m))
-        }
-      }
     }
 
 
