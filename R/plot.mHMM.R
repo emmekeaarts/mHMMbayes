@@ -23,13 +23,15 @@
 #'   for the emission probabilities, the vector has length \code{q_emiss[k]}
 #'   (i.e., the number of outcome categories for the dependent variable
 #'   \code{k}).
-#' @param cat_lab Optional vector of strings when plotting the posterior
-#'   densities of the emission probabilities, denoting the labels of the
-#'   categorical outcome values. Automatically generated when not provided.
-#' @param dep_lab Optional string when plotting the posterior
-#'   densities of the emission probabilities with length 1, denoting the label
-#'   for the dependent variable plotted. Automatically obtained from the input
-#'   object \code{x} when not specified.
+#' @param cat_lab Optional list containing \code{n_dep} elements used when
+#'   plotting the posterior densities of the emission probabilities. Each
+#'   element in the list is a vector of strings denoting the labels of the
+#'   categorical outcome values for each dependent variable. Automatically
+#'   generated when not provided.
+#' @param dep_lab Optional vector of strings when plotting the posterior
+#'   densities of the emission probabilities with length \code{n_dep}, denoting
+#'   the labels of the dependent variables. Automatically obtained from the
+#'   input object \code{x} when not specified.
 #' @param lwd1 Positive number indicating the line width of the posterior
 #'   density at the group level.
 #' @param lwd2 Positive number indicating the line width of the posterior
@@ -146,9 +148,19 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
   } else if (component == "emiss"){
     if (missing(cat_lab)){
       cat_lab <- paste("Category", 1:q_emiss[dep])
+    } else {
+      if (!is.list(cat_lab) | length(cat_lab) != n_dep | sum(lengths(cat_lab) != q_emiss) > 0){
+        stop(paste0("cat_lab should be a list with n_dep (", n_dep, ") elements, each containing a vector with lengths ", paste(q_emiss, collapse = ", "), ", respectively"))
+      }
+      cat_lab <- cat_lab[[dep]]
     }
     if (missing(dep_lab)){
       dep_lab <- input$dep_labels[dep]
+    } else {
+      if (!is.vector(dep_lab) | length(dep_lab) != n_dep){
+        stop(paste0("dep_lab should be a vector with lenght n_dep (", n_dep, ")"))
+      }
+      dep_lab <- dep_lab[dep]
     }
     start <- c(0, q_emiss * m)
     start2 <- c(0, seq(from = (q_emiss[dep]-1) * 2, to = (q_emiss[dep]-1) * 2 * m, by = (q_emiss[dep]-1) * 2))
