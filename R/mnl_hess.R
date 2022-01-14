@@ -28,10 +28,7 @@ mnlHess_bet <- function(bet, Obs, xx_t, n_cat){
     p     <- as.vector(Prob[hi, ])
     A     <- diag(p) - outer(p, p)
     Xt    <- X[(n_cat*(hi - 1) + 1):(n_cat * hi),]
-    Hess=Hess+crossprod(Xt,A)%*%Xt
-
-    Xt    <- diag(n_cat)[, -1]
-    Hess  <- Hess + crossprod(Xt, A) %*% Xt
+    Hess  <- Hess+crossprod(Xt,A)%*%Xt
   }
   return(Hess)
 }
