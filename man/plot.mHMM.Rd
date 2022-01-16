@@ -43,14 +43,16 @@ for the emission probabilities, the vector has length \code{q_emiss[k]}
 (i.e., the number of outcome categories for the dependent variable
 \code{k}).}
 
-\item{cat_lab}{Optional vector of strings when plotting the posterior
-densities of the emission probabilities, denoting the labels of the
-categorical outcome values. Automatically generated when not provided.}
+\item{cat_lab}{Optional list containing \code{n_dep} elements used when
+plotting the posterior densities of the emission probabilities. Each
+element in the list is a vector of strings denoting the labels of the
+categorical outcome values for each dependent variable. Automatically
+generated when not provided.}
 
-\item{dep_lab}{Optional string when plotting the posterior
-densities of the emission probabilities with length 1, denoting the label
-for the dependent variable plotted. Automatically obtained from the input
-object \code{x} when not specified.}
+\item{dep_lab}{Optional vector of strings when plotting the posterior
+densities of the emission probabilities with length \code{n_dep}, denoting
+the labels of the dependent variables. Automatically obtained from the
+input object \code{x} when not specified.}
 
 \item{lwd1}{Positive number indicating the line width of the posterior
 density at the group level.}
