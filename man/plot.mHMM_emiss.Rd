@@ -29,22 +29,16 @@ display plots state wise. If dependent variable wise presentation
 is preferred \code{by_state} should be set to \code{FALSE}
 (\code{by_state=FALSE})}
 
-\item{cat_lab}{optional list of n_dep(number of dependent variables) vectors
-of strings when plotting emission probability distribution variables in input
-object x. The first vector represents labels of the dependent variable's
-categories which is listed first in the input object x. To provide only some
-labels of dependent variables, user need to set the rest list elements to
-\code{NA}. Labels are automatically obtained from the input object x when not
-specified.}
+\item{cat_lab}{Optional list containing \code{n_dep} elements used when
+plotting the posterior densities of the emission probabilities. Each
+element in the list is a vector of strings denoting the labels of the
+categorical outcome values for each dependent variable. Automatically
+generated when not provided.}
 
-\item{dep_lab}{Optional vector of strings when plotting emission probability
-distribution, denoting the labels of dependent variable. Length of the vector
-need to be of the number of dependent variables in input object x. The first
-position of the vector is a label of the first object in the input object x.
-To provide only chosen labels user need to set the rest to \code{NA}.
-When a position of the vector is set to \code{NA}, the label is generated from the
-input object x. Labels are automatically obtained from the input object x
-when not specified.}
+\item{dep_lab}{Optional vector of strings when plotting the posterior
+densities of the emission probabilities with length \code{n_dep}, denoting
+the labels of the dependent variables. Automatically obtained from the
+input object \code{x} when not specified.}
 
 \item{col}{An optional vector of the size of the number of categories of the
 dependent variable that has them the most,specifying the used colors in the

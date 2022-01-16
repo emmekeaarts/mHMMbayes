@@ -19,21 +19,7 @@
 #'           display plots state wise. If dependent variable wise presentation
 #'           is preferred \code{by_state} should be set to \code{FALSE}
 #'           (\code{by_state=FALSE})
-#' @param dep_lab Optional vector of strings when plotting emission probability
-#' distribution, denoting the labels of dependent variable. Length of the vector
-#' need to be of the number of dependent variables in input object x. The first
-#' position of the vector is a label of the first object in the input object x.
-#' To provide only chosen labels user need to set the rest to \code{NA}.
-#' When a position of the vector is set to \code{NA}, the label is generated from the
-#' input object x. Labels are automatically obtained from the input object x
-#' when not specified.
-#' @param cat_lab optional list of n_dep(number of dependent variables) vectors
-#' of strings when plotting emission probability distribution variables in input
-#' object x. The first vector represents labels of the dependent variable's
-#' categories which is listed first in the input object x. To provide only some
-#' labels of dependent variables, user need to set the rest list elements to
-#' \code{NA}. Labels are automatically obtained from the input object x when not
-#' specified.
+#' @inheritParams plot.mHMM
 #' @param col An optional vector of the size of the number of categories of the
 #'  dependent variable that has them the most,specifying the used colors in the
 #'  \code{\link[graphics]{barplot}}.
@@ -119,22 +105,19 @@
 plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
                            dep_lab,col,legend_cex=1,...){
 
-  #inside function checking if the list of class of x is nested (subject specific) or not(group specific)
 
-
-
-  #-----Here the class checked
-  if (!is.mHMM_emiss(x)){
-    stop("The input object x should be from the class mHMM_emiss, obtained with the function obtain_emiss.")
-  }
-
-  # set to default plot space size
+  #------ set to default plot space size-------#
   k=c(5.1,4.1,4.1,2.1)
   par(mar=k)
   empty<-c()
 
+  #-----Here the class checked----------------#
+  if (!is.mHMM_emiss(x) && !is.mHMM_emiss_cont(x)){
+    stop("The input object x should be from the mHMM_emiss or mHMM_emiss_cont class, obtained with the function obtain_emiss.")
+  }
 
-  #number of dependent variables counted from number of elements of list x
+
+  #-----n_dep is number of elements of list x---#
   n_dep<-length(x)
 
 
@@ -149,7 +132,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
            be plotted needs to be specified with the input variable -subj_nr-.")
     }else{
       new<-list()
-      for(n in 1:n_dep){
+      for(n in 1:n_dep){#can be trouble with rmrmbering class ??
         new[[n]]<-x[[n]][[subj_nr]]
         x[[n]]<-new[[n]]
       }
@@ -159,8 +142,10 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       #calculating m(number of states) and q_emiss(vector representing number of categories for each dep. variable) for subject level
       m<-dim(x[[1]])[1]
 
-      for(b in 1:n_dep){
+      if(is.mHMM_emiss(x)){
+        for(b in 1:n_dep){
         q_emiss[b]<-dim(x[[b]])[2]
+      }
       }
     }
 
@@ -172,9 +157,10 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
 
     #calculating m(number of states) and q_emiss(vector representing number of categories for each dep. variable) for subject level
     m<- dim(x[[1]])[1]
-
-    for(l in 1:n_dep){
+    if(is.mHMM_emiss(x)){
+      for(l in 1:n_dep){
       q_emiss[l]<-dim(x[[l]])[2]
+    }
     }
     new<-list()
     new<-x
@@ -187,39 +173,31 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       names(x)[k]<-dep_lab[k]
     }
 
-  }else if(!missing(dep_lab) && length(dep_lab)!=max(n_dep)){
-    stop("When specifying group labels, in -dep_lab-, the length of the vector
-           has to be equal to the number of dependent variables ",n_dep,"and the
-           variables of the vectors need to be either strings or NAs")
+  }else if(!missing(dep_lab) && length(dep_lab)!=n_dep && !is.vector(dep_lab)){
+    stop("When specifying group labels, in -dep_lab-.The variable has to be a vector
+           with lenght equal to the number of dependent variables ",n_dep)
 
   }
 
-  #Plugging specified by user category labels
+
+  if(is.mHMM_emiss(x)){
+
+
+     #Plugging specified by user category labels
   if (missing(cat_lab)==T){
     for(k in n_dep){
       colnames(new[[k]])<-colnames(new[[k]])
     }
-  }else if(!missing(cat_lab) && is.list(cat_lab)==F){
-    stop("The variable -cat_lab- has to be of a list type.")
-  }else if(length(cat_lab)!=n_dep){
-    stop("The -cat_lab- need to contain n_dep(number of dependent variables)
-           elements of lenght of number of cathegories for each of dependent
-           variable.")
+  }else if(!is.list(cat_lab) | length(cat_lab) != n_dep | sum(lengths(cat_lab) != q_emiss) > 0){
+    stop(paste0("cat_lab should be a list with n_dep (", n_dep, ") elements, each containing a vector with lengths ", paste(q_emiss, collapse = ", "), ", respectively"))
   }
 
   if(!missing(cat_lab)){
     for(q in which(!is.na(cat_lab))){
-      if(length(cat_lab[[q]])!=q_emiss[q]){
-        stop("The vector length of the ",q,"th object of -cat_lab- list is not of the same lenght as the number of
-              cathegories of ", q,"th dependent variable which is ",q_emiss[q],".")
-      }else if(is.vector(cat_lab[[q]])==F){
-        stop("The ",q,"th list object, of -cat_lab- list, need to be a vector of length equal to ",q_emiss[q]," or NA.")
-
-      }else{
         colnames(new[[q]]) <-cat_lab[[q]]
       }
     }
-  }
+
 
 
 
@@ -244,7 +222,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
 
   # --- by_state==TRUE meaning that the plots will be displayed for each state
   if(by_state==TRUE){
-
+  #----Set the emission_states list where each object presents emission probabilities of all dependent variables for each state
     emission_states<-list()
     data<-matrix(nrow=n_dep,ncol=max(q_emiss))
     for(s in 1:m){
@@ -416,6 +394,97 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       graphics::text(x=1,y=0, paste("Group emission probability distributions by dependent variables"), cex = 2, col = "black")
     }
   }
+  }else if(is.mHMM_emiss_cont(x)){
+   #----Color setting-----
+     if(missing(col)){
+      n_col<-n_dep
+
+      if("RColorBrewer" %in% (.packages())){
+        set.seed(00)
+        qual_col_pals = RColorBrewer::brewer.pal.info[brewer.pal.info$category == 'qual',]
+        col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+        coul<-sample(col_vector, n_col)
+      }else{
+
+        coul<-grDevices::rainbow(n_col, s = 1, v = 1, start = 0, end = max(1, n_col - 1)/n_col, alpha = 1)
+      }
+    }else if(!missing(col)){
+      coul<-col
+    }
+
+ #----Set the emission_states list where each object presents emission distribution's parameters for all dependent variables for each state
+    emission_states<-list()
+    data<-matrix(nrow=n_dep,ncol=2)
+    for(s in 1:m){
+      for(j in 1:n_dep){
+        data[j,]<-x[[j]][s,]
+      }
+      data<-as.data.frame(data)
+      row.names(data)<-c(names(x))
+      emission_states[[s]]<-as.data.frame(data)
+      data<-matrix(nrow=n_dep,ncol=2)
+    }
+    a<-emission_states
+#---set the grid of the plotting space #maybe I should put the legend separately
+    if(m>3){
+      new_grid<-matrix(NA,5,ceiling(m/2))
+      new_grid[1,]<-rep(ceiling(m/2)*2+1,ceiling(m/2))
+      new_grid[2,]<-c(1:ceiling(m/2))
+      new_grid[3,]<-new_grid[2,]
+      new_grid[4,]<-c((ceiling(m/2)+1):(ceiling(m/2)*2))
+      new_grid[5,]<-new_grid[4,]
+      }else{
+        new_grid<-matrix(NA,5, m)
+        new_grid[1,]<-rep(m+1,m)
+
+      for (r in 2:5) {
+        new_grid[r,]<-c(1:m)
+      }
+         }
+
+    graphics::layout(new_grid)
+      y=list()
+    for(i in 1:m){
+      a[[i]][,2]<-sqrt(a[[i]][,2])
+      mu_range_min<-min(a[[i]][,1])
+      mu_range_max<-max(a[[i]][,1])
+      sigma_range<-max(a[[i]][,2])
+      range<-seq(mu_range_min-4*sigma_range,mu_range_max+4*sigma_range,0.01)
+
+      for(n in 1:n_dep){
+      y[[n]]<-dnorm(range,mean =a[[i]][[n,1]],sd =a[[i]][[n,2]] )
+      }
+
+      graphics::plot(range,y[[1]],ylim=c(0,1.10),xlim=c(min(range),max(range)),col=coul[1],type="l",ylab ="",xlab = "",main=paste("State ",i),lwd=2)
+      for(k in 2:n_dep){
+        graphics::lines(range,y[[k]],col=coul[k],lwd=2)
+      }
+      #graphics::legend("topright",legend=names(x),fill=coul,title = "Dependent variable",bty="n",cex =legend_cex)
+    }
+
+  if(m>3){
+    empty<-((ceiling(m/2)*2)-m)
+    while(empty>0) {
+      graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
+      empty=empty-1
+    }
+  }
+      old<-graphics::par("mai")
+      graphics::par(mar=old)
+
+      graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
+      if(!is.null(subj_nr)){
+        graphics::text(x=1,y=0, paste("Emission probability distributions by states for subject ",subj_nr), cex = 2, col = "black")
+      }else{
+        graphics::text(x=1,y=0, paste("Group emission probability distributions by states"), cex = 2, col = "black")
+      }
+      graphics::legend("topright",legend=names(x),fill=coul,title = "Dependent variable",bty="n",cex =legend_cex)
+
+}
+
+
+
+
   graphics::par(mfrow=c(1,1))
 }
 
