@@ -11,7 +11,7 @@ m <- 3
 J = 11
 burn_in = 5
 
-##### create test data wit 1 dependent variable
+##### create test data wit 2 dependent variables
 n_dep2 <- 2
 q_emiss2 <- c(4,2)
 
@@ -43,6 +43,14 @@ data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss2[2], gamma = gamma,
 data3 <- list(states = data1$states, obs = cbind(data1$obs, data2$obs[,2]))
 colnames(data3$obs) <- c("subj", "output_1", "output_2")
 
+# Fit the mHMM on 2 dep variable data
+set.seed(3523)
+out_2st_simb <- mHMM(s_data = data3$obs,
+                     gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
+                     start_val = list(gamma, emiss_distr1, emiss_distr2),
+                     mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
+
+#simulate data with continuous distribution for 2 dependent variables
 set.seed(4231)
 data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep2, data_distr = c('continuous','continuous'),
                       gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
@@ -61,12 +69,6 @@ out_3st_cont_sim <- mHMM_cont(s_data = data_cont$obs,
                               start_val = c(list(gamma), emiss_distr),
                               emiss_hyp_prior = hyp_pr,
                               mcmc = list(J = J, burn_in =burn_in, show_progress = FALSE))
-# Fit the mHMM on 2 dep variable data
-set.seed(3523)
-out_2st_simb <- mHMM(s_data = data3$obs,
-                     gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
-                     start_val = list(gamma, emiss_distr1, emiss_distr2),
-                     mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
 
 
 ####################
@@ -121,6 +123,7 @@ test_that("plotting functions don't throw unexpected errors", {
 
   expect_error(plot(emiss1_subj), "specified with the input variable -subj_nr-")
   expect_error(plot.mHMM_emiss(emiss1_subj_cont), "specified with the input variable -subj_nr-")
+  expect_error(plot.mHMM_emiss(emiss1_g_cont,dep_lab = c("a","b","c")),"When specifying group labels, in -dep_lab-")
 
 
   expect_error(plot.mHMM_emiss(out_2st_simb), "should be from the mHMM_emiss")
