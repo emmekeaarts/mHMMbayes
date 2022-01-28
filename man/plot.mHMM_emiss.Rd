@@ -70,6 +70,7 @@ probability matrix should be plotted.
 }
 \examples{
 \donttest{
+ #Discrete case
 m <- 3 #number of states
 n_dep <- 4 #number of dependent variables used to infer the hidden states
 q_emiss <- c(3, 2, 3, 2) #number of categorical outcomes of
@@ -111,18 +112,32 @@ plot(x=group_emiss3)
 
 plot(x=group_emiss3,by_state=FALSE)
 
+#continuous case
+#simulate data with continuous distribution for 2 dependent variables
+data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep2,
+ data_distr = c('continuous','continuous'),
+gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1,
+var_emiss = c(.5, 0.01))
+# Specify hyper-prior for the continuous emission distribution
+hyp_pr <- list(
+ emiss_mu0 = list(matrix(c(3,7,17), nrow = 1), matrix(c(0.7, 0.8, 1.8),
+  nrow = 1)),
+ emiss_K0  = list(1, 1),
+ emiss_nu  = list(1, 1),
+ emiss_V   = list(rep(2, m), rep(1, m)),
+ emiss_a0  = list(rep(1, m), rep(1, m)),
+ emiss_b0  = list(rep(1, m), rep(1, m)))
+# Fit the mHMM_cont on 2 dep variable data:
+out_3st_cont_sim <- mHMM_cont(s_data = data_cont$obs,
+                             gen = list(m = m, n_dep = n_dep2),
+                             start_val = c(list(gamma), emiss_distr),
+                             emiss_hyp_prior = hyp_pr,
+                             mcmc = list(J = J, burn_in =burn_in,
+                             show_progress = FALSE))
 
-}
-\dontshow{
-plot(x=subject_emiss3,subj_nr = 2,by_state = F,col = c("red","orange",
-     "green"))
-plot(x=subject_emiss3,subj_nr = 7,by_state = T,col = c("red","orange",
- "green"),dep_lab=c("Patient Looking",NA,"Therapist Vocalizing",
-               "Therapist Looking"),cat_lab=list())
+emiss1_g_cont <- obtain_emiss(out_3st_cont_sim)
+plot.mHMM_emiss(emiss1_g_cont)
 
-plot(x=subject_emiss3,subj_nr = 7,by_state = T,col = c("red","orange",
-       "green"),dep_lab=c("Patient Looking",NA,"Therapist Vocalizing",
-"Therapist Looking"),cat_lab=list(c("low","medium","high"),NA,NA,c("1","3")))
 }
 
 }

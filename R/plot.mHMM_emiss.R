@@ -45,6 +45,7 @@
 #'
 #' @examples
 #' \donttest{
+#'  #Discrete case
 #' m <- 3 #number of states
 #' n_dep <- 4 #number of dependent variables used to infer the hidden states
 #' q_emiss <- c(3, 2, 3, 2) #number of categorical outcomes of
@@ -86,18 +87,33 @@
 #'
 #' plot(x=group_emiss3,by_state=FALSE)
 #'
+#' #continuous case
+#' #simulate data with continuous distribution for 2 dependent variables
+#' data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep2,
+#'  data_distr = c('continuous','continuous'),
+#' gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1,
+#' var_emiss = c(.5, 0.01))
+#' # Specify hyper-prior for the continuous emission distribution
+#' hyp_pr <- list(
+#'  emiss_mu0 = list(matrix(c(3,7,17), nrow = 1), matrix(c(0.7, 0.8, 1.8),
+#'   nrow = 1)),
+#'  emiss_K0  = list(1, 1),
+#'  emiss_nu  = list(1, 1),
+#'  emiss_V   = list(rep(2, m), rep(1, m)),
+#'  emiss_a0  = list(rep(1, m), rep(1, m)),
+#'  emiss_b0  = list(rep(1, m), rep(1, m)))
+
+#'# Fit the mHMM_cont on 2 dep variable data:
+#' out_3st_cont_sim <- mHMM_cont(s_data = data_cont$obs,
+#'                              gen = list(m = m, n_dep = n_dep2),
+#'                              start_val = c(list(gamma), emiss_distr),
+#'                              emiss_hyp_prior = hyp_pr,
+#'                              mcmc = list(J = J, burn_in =burn_in,
+#'                              show_progress = FALSE))
 #'
-#'}
-#'\dontshow{
-#' plot(x=subject_emiss3,subj_nr = 2,by_state = F,col = c("red","orange",
-#'      "green"))
-#' plot(x=subject_emiss3,subj_nr = 7,by_state = T,col = c("red","orange",
-#'  "green"),dep_lab=c("Patient Looking",NA,"Therapist Vocalizing",
-#'                "Therapist Looking"),cat_lab=list())
+#' emiss1_g_cont <- obtain_emiss(out_3st_cont_sim)
+#' plot.mHMM_emiss(emiss1_g_cont)
 #'
-#' plot(x=subject_emiss3,subj_nr = 7,by_state = T,col = c("red","orange",
-#'        "green"),dep_lab=c("Patient Looking",NA,"Therapist Vocalizing",
-#'"Therapist Looking"),cat_lab=list(c("low","medium","high"),NA,NA,c("1","3")))
 #'}
 #'
 #' @export
@@ -132,14 +148,14 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
            be plotted needs to be specified with the input variable -subj_nr-.")
     }else{
       new<-list()
-      for(n in 1:n_dep){#can be trouble with rmrmbering class ??
+      for(n in 1:n_dep){
         new[[n]]<-x[[n]][[subj_nr]]
         x[[n]]<-new[[n]]
       }
 
 
 
-      #calculating m(number of states) and q_emiss(vector representing number of categories for each dep. variable) for subject level
+ #-----calculating m(number of states) and q_emiss(vector representing number of categories for each dep. variable) for subject level----#
       m<-dim(x[[1]])[1]
 
       if(is.mHMM_emiss(x)){
@@ -155,7 +171,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       warning("The subject number can only be specified when plotting the subject level transition probabilities. Currently, the group level transition probabilities are plotted.")
     }
 
-    #calculating m(number of states) and q_emiss(vector representing number of categories for each dep. variable) for subject level
+#------calculating m(number of states) and q_emiss(vector representing number of categories for each dep. variable) for subject level-----#
     m<- dim(x[[1]])[1]
     if(is.mHMM_emiss(x)){
       for(l in 1:n_dep){
@@ -173,17 +189,16 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       names(x)[k]<-dep_lab[k]
     }
 
-  }else if(!missing(dep_lab) && length(dep_lab)!=n_dep && !is.vector(dep_lab)){
+  }else if(!missing(dep_lab) && length(dep_lab)!=max(n_dep)){
     stop("When specifying group labels, in -dep_lab-.The variable has to be a vector
            with lenght equal to the number of dependent variables ",n_dep)
-
   }
 
 
   if(is.mHMM_emiss(x)){
 
 
-     #Plugging specified by user category labels
+#------Plugging specified by user category labels---#
   if (missing(cat_lab)==T){
     for(k in n_dep){
       colnames(new[[k]])<-colnames(new[[k]])
@@ -201,7 +216,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
 
 
 
-  # Color setting
+#------Color setting------#
   if(missing(col)){
 
     n_col<- max(q_emiss)
@@ -220,9 +235,9 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
   }
 
 
-  # --- by_state==TRUE meaning that the plots will be displayed for each state
+# --- by_state==TRUE meaning that the plots will be displayed for each state---#
   if(by_state==TRUE){
-  #----Set the emission_states list where each object presents emission probabilities of all dependent variables for each state
+#----Set the emission_states list where each object presents emission probabilities of all dependent variables for each state-----#
     emission_states<-list()
     data<-matrix(nrow=n_dep,ncol=max(q_emiss))
     for(s in 1:m){
@@ -237,7 +252,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
     }
     a<-emission_states
 
-    #Plotting grid setting
+#----Plotting grid setting---#
     if(m>3){
       pre_grid<-matrix(NA,5,ceiling(m/2))
       extra <-matrix(NA, 5, ceiling(m/4))
@@ -270,7 +285,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
     }
     graphics::layout(new_grid)
 
-    #here we plot for only 3 states but if we will want to plot 5 then after m plots there has to be ceiling(m/2)*2-m more empty plots
+#----here we plot for only 3 states but if we will want to plot 5 then after m plots there has to be ceiling(m/2)*2-m more empty plots----#
     for(j in 1:m){
       if(is.null(subj_nr)==F){
         main_sub<-paste("Subject ",subj_nr)
@@ -291,7 +306,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
     old<-graphics::par("mai")
     graphics::par(mar=old)
 
-    #there is ceiling(n_dep/4)*4 inputs so add ceiling(n_dep/4)*4-n_dep empty plots
+ #----there is ceiling(n_dep/4)*4 inputs so add ceiling(n_dep/4)*4-n_dep empty plots----#
     for(p in 1:n_dep){
       graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
       if(is.null(subj_nr)==F){
@@ -318,8 +333,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
     }else{
       graphics::text(x=1,y=0, paste("Group emission probability distributions by states"), cex = 2, col = "black")
     }
-    # Here when we want to plot grouping by dependent variable
-
+ #----- Here when we want to plot grouping by dependent variable----#
   }else if(by_state==FALSE){
 
     if(n_dep>3){
@@ -367,7 +381,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
     old<-graphics::par("mai")
     graphics::par(mar=old)
 
-    #there is ceiling(n_dep/4)*4 imputs so add ((ceiling(n_dep/4)*4)-n_dep) empty plots
+ #----there is ceiling(n_dep/4)*4 imputs so add ((ceiling(n_dep/4)*4)-n_dep) empty plots----#
     for(p in 1:n_dep){
       graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
       if(is.null(subj_nr)==F){
@@ -395,7 +409,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
     }
   }
   }else if(is.mHMM_emiss_cont(x)){
-   #----Color setting-----
+ #----Color setting-----#
      if(missing(col)){
       n_col<-n_dep
 
@@ -412,7 +426,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       coul<-col
     }
 
- #----Set the emission_states list where each object presents emission distribution's parameters for all dependent variables for each state
+ #----Set the emission_states list where each object presents emission distribution's parameters for all dependent variables for each state----#
     emission_states<-list()
     data<-matrix(nrow=n_dep,ncol=2)
     for(s in 1:m){
@@ -425,7 +439,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       data<-matrix(nrow=n_dep,ncol=2)
     }
     a<-emission_states
-#---set the grid of the plotting space #maybe I should put the legend separately
+ #---set the grid of the plotting space #maybe I should put the legend separately----#
     if(m>3){
       new_grid<-matrix(NA,5,ceiling(m/2))
       new_grid[1,]<-rep(ceiling(m/2)*2+1,ceiling(m/2))
@@ -433,6 +447,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       new_grid[3,]<-new_grid[2,]
       new_grid[4,]<-c((ceiling(m/2)+1):(ceiling(m/2)*2))
       new_grid[5,]<-new_grid[4,]
+
       }else{
         new_grid<-matrix(NA,5, m)
         new_grid[1,]<-rep(m+1,m)
@@ -459,8 +474,9 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       for(k in 2:n_dep){
         graphics::lines(range,y[[k]],col=coul[k],lwd=2)
       }
-      #graphics::legend("topright",legend=names(x),fill=coul,title = "Dependent variable",bty="n",cex =legend_cex)
+
     }
+      #graphics::legend("topright",legend=names(x),fill=coul,title = "Dependent variable",bty="n",cex =legend_cex)    #"I AM NOT SURE!!!!! " delete unnecessary
 
   if(m>3){
     empty<-((ceiling(m/2)*2)-m)
@@ -474,9 +490,9 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
 
       graphics::plot(0,type='n',axes=FALSE,ann=FALSE)
       if(!is.null(subj_nr)){
-        graphics::text(x=1,y=0, paste("Emission probability distributions by states for subject ",subj_nr), cex = 2, col = "black")
+        graphics::text(x=0.9,y=0, paste("Emission probability distributions by states for subject ",subj_nr), cex = 2, col = "black")
       }else{
-        graphics::text(x=1,y=0, paste("Group emission probability distributions by states"), cex = 2, col = "black")
+        graphics::text(x=0.9,y=0, paste("Group emission probability distributions by states"), cex = 2, col = "black")
       }
       graphics::legend("topright",legend=names(x),fill=coul,title = "Dependent variable",bty="n",cex =legend_cex)
 
