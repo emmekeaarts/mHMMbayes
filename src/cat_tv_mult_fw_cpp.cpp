@@ -30,7 +30,7 @@ List cat_tv_mult_fw_cpp(NumericMatrix allprobs, NumericMatrix tgamma, int m, int
   }
 
   for (t = 1; t < n; t++){
-    NumericVector gamma_vec = tgamma(t,_);
+    NumericVector gamma_vec = tgamma(t-1,_);
     gamma_vec.attr("dim") = Dimension(m, m);
     gamma = as<NumericMatrix>(gamma_vec);
     gamma = transpose(gamma);
