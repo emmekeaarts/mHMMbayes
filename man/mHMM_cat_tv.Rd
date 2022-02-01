@@ -100,26 +100,26 @@ FALSE}). Defaults to \code{show_progress = TRUE}.}
  set of (state specific) intercepts is an Inverse Wishart distribution.
 
  Hence, the list \code{gamma_hyp_prior} contains the following elements:
- \itemize{\item{\code{gamma_mu0}: a list containing m matrices; one matrix
+ \itemize{\item{\code{gamma_mu0_int}: a list containing m matrices; one matrix
  for each row of the transition probability matrix gamma. Each matrix
  contains the hypothesized mean values of the intercepts. Hence, each matrix
  consists of one row (when not including covariates in the model) and
  \code{m} - 1 columns}
- \item{\code{gamma_K0}: numeric vector with length 1 denoting the number of
- hypothetical prior subjects on which the vector of means \code{gamma_mu0} is
+ \item{\code{gamma_K0_int}: numeric vector with length 1 denoting the number of
+ hypothetical prior subjects on which the vector of means \code{gamma_mu0_int} is
  based}
- \item{\code{gamma_nu}: numeric vector with length 1 denoting the degrees of
+ \item{\code{gamma_nu_int}: numeric vector with length 1 denoting the degrees of
  freedom of the Inverse Wishart distribution}
- \item{\code{gamma_V}: matrix of \code{m} - 1 by \code{m} - 1 containing the
+ \item{\code{gamma_V0_int}: matrix of \code{m} - 1 by \code{m} - 1 containing the
  hypothesized variance-covariance matrix between the set of intercepts.}}
- Note that \code{gamma_K0}, \code{gamma_nu} and \code{gamma_V} are assumed
+ Note that \code{gamma_K0_int}, \code{gamma_nu_int} and \code{gamma_V0_int} are assumed
  equal over the states. The mean values of the intercepts (and regression
- coefficients of the covariates) denoted by \code{gamma_mu0} are allowed to
+ coefficients of the covariates) denoted by \code{gamma_mu0_int} are allowed to
  vary over the states.
 
  The default values for the hyper-prior on gamma are: all elements of the
- matrices contained in \code{gamma_mu0} set to 0, \code{gamma_K0} set to 1,
- \code{gamma_nu} set to 3 + m - 1, and the diagonal of \code{gamma_V} (i.e.,
+ matrices contained in \code{gamma_mu0_int} set to 0, \code{gamma_K0_int} set to 1,
+ \code{gamma_nu_int} set to 3 + m - 1, and the diagonal of \code{gamma_V0_int} (i.e.,
  the variance) set to 3 + m - 1 and the off-diagonal elements (i.e., the
  covariance) set to 0.
 
@@ -161,7 +161,7 @@ FALSE}). Defaults to \code{show_progress = TRUE}.}
  The default values for the hyper-prior on the emission distribution(s) are:
  all elements of the matrices contained in \code{emiss_mu0} set to 0,
  \code{emiss_K0} set to 1, \code{emiss_nu} set to 3 + \code{q_emiss[k]} - 1,
- and the diagonal of \code{gamma_V} (i.e., the variance) set to 3 +
+ and the diagonal of \code{gamma_V0_int} (i.e., the variance) set to 3 +
  \code{q_emiss[k]} - 1 and the off-diagonal elements (i.e., the covariance)
  set to 0.
 
@@ -338,15 +338,15 @@ If covariates are specified and the user wants to set the values for the
 parameters of the hyper-prior distributions manually, the specification of
 the elements in the arguments of the hyper-prior parameter values of the
 normal distribution on the means change as follows: the number of rows in the
-matrices \code{gamma_mu0} and \code{emiss_mu0} are equal to 1 + the number of
+matrices \code{gamma_mu0_int} and \code{emiss_mu0} are equal to 1 + the number of
 covariates used to predict the transition probability matrix for
-\code{gamma_mu0} and the emission distribution for \code{emiss_mu0} (i.e.,
+\code{gamma_mu0_int} and the emission distribution for \code{emiss_mu0} (i.e.,
 the first row correspond to the hyper-prior mean values of the intercepts,
 the subsequent rows correspond to the hyper-prior mean values of the
 regression coefficients connected to each of the covariates), and
-\code{gamma_K0} and \code{emiss_K0} are now a matrix with the number of
+\code{gamma_K0_int} and \code{emiss_K0} are now a matrix with the number of
 hypothetical prior subjects on which the vectors of means (i.e., the rows in
-\code{gamma_mu0} or \code{emiss_mu0}) are based on the diagonal, and
+\code{gamma_mu0_int} or \code{emiss_mu0}) are based on the diagonal, and
 off-diagonal elements equal to 0. Note that the hyper-prior parameter values
 of the inverse Wishart distribution on the covariance matrix remains
 unchanged, as the estimates of the regression coefficients for the covariates
@@ -427,7 +427,7 @@ q_emiss <- 3
 # Run the model on the simulated data:
 out_2st_sim <- mHMM(s_data = data1$obs,
                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                 start_val = list(gamma, emiss_distr),
+                 start_val = c(list(gamma), emiss_distr),
                  mcmc = list(J = 11, burn_in = 5))
 
 
