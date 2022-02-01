@@ -714,7 +714,7 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
       xx_t_state[[s]]                       <- vector("list", m)
       sample_path[[s]][n_vary[[s]], iter] 	<- sample(1:m, 1, prob = c(alpha[, n_vary[[s]]]))
       for(t in (subj_data[[s]]$n - 1):1){
-        sample_path[[s]][t,iter] 	              <- sample(1:m, 1, prob = (alpha[, t] * matrix(gamma_t[t+1,], byrow = TRUE, ncol = m)[,sample_path[[s]][t + 1, iter]]))
+        sample_path[[s]][t,iter] 	              <- sample(1:m, 1, prob = (alpha[, t] * matrix(gamma_t[t,], byrow = TRUE, ncol = m)[,sample_path[[s]][t + 1, iter]]))
         trans[[s]][[sample_path[[s]][t,iter]]]	<- c(trans[[s]][[sample_path[[s]][t, iter]]], sample_path[[s]][t + 1, iter])
       }
       for (i in 1:m){
@@ -904,14 +904,15 @@ mHMM_cat_tv <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = F
                 gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, gamma_tv_cov = gamma_tv_cov,
                 emiss_int_bar = emiss_int_bar, emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
                 emiss_prob_bar = emiss_prob_bar, gamma_int_naccept = gamma_int_naccept, emiss_naccept = emiss_naccept,
-                sample_path = sample_path)
+                gamma_bet_naccept = gamma_bet_naccept, sample_path = sample_path)
   } else {
     out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
                              burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                 PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
                 gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, gamma_tv_cov = gamma_tv_cov,
                 emiss_int_bar = emiss_int_bar, emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
-                emiss_prob_bar = emiss_prob_bar, gamma_int_naccept = gamma_int_naccept, emiss_naccept = emiss_naccept)
+                emiss_prob_bar = emiss_prob_bar, gamma_int_naccept = gamma_int_naccept, emiss_naccept = emiss_naccept,
+                gamma_bet_naccept = gamma_bet_naccept)
   }
   class(out) <- append(class(out), "mHMM_cat_tvc")
   return(out)
