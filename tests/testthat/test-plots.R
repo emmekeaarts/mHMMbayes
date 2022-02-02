@@ -115,7 +115,7 @@ test_that("plotting functions don't throw unexpected errors", {
   expect_silent(plot.mHMM_emiss(emiss1_subj_cont, subj_nr = 3))
   expect_silent(plot.mHMM_emiss(emiss1_g_cont))
   expect_silent(plot(emiss1_subj, subj_nr = 3,col=c("orange","steelblue","indianred","goldenrod")))
-  expect_silent(plot.mHMM_emiss(emiss1_g_cont,col=c("red","blue")))
+  expect_silent(plot.mHMM_emiss(emiss1_g_cont,col=c("red","blue","orange")))
 
 
   expect_warning(plot(emiss1_g, subj_nr = 2), "only be specified when plotting the subject level")
@@ -124,10 +124,12 @@ test_that("plotting functions don't throw unexpected errors", {
   expect_error(plot(emiss1_subj), "specified with the input variable -subj_nr-")
   expect_error(plot.mHMM_emiss(emiss1_subj_cont), "specified with the input variable -subj_nr-")
   expect_error(plot.mHMM_emiss(emiss1_g_cont,dep_lab = c("a","b","c")),"When specifying group labels, in -dep_lab-")
+  expect_error(plot.mHMM_emiss(emiss1_subj_cont,subj_nr = 2, col = c("blue","red")), "When specifying colour vector, in -col-.")
 
 
   expect_error(plot.mHMM_emiss(out_2st_simb), "should be from the mHMM_emiss")
   expect_error(plot.mHMM_emiss(gamma1_g), "should be from the mHMM_emiss")
+
 
 })
 
