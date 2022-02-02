@@ -113,7 +113,25 @@ plot(x=group_emiss3)
 plot(x=group_emiss3,by_state=FALSE)
 
 #continuous case
+n_t <- 100
+n <- 10
+m <- 3
+J = 11
+burn_in = 5
+n_dep2 <- 2
+
+emiss_distr <- list(matrix(c( 5, 1,
+10, 1,
+15, 1), nrow = m, byrow = TRUE),
+matrix(c(0.5, 0.1,
+        1.0, 0.2,
+        2.0, 0.1), nrow = m, byrow = TRUE))
+gamma <- matrix(c(0.8, 0.1, 0.1,
+0.2, 0.6, 0.2,
+0.1, 0.2, 0.7), ncol = m, byrow = TRUE)
+
 #simulate data with continuous distribution for 2 dependent variables
+
 data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep2,
  data_distr = c('continuous','continuous'),
 gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1,
