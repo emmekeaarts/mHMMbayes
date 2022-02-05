@@ -516,19 +516,31 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       mu_range_min<-min(a[[i]][,1])
       mu_range_max<-max(a[[i]][,1])
       sigma_range<-max(a[[i]][,2])
-      range<-seq(mu_range_min-4*sigma_range,mu_range_max+4*sigma_range,0.01)
+      range<-seq(mu_range_min-3*sigma_range,mu_range_max+3*sigma_range,0.01)
 
       for(n in 1:m){
       y[[n]]<-dnorm(range,mean =a[[i]][[n,1]],sd =a[[i]][[n,2]] )
       }
 
       graphics::plot(range,y[[1]],ylim=c(0,1.10),xlim=c(min(range),max(range)),col=coul[1],type="l",ylab ="",xlab = "",main=paste(names(x)[i]),lwd=2)
+      graphics::polygon(range,y[[1]], col=t_col(coul[1]))
       for(k in 2:m){
         graphics::lines(range,y[[k]],col=coul[k],lwd=2)
+        graphics::polygon(range,y[[k]], col= t_col(coul[k]))
       }
+      if(n_dep<=3){
+        if(i==n_dep){
+          graphics::legend("topright",legend=row.names(x[[1]]),fill=coul,title = "States",bty="n",cex =legend_cex)
+        }
+
+      }else
+        if(i==ceiling(n_dep/2)){
+          graphics::legend("topright",legend=row.names(x[[1]]),fill=coul,title = "States",bty="n",cex =legend_cex)
+
+        }
 
     }
-      graphics::legend("topright",legend=row.names(x[[1]]),fill=coul,title = "States",bty="n",cex =legend_cex)
+
 
   if(n_dep>3){
     empty<-((ceiling(n_dep/2)*2)-n_dep)
@@ -553,7 +565,6 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
 
   graphics::par(mfrow=c(1,1))
 }
-
 
 
 

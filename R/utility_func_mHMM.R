@@ -73,3 +73,15 @@ isNested <- function(x) {
   }
   return(out)
 }
+
+#' @keywords internal
+t_col <- function(color, percent = 60, name = NULL) {
+
+  rgb.val <- col2rgb(color)
+
+  t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
+               max = 255,
+               alpha = (100 - percent) * 255 / 100,
+               names = name)
+    invisible(t.col)
+}
