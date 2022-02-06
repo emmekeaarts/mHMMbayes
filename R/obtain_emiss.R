@@ -119,9 +119,9 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
       if(n_cat > 0){
         for(q in 1:n_cat){
           ind <- which_cat[q]
-          emiss_int_est[[ind]][] <- matrix(apply(object$emiss_int_bar[[j]][((burn_in + 1): J),], 2, median), #not sure if I should do anything to it
+          emiss_int_est[[ind]][] <- matrix(apply(object$emiss_int_bar[[q]][((burn_in + 1): J),], 2, median), #not sure if I should do anything to it
                                          byrow = TRUE, ncol = q_emiss[ind]-1, nrow = m)
-          est[[ind]][] <- round(int_to_prob(emiss_int_est[[q]]),3)
+          est[[ind]][] <- round(int_to_prob(emiss_int_est[[ind]]),3)
         }
       }
       if(n_cont > 0){
@@ -155,7 +155,6 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
 
         est_int<-matrix(,ncol = q_emiss[j]-1, nrow = m)
         emiss_int_est[[j]] <- rep(list(est_int), n_subj)
-        names(emiss_int_est[[j]]) <- paste("Subject", 1:n_subj)
 
       }
       for(i in 1:n_subj){
