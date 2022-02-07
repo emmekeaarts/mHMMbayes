@@ -522,10 +522,10 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
       y[[n]]<-dnorm(range,mean =a[[i]][[n,1]],sd =a[[i]][[n,2]] )
       }
 
-      graphics::plot(range,y[[1]],ylim=c(0,1.10),xlim=c(min(range),max(range)),col=coul[1],type="l",ylab ="",xlab = "",main=paste(names(x)[i]),lwd=2)
+      graphics::plot(range,y[[1]],ylim=c(0,1.10),xlim=c(min(range),max(range)),col=coul[1],type="l",ylab ="",xlab = "",main=paste(names(x)[i]),lwd=3)
       graphics::polygon(range,y[[1]], col=t_col(coul[1]))
       for(k in 2:m){
-        graphics::lines(range,y[[k]],col=coul[k],lwd=2)
+        graphics::lines(range,y[[k]],col=coul[k],lwd=3)
         graphics::polygon(range,y[[k]], col= t_col(coul[k]))
       }
       if(n_dep<=3){
