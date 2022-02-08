@@ -511,6 +511,7 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
     graphics::layout(new_grid)
       y=list()
 
+
     for(i in 1:n_dep){
       a[[i]][,2]<-sqrt(a[[i]][,2])
       mu_range_min<-min(a[[i]][,1])
@@ -520,9 +521,12 @@ plot.mHMM_emiss<- function(x,subj_nr=NULL,by_state=TRUE,cat_lab,
 
       for(n in 1:m){
       y[[n]]<-dnorm(range,mean =a[[i]][[n,1]],sd =a[[i]][[n,2]] )
-      }
 
-      graphics::plot(range,y[[1]],ylim=c(0,1.10),xlim=c(min(range),max(range)),col=coul[1],type="l",ylab ="",xlab = "",main=paste(names(x)[i]),lwd=3)
+      }
+      new<-unlist(y)
+      new_ylim<-max(new)
+
+      graphics::plot(range,y[[1]],ylim=c(0,new_ylim+0.05),xlim=c(min(range),max(range)),col=coul[1],type="l",ylab ="",xlab = "",main=paste(names(x)[i]),lwd=3)
       graphics::polygon(range,y[[1]], col=t_col(coul[1]))
       for(k in 2:m){
         graphics::lines(range,y[[k]],col=coul[k],lwd=3)
