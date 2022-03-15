@@ -1008,7 +1008,7 @@ mHMM_vary <- function(s_data, gen, data_distr, xx = NULL, start_val, emiss_cont_
           for (s in 1:n_subj){
             emiss_candcov_comb		     <- chol2inv(chol(subj_data[[s]]$emiss_mhess[[q]][(1 + (i - 1) * (q_emiss[ind] - 1)):((q_emiss[ind] - 1) + (i - 1) * (q_emiss[ind] - 1)), ] + chol2inv(chol(emiss_V_int[[i]][[q]]))))
             emiss_RWout				       <- mnl_RW_once(int1 = emiss_c_int[[i]][[q]][s,], Obs = cond_y[[s]][[i]][[ind]], n_cat = q_emiss[ind], mu_int_bar1 = c(t(emiss_mu_int_bar[[i]][[q]]) %*% xx[[1 + ind]][s,]), V_int1 = emiss_V_int[[i]][[q]], scalar = emiss_scalar[[q]], candcov1 = emiss_candcov_comb)
-            emiss[[s]][[ind]][i,]		   <- PD_subj[[s]]$cat_emiss[iter, (sum(start[1:q]) + 1 + (i - 1) * q_emiss[ind]):(sum(start[1:q]) + (i - 1) * q_emiss[ind] + q_emiss[ind])] <- emiss_RWout$prob
+            emiss[[s]][[ind]][i,]		   <- PD_subj[[s]]$cat_emiss[iter, (sum(start[1:q]) + 1 + (i - 1) * q_emiss[ind]):(sum(start[1:q]) + (i - 1) * q_emiss[ind] + q_emiss[ind])] <- emiss_RWout$prob + .0001
             emiss_naccept[[q]][s, i]	 <- emiss_naccept[[q]][s, i] + emiss_RWout$accept
             emiss_c_int[[i]][[q]][s,] <- emiss_RWout$draw_int
             emiss_int_subj[[s]][[q]][iter, (1 + (i - 1) * (q_emiss[ind] - 1)) : ((q_emiss[ind] - 1) + (i - 1) * (q_emiss[ind] - 1))]	<- emiss_c_int[[i]][[q]][s,]
