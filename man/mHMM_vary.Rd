@@ -426,7 +426,7 @@ ADJUST: use of n_dep in the help file! change to n_cat and n_cont? introduce
 ###### Example on simulated data
 # simulating data with both categorical and continous dependent variables
 
-number of observations per subject, subjects, states and dependent variables
+# number of observations per subject, subjects, states and dependent variables
 n_t     <- 100
 n       <- 10
 m       <- 3
