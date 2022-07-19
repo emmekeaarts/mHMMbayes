@@ -19,6 +19,7 @@ In the function sim_mHMM() used to simulate data for multiple subject - for whic
 ## Other minor improvements and bug fixes
 * fixed error in tutorial vignette, section 'Graphically displaying outcomes'.
 * implemented progress bar for mHMM() to indicate progress of the used algorithm
+* bug fix for plotting subject posterior densities in plot.mHMM(): iterations were set to 10 instead of n_subj. 
 
 
 # mHMMbayes 0.1.1
