@@ -1,3 +1,4 @@
+# mHMMbayes 0.2.0
 
 # mHMMbayes (development version)
 ## Speed
