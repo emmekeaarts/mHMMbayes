@@ -10,37 +10,30 @@ n <- 10
 m <- 3
 J = 11
 burn_in = 5
-
-##### create test data wit 1 dependent variable
-n_dep2 <- 2
-q_emiss2 <- c(4,2)
+n_dep <- 2
+q_emiss <- c(4,2)
 
 gamma <- matrix(c(0.8, 0.1, 0.1,
                   0.2, 0.6, 0.2,
                   0.1, 0.2, 0.7), ncol = m, byrow = TRUE)
-emiss_distr1 <- matrix(c(0.5, 0.5, 0.0, 0.0,
-                         0.1, 0.1, 0.8, 0.0,
-                         0.1, 0.1, 0.2, 0.6), nrow = m, ncol = q_emiss2[1], byrow = TRUE)
-emiss_distr2 <- matrix(c(0.7, 0.3,
-                         0.9, 0.1,
-                         0.8, 0.2), nrow = m, ncol = q_emiss2[2], byrow = TRUE)
-
-# (small workaround as cannot simulate multivariate data yet)
-set.seed(4231)
-data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss2[1], gamma = gamma,
-                  emiss_distr = list(emiss_distr1=emiss_distr1), var_gamma = .5, var_emiss = .5)
+emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
+                             0.1, 0.1, 0.8, 0.0,
+                             0.1, 0.1, 0.2, 0.6), nrow = m, ncol = q_emiss[1], byrow = TRUE),
+                    matrix(c(0.7, 0.3,
+                             0.9, 0.1,
+                             0.8, 0.2), nrow = m, ncol = q_emiss[2], byrow = TRUE)
+)
 
 set.seed(4231)
-data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss2[2], gamma = gamma,
-                  emiss_distr = list(emiss_distr2=emiss_distr2), var_gamma = .5, var_emiss = .5)
-data3 <- list(states = data1$states, obs = cbind(data1$obs, data2$obs[,2]))
-colnames(data3$obs) <- c("subj", "output_1", "output_2")
+data_sim <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, q_emiss = q_emiss, gamma = gamma,
+                     emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.5))
+colnames(data_sim$obs) <- c("subj", "output_1", "output_2")
 
 # Fit the mHMM on 2 dep variable data
 set.seed(3523)
-out_2st_simb <- mHMM(s_data = data3$obs,
-                     gen = list(m = m, n_dep = n_dep2, q_emiss = q_emiss2),
-                     start_val = list(gamma, emiss_distr1, emiss_distr2),
+out_2st_simb <- mHMM(s_data = data_sim$obs,
+                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                     start_val = c(list(gamma), emiss_distr),
                      mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
 
 
