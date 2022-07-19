@@ -7,7 +7,6 @@
 sim_mHMM(
   n_t,
   n,
-  data_distr = "categorical",
   m,
   n_dep = 1,
   start_state = NULL,
@@ -30,12 +29,6 @@ specific transition probability matrices gamma and emission distributions
 \item{n}{Numeric vector with length 1 denoting the number of subjects for
 which data is simulated.}
 
-\item{data_distr}{String vector with lenght 1 denoting the observation type
-of the data to be simulated. Should be set to either \code{'categorical'}
-or \code{'continuous'}. Note that when simulating multivariate data, all
-dependent variables are assumed to be of the same observation type. The
-default equals to \code{data_distr = 'categorical'}.}
-
 \item{m}{Numeric vector with length 1 denoting the number
 of hidden states.}
 
@@ -48,10 +41,9 @@ simulated state for time point 1 is sampled from the initial state
 distribution (which is derived from the transition probability matrix
 gamma).}
 
-\item{q_emiss}{Only to be specified if the data to be simulated represents
-categorical data. Numeric vector with length \code{n_dep} denoting the
-number of observed categories for the categorical emission distribution for
-each of the dependent variables.}
+\item{q_emiss}{Numeric vector with length \code{n_dep} denoting the number of
+observed categories for the categorical emission distribution for each of
+the dependent variables.}
 
 \item{gamma}{A matrix with \code{m} rows and \code{m} columns containing the
 average population transition probability matrix used for simulating the
@@ -60,15 +52,11 @@ data. That is, the probability to switch from hidden state \emph{i} (row
 
 \item{emiss_distr}{A list with \code{n_dep} elements containing the average
 population emission distribution(s) of the observations given the hidden
-states for each of the dependent variables. If \code{data_distr =
-'categorical'}, each element is a matrix with \code{m} rows and
-\code{q_emiss[k]} columns for each of the \code{k} in \code{n_dep} emission
-distribution(s). That is, the probability of observing category \emph{q}
-(column \emph{q}) in state \emph{i} (row \emph{i}). If \code{data_distr =
-'continuous'}, each element is a matrix with \code{m} rows and 2 columns;
-the first column denoting the mean of state \emph{i} (row \emph{i}) and the
-second column denoting the variance of state \emph{i} (row \emph{i}) of the
-Normal distribution.}
+states for each of the dependent variables. Each element is a matrix with
+\code{m} rows and \code{q_emiss[k]} columns for each of the \code{k} in
+\code{n_dep} emission distribution(s). That is, the probability of
+observing category \emph{q} (column \emph{q}) in state \emph{i} (row
+\emph{i}).}
 
 \item{xx_vec}{List of 1 + \code{n_dep} vectors containing the covariate(s) to
 predict the transition probability matrix \code{gamma} and/or (specific)
@@ -80,10 +68,7 @@ dependent variable(s). This means that the covariate used to predict
 \code{gamma} and \code{emiss_distr} can either be the same covariate,
 different covariates, or a covariate for certain elements and none for the
 other. At this point, it is only possible to use one covariate for both
-\code{gamma} and \code{emiss_distr}. The first vector of the list
-\code{xx_vec} is used to predict the transition matrix. The subsequent
-vectors in the list \code{xx_vec} are used to predict the emission
-distribution(s) of the dependent variable(s). For all elements in the list,
+\code{gamma} and \code{emiss_distr}. For all elements in the list,
 the number of observations in the vectors should be  equal to the number of
 subjects to be simulated \code{n}. If \code{xx_vec} is omitted completely,
 \code{xx_vec} defaults to NULL, resembling no covariates at all. Specific
@@ -135,17 +120,14 @@ for only 1 subject is simulated (i.e., n = 1), \code{var_gamma} is set to
 0.}
 
 \item{var_emiss}{A numeric vector with length \code{n_dep} denoting the
-amount of variance between subjects in the emission distribution(s). For
-categorical data, this value corresponds to the variance of the parameters
-of the multinomial distribution (i.e., the intercepts of the regression
-equation of the multinomial distribution used to sample the components of
-the emission distribution), see details below.  For continuous data, this
-value corresponds to the variance in the mean of the emission
-distribution(s) across subjects. Note that only one variance value can be
+amount of variance between subjects in the emission distribution(s). Note
+that this value corresponds to the variance of the parameters of the
+multinomial distribution (i.e., the intercepts of the regression equation
+of the multinomial distribution used to sample the components of the
+emission distribution), see details below. Only one variance value can be
 specified each emission distribution, hence the variance is assumed fixed
-across states (and, for the categorical distribution, categories within
-a state) within an emission distribuiton. The default equals 0.1, which
-corresponds to little variation between subjects given categorical
+across states and across categories within a state. The default equals 0.1,
+which corresponds to little variation between subjects given categorical
 observations. If one wants to simulate data from exactly the same HMM for
 all subjects, var_emiss should be set to a vector of 0's. Note that if data
 for only 1 subject is simulated (i.e., n = 1), \code{var_emiss} is set to a
@@ -183,7 +165,7 @@ The following components are returned by the function \code{sim_mHMM}:
 }
 \description{
 \code{sim_mHMM} simulates data for multiple subjects, for which the data have
-either categorical or continuous (i.e., normally distributed)
+categorical
 observations that follow a hidden Markov model (HMM) with a multilevel
 structure. The multilevel structure implies that each subject is allowed to
 have its own set of parameters, and that the parameters at the subject level
@@ -200,14 +182,12 @@ distribution of the corresponding parameter. The user specifies the
 population distribution for each parameter: the average population transition
 probability matrix and its variance, and the average population emission
 distribution and its variance. For now, the variance of the mean population
-paramters is assumed fixed for all components of the transition probability
+parameters is assumed fixed for all components of the transition probability
 matrix and for all components of the emission distribution.
 
 One can simulate multivariate data. That is, the hidden states depend on more
 than 1 observed variable simultaneously. The distributions of multiple
-dependent variables for multivariate data are assumed to be independent, and
-all distributions for one dataset have to be of the same type (either
-categorical or continuous).
+dependent variables for multivariate data are assumed to be independent.
 
 Note: the subject specific) initial state distributions (i.e., the
 probability of each of the states at the first time point) needed to simulate
@@ -279,29 +259,6 @@ data3
 data4 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 data4
-
-# simulating multivariate continuous data
-n_t     <- 100
-n       <- 10
-m       <- 3
-n_dep   <- 2
-
-gamma   <- matrix(c(0.8, 0.1, 0.1,
-                    0.2, 0.7, 0.1,
-                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
-
-emiss_distr <- list(matrix(c( 5, 1,
-                             10, 1,
-                             15, 1), nrow = m, byrow = TRUE),
-                     matrix(c(0.5, 0.1,
-                              1.0, 0.2,
-                              2.0, 0.1), nrow = m, byrow = TRUE))
-
-data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
-                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.01))
-
-head(data_cont$states)
-head(data_cont$obs)
 }
 \seealso{
 \code{\link{mHMM}} for analyzing multilevel hidden Markov data.
