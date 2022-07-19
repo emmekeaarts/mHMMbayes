@@ -21,7 +21,7 @@ cat_mult_fw_r_to_cpp <- function(x, m, emiss, n_dep, gamma, delta = NULL){
     delta <- solve(t(diag(m) - gamma + 1), rep(1, m))
   }
   n        <- dim(x)[1]
-  allprobs <- all1(x = x, emiss = emiss, n_dep = n_dep, data_distr = "categorical")
+  allprobs <- all1(x = x, emiss = emiss, n_dep = n_dep)
   out <- cat_mult_fw_cpp(allprobs = allprobs, gamma = gamma, m = m, n = n, delta = delta)
   return(out)
 }

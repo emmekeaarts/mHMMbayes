@@ -76,7 +76,7 @@
 #'
 obtain_gamma <- function(object, level = "group", burn_in = NULL){
   if (!is.mHMM(object)){
-    stop("The input object used should either be from the class mHMM, obtained by using the function mHMM.")
+    stop("The input object used should be from the class mHMM, obtained by using the function mHMM.")
   }
   if (level != "group" & level != "subject"){
     stop("The specification at the input variable -level- should be set to either group or subject")
