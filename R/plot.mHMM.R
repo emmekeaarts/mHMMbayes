@@ -179,7 +179,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         graphics::lines(stats::density(object$emiss_prob_bar[[dep]][burn_in:J,q_emiss[dep] * (i-1) + q]),
               type = "l", col = cat_col[q], lwd = lwd1, lty = lty1)
         # add density curves for subject posterior distributions
-        for(s in 1:10){
+        for(s in 1:n_subj){
           graphics::lines(stats::density(object$PD_subj[[s]][burn_in:J,(sum(start[1:dep])
                                                      + (i-1)*q_emiss[dep] + q)]),
                 type = "l", col = cat_col[q], lwd = lwd2, lty = lty2)
