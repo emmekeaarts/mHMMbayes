@@ -4,9 +4,20 @@
 \alias{mHMM}
 \title{Multilevel hidden  Markov model using Bayesian estimation}
 \usage{
-mHMM(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE,
-  print_iter = FALSE, gamma_hyp_prior = NULL, emiss_hyp_prior = NULL,
-  gamma_sampler = NULL, emiss_sampler = NULL)
+mHMM(
+  s_data,
+  gen,
+  xx = NULL,
+  start_val,
+  mcmc,
+  return_path = FALSE,
+  print_iter,
+  show_progress = TRUE,
+  gamma_hyp_prior = NULL,
+  emiss_hyp_prior = NULL,
+  gamma_sampler = NULL,
+  emiss_sampler = NULL
+)
 }
 \arguments{
 \item{s_data}{A matrix containing the observations to be modelled, where the
@@ -52,8 +63,8 @@ for each of the dependent variables.}}}
 probability matrix gamma and the emission distribution(s). The first
 element of the list contains a \code{m} by \code{m} matrix with the start
 values for gamma. The subsequent elements contain \code{m} by
-\code{q_emiss[k]} matrices for the start values for each of the \code{k}
-emission distribution(s). Note that \code{start_val} should not contain
+\code{q_emiss[k]} matrices for the start values for each of the \code{k} in
+\code{n_dep} emission distribution(s). Note that \code{start_val} should not contain
 nested lists (i.e., lists within lists).}
 
 \item{mcmc}{List of Markov chain Monte Carlo (MCMC) arguments, containing the
@@ -70,10 +81,13 @@ the sampled state sequence is quite a large object, hence the default
 setting is \code{sample_path = FALSE}. Can be used for local decoding
 purposes.}
 
-\item{print_iter}{A logical scaler. Should the function print the progress of
-the algorithm by returning the current iteration number at every 10th
-iteration (\code{print_iter = TRUE}) or not (\code{print_iter = FALSE}).
-Defaults to \code{print_iter = FALSE}.}
+\item{print_iter}{The argument print_iter is depricated; please use
+show_progress instead to show the progress of the algorithm.}
+
+\item{show_progress}{A logical scaler. Should the function show a text
+progress bar in the \code{R} console to represent the progress of the
+algorithm (\code{show_progress = TRUE}) or not (\code{show_progress =
+FALSE}). Defaults to \code{show_progress = TRUE}.}
 
 \item{gamma_hyp_prior}{An optional list containing user specified parameters
  of the hyper-prior distribution on the multivariate normal distribution
@@ -120,20 +134,20 @@ Defaults to \code{print_iter = FALSE}.}
 
  Hence, the list \code{emiss_hyp_prior} contains the following elements:
  \itemize{\item{\code{emiss_mu0}: a list of lists: \code{emiss_mu0} contains
- \code{ndep} lists, i.e., one list for each dependent variable \code{k}. Each
+ \code{n_dep} lists, i.e., one list for each dependent variable \code{k}. Each
  of these lists contains m matrices; one matrix for each set of emission
  probabilities within a state. The matrices contain the hypothesized mean
  values of the intercepts. Hence, each matrix consists of one row (when not
  including covariates in the model) and \code{q_emiss[k]} - 1 columns}
- \item{\code{emiss_K0}: a list containing \code{ndep} elements corresponding
+ \item{\code{emiss_K0}: a list containing \code{n_dep} elements corresponding
  to each of the dependent variables, where each element is a numeric vector
  with length 1 denoting the number of hypothetical prior subjects on which
  the vector of means \code{emiss_mu0} is based}
- \item{\code{emiss_nu}: a list containing \code{ndep} elements corresponding
+ \item{\code{emiss_nu}: a list containing \code{n_dep} elements corresponding
  to each of the dependent variables, where each element is a numeric vector
  with length 1 denoting the degrees of freedom of the Inverse Wishart
  distribution}
- \item{\code{emiss_V}: a list containing \code{ndep} elements corresponding
+ \item{\code{emiss_V}: a list containing \code{n_dep} elements corresponding
  to each of the dependent variables \code{k}, where each element is a matrix
  of \code{q_emiss[k]} - 1 by \code{q_emiss[k]} - 1 containing the
  hypothesized variance-covariance matrix between the set of intercepts.}}
@@ -143,7 +157,7 @@ Defaults to \code{print_iter = FALSE}.}
  vary over the states.
 
  The default values for the hyper-prior on the emission distribution(s) are:
- all elements of the matrices contained in \code{emiss_K0} set to 0,
+ all elements of the matrices contained in \code{emiss_mu0} set to 0,
  \code{emiss_K0} set to 1, \code{emiss_nu} set to 3 + \code{q_emiss[k]} - 1,
  and the diagonal of \code{gamma_V} (i.e., the variance) set to 3 +
  \code{q_emiss[k]} - 1 and the off-diagonal elements (i.e., the covariance)
@@ -178,18 +192,18 @@ over all subjects) in the fractional likelihood.}}
  the subject level parameter estimates of the intercepts modeling the
  emission distributions of the dependent variables \code{k}. The list
  \code{emiss_sampler} contains the following elements:
-\itemize{\item{\code{emiss_int_mle0}: a list containing \code{ndep} elements
+\itemize{\item{\code{emiss_int_mle0}: a list containing \code{n_dep} elements
 corresponding to each of the dependent variables \code{k}, where each
 element is a a numeric vector with length \code{q_emiss[k]} - 1 denoting the
 start values for the maximum likelihood estimates of the intercepts for
 the emission distribution, based on the pooled data (data over all
 subjects)}
-\item{\code{emiss_scalar}: a list containing \code{ndep} elements
+\item{\code{emiss_scalar}: a list containing \code{n_dep} elements
 corresponding to each of the dependent variables, where each element is a
 numeric vector with length 1 denoting the scale factor \code{s}. That is,
 The scale of the proposal distribution is composed of a covariance matrix
 Sigma, which is then tuned by multiplying it by a scaling factor \code{s}^2}
-\item{\code{emiss_w}: a list containing \code{ndep} elements corresponding
+\item{\code{emiss_w}: a list containing \code{n_dep} elements corresponding
 to each of the dependent variables, where each element is a numeric vector
 with length 1 denoting the weight for the overall log likelihood (i.e., log
 likelihood based on the pooled data over all subjects) in the fractional
@@ -395,8 +409,8 @@ m <- 2
 q_emiss <- 3
 gamma <- matrix(c(0.8, 0.2,
                   0.3, 0.7), ncol = m, byrow = TRUE)
-emiss_distr <- matrix(c(0.5, 0.5, 0.0,
-                        0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE)
+emiss_distr <- list(matrix(c(0.5, 0.5, 0.0,
+                        0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE))
 data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 

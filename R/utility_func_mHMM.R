@@ -1,7 +1,14 @@
 #' @keywords internal
+# Whenever you use C++ code in your package, you need to clean up after yourself
+# when your package is unloaded. This function unloads the DLL (H. Wickham(2019). R packages)
+.onUnload <- function (libpath) {
+  library.dynam.unload("mHMMbayes", libpath)
+}
+
+#' @keywords internal
 # simple functions used in mHMM
-dif_matrix <- function(rows, cols){
-  return(matrix(, ncol = cols, nrow = rows))
+dif_matrix <- function(rows, cols, data = NA){
+  return(matrix(data, ncol = cols, nrow = rows))
 }
 
 #' @keywords internal
@@ -22,6 +29,11 @@ is.whole <- function(x) {
 #' @keywords internal
 is.mHMM <- function(x) {
   inherits(x, "mHMM")
+}
+
+#' @keywords internal
+is.mHMM_cont <- function(x) {
+  inherits(x, "mHMM_cont")
 }
 
 #' @keywords internal

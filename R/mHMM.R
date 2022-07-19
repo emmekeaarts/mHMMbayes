@@ -83,8 +83,8 @@
 #'   probability matrix gamma and the emission distribution(s). The first
 #'   element of the list contains a \code{m} by \code{m} matrix with the start
 #'   values for gamma. The subsequent elements contain \code{m} by
-#'   \code{q_emiss[k]} matrices for the start values for each of the \code{k}
-#'   emission distribution(s). Note that \code{start_val} should not contain
+#'   \code{q_emiss[k]} matrices for the start values for each of the \code{k} in
+#'   \code{n_dep} emission distribution(s). Note that \code{start_val} should not contain
 #'   nested lists (i.e., lists within lists).
 #' @param mcmc List of Markov chain Monte Carlo (MCMC) arguments, containing the
 #'   following elements:
@@ -98,10 +98,12 @@
 #'   the sampled state sequence is quite a large object, hence the default
 #'   setting is \code{sample_path = FALSE}. Can be used for local decoding
 #'   purposes.
-#' @param print_iter A logical scaler. Should the function print the progress of
-#'   the algorithm by returning the current iteration number at every 10th
-#'   iteration (\code{print_iter = TRUE}) or not (\code{print_iter = FALSE}).
-#'   Defaults to \code{print_iter = FALSE}.
+#' @param print_iter The argument print_iter is depricated; please use
+#'   show_progress instead to show the progress of the algorithm.
+#' @param show_progress A logical scaler. Should the function show a text
+#'   progress bar in the \code{R} console to represent the progress of the
+#'   algorithm (\code{show_progress = TRUE}) or not (\code{show_progress =
+#'   FALSE}). Defaults to \code{show_progress = TRUE}.
 #' @param gamma_hyp_prior An optional list containing user specified parameters
 #'  of the hyper-prior distribution on the multivariate normal distribution
 #'  of the intercepts (and regression coefficients given that covariates are
@@ -146,20 +148,20 @@
 #'
 #'  Hence, the list \code{emiss_hyp_prior} contains the following elements:
 #'  \itemize{\item{\code{emiss_mu0}: a list of lists: \code{emiss_mu0} contains
-#'  \code{ndep} lists, i.e., one list for each dependent variable \code{k}. Each
+#'  \code{n_dep} lists, i.e., one list for each dependent variable \code{k}. Each
 #'  of these lists contains m matrices; one matrix for each set of emission
 #'  probabilities within a state. The matrices contain the hypothesized mean
 #'  values of the intercepts. Hence, each matrix consists of one row (when not
 #'  including covariates in the model) and \code{q_emiss[k]} - 1 columns}
-#'  \item{\code{emiss_K0}: a list containing \code{ndep} elements corresponding
+#'  \item{\code{emiss_K0}: a list containing \code{n_dep} elements corresponding
 #'  to each of the dependent variables, where each element is a numeric vector
 #'  with length 1 denoting the number of hypothetical prior subjects on which
 #'  the vector of means \code{emiss_mu0} is based}
-#'  \item{\code{emiss_nu}: a list containing \code{ndep} elements corresponding
+#'  \item{\code{emiss_nu}: a list containing \code{n_dep} elements corresponding
 #'  to each of the dependent variables, where each element is a numeric vector
 #'  with length 1 denoting the degrees of freedom of the Inverse Wishart
 #'  distribution}
-#'  \item{\code{emiss_V}: a list containing \code{ndep} elements corresponding
+#'  \item{\code{emiss_V}: a list containing \code{n_dep} elements corresponding
 #'  to each of the dependent variables \code{k}, where each element is a matrix
 #'  of \code{q_emiss[k]} - 1 by \code{q_emiss[k]} - 1 containing the
 #'  hypothesized variance-covariance matrix between the set of intercepts.}}
@@ -169,7 +171,7 @@
 #'  vary over the states.
 #'
 #'  The default values for the hyper-prior on the emission distribution(s) are:
-#'  all elements of the matrices contained in \code{emiss_K0} set to 0,
+#'  all elements of the matrices contained in \code{emiss_mu0} set to 0,
 #'  \code{emiss_K0} set to 1, \code{emiss_nu} set to 3 + \code{q_emiss[k]} - 1,
 #'  and the diagonal of \code{gamma_V} (i.e., the variance) set to 3 +
 #'  \code{q_emiss[k]} - 1 and the off-diagonal elements (i.e., the covariance)
@@ -202,18 +204,18 @@
 #'   the subject level parameter estimates of the intercepts modeling the
 #'   emission distributions of the dependent variables \code{k}. The list
 #'   \code{emiss_sampler} contains the following elements:
-#'  \itemize{\item{\code{emiss_int_mle0}: a list containing \code{ndep} elements
+#'  \itemize{\item{\code{emiss_int_mle0}: a list containing \code{n_dep} elements
 #'  corresponding to each of the dependent variables \code{k}, where each
 #'  element is a a numeric vector with length \code{q_emiss[k]} - 1 denoting the
 #'  start values for the maximum likelihood estimates of the intercepts for
 #'  the emission distribution, based on the pooled data (data over all
 #'  subjects)}
-#'  \item{\code{emiss_scalar}: a list containing \code{ndep} elements
+#'  \item{\code{emiss_scalar}: a list containing \code{n_dep} elements
 #'  corresponding to each of the dependent variables, where each element is a
 #'  numeric vector with length 1 denoting the scale factor \code{s}. That is,
 #'  The scale of the proposal distribution is composed of a covariance matrix
 #'  Sigma, which is then tuned by multiplying it by a scaling factor \code{s}^2}
-#'  \item{\code{emiss_w}: a list containing \code{ndep} elements corresponding
+#'  \item{\code{emiss_w}: a list containing \code{n_dep} elements corresponding
 #'  to each of the dependent variables, where each element is a numeric vector
 #'  with length 1 denoting the weight for the overall log likelihood (i.e., log
 #'  likelihood based on the pooled data over all subjects) in the fractional
@@ -392,8 +394,8 @@
 #' q_emiss <- 3
 #' gamma <- matrix(c(0.8, 0.2,
 #'                   0.3, 0.7), ncol = m, byrow = TRUE)
-#' emiss_distr <- matrix(c(0.5, 0.5, 0.0,
-#'                         0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE)
+#' emiss_distr <- list(matrix(c(0.5, 0.5, 0.0,
+#'                         0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE))
 #' data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
 #'                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 #'
@@ -413,10 +415,12 @@
 #'
 #'
 
-mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, print_iter = FALSE,
-                 gamma_hyp_prior = NULL, emiss_hyp_prior = NULL,
-                 gamma_sampler = NULL, emiss_sampler = NULL){
+mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, print_iter, show_progress = TRUE,
+                 gamma_hyp_prior = NULL, emiss_hyp_prior = NULL, gamma_sampler = NULL, emiss_sampler = NULL){
 
+  if(!missing(print_iter)){
+    warning("The argument print_iter is depricated; please use show_progress instead to show the progress of the algorithm.")
+  }
   # Initialize data -----------------------------------
   # dependent variable(s), sample size, dimensions gamma and conditional distribuiton
   n_dep			 <- gen$n_dep
@@ -553,9 +557,9 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
     for(q in 1:n_dep){
       # emiss_hyp_prior[[q]]$emiss_mu0 has to contain a list with lenght equal to m, and each list contains matrix with number of rows equal to number of covariates for that dep. var.
       # stil build in a CHECK, with warning / stop / switch to default prior
-      emiss_mu0[[q]]	 <- emiss_hyp_prior[[q]]$emiss_mu0
-      emiss_nu[[q]]	 <- emiss_hyp_prior[[q]]$emiss_nu
-      emiss_V[[q]]		 <- emiss_hyp_prior[[q]]$emiss_V
+      emiss_mu0[[q]]	 <- emiss_hyp_prior$emiss_mu0[[q]]
+      emiss_nu[[q]]	 <- emiss_hyp_prior$emiss_nu[[q]]
+      emiss_V[[q]]		 <- emiss_hyp_prior$emiss_V[[q]]
       emiss_K0[[q]]	 <- diag(emiss_hyp_prior$emiss_K0, nx[1 + q])
     }
   }
@@ -568,7 +572,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   trans <- rep(list(vector("list", m)), n_subj)
 
   # gamma
-  gamma_mle_pooled <-gamma_int_mle_pooled <- gamma_mhess_pooled <- gamma_pooled_ll <- vector("list", m)
+  gamma_int_mle_pooled <- gamma_pooled_ll <- vector("list", m)
   gamma_c_int <- rep(list(matrix(, n_subj, (m-1))), m)
   gamma_mu_int_bar <- gamma_V_int <- vector("list", m)
   gamma_mu_prob_bar <- rep(list(numeric(m)), m)
@@ -576,7 +580,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
 
   # emiss
   cond_y <- lapply(rep(n_dep, n_subj), nested_list, m = m)
-  emiss_mle_pooled <- emiss_int_mle_pooled <- emiss_mhess_pooled <- emiss_pooled_ll <- rep(list(vector("list", n_dep)), m)
+  emiss_int_mle_pooled <- emiss_pooled_ll <- rep(list(vector("list", n_dep)), m)
   emiss_c_int <- rep(list(lapply(q_emiss - 1, dif_matrix, rows = n_subj)), m)
   emiss_mu_int_bar <- emiss_V_int <- rep(list(vector("list", n_dep)), m)
   emiss_mu_prob_bar <- rep(list(lapply(q_emiss, dif_vector)), m)
@@ -663,15 +667,19 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   # Start analysis --------------------------------------------
   # Run the MCMC algorithm
   itime <- proc.time()[3]
+  if(show_progress == TRUE){
+    cat("Progress of the Bayesian mHMM algorithm:", "\n")
+    pb <- utils::txtProgressBar(min = 2, max = J, style = 3)
+  }
   for (iter in 2 : J){
 
     # For each subject, obtain sampled state sequence with subject individual parameters ----------
     for(s in 1:n_subj){
       # Run forward algorithm, obtain subject specific forward proababilities and log likelihood
-      forward				<- cat_Mult_HMM_fw(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], gamma = gamma[[s]], n_dep = n_dep, delta=NULL)
-      alpha         <- forward$forward_p
-      c             <- max(forward$la[, subj_data[[s]]$n])
-      llk           <- c + log(sum(exp(forward$la[, subj_data[[s]]$n] - c)))
+      forward				<- cat_mult_fw_r_to_cpp(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], gamma = gamma[[s]], n_dep = n_dep, delta=NULL)
+      alpha         <- forward[[1]]
+      c             <- max(forward[[2]][, subj_data[[s]]$n])
+      llk           <- c + log(sum(exp(forward[[2]][, subj_data[[s]]$n] - c)))
       PD_subj[[s]][iter, sum(m * q_emiss) + m * m + 1] <- llk
 
       # Using the forward probabilites, sample the state sequence in a backward manner.
@@ -699,9 +707,11 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
 
       # population level, transition matrix
       trans_pooled			  <- factor(c(unlist(sapply(trans, "[[", i)), c(1:m)))
-      gamma_mle_pooled[[i]] 		<- optim(gamma_int_mle0, llmnl_int, Obs = trans_pooled, n_cat = m, method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
-      gamma_int_mle_pooled[[i]] <- gamma_mle_pooled[[i]]$par
-      gamma_pooled_ll[[i]]			<- gamma_mle_pooled[[i]]$value
+      gamma_mle_pooled		<- optim(gamma_int_mle0, llmnl_int, Obs = trans_pooled,
+                                   n_cat = m, method = "BFGS", hessian = TRUE,
+                                   control = list(fnscale = -1))
+      gamma_int_mle_pooled[[i]]  <- gamma_mle_pooled$par
+      gamma_pooled_ll[[i]]			<- gamma_mle_pooled$value
 
       # population level, conditional probabilities, seperate for each dependent variable
       for(q in 1:n_dep){
@@ -710,25 +720,30 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
         for(s in 1:n_subj){
           cond_y_pooled             <- c(cond_y_pooled, cond_y[[s]][[i]][[q]])
         }
-        emiss_mle_pooled[[i]][[q]]		  <- optim(emiss_int_mle0[[q]], llmnl_int, Obs = c(cond_y_pooled, c(1:q_emiss[q])), n_cat = q_emiss[q],
-                                               method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
-        emiss_int_mle_pooled[[i]][[q]]	<- emiss_mle_pooled[[i]][[q]]$par
-        emiss_pooled_ll[[i]][[q]]			<- emiss_mle_pooled[[i]][[q]]$value
+        emiss_mle_pooled		<- optim(emiss_int_mle0[[q]], llmnl_int, Obs = c(cond_y_pooled, c(1:q_emiss[q])),
+                                     n_cat = q_emiss[q], method = "BFGS", hessian = TRUE,
+                                     control = list(fnscale = -1))
+        emiss_int_mle_pooled[[i]][[q]]  <- emiss_mle_pooled$par
+        emiss_pooled_ll[[i]][[q]]				<- emiss_mle_pooled$value
       }
 
-      # subject level, transition matrix
+      # subject level
       for (s in 1:n_subj){
         wgt 				<- subj_data[[s]]$n / n_total
-        gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_int_frac, Obs = c(trans[[s]][[i]], c(1:m)), n_cat = m,
-                               pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt, method="BFGS", hessian = TRUE, control = list(fnscale = -1))
+
+        # subject level, transition matrix
+        gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_int_frac, Obs = c(trans[[s]][[i]], c(1:m)),
+                                 n_cat = m, pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt,
+                                 method="BFGS", hessian = TRUE, control = list(fnscale = -1))
         if(gamma_out$convergence == 0){
-          subj_data[[s]]$gamma_converge[i]									<- 1
-          subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<- mnlHess_int(int = gamma_out$par, Obs = c(trans[[s]][[i]], c(1:m)), n_cat =  m)
-          subj_data[[s]]$gamma_int_mle[i,]									<- gamma_out$par
+          subj_data[[s]]$gamma_converge[i] <- 1
+          subj_data[[s]]$gamma_int_mle[i,] <- gamma_out$par
+          subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<-
+            mnlHess_int(int = gamma_out$par, Obs = c(trans[[s]][[i]], c(1:m)), n_cat =  m)
         } else {
-          subj_data[[s]]$gamma_converge[i]									<- 0
-          subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)),]	<- diag(m-1)
-          subj_data[[s]]$gamma_int_mle[i,]									<- rep(0, m - 1)
+          subj_data[[s]]$gamma_converge[i] <- 0
+          subj_data[[s]]$gamma_int_mle[i,] <- rep(0, m - 1)
+          subj_data[[s]]$gamma_mhess[(1 + (i - 1) * (m - 1)):((m - 1) + (i - 1) * (m - 1)), ]	<- diag(m-1)
         }
         # if this is first iteration, use MLE for current values RW metropolis sampler
         if (iter == 2){
@@ -738,15 +753,17 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
         # subject level, conditional probabilities, seperate for each dependent variable
         for(q in 1:n_dep){
           emiss_out				<- optim(emiss_int_mle_pooled[[i]][[q]], llmnl_int_frac, Obs = c(cond_y[[s]][[i]][[q]], c(1:q_emiss[q])),
-                                n_cat = q_emiss[q], pooled_likel = emiss_pooled_ll[[i]][[q]], w = emiss_w, wgt = wgt, method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
+                                  n_cat = q_emiss[q], pooled_likel = emiss_pooled_ll[[i]][[q]],
+                                  w = emiss_w, wgt = wgt, method = "BFGS", hessian = TRUE, control = list(fnscale = -1))
           if(emiss_out$convergence == 0){
-            subj_data[[s]]$emiss_converge[[q]][i]									<- 1
-            subj_data[[s]]$emiss_mhess[[q]][(1 + (i - 1) * (q_emiss[q] - 1)):((q_emiss[q] - 1) + (i - 1) * (q_emiss[q] - 1)), ]	<- mnlHess_int(int = emiss_out$par, Obs = c(cond_y[[s]][[i]][[q]], c(1:q_emiss[q])), n_cat =  q_emiss[q])
-            subj_data[[s]]$emiss_int_mle[[q]][i,]									<- emiss_out$par
+            subj_data[[s]]$emiss_converge[[q]][i]	 <- 1
+            subj_data[[s]]$emiss_int_mle[[q]][i,] <- emiss_out$par
+            subj_data[[s]]$emiss_mhess[[q]][(1 + (i - 1) * (q_emiss[q] - 1)):((q_emiss[q] - 1) + (i - 1) * (q_emiss[q] - 1)), ]		<-
+              mnlHess_int(int = subj_data[[s]]$emiss_int_mle[[q]][i,], Obs = c(cond_y[[s]][[i]][[q]], c(1:q_emiss[q])), n_cat =  q_emiss[q])
           } else {
-            subj_data[[s]]$emiss_converge[[q]][i]										<- 0
+            subj_data[[s]]$emiss_converge[[q]][i]	 <- 0
+            subj_data[[s]]$emiss_int_mle[[q]][i,]  <- rep(0, q_emiss[q] - 1)
             subj_data[[s]]$emiss_mhess[[q]][(1 + (i - 1) * (q_emiss[q] - 1)):((q_emiss[q] - 1) + (i - 1) * (q_emiss[q] - 1)), ]	<- diag(q_emiss[q] - 1)
-            subj_data[[s]]$emiss_int_mle[[q]][i,]									<- rep(0, q_emiss[q] - 1)
           }
           # if this is first iteration, use MLE for current values RW metropolis sampler
           if (iter == 2){
@@ -754,6 +771,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
           }
         }
       }
+
 
       # Sample pouplaton values for gamma and conditional probabilities using Gibbs sampler -----------
       # gamma_mu0_n and gamma_mu_int_bar are matrices, with the number of rows equal to the number of covariates, and ncol equal to number of intercepts estimated
@@ -817,14 +835,13 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
       }
       emiss_prob_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_mu_prob_bar, "[[", q)))
     }
-    if(is.whole(iter/10) & print_iter == TRUE){
-      if(iter == 10){
-       cat("Iteration:", "\n")
-      }
-      cat(c(iter), "\n")
+    if(show_progress == TRUE){
+      utils::setTxtProgressBar(pb, iter)
     }
   }
-
+  if(show_progress == TRUE){
+     close(pb)
+  }
 
   # End of function, return output values --------
   ctime = proc.time()[3]

@@ -9,14 +9,11 @@ cat_Mult_HMM_fw <- function(x, m, emiss, n_dep, gamma, delta = NULL){
   }
   n        <- dim(x)[1]
   lalpha   <- alpha_prob <- matrix(NA, m, n)
-  allprobs <- matrix(NA, nrow = n, ncol = m)
-  inp      <- matrix(ncol = n_dep, nrow = m)
-  for(i in 1:n){
-    for (q in 1:n_dep){
-      inp[, q]    <- emiss[[q]][, x[i, q]]
-    }
-    allprobs[i, ] <- apply(inp, 1, prod)
+  inp <- rep(list(NULL), n_dep)
+  for(q in 1:n_dep){
+    inp[[q]] <- t(emiss[[q]][,x[,q]])
   }
+  allprobs <- Reduce("*", inp)
   foo             <- delta * allprobs[1, ]
   sumfoo          <- sum(foo)
   alpha_prob[, 1] <- foo/sumfoo

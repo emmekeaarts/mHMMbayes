@@ -4,12 +4,14 @@
 \name{nonverbal_cov}
 \alias{nonverbal_cov}
 \title{Predictors of nonverbal communication}
-\format{A matrix with 10 rows and 3 variables:
+\format{
+A matrix with 10 rows and 3 variables:
 \describe{
 \item{diagnosis}{Diagnosis of the patient, consisting of 0 = depression, 1 = anxiety}
 \item{std_CDI_change}{Change in measure for depression (CDI) before and after therapy, standardized scale}
 \item{std_SCA_change}{Change in measure for anxiety (SCARED) before and after therapy, standardized scale}
-}}
+}
+}
 \usage{
 nonverbal_cov
 }

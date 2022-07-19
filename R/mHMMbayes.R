@@ -55,7 +55,9 @@
 #' @importFrom stats optim rnorm runif median
 # to include bib references in help file
 #' @importFrom Rdpack reprompt
-#'
+# for RCpp
+#' @useDynLib mHMMbayes, .registration = TRUE
+#' @importFrom Rcpp sourceCpp
 #'
 #' @docType package
 #' @name mHMMbayes

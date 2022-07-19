@@ -1,15 +1,17 @@
 Package: mHMMbayes
 Type: Package
 Title: Multilevel Hidden Markov Models Using Bayesian Estimation
-Version: 0.1.1
+Version: 0.1.1.9002
 Depends: R (>= 3.5.0)
 Imports:
     MCMCpack,
     mvtnorm,
     stats,
-    Rdpack
-Authors@R: person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
-                  role = c("aut", "cre"))
+    Rdpack,
+    Rcpp
+Authors@R: c(person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
+                  role = c("aut", "cre")),
+             person("Sebastian", "Mildiner Moraga", role = "ctb"))      
 Maintainer: Emmeke Aarts <e.aarts@uu.nl>
 Description: An implementation of the multilevel (also known as mixed or random 
     effects) hidden Markov model using Bayesian estimation in R. The multilevel 
@@ -32,7 +34,7 @@ BugReports: https://github.com/emmekeaarts/mHMMbayes/issues
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 Suggests: 
     knitr,
     rmarkdown,
@@ -42,3 +44,6 @@ Suggests:
     testthat (>= 2.1.0)
 VignetteBuilder: knitr
 RdMacros: Rdpack
+SystemRequirements: GNU make
+LinkingTo: 
+    Rcpp

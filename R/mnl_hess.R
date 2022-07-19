@@ -17,3 +17,14 @@ mnlHess_int <- function(int, Obs, n_cat){
   }
   return(Hess)
 }
+
+
+#' @keywords internal
+# faster version but dus not work for n_cat = 2, still repair
+mnlHess_int2 <- function(int, Obs, n_cat){
+  n_Obs 	<- length(Obs)
+  betas   <- c(0, int)
+  prob    <- exp(betas) / sum(exp(betas))
+  Hess    <- (diag(prob[-1]) - outer(prob[-1],prob[-1])) * n_Obs
+  return(Hess)
+}
