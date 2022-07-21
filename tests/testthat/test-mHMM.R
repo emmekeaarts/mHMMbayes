@@ -152,8 +152,8 @@ test_that("print mHMM", {
 
 test_that("summary mHMM", {
   # 2 dependent var, no covariates
-  expect_output(summary(out_2st_simb), "From state 1      0.684      0.166      0.136")
-  expect_output(summary(out_2st_simb), "From state 3      0.160      0.262      0.571")
+  expect_output(summary(out_2st_simb), "From state 1      0.696      0.166      0.138")
+  expect_output(summary(out_2st_simb), "From state 3      0.164      0.277      0.558")
   expect_output(summary(out_2st_simb), "output_1")
   expect_output(summary(out_2st_simb), "output_2")
 })

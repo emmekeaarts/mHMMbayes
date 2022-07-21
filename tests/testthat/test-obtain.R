@@ -58,9 +58,9 @@ test_that("output obtain gamma", {
   expect_equal(dim(gamma1_subj[[1]]), c(m,m))
   expect_equal(dim(gamma1_subj[[1]]), dim(gamma1_subj[[n]]))
   # calculations
-  expect_equal(as.vector(gamma1_g[2,]), c(0.231,  0.553, 0.216))
-  expect_equal(as.vector(gamma1_subj[[1]][3,]), c(0.235, 0.250, 0.511))
-  expect_equal(as.vector(gamma1_subj[[n]][1,]), c(0.605, 0.212, 0.163))
+  expect_equal(as.vector(gamma1_g[2,]), c(0.235,  0.541, 0.224))
+  expect_equal(as.vector(gamma1_subj[[1]][3,]), c(0.229, 0.262, 0.509))
+  expect_equal(as.vector(gamma1_subj[[n]][1,]), c(0.610, 0.226, 0.164))
 })
 
 test_that("output obtain emiss", {
@@ -74,8 +74,8 @@ test_that("output obtain emiss", {
   expect_equal(dim(emiss1_subj[[1]][[1]]), c(m,q_emiss[1]))
   expect_equal(dim(emiss1_subj[[2]][[1]]), dim(emiss1_subj[[2]][[n]]))
   # calculations
-  expect_equal(as.vector(emiss1_g[[1]][2,]), c(0.109, 0.139, 0.668, 0.097))
+  expect_equal(as.vector(emiss1_g[[1]][2,]), c(0.108, 0.134, 0.667, 0.092))
   expect_equal(as.vector(emiss1_g[[2]][2,]), c( 0.824, 0.176))
-  expect_equal(as.vector(emiss1_subj[[1]][[1]][3,]), c(0.036, 0.072, 0.223, 0.660))
+  expect_equal(as.vector(emiss1_subj[[1]][[1]][3,]), c(0.036, 0.081, 0.223, 0.660))
   expect_equal(as.vector(emiss1_subj[[2]][[n]][1,]), c(0.484, 0.516))
 })
