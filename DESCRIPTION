@@ -1,7 +1,7 @@
 Package: mHMMbayes
 Type: Package
 Title: Multilevel Hidden Markov Models Using Bayesian Estimation
-Version: 0.2.0
+Version: 0.2.9000
 Depends: R (>= 3.5.0)
 Imports:
     MCMCpack,
