@@ -49,6 +49,6 @@ test_that("output viterbi", {
   expect_equal(dim(states1), c(n_t, n))
   expect_equal(sort(unique(states1[,1])), c(1:m))
   expect_equal(sort(unique(states1[,n])), c(1:m))
-  expect_equal(sum(states1[,2]), 196)
-  expect_equal(sum(states1[2,]), 20)
+  expect_equal(sum(states1[,2]), 197)
+  expect_equal(sum(states1[2,]), 21)
 })
