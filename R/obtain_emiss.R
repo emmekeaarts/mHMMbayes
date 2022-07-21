@@ -92,8 +92,6 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
       rownames(est[[i]]) <- paste("State", 1:m)
     }
 
-
-    ########### HIER GEBLEVEN
   est_emiss <- est
   }
   if (level == "subject"){

@@ -82,7 +82,7 @@
 #' # and a burn_in of 200.
 #' out_2st_sim <- mHMM(s_data = data1$obs,
 #'                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-#'                  start_val = list(gamma, emiss_distr),
+#'                  start_val = c(list(gamma), emiss_distr),
 #'                  mcmc = list(J = 11, burn_in = 5))
 #'
 #' ###### obtain the most likely state sequence with the Viterbi algorithm
