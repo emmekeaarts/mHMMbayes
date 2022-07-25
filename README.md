@@ -1,9 +1,16 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+*Note: this branch is dedicated to development of **using emission
+distributions of varying types within the same mHMM model**. When the
+development is complete (e.g., documentation is complete, functions
+thoroughly tested), the developments will be incorporated in the master
+branch, and eventually in the stable R CRAN version of the mHMM
+package.*
+
 # mHMMbayes
 
-With the  package mHMMbayes you can fit multilevel hidden Markov models.
+With the package mHMMbayes you can fit multilevel hidden Markov models.
 The multilevel hidden Markov model (HMM) is a generalization of the
 well-known hidden Markov model, tailored to accommodate (intense)
 longitudinal data of multiple individuals simultaneously. Using a
@@ -25,288 +32,131 @@ the package.
 
 ## Installation
 
-You can install mHMMbayes from github with:
+You can install mHMMbayes that incorporates the possibility of using
+emission distributions of varying types within the same mHMM model from
+github with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("emmekeaarts/mHMMbayes")
+devtools::install_github("emmekeaarts/mHMMbayes@vary-emiss")
 ```
 
 ## Usage
 
-This is a basic example which shows you how to run the model using
-example data included with the package, and how to simulate data. For a
-more elaborate introduction, see the vignette “tutorial-mhmm”
-accompanying the package.
+This is a basic example which shows you how to run the model on data
+that includes categorical and continuous (i.e., normally distributed)
+observations, and how to simulate this type of data.
 
 ``` r
 library(mHMMbayes)
 
-##### Simple 2 state model
-# specifying general model properties
-m <- 2
-n_dep <- 4
-q_emiss <- c(3, 2, 3, 2)
+###### Example on simulated data
+# simulating data with both categorical and continous dependent variables
 
-# specifying starting values
-start_TM <- diag(.8, m)
-start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
-start_EM <- list(matrix(c(0.05, 0.90, 0.05,
-                          0.90, 0.05, 0.05), byrow = TRUE,
-                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
-                  matrix(c(0.1, 0.9,
-                           0.1, 0.9), byrow = TRUE, nrow = m,
-                         ncol = q_emiss[2]), # looking patient
-                  matrix(c(0.90, 0.05, 0.05,
-                           0.05, 0.90, 0.05), byrow = TRUE,
-                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-                  matrix(c(0.1, 0.9,
-                           0.1, 0.9), byrow = TRUE, nrow = m,
-                         ncol = q_emiss[4])) # looking therapist
+# number of observations per subject, subjects, states and dependent variables
+n_t     <- 100
+n       <- 10
+m       <- 3
+n_dep   <- 3
 
- # Run a model without covariates. 
- # Note that normally, a much higher number of iterations J would be used
- set.seed(23245)
- out_2st <- mHMM(s_data = nonverbal, 
-              gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
-              start_val = c(list(start_TM), start_EM),
-              mcmc = list(J = 11, burn_in = 5))
-#> [1] 10
-#> [1] "total time elapsed in minutes 0.42"
- 
-out_2st
+# distribution of each of the dependent variables
+data_distr = c("categorical", "continuous", "continuous")
+
+# number of categories for the categorical depenent variable
+q_emiss <- c(4, 0, 0)
+
+# transition probabilities between the states
+gamma <- matrix(c(0.6, 0.3, 0.1,
+                  0.2, 0.7, 0.1,
+                  0.1, 0.4, 0.5), nrow = m, byrow = TRUE)
+
+# emission distributions
+                    # observation probabilities of each of the 4 categories of the first (categorical) dependent variable over the 3 states
+emiss_distr <- list(matrix(c(0.80, 0.13, 0.05, 0.02,
+                    0.08, 0.85, 0.05, 0.02,
+                    0.05, 0.20, 0.40, 0.35), nrow = m, byrow = TRUE),
+                    # mean and variance of second (continuous) dependend in each of the 3 states
+                    matrix(c(6.0, 0.5,
+                             5.0, 0.5,
+                             3.0, 0.5), nrow = m, byrow = TRUE),
+                    # mean and variance of third (continous) in each of the 3 states
+                    matrix(c(4.0, 1.0,
+                           5.0, 1.0,
+                           6.5, 1.0), nrow = m, byrow = TRUE))
+
+# amount of variance in the transition probabilities between subjects
+var_gamma <- 0.01
+
+# amount of variance in state dependent distributions of the three dependent variables between subjects
+var_emiss <- c(0.01, 0.10, 0.10)
+
+# simulate the data
+data_vary <- sim_mHMM(n_t = n_t, n = n, data_distr = data_distr, m = m , n_dep = n_dep, q_emiss = q_emiss,
+                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = var_gamma, var_emiss = var_emiss)
+
+# Specify hyper-prior for the continuous emission distribution
+hyp_pr = emiss_cont_hyp_prior = list(
+           emiss_mu0 = list(matrix(c(6,5,3), nrow = 1),
+                            matrix(c(4,5,6), nrow = 1)),
+           emiss_K0 = list(1,1),
+           emiss_nu = list(1,1),
+           emiss_V = list(rep(2, 3), rep(2, 3)),
+           emiss_a0 = list(rep(1, 3), rep(1, 3)),
+           emiss_b0 = list(rep(1, 3), rep(1, 3))
+           )
+
+# Run the model on the simulated data:
+out_3st_vary_dep <- mHMM_vary(s_data = data_vary$obs,
+                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                    data_distr = data_distr,
+                    start_val = c(list(gamma), emiss_distr),
+                    emiss_cont_hyp_prior = hyp_pr,
+                    mcmc = list(J = 11, burn_in = 5))
+#> Progress of the Bayesian mHMM algorithm: 
+#>   |                                                                              |                                                                      |   0%  |                                                                              |========                                                              |  11%  |                                                                              |================                                                      |  22%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================                                       |  44%  |                                                                              |=======================================                               |  56%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================                |  78%  |                                                                              |==============================================================        |  89%  |                                                                              |======================================================================| 100%
+#> Total time elapsed (hh:mm:ss): 00:00:00
+
+out_3st_vary_dep
 #> Number of subjects: 10 
 #> 
 #> 11 iterations used in the MCMC algorithm with a burn in of 5 
-#> Average Log likelihood over all subjects: -1639.443 
-#> Average AIC over all subjects: 3306.885 
+#> Average Log likelihood over all subjects: -402.8316 
+#> Average AIC over all subjects: 853.6631 
 #> 
-#> Number of states used: 2 
+#> Number of states used: 3 
 #> 
-#> Number of dependent variables used: 4
-summary(out_2st)
+#> Number of dependent variables used: 3 
+#> 
+#> Distribution(s) of the 3 dependent variable(s) used: 
+#>  categorical continuous continuous
+summary(out_3st_vary_dep)
 #> State transition probability matrix 
 #>  (at the group level): 
 #>  
-#>              To state 1 To state 2
-#> From state 1      0.934      0.066
-#> From state 2      0.058      0.942
+#>              To state 1 To state 2 To state 3
+#> From state 1      0.516      0.382      0.097
+#> From state 2      0.212      0.647      0.121
+#> From state 3      0.165      0.369      0.462
 #> 
 #>  
 #> Emission distribution for each of the dependent variables 
 #>  (at the group level): 
 #>  
-#> $p_vocalizing
-#>         Category 1 Category 2 Category 3
-#> State 1      0.031      0.943      0.025
-#> State 2      0.766      0.110      0.134
+#> $`observation 1`
+#>         Category 1 Category 2 Category 3 Category 4
+#> State 1      0.744      0.177      0.060      0.026
+#> State 2      0.104      0.765      0.080      0.026
+#> State 3      0.062      0.270      0.377      0.273
 #> 
-#> $p_looking
-#>         Category 1 Category 2
-#> State 1      0.221      0.779
-#> State 2      0.100      0.900
+#> $`observation 2`
+#>          Mean Variance
+#> State 1 5.866    0.560
+#> State 2 5.283    0.632
+#> State 3 2.895    0.905
 #> 
-#> $t_vocalizing
-#>         Category 1 Category 2 Category 3
-#> State 1      0.802      0.084      0.106
-#> State 2      0.049      0.924      0.031
-#> 
-#> $t_looking
-#>         Category 1 Category 2
-#> State 1      0.041      0.959
-#> State 2      0.292      0.708
-
-# Run a model including a covariate 
-# Here, the covariate (standardized CDI change) predicts the emission 
-# distribution for each of the 4 dependent variables:
-n_subj <- 10
-xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), (n_dep + 1))
-for(i in 2:(n_dep + 1)){
- xx[[i]] <- cbind(xx[[i]], nonverbal_cov$std_CDI_change)
-}
-out_2st_c <- mHMM(s_data = nonverbal, xx = xx, 
-                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
-                 start_val = c(list(start_TM), start_EM),
-                 mcmc = list(J = 11, burn_in = 5))
-#> [1] 10
-#> [1] "total time elapsed in minutes 0.42"
-
- 
- ### Simulating data
- # simulating data for 10 subjects with each 100 observations
- n_t <- 100
- n <- 10
- m <- 3
- q_emiss <- 4
- gamma <- matrix(c(0.8, 0.1, 0.1,
-                   0.2, 0.7, 0.1,
-                   0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
- emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
-                         0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
- set.seed(1253)
- data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
-                   emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
- head(data1$states)
-#>      subj state
-#> [1,]    1     2
-#> [2,]    1     2
-#> [3,]    1     2
-#> [4,]    1     2
-#> [5,]    1     2
-#> [6,]    1     2
- head(data1$obs)
-#>      subj observation
-#> [1,]    1           2
-#> [2,]    1           3
-#> [3,]    1           1
-#> [4,]    1           2
-#> [5,]    1           2
-#> [6,]    1           2
-
-
- # simulating subject specific transition probability matrices and emission distributions only
- n_t <- 0
- n <- 5
- m <- 3
- q_emiss <- 4
- gamma <- matrix(c(0.8, 0.1, 0.1,
-                   0.2, 0.7, 0.1,
-                   0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
- emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
-                         0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
- set.seed(549801)
- data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
-                   emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
- data2
-#> $subject_gamma
-#> $subject_gamma[[1]]
-#>        [,1]   [,2]   [,3]
-#> [1,] 0.6302 0.2849 0.0849
-#> [2,] 0.1817 0.7714 0.0469
-#> [3,] 0.2164 0.1738 0.6098
-#> 
-#> $subject_gamma[[2]]
-#>        [,1]   [,2]   [,3]
-#> [1,] 0.7819 0.1235 0.0945
-#> [2,] 0.0747 0.9015 0.0238
-#> [3,] 0.3285 0.4705 0.2011
-#> 
-#> $subject_gamma[[3]]
-#>        [,1]   [,2]   [,3]
-#> [1,] 0.6228 0.1443 0.2329
-#> [2,] 0.5242 0.3106 0.1652
-#> [3,] 0.5215 0.1167 0.3618
-#> 
-#> $subject_gamma[[4]]
-#>        [,1]   [,2]   [,3]
-#> [1,] 0.5726 0.1054 0.3220
-#> [2,] 0.1751 0.5438 0.2811
-#> [3,] 0.2109 0.1686 0.6204
-#> 
-#> $subject_gamma[[5]]
-#>        [,1]   [,2]   [,3]
-#> [1,] 0.8227 0.1212 0.0561
-#> [2,] 0.2029 0.5990 0.1982
-#> [3,] 0.0902 0.3200 0.5898
-#> 
-#> 
-#> $subject_emmis
-#> $subject_emmis[[1]]
-#>        [,1]   [,2]   [,3]   [,4]
-#> [1,] 0.4916 0.5083 0.0001 0.0000
-#> [2,] 0.0572 0.1810 0.7618 0.0000
-#> [3,] 0.0000 0.0000 0.0629 0.9371
-#> 
-#> $subject_emmis[[2]]
-#>        [,1]   [,2]   [,3]   [,4]
-#> [1,] 0.1451 0.8549 0.0000 0.0000
-#> [2,] 0.0510 0.1518 0.7972 0.0000
-#> [3,] 0.0000 0.0000 0.0514 0.9486
-#> 
-#> $subject_emmis[[3]]
-#>        [,1]   [,2]   [,3]   [,4]
-#> [1,] 0.2158 0.7842 0.0000 0.0000
-#> [2,] 0.1865 0.1831 0.6304 0.0000
-#> [3,] 0.0001 0.0002 0.5793 0.4204
-#> 
-#> $subject_emmis[[4]]
-#>        [,1]   [,2]   [,3]   [,4]
-#> [1,] 0.3268 0.6732 0.0000 0.0000
-#> [2,] 0.0501 0.0867 0.8631 0.0000
-#> [3,] 0.0000 0.0000 0.1194 0.8806
-#> 
-#> $subject_emmis[[5]]
-#>        [,1]   [,2]   [,3]   [,4]
-#> [1,] 0.7268 0.2731 0.0000 0.0001
-#> [2,] 0.1303 0.2549 0.6148 0.0000
-#> [3,] 0.0000 0.0000 0.1085 0.8915
-
- set.seed(10893)
- data3 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
-                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
- data3
-#> $subject_gamma
-#> $subject_gamma[[1]]
-#>        [,1]   [,2]   [,3]
-#> [1,] 0.7958 0.0461 0.1581
-#> [2,] 0.3042 0.4663 0.2295
-#> [3,] 0.1396 0.6520 0.2084
-#> 
-#> $subject_gamma[[2]]
-#>        [,1]   [,2]   [,3]
-#> [1,] 0.6221 0.0834 0.2946
-#> [2,] 0.1143 0.8430 0.0427
-#> [3,] 0.1414 0.3805 0.4780
-#> 
-#> $subject_gamma[[3]]
-#>        [,1]   [,2]  [,3]
-#> [1,] 0.7416 0.0554 0.203
-#> [2,] 0.1403 0.7937 0.066
-#> [3,] 0.1915 0.0975 0.711
-#> 
-#> $subject_gamma[[4]]
-#>        [,1]   [,2]   [,3]
-#> [1,] 0.6333 0.0932 0.2736
-#> [2,] 0.1127 0.6909 0.1964
-#> [3,] 0.1058 0.3872 0.5070
-#> 
-#> $subject_gamma[[5]]
-#>        [,1]   [,2]   [,3]
-#> [1,] 0.7610 0.1833 0.0557
-#> [2,] 0.0781 0.8920 0.0300
-#> [3,] 0.2269 0.1116 0.6615
-#> 
-#> 
-#> $subject_emmis
-#> $subject_emmis[[1]]
-#>        [,1]   [,2]   [,3]   [,4]
-#> [1,] 0.6359 0.3641 0.0000 0.0000
-#> [2,] 0.2302 0.2625 0.5073 0.0000
-#> [3,] 0.0000 0.0000 0.0326 0.9674
-#> 
-#> $subject_emmis[[2]]
-#>        [,1]   [,2]   [,3]   [,4]
-#> [1,] 0.6471 0.3528 0.0000 0.0000
-#> [2,] 0.1977 0.2782 0.5240 0.0001
-#> [3,] 0.0000 0.0000 0.2446 0.7554
-#> 
-#> $subject_emmis[[3]]
-#>        [,1]   [,2]   [,3]   [,4]
-#> [1,] 0.7053 0.2946 0.0000 0.0000
-#> [2,] 0.1433 0.0626 0.7940 0.0001
-#> [3,] 0.0000 0.0000 0.0274 0.9726
-#> 
-#> $subject_emmis[[4]]
-#>        [,1]   [,2]   [,3]   [,4]
-#> [1,] 0.8119 0.1880 0.0000 0.0000
-#> [2,] 0.0704 0.0669 0.8627 0.0000
-#> [3,] 0.0000 0.0000 0.1557 0.8443
-#> 
-#> $subject_emmis[[5]]
-#>        [,1]   [,2]   [,3]   [,4]
-#> [1,] 0.5968 0.4032 0.0000 0.0000
-#> [2,] 0.1023 0.1158 0.7819 0.0000
-#> [3,] 0.0000 0.0000 0.1358 0.8642
+#> $`observation 3`
+#>          Mean Variance
+#> State 1 3.955    1.264
+#> State 2 5.310    1.229
+#> State 3 6.152    1.398
 ```
