@@ -12,6 +12,8 @@ knitr::opts_chunk$set(
 )
 ```
 
+*Note: this branch is dedicated to various (small) updates made by a student assistant* 
+
 # mHMMbayes
 
   With the \code{R} package mHMMbayes you can fit multilevel hidden Markov 
@@ -106,9 +108,9 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
  gamma <- matrix(c(0.8, 0.1, 0.1,
                    0.2, 0.7, 0.1,
                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
- emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
+ emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
                          0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
+                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
  set.seed(1253)
  data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
                    emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
@@ -124,9 +126,9 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
  gamma <- matrix(c(0.8, 0.1, 0.1,
                    0.2, 0.7, 0.1,
                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
- emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
+ emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
                          0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
+                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
  set.seed(549801)
  data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
                    emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
