@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-*Note: this branch is dedicated to development of __using continuous observations (i.e., normally distributed) within the mHMM model. This development is near complete. When the development is complete (e.g., documentation is complete, functions thoroughly tested), the developments will be incorporated in the master branch, and eventually in the stable R CRAN version of the mHMM package.*
+*Note: this branch is dedicated to development of __using continuous observations (i.e., normally distributed)__ within the mHMM model. This development is near complete. When the development is complete (e.g., documentation is complete, functions thoroughly tested), the developments will be incorporated in the master branch, and eventually in the stable R CRAN version of the mHMM package.*
 
 
 # mHMMbayes
@@ -70,6 +70,7 @@ emiss_distr <- list(matrix(c( 5, 1,
                              1.0, 0.2,
                              2.0, 0.1), nrow = m, byrow = TRUE))
 
+set.seed(2327)
 data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
 
@@ -83,6 +84,7 @@ hyp_pr <- list(
                emiss_b0  = list(rep(1, m), rep(1, m)))
 
 # Run the model on the simulated data:
+set.seed(9834)
 out_3st_cont_sim <- mHMM_cont(s_data = data_cont$obs,
                     gen = list(m = m, n_dep = n_dep),
                     start_val = c(list(gamma), emiss_distr),

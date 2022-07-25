@@ -1,12 +1,12 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-\*Note: this branch is dedicated to development of \_\_using continuous
-observations (i.e., normally distributed) within the mHMM model. This
+*Note: this branch is dedicated to development of **using continuous
+observations (i.e., normally distributed)** within the mHMM model. This
 development is near complete. When the development is complete (e.g.,
 documentation is complete, functions thoroughly tested), the
 developments will be incorporated in the master branch, and eventually
-in the stable R CRAN version of the mHMM package.\*
+in the stable R CRAN version of the mHMM package.*
 
 # mHMMbayes
 
@@ -68,6 +68,7 @@ emiss_distr <- list(matrix(c( 5, 1,
                              1.0, 0.2,
                              2.0, 0.1), nrow = m, byrow = TRUE))
 
+set.seed(2327)
 data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
 
@@ -81,6 +82,7 @@ hyp_pr <- list(
                emiss_b0  = list(rep(1, m), rep(1, m)))
 
 # Run the model on the simulated data:
+set.seed(9834)
 out_3st_cont_sim <- mHMM_cont(s_data = data_cont$obs,
                     gen = list(m = m, n_dep = n_dep),
                     start_val = c(list(gamma), emiss_distr),
@@ -94,8 +96,8 @@ out_3st_cont_sim
 #> Number of subjects: 10 
 #> 
 #> 1000 iterations used in the MCMC algorithm with a burn in of 200 
-#> Average Log likelihood over all subjects: -286.2929 
-#> Average AIC over all subjects: 608.5859 
+#> Average Log likelihood over all subjects: -276.8873 
+#> Average AIC over all subjects: 589.7747 
 #> 
 #> Number of states used: 3 
 #> 
@@ -105,9 +107,9 @@ summary(out_3st_cont_sim)
 #>  (at the group level): 
 #>  
 #>              To state 1 To state 2 To state 3
-#> From state 1      0.729      0.124      0.143
-#> From state 2      0.225      0.601      0.171
-#> From state 3      0.239      0.227      0.532
+#> From state 1      0.755      0.092      0.149
+#> From state 2      0.232      0.608      0.156
+#> From state 3      0.199      0.259      0.536
 #> 
 #>  
 #> Emission distribution for each of the dependent variables 
@@ -115,155 +117,155 @@ summary(out_3st_cont_sim)
 #>  
 #> $`observation 1`
 #>           Mean Variance
-#> State 1  4.842    1.314
-#> State 2  9.402    1.447
-#> State 3 15.435    1.555
+#> State 1  5.164    1.580
+#> State 2  9.454    1.529
+#> State 3 15.552    1.160
 #> 
 #> $`observation 2`
 #>          Mean Variance
-#> State 1 0.448    0.143
-#> State 2 0.932    0.255
-#> State 3 1.992    0.156
+#> State 1 0.516    0.133
+#> State 2 0.890    0.234
+#> State 3 2.019    0.152
 
 # obtaining the transition probability matrix gamma and the emission ditribution 
 # at the group and subject level 
 obtain_gamma(out_3st_cont_sim, level = 'group')
 #>              To state 1 To state 2 To state 3
-#> From state 1      0.729      0.124      0.143
-#> From state 2      0.225      0.601      0.171
-#> From state 3      0.239      0.227      0.532
+#> From state 1      0.755      0.092      0.149
+#> From state 2      0.232      0.608      0.156
+#> From state 3      0.199      0.259      0.536
 obtain_emiss(out_3st_cont_sim, level = 'subject')
 #> $`observation 1`
 #> $`observation 1`$`Subject 1`
 #>           Mean Variance
-#> State 1  5.275    1.314
-#> State 2 10.497    1.447
-#> State 3 15.211    1.555
+#> State 1  4.843    1.580
+#> State 2  9.798    1.529
+#> State 3 16.234    1.160
 #> 
 #> $`observation 1`$`Subject 2`
 #>           Mean Variance
-#> State 1  5.440    1.314
-#> State 2  8.936    1.447
-#> State 3 16.373    1.555
+#> State 1  5.298    1.580
+#> State 2 11.209    1.529
+#> State 3 14.965    1.160
 #> 
 #> $`observation 1`$`Subject 3`
 #>           Mean Variance
-#> State 1  4.649    1.314
-#> State 2  9.871    1.447
-#> State 3 15.153    1.555
+#> State 1  5.586    1.580
+#> State 2  9.603    1.529
+#> State 3 15.503    1.160
 #> 
 #> $`observation 1`$`Subject 4`
 #>           Mean Variance
-#> State 1  5.092    1.314
-#> State 2  9.380    1.447
-#> State 3 15.714    1.555
+#> State 1  5.425    1.580
+#> State 2  8.746    1.529
+#> State 3 15.436    1.160
 #> 
 #> $`observation 1`$`Subject 5`
 #>           Mean Variance
-#> State 1  5.800    1.314
-#> State 2  9.480    1.447
-#> State 3 15.259    1.555
+#> State 1  5.521    1.580
+#> State 2 10.122    1.529
+#> State 3 15.573    1.160
 #> 
 #> $`observation 1`$`Subject 6`
 #>           Mean Variance
-#> State 1  4.912    1.314
-#> State 2  9.242    1.447
-#> State 3 14.182    1.555
+#> State 1  5.222    1.580
+#> State 2  8.762    1.529
+#> State 3 15.003    1.160
 #> 
 #> $`observation 1`$`Subject 7`
 #>           Mean Variance
-#> State 1  5.282    1.314
-#> State 2  9.382    1.447
-#> State 3 14.506    1.555
+#> State 1  5.458    1.580
+#> State 2  9.716    1.529
+#> State 3 15.470    1.160
 #> 
 #> $`observation 1`$`Subject 8`
 #>           Mean Variance
-#> State 1  5.324    1.314
-#> State 2  9.694    1.447
-#> State 3 17.132    1.555
+#> State 1  5.127    1.580
+#> State 2  9.687    1.529
+#> State 3 13.646    1.160
 #> 
 #> $`observation 1`$`Subject 9`
 #>           Mean Variance
-#> State 1  3.871    1.314
-#> State 2 10.121    1.447
-#> State 3 14.221    1.555
+#> State 1  5.822    1.580
+#> State 2  9.662    1.529
+#> State 3 16.903    1.160
 #> 
 #> $`observation 1`$`Subject 10`
 #>           Mean Variance
-#> State 1  4.656    1.314
-#> State 2  9.760    1.447
-#> State 3 14.916    1.555
+#> State 1  5.621    1.580
+#> State 2  9.954    1.529
+#> State 3 15.327    1.160
 #> 
 #> 
 #> $`observation 2`
 #> $`observation 2`$`Subject 1`
 #>          Mean Variance
-#> State 1 0.507    0.143
-#> State 2 0.922    0.255
-#> State 3 1.827    0.156
+#> State 1 0.318    0.133
+#> State 2 0.871    0.234
+#> State 3 2.030    0.152
 #> 
 #> $`observation 2`$`Subject 2`
 #>          Mean Variance
-#> State 1 0.542    0.143
-#> State 2 0.770    0.255
-#> State 3 2.216    0.156
+#> State 1 0.872    0.133
+#> State 2 0.806    0.234
+#> State 3 2.038    0.152
 #> 
 #> $`observation 2`$`Subject 3`
 #>          Mean Variance
-#> State 1 0.327    0.143
-#> State 2 0.813    0.255
-#> State 3 1.935    0.156
+#> State 1 0.474    0.133
+#> State 2 1.014    0.234
+#> State 3 1.942    0.152
 #> 
 #> $`observation 2`$`Subject 4`
 #>          Mean Variance
-#> State 1 0.354    0.143
-#> State 2 0.954    0.255
-#> State 3 1.873    0.156
+#> State 1 0.424    0.133
+#> State 2 0.854    0.234
+#> State 3 2.113    0.152
 #> 
 #> $`observation 2`$`Subject 5`
 #>          Mean Variance
-#> State 1 0.347    0.143
-#> State 2 0.891    0.255
-#> State 3 1.984    0.156
+#> State 1 0.615    0.133
+#> State 2 0.952    0.234
+#> State 3 2.006    0.152
 #> 
 #> $`observation 2`$`Subject 6`
 #>          Mean Variance
-#> State 1 0.431    0.143
-#> State 2 0.933    0.255
-#> State 3 1.869    0.156
+#> State 1 0.445    0.133
+#> State 2 0.937    0.234
+#> State 3 2.119    0.152
 #> 
 #> $`observation 2`$`Subject 7`
 #>          Mean Variance
-#> State 1 0.430    0.143
-#> State 2 1.130    0.255
-#> State 3 2.044    0.156
+#> State 1 0.384    0.133
+#> State 2 0.957    0.234
+#> State 3 2.035    0.152
 #> 
 #> $`observation 2`$`Subject 8`
 #>          Mean Variance
-#> State 1 0.333    0.143
-#> State 2 1.008    0.255
-#> State 3 2.128    0.156
+#> State 1 0.393    0.133
+#> State 2 0.721    0.234
+#> State 3 2.107    0.152
 #> 
 #> $`observation 2`$`Subject 9`
 #>          Mean Variance
-#> State 1 0.674    0.143
-#> State 2 0.933    0.255
-#> State 3 2.098    0.156
+#> State 1 0.545    0.133
+#> State 2 0.861    0.234
+#> State 3 1.923    0.152
 #> 
 #> $`observation 2`$`Subject 10`
 #>          Mean Variance
-#> State 1 0.257    0.143
-#> State 2 0.987    0.255
-#> State 3 2.124    0.156
+#> State 1 0.590    0.133
+#> State 2 0.964    0.234
+#> State 3 2.076    0.152
 
 # Inferring the most likely state at each point in time
 inferred_states <- vit_mHMM_cont(out_3st_cont_sim, data_cont$obs)
 head(inferred_states)
 #>      Subj_1 Subj_2 Subj_3 Subj_4 Subj_5 Subj_6 Subj_7 Subj_8 Subj_9 Subj_10
-#> [1,]      2      1      1      1      3      3      1      1      1       3
-#> [2,]      2      1      1      1      3      3      1      1      2       3
-#> [3,]      3      2      1      1      1      3      2      1      2       3
-#> [4,]      2      2      2      1      1      1      3      1      2       3
-#> [5,]      3      2      2      2      1      1      3      2      2       1
-#> [6,]      3      2      2      2      1      1      3      2      2       1
+#> [1,]      1      1      1      2      1      1      3      2      1       1
+#> [2,]      3      1      1      1      1      1      3      2      1       1
+#> [3,]      2      1      1      1      1      1      3      3      1       1
+#> [4,]      2      2      1      1      1      1      3      3      1       1
+#> [5,]      2      2      3      1      1      1      3      3      1       1
+#> [6,]      2      1      3      1      1      1      3      3      1       2
 ```
