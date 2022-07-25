@@ -12,6 +12,9 @@ knitr::opts_chunk$set(
 )
 ```
 
+*Note: this branch is dedicated to development of a __singlelevel HMM using Bayesian estimation__. When the development is complete (e.g., documentation is complete, functions thoroughly tested), the developments will be incorporated in the master branch, and eventually in the stable R CRAN version of the mHMM package.*
+
+
 # mHMMbayes
 
   With the \code{R} package mHMMbayes you can fit multilevel hidden Markov 
@@ -34,108 +37,54 @@ knitr::opts_chunk$set(
 
 ## Installation
 
-You can install mHMMbayes from github with:
+You can install mHMMbayes  that incorporates the possibility of modelling singlelevel data  from github with:
 
 ```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
-devtools::install_github("emmekeaarts/mHMMbayes")
+devtools::install_github("emmekeaarts/mHMMbayes@single-level-Bayes")
 ```
 
 ## Usage
 
-This is a basic example which shows you how to run the model using example data 
-included with the package, and how to simulate data. For a more elaborate
-introduction, see the vignette "tutorial-mhmm" accompanying the package.
+This is a basic example which shows you how to run the model on singlelevel data, and how to simulate this type of data. 
 
 ```{r example}
 library(mHMMbayes)
 
-##### Simple 2 state model
-# specifying general model properties
+### first simulate data
+# One subject with each n_t observations:
+n <- 1
+n_t <- 300
+
+# specifying general model properties:
 m <- 2
-n_dep <- 4
-q_emiss <- c(3, 2, 3, 2)
+q_emiss <- 3
+n_dep <- 1
+gamma <- matrix(c(0.8, 0.2,
+                  0.2, 0.8), ncol = m, byrow = TRUE)
+emiss_distr <- list(matrix(c(0.50, 0.45, 0.05,
+                        0.05, 0.05, 0.90), nrow = m, ncol = q_emiss, byrow = TRUE))
 
+# simulate data
+set.seed(97834)
+data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss,
+                  gamma = gamma, emiss_distr = emiss_distr)
+
+### analysis of data
 # specifying starting values
-start_TM <- diag(.8, m)
-start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
-start_EM <- list(matrix(c(0.05, 0.90, 0.05,
-                          0.90, 0.05, 0.05), byrow = TRUE,
-                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
-                  matrix(c(0.1, 0.9,
-                           0.1, 0.9), byrow = TRUE, nrow = m,
-                         ncol = q_emiss[2]), # looking patient
-                  matrix(c(0.90, 0.05, 0.05,
-                           0.05, 0.90, 0.05), byrow = TRUE,
-                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-                  matrix(c(0.1, 0.9,
-                           0.1, 0.9), byrow = TRUE, nrow = m,
-                         ncol = q_emiss[4])) # looking therapist
+st_gamma <- matrix(c(0.7, 0.3,
+                     0.3, 0.7), ncol = m, byrow = TRUE)
+st_emiss_distr <- list(matrix(c(0.40, 0.40, 0.20,
+                           0.20, 0.20, 0.60), nrow = m, ncol = q_emiss, byrow = TRUE))
 
- # Run a model without covariates. 
- # Note that normally, a much higher number of iterations J would be used
- set.seed(23245)
- out_2st <- mHMM(s_data = nonverbal, 
-              gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
-              start_val = c(list(start_TM), start_EM),
-              mcmc = list(J = 11, burn_in = 5))
- 
-out_2st
-summary(out_2st)
+# run the model
+set.seed(8750)
+out_2st_sim <- HMM(s_data = data1$obs,
+                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                    start_val = c(st_gamma, st_emiss_distr),
+                    mcmc = list(J = 4000, burn_in = 200), show_progress = TRUE)
 
-# Run a model including a covariate 
-# Here, the covariate (standardized CDI change) predicts the emission 
-# distribution for each of the 4 dependent variables:
-n_subj <- 10
-xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), (n_dep + 1))
-for(i in 2:(n_dep + 1)){
- xx[[i]] <- cbind(xx[[i]], nonverbal_cov$std_CDI_change)
-}
-out_2st_c <- mHMM(s_data = nonverbal, xx = xx, 
-                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
-                 start_val = c(list(start_TM), start_EM),
-                 mcmc = list(J = 11, burn_in = 5))
-
- 
- ### Simulating data
- # simulating data for 10 subjects with each 100 observations
- n_t <- 100
- n <- 10
- m <- 3
- q_emiss <- 4
- gamma <- matrix(c(0.8, 0.1, 0.1,
-                   0.2, 0.7, 0.1,
-                   0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
- emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
-                         0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
- set.seed(1253)
- data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
-                   emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
- head(data1$states)
- head(data1$obs)
-
-
- # simulating subject specific transition probability matrices and emission distributions only
- n_t <- 0
- n <- 5
- m <- 3
- q_emiss <- 4
- gamma <- matrix(c(0.8, 0.1, 0.1,
-                   0.2, 0.7, 0.1,
-                   0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
- emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
-                         0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
- set.seed(549801)
- data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
-                   emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
- data2
-
- set.seed(10893)
- data3 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
-                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
- data3
-
+out_2st_sim
+summary(out_2st_sim)
 
 ```
