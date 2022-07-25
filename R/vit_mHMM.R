@@ -108,7 +108,7 @@ vit_mHMM <- function(object, s_data, burn_in = NULL){
   id         <- unique(s_data[,1])
   n_subj     <- length(id)
   if(length(object$PD_subj) != n_subj){
-    stop("s_data used should be identical to the data used for creating the object in mHMM.
+    stop("s_data used should be from the same subjects used for creating the object in mHMM.
          The number of subjects in the datasets are not the same.")
   }
   n_vary     <- table(s_data[,1])

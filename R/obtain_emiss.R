@@ -87,15 +87,13 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
   n_dep   <- input$n_dep
   if (level == "group"){
     if(is.mHMM(object)){
-      est <- lapply(q_emiss, dif_matrix, rows = m)
-      for(j in 1:n_dep){
-        colnames(est[[j]]) <- paste("Category", 1:q_emiss[j])
-        rownames(est[[j]]) <- paste("State", 1:m)
-      }
+      est_int <- est <- vector("list", n_dep)
       names(est) <- dep_labels
-      for(j in 1: n_dep){
-        est[[j]][] <- matrix(round(apply(object$emiss_prob_bar[[j]][((burn_in + 1): J),], 2, median),3),
-                             byrow = TRUE, ncol = q_emiss[j], nrow = m)
+      for(i in 1:n_dep){
+        est_int[[i]] <- matrix(apply(object$emiss_int_bar[[i]][((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = q_emiss[i]-1, nrow = m)
+        est[[i]] <- round(int_to_prob(est_int[[i]]),3)
+        colnames(est[[i]]) <- paste("Category", 1:q_emiss[i])
+        rownames(est[[i]]) <- paste("State", 1:m)
       }
     } else if (is.mHMM_cont(object)){
       est <- rep(list(matrix(, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "Variance")))), n_dep)
@@ -107,21 +105,23 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
     est_emiss <- est
   }
   if (level == "subject"){
-    est_emiss <- vector("list", n_dep)
+    est_emiss <- est_emiss_int <- vector("list", n_dep)
     names(est_emiss) <- dep_labels
     if(is.mHMM(object)){
       for(j in 1:n_dep){
-        est <- matrix(,ncol = q_emiss[j], nrow = m)
+        est <- matrix(, ncol = q_emiss[j], nrow = m)
         colnames(est) <- paste("Category", 1:q_emiss[j])
         rownames(est) <- paste("State", 1:m)
         est_emiss[[j]] <- rep(list(est), n_subj)
         names(est_emiss[[j]]) <- paste("Subject", 1:n_subj)
+        est_int <-  matrix(, ncol = q_emiss[j] - 1, nrow = m)
+        est_emiss_int[[j]] <- rep(list(est_int), n_subj)
       }
-      start <- c(0, q_emiss * m)
       for(i in 1:n_subj){
         for(j in 1:n_dep){
-          est_emiss[[j]][[i]][] <- matrix(round(apply(object$PD_subj[[i]][burn_in:J, (sum(start[1:j]) + 1) : sum(start[1:(j+1)])], 2, median), 3),
-                                          byrow = TRUE, ncol = q_emiss[j], nrow = m)
+          est_emiss_int[[j]][[i]][] <- matrix(apply(object$emiss_int_subj[[i]][[j]][burn_in:J, ], 2, median),
+                                              byrow = TRUE, ncol = q_emiss[j]-1, nrow = m)
+          est_emiss[[j]][[i]][] <- round(int_to_prob(est_emiss_int[[j]][[i]]),3)
         }
       }
     } else if (is.mHMM_cont(object)){
