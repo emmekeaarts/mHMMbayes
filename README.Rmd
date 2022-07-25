@@ -16,20 +16,21 @@ knitr::opts_chunk$set(
 
 # mHMMbayes
 
-  With the \code{R} package mHMMbayes you can fit multilevel hidden Markov 
-  models. The multilevel hidden Markov model (HMM) is a generalization of the well-known
-  hidden Markov model, tailored to accommodate (intense) longitudinal data of 
-  multiple individuals simultaneously. Using a multilevel framework, we allow 
-  for heterogeneity in the model parameters (transition probability matrix and
-  conditional distribution), while estimating one overall HMM. The model has a
-  great potential of application in  many fields, such as the social sciences 
-  and medicine. The model can be fitted on multivariate data with a categorical 
-  distribution, and include individual level covariates (allowing for e.g.,
-  group comparisons on model parameters). Parameters are estimated using 
-  Bayesian estimation utilizing the forward-backward recursion within a hybrid 
-  Metropolis within Gibbs sampler. The package also includes various options for 
-  model visualization, a function to simulate data and a function to obtain the 
-  most likely hidden state sequence for each individual using the Viterbi algorithm. 
+  With the \code{R} package mHMMbayes you can fit multilevel hidden Markov
+  models. The multilevel hidden Markov model (HMM) is a generalization of the
+  well-known hidden Markov model, tailored to accommodate (intense) longitudinal
+  data of multiple individuals simultaneously. Using a multilevel framework, we
+  allow for heterogeneity in the model parameters (transition probability matrix
+  and conditional distribution), while estimating one overall HMM. The model has
+  a great potential of application in  many fields, such as the social sciences
+  and medicine. The model can be fitted on multivariate data with categorical
+  and/or continuous (i.e., normally distributed) observations, and include
+  individual level covariates (allowing for e.g., group comparisons on model
+  parameters). Parameters are estimated using Bayesian estimation utilizing the
+  forward-backward recursion within a hybrid Metropolis within Gibbs sampler.
+  The package also includes various options for model visualization, a function
+  to simulate data and a function to obtain the most likely hidden state
+  sequence for each individual using the Viterbi algorithm.
   
   Please do not hesitate to contact me if you have any questions regarding the 
   package. 
@@ -91,6 +92,7 @@ var_gamma <- 0.01
 var_emiss <- c(0.01, 0.10, 0.10)
 
 # simulate the data
+set.seed(3251)
 data_vary <- sim_mHMM(n_t = n_t, n = n, data_distr = data_distr, m = m , n_dep = n_dep, q_emiss = q_emiss,
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = var_gamma, var_emiss = var_emiss)
 
@@ -106,14 +108,19 @@ hyp_pr = emiss_cont_hyp_prior = list(
            )
 
 # Run the model on the simulated data:
+set.seed(5420)
 out_3st_vary_dep <- mHMM_vary(s_data = data_vary$obs,
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     data_distr = data_distr,
                     start_val = c(list(gamma), emiss_distr),
                     emiss_cont_hyp_prior = hyp_pr,
-                    mcmc = list(J = 11, burn_in = 5))
+                    mcmc = list(J = 1000, burn_in = 200))
 
 out_3st_vary_dep
 summary(out_3st_vary_dep)
+
+# Inferring the most likely state at each point in time
+inferred_states <- vit_mHMM_vary(out_3st_vary_dep, data_vary$obs)
+head(inferred_states)
 
 ```
