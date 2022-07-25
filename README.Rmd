@@ -12,6 +12,9 @@ knitr::opts_chunk$set(
 )
 ```
 
+*Note: this branch is dedicated to development of __time varying covariates__.When the development is complete (e.g., documentation is complete, functions thoroughly tested), the developments will be incorporated in the master branch, and eventually in the stable R CRAN version of the mHMM package.*
+
+
 # mHMMbayes
 
   With the \code{R} package mHMMbayes you can fit multilevel hidden Markov 
@@ -34,14 +37,17 @@ knitr::opts_chunk$set(
 
 ## Installation
 
-You can install mHMMbayes from github with:
+You can install mHMMbayes that incorporates time varying covariates from github with:
 
 ```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
-devtools::install_github("emmekeaarts/mHMMbayes")
+devtools::install_github("emmekeaarts/mHMMbayes@time-vary-cov")
 ```
 
-## Usage
+Note that this extension is still under development, and documentation is still incomplete. 
+
+
+## Usage (mHMM in general)
 
 This is a basic example which shows you how to run the model using example data 
 included with the package, and how to simulate data. For a more elaborate
@@ -106,9 +112,9 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
  gamma <- matrix(c(0.8, 0.1, 0.1,
                    0.2, 0.7, 0.1,
                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
- emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
+ emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
                          0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
+                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
  set.seed(1253)
  data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
                    emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
@@ -124,9 +130,9 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
  gamma <- matrix(c(0.8, 0.1, 0.1,
                    0.2, 0.7, 0.1,
                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
- emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
+ emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
                          0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
+                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
  set.seed(549801)
  data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
                    emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)

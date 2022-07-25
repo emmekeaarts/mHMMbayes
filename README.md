@@ -1,9 +1,15 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+*Note: this branch is dedicated to development of **time varying
+covariates**.When the development is complete (e.g., documentation is
+complete, functions thoroughly tested), the developments will be
+incorporated in the master branch, and eventually in the stable R CRAN
+version of the mHMM package.*
+
 # mHMMbayes
 
-With the  package mHMMbayes you can fit multilevel hidden Markov models.
+With the package mHMMbayes you can fit multilevel hidden Markov models.
 The multilevel hidden Markov model (HMM) is a generalization of the
 well-known hidden Markov model, tailored to accommodate (intense)
 longitudinal data of multiple individuals simultaneously. Using a
@@ -25,14 +31,18 @@ the package.
 
 ## Installation
 
-You can install mHMMbayes from github with:
+You can install mHMMbayes that incorporates time varying covariates from
+github with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("emmekeaarts/mHMMbayes")
+devtools::install_github("emmekeaarts/mHMMbayes@time-vary-cov")
 ```
 
-## Usage
+Note that this extension is still under development, and documentation
+is still incomplete.
+
+## Usage (mHMM in general)
 
 This is a basic example which shows you how to run the model using
 example data included with the package, and how to simulate data. For a
@@ -71,8 +81,9 @@ start_EM <- list(matrix(c(0.05, 0.90, 0.05,
               gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
               start_val = c(list(start_TM), start_EM),
               mcmc = list(J = 11, burn_in = 5))
-#> [1] 10
-#> [1] "total time elapsed in minutes 0.42"
+#> Progress of the Bayesian mHMM algorithm: 
+#>   |                                                                              |                                                                      |   0%  |                                                                              |========                                                              |  11%  |                                                                              |================                                                      |  22%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================                                       |  44%  |                                                                              |=======================================                               |  56%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================                |  78%  |                                                                              |==============================================================        |  89%  |                                                                              |======================================================================| 100%
+#> Total time elapsed (hh:mm:ss): 00:00:01
  
 out_2st
 #> Number of subjects: 10 
@@ -128,8 +139,9 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
                  start_val = c(list(start_TM), start_EM),
                  mcmc = list(J = 11, burn_in = 5))
-#> [1] 10
-#> [1] "total time elapsed in minutes 0.42"
+#> Progress of the Bayesian mHMM algorithm: 
+#>   |                                                                              |                                                                      |   0%  |                                                                              |========                                                              |  11%  |                                                                              |================                                                      |  22%  |                                                                              |=======================                                               |  33%  |                                                                              |===============================                                       |  44%  |                                                                              |=======================================                               |  56%  |                                                                              |===============================================                       |  67%  |                                                                              |======================================================                |  78%  |                                                                              |==============================================================        |  89%  |                                                                              |======================================================================| 100%
+#> Total time elapsed (hh:mm:ss): 00:00:01
 
  
  ### Simulating data
@@ -141,9 +153,9 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
  gamma <- matrix(c(0.8, 0.1, 0.1,
                    0.2, 0.7, 0.1,
                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
- emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
+ emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
                          0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
+                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
  set.seed(1253)
  data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
                    emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
@@ -156,13 +168,13 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
 #> [5,]    1     2
 #> [6,]    1     2
  head(data1$obs)
-#>      subj observation
-#> [1,]    1           2
-#> [2,]    1           3
-#> [3,]    1           1
-#> [4,]    1           2
-#> [5,]    1           2
-#> [6,]    1           2
+#>      subj observation 1
+#> [1,]    1             2
+#> [2,]    1             3
+#> [3,]    1             1
+#> [4,]    1             2
+#> [5,]    1             2
+#> [6,]    1             2
 
 
  # simulating subject specific transition probability matrices and emission distributions only
@@ -173,9 +185,9 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
  gamma <- matrix(c(0.8, 0.1, 0.1,
                    0.2, 0.7, 0.1,
                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
- emiss_distr <- matrix(c(0.5, 0.5, 0.0, 0.0,
+ emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
                          0.1, 0.1, 0.8, 0.0,
-                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)
+                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
  set.seed(549801)
  data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma, 
                    emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
@@ -212,32 +224,41 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
 #> [3,] 0.0902 0.3200 0.5898
 #> 
 #> 
-#> $subject_emmis
-#> $subject_emmis[[1]]
+#> $subject_emiss
+#> $subject_emiss[[1]]
+#> $subject_emiss[[1]][[1]]
 #>        [,1]   [,2]   [,3]   [,4]
 #> [1,] 0.4916 0.5083 0.0001 0.0000
 #> [2,] 0.0572 0.1810 0.7618 0.0000
 #> [3,] 0.0000 0.0000 0.0629 0.9371
 #> 
-#> $subject_emmis[[2]]
+#> 
+#> $subject_emiss[[2]]
+#> $subject_emiss[[2]][[1]]
 #>        [,1]   [,2]   [,3]   [,4]
 #> [1,] 0.1451 0.8549 0.0000 0.0000
 #> [2,] 0.0510 0.1518 0.7972 0.0000
 #> [3,] 0.0000 0.0000 0.0514 0.9486
 #> 
-#> $subject_emmis[[3]]
+#> 
+#> $subject_emiss[[3]]
+#> $subject_emiss[[3]][[1]]
 #>        [,1]   [,2]   [,3]   [,4]
 #> [1,] 0.2158 0.7842 0.0000 0.0000
 #> [2,] 0.1865 0.1831 0.6304 0.0000
 #> [3,] 0.0001 0.0002 0.5793 0.4204
 #> 
-#> $subject_emmis[[4]]
+#> 
+#> $subject_emiss[[4]]
+#> $subject_emiss[[4]][[1]]
 #>        [,1]   [,2]   [,3]   [,4]
 #> [1,] 0.3268 0.6732 0.0000 0.0000
 #> [2,] 0.0501 0.0867 0.8631 0.0000
 #> [3,] 0.0000 0.0000 0.1194 0.8806
 #> 
-#> $subject_emmis[[5]]
+#> 
+#> $subject_emiss[[5]]
+#> $subject_emiss[[5]][[1]]
 #>        [,1]   [,2]   [,3]   [,4]
 #> [1,] 0.7268 0.2731 0.0000 0.0001
 #> [2,] 0.1303 0.2549 0.6148 0.0000
@@ -279,32 +300,41 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
 #> [3,] 0.2269 0.1116 0.6615
 #> 
 #> 
-#> $subject_emmis
-#> $subject_emmis[[1]]
+#> $subject_emiss
+#> $subject_emiss[[1]]
+#> $subject_emiss[[1]][[1]]
 #>        [,1]   [,2]   [,3]   [,4]
 #> [1,] 0.6359 0.3641 0.0000 0.0000
 #> [2,] 0.2302 0.2625 0.5073 0.0000
 #> [3,] 0.0000 0.0000 0.0326 0.9674
 #> 
-#> $subject_emmis[[2]]
+#> 
+#> $subject_emiss[[2]]
+#> $subject_emiss[[2]][[1]]
 #>        [,1]   [,2]   [,3]   [,4]
 #> [1,] 0.6471 0.3528 0.0000 0.0000
 #> [2,] 0.1977 0.2782 0.5240 0.0001
 #> [3,] 0.0000 0.0000 0.2446 0.7554
 #> 
-#> $subject_emmis[[3]]
+#> 
+#> $subject_emiss[[3]]
+#> $subject_emiss[[3]][[1]]
 #>        [,1]   [,2]   [,3]   [,4]
 #> [1,] 0.7053 0.2946 0.0000 0.0000
 #> [2,] 0.1433 0.0626 0.7940 0.0001
 #> [3,] 0.0000 0.0000 0.0274 0.9726
 #> 
-#> $subject_emmis[[4]]
+#> 
+#> $subject_emiss[[4]]
+#> $subject_emiss[[4]][[1]]
 #>        [,1]   [,2]   [,3]   [,4]
 #> [1,] 0.8119 0.1880 0.0000 0.0000
 #> [2,] 0.0704 0.0669 0.8627 0.0000
 #> [3,] 0.0000 0.0000 0.1557 0.8443
 #> 
-#> $subject_emmis[[5]]
+#> 
+#> $subject_emiss[[5]]
+#> $subject_emiss[[5]][[1]]
 #>        [,1]   [,2]   [,3]   [,4]
 #> [1,] 0.5968 0.4032 0.0000 0.0000
 #> [2,] 0.1023 0.1158 0.7819 0.0000
