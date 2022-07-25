@@ -2,9 +2,12 @@
 
 S3method(plot,mHMM)
 S3method(plot,mHMM_gamma)
+S3method(print,HMM)
 S3method(print,mHMM)
 S3method(print,mHMM_gamma)
+S3method(summary,HMM)
 S3method(summary,mHMM)
+export(HMM)
 export(mHMM)
 export(obtain_emiss)
 export(obtain_gamma)
