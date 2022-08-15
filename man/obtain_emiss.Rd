@@ -38,7 +38,7 @@ average emission distribution over all subjects, or at the subject level,
 returning the emission distribution for each subject.
 }
 \examples{
-###### Example on package data
+###### Example on package data, see ?nonverbal
 \donttest{
 # specifying general model properties:
 m <- 2

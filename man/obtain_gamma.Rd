@@ -39,7 +39,7 @@ fitted multilevel hidden Markov model, for either the group level, i.e.,
   each subject.
 }
 \examples{
-###### Example on package data
+###### Example on package data, see ?nonverbal
 \donttest{
 # specifying general model properties:
 m <- 2
