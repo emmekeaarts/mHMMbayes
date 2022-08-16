@@ -49,7 +49,7 @@ plotted.
 }
 \examples{
 \donttest{
-#' ###### Example on package data
+#' ###### Example on package data, see ?nonverbal
 # specifying general model properties:
 m <- 2
 n_dep <- 4
@@ -93,12 +93,13 @@ plot(est_gamma_group, col = rep(c("green", "blue"), each = m))
 n_t <- 100
 n <- 10
 m <- 2
+n_dep <- 1
 q_emiss <- 3
 gamma <- matrix(c(0.8, 0.2,
                   0.3, 0.7), ncol = m, byrow = TRUE)
 emiss_distr <- list(matrix(c(0.5, 0.5, 0.0,
                         0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE))
-data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+data1 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), gamma = gamma,
                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 
 # Specify remaining required analysis input (for the example, we use simulation
