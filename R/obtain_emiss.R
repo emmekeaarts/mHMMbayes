@@ -21,7 +21,7 @@
 #'
 #'
 #' @examples
-#' ###### Example on package data
+#' ###### Example on package data, see ?nonverbal
 #' \donttest{
 #' # specifying general model properties:
 #' m <- 2

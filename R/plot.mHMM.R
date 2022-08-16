@@ -55,7 +55,8 @@
 #'   model, creating the object \code{mHMM}.
 #'
 #' @examples
-#' ###### First run the function mHMM on the nonverbal data
+#' ###### Example on package example data, see ?nonverbal
+#' # First run the function mHMM on example data
 #' \donttest{
 #' # specifying general model properties:
 #' m <- 2
