@@ -169,7 +169,7 @@
 #'                 diag(5, q_emiss[3] - 1),
 #'                 diag(4, q_emiss[4] - 1))
 #'
-#' manual_prior_emiss <- prior_emiss(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#' manual_prior_emiss <- prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
 #'                                   emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0,
 #'                                   emiss_nu = emiss_nu, emiss_V = emiss_V)
 #'
@@ -212,7 +212,7 @@
 #'
 
 
-prior_emiss <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, emiss_V = NULL, n_xx_emiss = NULL){
+prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, emiss_V = NULL, n_xx_emiss = NULL){
   if(is.null(n_xx_emiss)){
     n_xx_int <- rep(1, n_dep)
   } else {
