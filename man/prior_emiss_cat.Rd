@@ -160,24 +160,29 @@ prior_prob_emiss_cat <- list(matrix(c(0.10, 0.80, 0.10,
                                       0.80, 0.10, 0.10,
                                       0.40, 0.40, 0.20), byrow = TRUE,
                                     nrow = m, ncol = q_emiss[1]), # vocalizing patient,
-                                    # prior belief: state 1 - much talking, state 2 - no talking, state 3 - mixed
+                                    # prior belief: state 1 - much talking, state 2 -
+                                    # no talking, state 3 - mixed
                              matrix(c(0.30, 0.70,
                                       0.30, 0.70,
                                       0.30, 0.70), byrow = TRUE, nrow = m,
                                     ncol = q_emiss[2]), # looking patient
-                                    # prior belief: all 3 states show frequent looking behavior
+                                    # prior belief: all 3 states show frequent looking
+                                    # behavior
                              matrix(c(0.80, 0.10, 0.10,
                                       0.10, 0.80, 0.10,
                                       0.40, 0.40, 0.20), byrow = TRUE,
                                     nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-                                    # prior belief: state 1 - no talking, state 2 - frequent talking, state 3 - mixed
+                                    # prior belief: state 1 - no talking, state 2 -
+                                    # frequent talking, state 3 - mixed
                              matrix(c(0.30, 0.70,
                                       0.30, 0.70,
                                       0.30, 0.70), byrow = TRUE, nrow = m,
                                     ncol = q_emiss[4])) # looking therapist
-                                    # prior belief: all 3 states show frequent looking behavior
+                                    # prior belief: all 3 states show frequent looking
+                                    # behavior
 
-# using the function prob_to_int to obtain intercept values for the above specified categorical emission distributions
+# using the function prob_to_int to obtain intercept values for the above specified
+# categorical emission distributions
 prior_int_emiss <- sapply(prior_prob_emiss_cat, prob_to_int)
 emiss_mu0 <- rep(list(vector(mode = "list", length = m)), n_dep)
 for(k in 1:n_dep){

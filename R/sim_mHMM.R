@@ -194,8 +194,8 @@
 #' emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
 #'                              0.1, 0.1, 0.8, 0.0,
 #'                              0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
-#' data1 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), gamma = gamma,
-#'                   emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
+#' data1 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
 #' head(data1$obs)
 #' head(data1$states)
 #'
@@ -227,8 +227,8 @@
 #'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
 #' data3
 #'
-#' data4 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), gamma = gamma,
-#'                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
+#' data4 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 #' data4
 
 

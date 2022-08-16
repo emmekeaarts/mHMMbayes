@@ -129,12 +129,14 @@ are fixed over subjects.
 ###### Example using package example data, see ?nonverbal
 # specifying general model properties:
 m <- 3
-# representing a prior belief that switching to state 3 does not occur often and state 3 has a relative short duration
+# representing a prior belief that switching to state 3 does not occur often and
+# state 3 has a relative short duration
 prior_prob_gamma <- matrix(c(0.70, 0.25, 0.05,
                              0.25, 0.70, 0.05,
                              0.30, 0.30, 0.40), nrow = m, ncol = m, byrow = TRUE)
 
-# using the function prob_to_int to obtain intercept values for the above specified transition probability matrix gamma
+# using the function prob_to_int to obtain intercept values for the above specified
+# transition probability matrix gamma
 prior_int_gamma <- prob_to_int(prior_prob_gamma)
 gamma_mu0 <- list(matrix(prior_int_gamma[1,], nrow = 1, ncol = m-1),
                   matrix(prior_int_gamma[2,], nrow = 1, ncol = m-1),
@@ -145,7 +147,8 @@ gamma_nu <- 5
 gamma_V <- diag(5, m - 1)
 
 manual_prior_gamma <- prior_gamma(m = m, gamma_mu0 = gamma_mu0,
-                                  gamma_K0 = gamma_K0, gamma_nu = gamma_nu, gamma_V = gamma_V)
+                                  gamma_K0 = gamma_K0, gamma_nu = gamma_nu,
+                                  gamma_V = gamma_V)
 
 
 # using the informative hyper-prior in a model
