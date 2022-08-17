@@ -1,23 +1,29 @@
 # mHMMbayes 0.2.0
 
 ## Speed
-This release mostly focuses on increasing the speed of the `mHMM()` algorithm. 
+A major improvement in this release is the increased speed of the `mHMM()` algorithm. 
 * the forward algorithm used in mHMM() is now implemented in c++ using Rcpp to optimize computational speed
 * the call to optim() in mHMM() used to create correct scalers for the Metropolis Hasting was computationally very intensive, especially for long sequences of data. In this new version, the log likelihood function of the Multinomial distribution is programmed in a more efficient manner, and obtaining the Hessian based on the outcomes of optim() is done more efficiently.  
 
 ## Manually specifying hyper-prior distribution paramter values
 Two new functions to manually specify hyper-prior distribution parameter values for the multilevel hidden Markov model are introduced:
 
-* For manually specifying hyper-prior distribution parameter values for the categorical emission distribution(s), the function prior_emiss_cat() is used, creating an object of class 'mHMM_prior_emiss'. 
-* For manually specifying hyper-prior distribution parameter values for the transition probability matrix gamma, the function prior_gamma() is used, creating an object of class 'mHMM_prior_gamma'. 
+* prior_emiss_cat(): for manually specifying hyper-prior distribution parameter values for the categorical emission distribution(s), creating an object of class 'mHMM_prior_emiss'. 
+* prior_gamma(): for manually specifying hyper-prior distribution parameter values for the transition probability matrix gamma, creating an object of class 'mHMM_prior_gamma'. 
 
 Using manually specified hyper-prior distribution parameter values in the function mHMM() is as of now thus done by inputting an object of the class 'mHMM_prior_emiss' and/or 'mHMM_prior_gamma' for the input parameters emiss_hyp_prior and gamma_hyp_prior, respectively, created by the above functions. Note that manually specifying hyper-prior distribution parameter values is optional, default values are available for all parameters. 
+
+## Transforming a set of probabilities to Multinomial logit regression intercepts and vice versa
+Manually specifying hyper-prior distribution parameter values is done on the logit domain. That is, the hyper-priors are on the intercepts (and, if subject level covariates are used, regression coefficients) of the Multinomial logit model used to accommodate the multilevel framework of the data, instead of on the probabilities directly. As logit domain might be more unfamiliar to the user compared to the probability domain, two functions are introduced to aid the user: 
+
+* prob_to_int(): transforms a set of state transition or categorical emission observation probabilities to the corresponding Multinomial logit regression intercepts.
+* int_to_prob(): transforms a set of Multinomial logit regression intercepts to the corresponding state transition or categorical emission observation probabilities 
 
 ## Manually specifying settings of the proposal distribution of the Random Walk Metropolis sampler 
 Two new functions to manually specify settings of the proposal distribution of the Random Walk (RW) Metropolis sampler for the multilevel hidden Markov model are introduced:
 
-* For manually specifying setting of the RW proposal distribution for the categorical emission distribution(s), the function pd_RW_emiss_cat() is used, creating an object of class 'mHMM_pdRW_emiss'. 
-* For manually specifying setting of the RW proposal distribution for the transition probability matrix gamma, the function pd_RW_gamma() is used, creating an object of class 'mHMM_pdRW_gamma'.  
+* pd_RW_emiss_cat(): for manually specifying setting of the RW proposal distribution for the categorical emission distribution(s), creating an object of class 'mHMM_pdRW_emiss'. 
+* pd_RW_gamma(): for manually specifying setting of the RW proposal distribution for the transition probability matrix gamma, creating an object of class 'mHMM_pdRW_gamma'.  
 
 Using manually specified settings of the proposal distribution of the Random Walk (RW) Metropolis sampler in the function mHMM() is as of now thus done by inputting an object of the class 'mHMM_pdRW_emiss' and/or 'mHMM_pdRW_gamma' for the input parameters emiss_sampler and gamma_sampler, respectively, created by the above functions. Note that manually specifying setting of the RW proposal distribution is optional, default values are available for all parameters. 
 
