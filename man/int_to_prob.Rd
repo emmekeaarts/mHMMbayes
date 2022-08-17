@@ -23,9 +23,10 @@ category.}
 }
 \description{
 \code{int_to_prob} transforms a set of Multinomial logit regression
-intercepts to the corresponding probabilities for each state or category.
-Note that the first state or category is assumed to be the reference category, hence
-no intercept is to specified for the first state or category.
+intercepts to the corresponding state transition or categorical emission
+observation probabilities. Note that the first state or category is assumed
+to be the reference category, hence no intercept is to specified for the
+first state or category.
 }
 \details{
 Designed to ease the specification of informative hyper-prior values for the

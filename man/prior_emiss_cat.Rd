@@ -82,7 +82,7 @@ distribution(s).}
   number of hypothetical prior subjects on which the set of hyper-prior mean
   intercepts specified in \code{emiss_mu0} are based.}
   \item{\code{emiss_nu}}{A list containing \code{n_dep} elements denoting the
-  the degrees of freedom of the hyper-prior Inverse Wishart distribution on
+  degrees of freedom of the hyper-prior Inverse Wishart distribution on
   the covariance of the Multinomial logit intercepts.}
   \item{\code{emiss_V}}{A list containing \code{n_dep} elements containing
   the variance-covariance of the hyper-prior Inverse Wishart distribution on

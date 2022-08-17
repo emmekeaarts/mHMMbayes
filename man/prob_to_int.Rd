@@ -23,10 +23,11 @@ distribution matrix, the number of rows equals the number of states
   category.
 }
 \description{
-\code{prob_to_int} transforms a set of state or observation probabilities to the
-corresponding Multinomial logit regression intercepts. Note that the first
-category is assumed to be the reference category, hence no intercept is
-returned for the first state or category.
+\code{prob_to_int} transforms a set of state transition or categorical
+emission observation probabilities to the corresponding Multinomial logit
+regression intercepts. Note that the first category is assumed to be the
+reference category, hence no intercept is returned for the first state or
+category.
 }
 \details{
 Designed to ease the specification of informative hyper-prior values for the

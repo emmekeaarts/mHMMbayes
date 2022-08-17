@@ -64,7 +64,7 @@ gamma.}
   \item{\code{gamma_K0}}{A numeric vector denoting the number of hypothetical
   prior subjects on which the set of hyper-prior mean intercepts specified in
   \code{gamma_mu0} are based.}
-  \item{\code{gamma_nu}}{A numeric vector denoting the the degrees of freedom
+  \item{\code{gamma_nu}}{A numeric vector denoting the degrees of freedom
   of the hyper-prior Inverse Wishart distribution on the covariance of the
   Multinomial logit intercepts.}
   \item{\code{gamma_V}}{A matrix containing the variance-covariance of the
