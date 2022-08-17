@@ -92,7 +92,7 @@
 #'   \item{\code{gamma_K0}}{A numeric vector denoting the number of hypothetical
 #'   prior subjects on which the set of hyper-prior mean intercepts specified in
 #'   \code{gamma_mu0} are based.}
-#'   \item{\code{gamma_nu}}{A numeric vector denoting the the degrees of freedom
+#'   \item{\code{gamma_nu}}{A numeric vector denoting the degrees of freedom
 #'   of the hyper-prior Inverse Wishart distribution on the covariance of the
 #'   Multinomial logit intercepts.}
 #'   \item{\code{gamma_V}}{A matrix containing the variance-covariance of the
@@ -181,7 +181,10 @@ prior_gamma <- function(m, gamma_mu0, gamma_K0 = NULL, gamma_nu = NULL, gamma_V 
   } else {
     n_xx_int <- n_xx_gamma + 1
   }
-  if(!is.list(gamma_mu0) | length(gamma_mu0) != m | sum(sapply(gamma_mu0, is.matrix)) != m){
+  if(!is.list(gamma_mu0)){
+    stop(paste("gamma_mu0 should be a list containing", m, "matrices; one matrix for each row of the transition probability matrix gamma."))
+    }
+  if(length(gamma_mu0) != m | sum(sapply(gamma_mu0, is.matrix)) != m){
     stop(paste("gamma_mu0 should be a list containing", m, "matrices; one matrix for each row of the transition probability matrix gamma."))
   }
   if(sum((m-1) == sapply(gamma_mu0, dim)[2,]) != m){
@@ -213,9 +216,12 @@ prior_gamma <- function(m, gamma_mu0, gamma_K0 = NULL, gamma_nu = NULL, gamma_V 
   if(is.null(gamma_V)){
     gamma_V			  <- (3 + m - 1) * diag(m - 1)
   } else {
-    if(!is.matrix(gamma_V) | dim(gamma_V)[1] != (m-1) | dim(gamma_V)[2] != (m-1)){
+    if(!is.matrix(gamma_V)){
       stop(paste("gamma_V should be an", m-1, "by", m-1, "matrix"))
-      }
+    }
+    if(dim(gamma_V)[1] != (m-1) | dim(gamma_V)[2] != (m-1)){
+      stop(paste("gamma_V should be an", m-1, "by", m-1, "matrix"))
+    }
     gamma_V <- gamma_V
   }
   out <- list(m = m, n_xx_gamma = n_xx_gamma, gamma_mu0 = gamma_mu0, gamma_K0 = gamma_K0, gamma_nu = gamma_nu, gamma_V = gamma_V)

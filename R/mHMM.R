@@ -431,7 +431,9 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
     if (!is.mHMM_prior_gamma(gamma_hyp_prior)){
       stop("The input object specified for gamma_hyp_prior should be from the class mHMM_prior_gamma, obtained by using the function prior_gamma.")
     }
-    c
+    if (gamma_hyp_prior$m != m){
+      stop("The number of states specified in m is not equal to the number of states specified when creating the informative hper-prior distribution gamma using the function prior_gamma.")
+    }
     if(is.null(gamma_hyp_prior$n_xx_gamma) & nx[1] > 1){
       stop("Covariates were specified to predict gamma, but no covariates were specified when creating the informative hyper-prior distribution on gamma using the function prior_gamma.")
     }

@@ -107,7 +107,7 @@
 #'   number of hypothetical prior subjects on which the set of hyper-prior mean
 #'   intercepts specified in \code{emiss_mu0} are based.}
 #'   \item{\code{emiss_nu}}{A list containing \code{n_dep} elements denoting the
-#'   the degrees of freedom of the hyper-prior Inverse Wishart distribution on
+#'   degrees of freedom of the hyper-prior Inverse Wishart distribution on
 #'   the covariance of the Multinomial logit intercepts.}
 #'   \item{\code{emiss_V}}{A list containing \code{n_dep} elements containing
 #'   the variance-covariance of the hyper-prior Inverse Wishart distribution on
@@ -235,7 +235,10 @@ prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, em
   if(length(q_emiss) != n_dep){
     stop("The lenght of q_emiss specifying the number of output categories for each of the number of dependent variables should equal the number of dependent variables specified in n_dep")
   }
-  if(!is.list(emiss_mu0) | length(emiss_mu0) != n_dep | sum(sapply(emiss_mu0, is.list)) != n_dep){
+  if(!is.list(emiss_mu0)){
+    stop(paste("emiss_mu0 should be a list of lists containing", n_dep, "lists; one list for each dependent variable."))
+  }
+  if(length(emiss_mu0) != n_dep | sum(sapply(emiss_mu0, is.list)) != n_dep){
     stop(paste("emiss_mu0 should be a list of lists containing", n_dep, "lists; one list for each dependent variable."))
   }
   if(sum(m == sapply(emiss_mu0, length)) != n_dep){
@@ -280,7 +283,10 @@ prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, em
       emiss_nu[[k]]		<- 3 + q_emiss[k] - 1
     }
   } else {
-    if(!is.list(emiss_nu) | length(emiss_nu) != n_dep | sum(rep(1, n_dep) == sapply(emiss_nu, length)) != n_dep |
+    if(!is.list(emiss_nu)){
+      stop(paste("emiss_nu should be a list containing n_dep, here", n_dep,", elements, where each element is a numeric vector with length 1 "))
+    }
+    if(length(emiss_nu) != n_dep | sum(rep(1, n_dep) == sapply(emiss_nu, length)) != n_dep |
        sum(sapply(emiss_nu, is.double)) != n_dep | sum(sapply(emiss_nu, is.matrix)) > 0){
       stop(paste("emiss_nu should be a list containing n_dep, here", n_dep,", elements, where each element is a numeric vector with length 1 "))
     }
@@ -292,7 +298,10 @@ prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, em
       emiss_V[[k]]		  <- (3 + q_emiss[k] - 1) * diag(q_emiss[k] - 1)
     }
   } else {
-    if(!is.list(emiss_V) | length(emiss_V) != n_dep | sum(sapply(emiss_V, is.matrix)) != n_dep | sum(q_emiss-1 == sapply(emiss_V, dim)[1,]) != n_dep | sum(q_emiss-1 == sapply(emiss_V, dim)[2,]) != n_dep){
+    if(!is.list(emiss_V)){
+      stop(paste("emiss_V should be a list containing n_dep, here", n_dep,", elements, where each element is a matrix with the following dimensions: ", paste(paste(q_emiss - 1, "by", q_emiss - 1), collapse = ", "), "."))
+    }
+    if(length(emiss_V) != n_dep | sum(sapply(emiss_V, is.matrix)) != n_dep | sum(q_emiss-1 == sapply(emiss_V, dim)[1,]) != n_dep | sum(q_emiss-1 == sapply(emiss_V, dim)[2,]) != n_dep){
       stop(paste("emiss_V should be a list containing n_dep, here", n_dep,", elements, where each element is a matrix with the following dimensions: ", paste(paste(q_emiss - 1, "by", q_emiss - 1), collapse = ", "), "."))
     }
     emiss_V <- emiss_V
