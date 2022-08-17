@@ -11,7 +11,7 @@ n <- 10
 m <- 3
 J = 11
 burn_in = 5
-n_dep1 <- 2
+n_dep <- 2
 q_emiss <- c(4,2)
 
 gamma <- matrix(c(0.8, 0.1, 0.1,
@@ -26,7 +26,7 @@ emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
 )
 
 set.seed(4231)
-data_sim <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss), gamma = gamma,
+data_sim <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), gamma = gamma,
                      emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.5))
 colnames(data_sim$obs) <- c("subj", "output_1", "output_2")
 
@@ -42,20 +42,20 @@ prior_prob_emiss_cat <- list(matrix(c(0.40, 0.40, 0.10, 0.10,
 
 # correct specifications
 prior_int_emiss <- sapply(prior_prob_emiss_cat, prob_to_int)
-emiss_mu0 <- rep(list(vector(mode = "list", length = m)), n_dep1)
-for(k in 1:n_dep1){
+emiss_mu0 <- rep(list(vector(mode = "list", length = m)), n_dep)
+for(k in 1:n_dep){
   for(i in 1:m){
     emiss_mu0[[k]][[i]] <- matrix(prior_int_emiss[[k]][i,], nrow = 1)
   }
 }
 
-emiss_K0 <- rep(list(c(1)), n_dep1)
+emiss_K0 <- rep(list(c(1)), n_dep)
 emiss_nu <- list(c(5), c(4))
 emiss_V <- list(diag(5, q_emiss[1] - 1),
                 diag(4, q_emiss[2] - 1))
 
 manual_prior_emiss <- prior_emiss_cat(gen = list(m = m,
-                                                 n_dep = n_dep1,
+                                                 n_dep = n_dep,
                                                  q_emiss = q_emiss),
                                       emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0,
                                       emiss_nu = emiss_nu, emiss_V = emiss_V)
@@ -66,22 +66,22 @@ n_dep_wrong <- 3
 q_emiss_wrong <- c(2,3,2)
 
 emiss_mu0_wrong1 <- emiss_mu0[[1]]
-emiss_mu0_wrong2 <- rep(list(vector(mode = "list", length = m)), n_dep1)
-for(k in 1:n_dep1){
+emiss_mu0_wrong2 <- rep(list(vector(mode = "list", length = m)), n_dep)
+for(k in 1:n_dep){
   for(i in 1:m){
     emiss_mu0_wrong2[[k]][[i]] <- matrix(prior_int_emiss[[1]][i,], nrow = 1)
   }
 }
-emiss_mu0_wrong3 <- rep(list(vector(mode = "list", length = m)), n_dep1)
-for(k in 1:n_dep1){
+emiss_mu0_wrong3 <- rep(list(vector(mode = "list", length = m)), n_dep)
+for(k in 1:n_dep){
   for(i in 1:m){
     emiss_mu0_wrong3[[k]][[i]] <- matrix(prior_int_emiss[[2]][i,], nrow = 1)
   }
 }
 emiss_mu0_wrong4 <- prior_int_emiss
 
-emiss_K0_wrong1 <- rep(list(c(1)), n_dep1 + 1)
-emiss_K0_wrong2 <- rep((c(1)), n_dep1)
+emiss_K0_wrong1 <- rep(list(c(1)), n_dep + 1)
+emiss_K0_wrong2 <- rep((c(1)), n_dep)
 emiss_nu_wrong1 <- list(c(5), c(4), c(5))
 emiss_nu_wrong2 <- (c(5, 4, 5))
 emiss_V_wrong1 <- list(diag(5, q_emiss[1]),
@@ -139,7 +139,7 @@ manual_prior_gamma_wrongm$m <- 2
 ###############
 
 test_that("errors prior_emiss input", {
-  expect_error(prior_emiss_cat(gen = list(m = m_wrong, n_dep = n_dep1, q_emiss = q_emiss),
+  expect_error(prior_emiss_cat(gen = list(m = m_wrong, n_dep = n_dep, q_emiss = q_emiss),
                                emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0,
                                emiss_nu = emiss_nu, emiss_V = emiss_V),
                "emiss_mu0 should consist of m , here 2")
@@ -147,43 +147,43 @@ test_that("errors prior_emiss input", {
                                emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0,
                                emiss_nu = emiss_nu, emiss_V = emiss_V),
                "should equal the number of dependent variables specified in n_dep")
-  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss_wrong),
+  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss_wrong),
                                emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0,
                                emiss_nu = emiss_nu, emiss_V = emiss_V),
                "should equal the number of dependent variables specified in n_dep")
-  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                emiss_mu0 = emiss_mu0_wrong1, emiss_K0 = emiss_K0,
                                emiss_nu = emiss_nu, emiss_V = emiss_V),
                "emiss_mu0 should be a list of lists containing 2 lists")
-  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                emiss_mu0 = emiss_mu0_wrong2, emiss_K0 = emiss_K0,
                                emiss_nu = emiss_nu, emiss_V = emiss_V),
                "For the list relating to dependent variable 2 of the input argument emiss_mu0")
-  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                emiss_mu0 = emiss_mu0_wrong3, emiss_K0 = emiss_K0,
                                emiss_nu = emiss_nu, emiss_V = emiss_V),
                "For the list relating to dependent variable 1 of the input argument emiss_mu0")
-  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                emiss_mu0 = emiss_mu0_wrong4, emiss_K0 = emiss_K0,
                                emiss_nu = emiss_nu, emiss_V = emiss_V),
                "emiss_mu0 should be a list of lists containing 2 lists")
-  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0_wrong1,
                                emiss_nu = emiss_nu, emiss_V = emiss_V),
                "emiss_K0 should be a list containing n_dep, here 2")
-  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0_wrong2,
                                emiss_nu = emiss_nu, emiss_V = emiss_V),
                "emiss_K0 should be a list containing n_dep, here 2")
-  expect_warning(expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+  expect_warning(expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0,
                                emiss_nu = emiss_nu_wrong1, emiss_V = emiss_V),
                "emiss_nu should be a list containing n_dep"))
-  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                               emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0,
                                               emiss_nu = emiss_nu_wrong2, emiss_V = emiss_V),
                               "emiss_nu should be a list containing n_dep")
-  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+  expect_error(prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0,
                                emiss_nu = emiss_nu, emiss_V = emiss_V_wrong1),
                "emiss_V should be a list containing n_dep, here 2")
@@ -191,42 +191,42 @@ test_that("errors prior_emiss input", {
 
 test_that("output dim prior_emiss", {
   expect_equal(length(manual_prior_emiss), 6)
-  expect_equal(as.numeric(sapply(manual_prior_emiss, length)), c(3, n_dep1, n_dep1, n_dep1, n_dep1, 0))
-  expect_equal(sapply(manual_prior_emiss$emiss_mu0, length), rep(m, n_dep1))
+  expect_equal(as.numeric(sapply(manual_prior_emiss, length)), c(3, n_dep, n_dep, n_dep, n_dep, 0))
+  expect_equal(sapply(manual_prior_emiss$emiss_mu0, length), rep(m, n_dep))
   expect_equal(sapply(manual_prior_emiss$emiss_mu0[[1]], dim), matrix(c(1, q_emiss[1] - 1), ncol = m, nrow = 2))
   expect_equal(sapply(manual_prior_emiss$emiss_mu0[[2]], dim), matrix(c(1,  q_emiss[2] - 1), ncol = m, nrow = 2))
-  expect_equal(sapply(manual_prior_emiss$emiss_K0, length), rep(1, n_dep1))
-  expect_equal(sapply(manual_prior_emiss$emiss_nu, length), rep(1, n_dep1))
+  expect_equal(sapply(manual_prior_emiss$emiss_K0, length), rep(1, n_dep))
+  expect_equal(sapply(manual_prior_emiss$emiss_nu, length), rep(1, n_dep))
   expect_equal(sapply(manual_prior_emiss$emiss_V, dim), matrix(c(rep(q_emiss[1] - 1, 2),
-                                                                 rep(q_emiss[2] - 1, 2)), ncol = n_dep1, nrow = 2))
+                                                                 rep(q_emiss[2] - 1, 2)), ncol = n_dep, nrow = 2))
 })
 
 test_that("using prior_emiss object in mHMM", {
   expect_failure(expect_error(mHMM(s_data = nonverbal,
-                                   gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+                                   gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                    start_val = c(list(gamma), emiss_distr),
                                    emiss_hyp_prior = manual_prior_emiss,
                                    mcmc = list(J = 11, burn_in = 5))))
   expect_error(mHMM(s_data = nonverbal,
-                    gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),
                     emiss_hyp_prior = manual_prior_emiss_wrongm,
                     mcmc = list(J = 11, burn_in = 5)),
                "number of states specified in m")
   expect_error(mHMM(s_data = nonverbal,
-                    gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),
                     emiss_hyp_prior = manual_prior_emiss_wrongn_dep,
                     mcmc = list(J = 11, burn_in = 5)),
                "number of dependent variables")
   expect_error(mHMM(s_data = nonverbal,
-                    gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),
                     emiss_hyp_prior = manual_prior_emiss_wrongq_emiss1,
                     mcmc = list(J = 11, burn_in = 5)),
                "number of number of observed categories")
   expect_warning(expect_error(mHMM(s_data = nonverbal,
-                    gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),
                     emiss_hyp_prior = manual_prior_emiss_wrongq_emiss2,
                     mcmc = list(J = 11, burn_in = 5)),
@@ -292,12 +292,12 @@ test_that("output dim prior_gamma", {
 
 test_that("using prior_gamma object in mHMM", {
   expect_failure(expect_error(mHMM(s_data = nonverbal,
-                                   gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+                                   gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                    start_val = c(list(gamma), emiss_distr),
                                    gamma_hyp_prior = manual_prior_gamma,
                                    mcmc = list(J = 11, burn_in = 5))))
   expect_error(mHMM(s_data = nonverbal,
-                    gen = list(m = m, n_dep = n_dep1, q_emiss = q_emiss),
+                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),
                     gamma_hyp_prior = manual_prior_gamma_wrongm,
                     mcmc = list(J = 11, burn_in = 5)),

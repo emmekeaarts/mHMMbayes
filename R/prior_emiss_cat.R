@@ -218,6 +218,12 @@
 
 
 prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, emiss_V = NULL, n_xx_emiss = NULL){
+  if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1 | sum(objects(gen) %in% "q_emiss") != 1){
+    stop("The input argument gen should contain the elements m, n_dep and q_emiss.")
+  }
+  m <- gen$m
+  n_dep <- gen$n_dep
+  q_emiss <- gen$q_emiss
   if(is.null(n_xx_emiss)){
     n_xx_int <- rep(1, n_dep)
   } else {
@@ -226,12 +232,6 @@ prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, em
     }
     n_xx_int <- n_xx_emiss + 1
   }
-  if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1 | sum(objects(gen) %in% "q_emiss") != 1){
-    stop("The input argument gen should contain the elements m, n_dep and q_emiss.")
-  }
-  m <- gen$m
-  n_dep <- gen$n_dep
-  q_emiss <- gen$q_emiss
   if(length(q_emiss) != n_dep){
     stop("The lenght of q_emiss specifying the number of output categories for each of the number of dependent variables should equal the number of dependent variables specified in n_dep")
   }
