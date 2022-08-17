@@ -1,9 +1,10 @@
 #' Transforming a set of Multinomial logit regression intercepts to probabilities
 #'
 #' \code{int_to_prob} transforms a set of Multinomial logit regression
-#' intercepts to the corresponding probabilities for each state or category.
-#' Note that the first state or category is assumed to be the reference category, hence
-#' no intercept is to specified for the first state or category.
+#' intercepts to the corresponding state transition or categorical emission
+#' observation probabilities. Note that the first state or category is assumed
+#' to be the reference category, hence no intercept is to specified for the
+#' first state or category.
 #'
 #' Designed to ease the specification of informative hyper-prior values for the
 #' mean intercepts of the transition probability matrix gamma and categorical
@@ -56,10 +57,11 @@ int_to_prob <- function(int_matrix) {
 
 #' Transforming a set of probabilities to Multinomial logit regression intercepts
 #'
-#' \code{prob_to_int} transforms a set of state or observation probabilities to the
-#' corresponding Multinomial logit regression intercepts. Note that the first
-#' category is assumed to be the reference category, hence no intercept is
-#' returned for the first state or category.
+#' \code{prob_to_int} transforms a set of state transition or categorical
+#' emission observation probabilities to the corresponding Multinomial logit
+#' regression intercepts. Note that the first category is assumed to be the
+#' reference category, hence no intercept is returned for the first state or
+#' category.
 #'
 #' Designed to ease the specification of informative hyper-prior values for the
 #' mean intercepts of the transition probability matrix gamma and categorical
