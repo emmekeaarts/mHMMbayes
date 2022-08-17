@@ -9,5 +9,5 @@ There are 2 NOTEs:
 
 * ONLY on win-builder: checking CRAN incoming feasibility ... NOTE
 Maintainer: 'Emmeke Aarts <e.aarts@uu.nl>'. I believe this is because the Authors in DESCRIPTION is changed. 
-* ONLY on Fedora Linux (R-hub): * checking HTML version of manual ... NOTE
+* ONLY on Fedora Linux (R-hub): checking HTML version of manual ... NOTE
 Skipping checking HTML validation: no command 'tidy' found. I cannot change that Tidy is not on the path, or update Tidy on the external Fedora Linux server. 
