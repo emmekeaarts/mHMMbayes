@@ -1,15 +1,14 @@
 #' Simulate data using a multilevel hidden Markov model
 #'
 #' \code{sim_mHMM} simulates data for multiple subjects, for which the data have
-#' categorical
-#' observations that follow a hidden Markov model (HMM) with a multilevel
-#' structure. The multilevel structure implies that each subject is allowed to
-#' have its own set of parameters, and that the parameters at the subject level
-#' (level 1) are tied together by a population distribution at level 2 for each
-#' of the corresponding parameters. The shape of the population distribution for
-#' each of the parameters is a normal distribution. In addition to (natural
-#' and/or unexplained) heterogeneity between subjects, the subjects parameters
-#' can also depend on a covariate.
+#' categorical observations that follow a hidden Markov model (HMM) with a
+#' multilevel structure. The multilevel structure implies that each subject is
+#' allowed to have its own set of parameters, and that the parameters at the
+#' subject level (level 1) are tied together by a population distribution at
+#' level 2 for each of the corresponding parameters. The shape of the population
+#' distribution for each of the parameters is a normal distribution. In addition
+#' to (natural and/or unexplained) heterogeneity between subjects, the subjects
+#' parameters can also depend on a covariate.
 #'
 #' In simulating the data, having a multilevel structure means that the
 #' parameters for each subject are sampled from the population level
@@ -31,7 +30,7 @@
 #'
 #'
 #' \code{beta}: As the first element in each row of \code{gamma} is used as
-#' reference category in the multinomial logistic regression, the first matrix
+#' reference category in the Multinomial logistic regression, the first matrix
 #' in the list \code{beta} used to predict transition probability matrix
 #' \code{gamma} has a number of rows equal to \code{m} and the number of columns
 #' equal to \code{m} - 1. The first element in the first row corresponds to the
@@ -47,25 +46,25 @@
 #' first row corresponds to the probability of observing the last category in
 #' state one.
 #'
-#'
+#' @inheritParams mHMM
 #' @param n_t Numeric vector with length 1 denoting the length of the observed
 #'   sequence to be simulated for each subject. To only simulate subject
 #'   specific transition probability matrices gamma and emission distributions
 #'   (and no data), set \code{t} to 0.
 #' @param n Numeric vector with length 1 denoting the number of subjects for
 #'   which data is simulated.
-#' @param m Numeric vector with length 1 denoting the number
-#'   of hidden states.
-#' @param n_dep Numeric vector with length 1 denoting the
-#'   number of dependent variables
+#' @param m The argument \code{m} is deprecated; please specify using the input
+#'   parameter \code{gen}.
+#' @param n_dep The argument \code{n_dep} is deprecated; please specify using
+#'   the input parameter \code{n_dep}.
+#' @param q_emiss The argument \code{q_emiss} is deprecated; please specify
+#'   using the input parameter \code{q_emiss}.
 #' @param start_state Optional numeric vector with length 1 denoting in which
 #'   state the simulated state sequence should start. If left unspecified, the
 #'   simulated state for time point 1 is sampled from the initial state
 #'   distribution (which is derived from the transition probability matrix
 #'   gamma).
-#' @param q_emiss Numeric vector with length \code{n_dep} denoting the number of
-#'   observed categories for the categorical emission distribution for each of
-#'   the dependent variables.
+
 #' @param gamma A matrix with \code{m} rows and \code{m} columns containing the
 #'   average population transition probability matrix used for simulating the
 #'   data. That is, the probability to switch from hidden state \emph{i} (row
@@ -96,14 +95,14 @@
 #'   emission distribution(s) is not predicted by covariates.
 #' @param beta List of 1 + \code{n_dep} matrices containing the regression
 #'   parameters to predict \code{gamma} and/or \code{emiss_distr} in combination
-#'   with \code{xx_vec} using (multinomial logistic) regression. The first
+#'   with \code{xx_vec} using (Multinomial logistic) regression. The first
 #'   matrix is used to predict the transition probability matrix \code{gamma}.
 #'   The subsequent matrices are used to predict the emission distribution(s)
 #'   \code{emiss_distr} of the dependent variable(s). For \code{gamma} and
 #'   categorical emission distributions, one regression parameter is specified
 #'   for each element in \code{gamma} and \code{emiss_distr}, with the following
 #'   exception. The first element in each row of \code{gamma} and/or
-#'   \code{emiss_distr} is used as reference category in the multinomial
+#'   \code{emiss_distr} is used as reference category in the Multinomial
 #'   logistic regression. As such, no regression parameters can be specified for
 #'   these parameters. Hence, the first element in the list \code{beta} to
 #'   predict \code{gamma} consist of a matrix with the number of rows equal to
@@ -112,7 +111,7 @@
 #'   predict \code{emiss_distr} consist of a matrix with the number of rows
 #'   equal to \code{m} and the number of columns equal to \code{q_emiss[k]} - 1
 #'   for each of the \code{k} in \code{n_dep} emission distribution(s). See
-#'   \emph{details} for more information. For continuous emission distribuitons,
+#'   \emph{details} for more information. For continuous emission distributions,
 #'   the subsequent elements in the list \code{beta} consist of a matrix with
 #'   the number of rows equal to \code{m} and 1 column.
 #'
@@ -125,12 +124,12 @@
 #'   covariates.
 #' @param var_gamma A numeric vector with length 1 denoting the amount of variance between subjects in
 #'   the transition probability matrix. Note that this value corresponds to the
-#'   variance of the parameters of the multinomial distribution (i.e., the
-#'   intercepts of the regression equation of the multinomial distribution used
+#'   variance of the parameters of the Multinomial distribution (i.e., the
+#'   intercepts of the regression equation of the Multinomial distribution used
 #'   to sample the transition probability matrix), see details below. In
 #'   addition, only one variance value can be specified for the complete
 #'   transition probability matrix, hence the variance is assumed fixed across
-#'   all components. The default equals 0.1, which corresponds to litlle
+#'   all components. The default equals 0.1, which corresponds to little
 #'   variation between subjects. If one wants to simulate data from exactly the
 #'   same HMM for all subjects, var_gamma should be set to 0. Note that if data
 #'   for only 1 subject is simulated (i.e., n = 1), \code{var_gamma} is set to
@@ -138,8 +137,8 @@
 #' @param var_emiss A numeric vector with length \code{n_dep} denoting the
 #'   amount of variance between subjects in the emission distribution(s). Note
 #'   that this value corresponds to the variance of the parameters of the
-#'   multinomial distribution (i.e., the intercepts of the regression equation
-#'   of the multinomial distribution used to sample the components of the
+#'   Multinomial distribution (i.e., the intercepts of the regression equation
+#'   of the Multinomial distribution used to sample the components of the
 #'   emission distribution), see details below. Only one variance value can be
 #'   specified each emission distribution, hence the variance is assumed fixed
 #'   across states and across categories within a state. The default equals 0.1,
@@ -187,6 +186,7 @@
 #' n_t     <- 100
 #' n       <- 10
 #' m       <- 3
+#' n_dep   <- 1
 #' q_emiss <- 4
 #' gamma   <- matrix(c(0.8, 0.1, 0.1,
 #'                     0.2, 0.7, 0.1,
@@ -194,8 +194,8 @@
 #' emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
 #'                              0.1, 0.1, 0.8, 0.0,
 #'                              0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
-#' data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
-#'                   emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
+#' data1 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
 #' head(data1$obs)
 #' head(data1$states)
 #'
@@ -206,8 +206,8 @@
 #'                       0.0, 1.0), byrow = TRUE, ncol = 2)
 #' xx_vec      <- rep(list(NULL),2)
 #' xx_vec[[1]] <-  c(rep(0,5), rep(1,5))
-#' data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
-#'                   emiss_distr = emiss_distr, beta = beta, xx_vec = xx_vec,
+#' data2 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                   gamma = gamma, emiss_distr = emiss_distr, beta = beta, xx_vec = xx_vec,
 #'                   var_gamma = 1, var_emiss = 1)
 #'
 #'
@@ -215,6 +215,7 @@
 #' n_t <- 0
 #' n <- 5
 #' m <- 3
+#' n_dep   <- 1
 #' q_emiss <- 4
 #' gamma <- matrix(c(0.8, 0.1, 0.1,
 #'                   0.2, 0.7, 0.1,
@@ -222,25 +223,52 @@
 #' emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
 #'                              0.1, 0.1, 0.8, 0.0,
 #'                              0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
-#' data3 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
-#'                   emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
+#' data3 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
 #' data3
 #'
-#' data4 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
-#'                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
+#' data4 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 #' data4
 
 
 #' @export
 
-sim_mHMM <- function(n_t, n, m, n_dep = 1, start_state = NULL, q_emiss = NULL,
-                     gamma, emiss_distr, xx_vec = NULL, beta = NULL,
-                     var_gamma = 0.1, var_emiss = NULL, return_ind_par = FALSE){
+sim_mHMM <- function(n_t, n, gen, gamma, emiss_distr, start_state = NULL,
+                     xx_vec = NULL, beta = NULL, var_gamma = 0.1, var_emiss = NULL,
+                     return_ind_par = FALSE, m, n_dep, q_emiss){
 
-  if (dim(gamma)[1] != m){
-    stop(paste("The transiton probability matrix gamma should be a", m, "by", m, "matrix."))
+  if(!missing(m)){
+    warning("The argument m is deprecated; please specify using the input parameter gen.")
   }
-  if (dim(gamma)[2] != m){
+  if(!missing(n_dep)){
+    warning("The argument n_dep is deprecated; please specify using the input parameter gen.")
+  }
+  if(!missing(q_emiss)){
+    warning("The argument q_emiss is deprecated; please specify using the input parameter gen.")
+  }
+
+  if(!missing(gen)){
+    if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1 | sum(objects(gen) %in% "q_emiss") != 1){
+      stop("The input argument gen should contain the elements m, n_dep and q_emiss.")
+    }
+    m <- gen$m
+    n_dep <- gen$n_dep
+    q_emiss <- gen$q_emiss
+  }
+
+  if(missing(m) & missing(gen)){
+    stop("Please specify the number of hidden states m via the input parameter gen.")
+  }
+  if(missing(n_dep) & missing(gen)){
+    n_dep <- 1
+    warning("Please specify the number of dependent variables n_dep via the input parameter gen. Model now assums n_dep = 1")
+  }
+  if(missing(q_emiss) & missing(gen)){
+    stop("Please specify the number of observed categories for each categorical emission distribtution q_emiss via the input parameter gen.")
+  }
+
+  if (dim(gamma)[1] != m | dim(gamma)[2] != m){
     stop(paste("The transiton probability matrix gamma should be a", m, "by", m, "matrix."))
   }
   if(!isTRUE(all.equal(apply(gamma,1,sum), rep(1,m)))){

@@ -27,8 +27,8 @@
 #'   \code{NA}.
 #'
 #' @examples
-#' ###### Example on package example data
-#' ###### First fit the multilevel HMM on the nonverbal data
+#' ###### Example on package example data, see ?nonverbal
+#' # First fit the multilevel HMM on the example data
 #' \donttest{
 #' # specifying general model properties:
 #' m <- 2
@@ -63,18 +63,14 @@
 #' n_t <- 100
 #' n <- 10
 #' m <- 2
+#' n_dep <- 1
 #' q_emiss <- 3
 #' gamma <- matrix(c(0.8, 0.2,
 #'                   0.3, 0.7), ncol = m, byrow = TRUE)
 #' emiss_distr <- list(matrix(c(0.5, 0.5, 0.0,
 #'                         0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE))
-#' data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
-#'                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
-#'
-#' # Specify remaining required analysis input (for the example, we use simulation
-#' # input as starting values):
-#' n_dep <- 1
-#' q_emiss <- 3
+#' data1 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 #'
 #' # Fit the model on the simulated data:
 #' # Note that for reasons of running time, J is set at a ridiculous low value.
@@ -127,20 +123,21 @@ vit_mHMM <- function(object, s_data, burn_in = NULL){
     stop(paste("The specified burn in period should be at least 2 points smaller
                compared to the number of iterations J, J =", J))
   }
+  int_est_emiss <- rep(list(lapply(q_emiss-1, dif_matrix, rows = m)), n_subj)
   est_emiss  <- rep(list(lapply(q_emiss, dif_matrix, rows = m)), n_subj)
-  start <- c(0, q_emiss * m)
-  for(i in 1:n_subj){
+  for(s in 1:n_subj){
     for(j in 1:n_dep){
-      est_emiss[[i]][[j]][] <- matrix(round(apply(object$PD_subj[[i]][burn_in:J, (sum(start[1:j]) + 1) : sum(start[1:(j+1)])], 2, median), 3),
-                                      byrow = TRUE, ncol = q_emiss[j], nrow = m)
+      int_est_emiss[[s]][[j]][] <- matrix(apply(object$emiss_int_subj[[s]][[j]][burn_in:J, ], 2, median),
+                                          byrow = TRUE, ncol = q_emiss[j]-1, nrow = m)
+      est_emiss[[s]][[j]][] <- int_to_prob(int_est_emiss[[s]][[j]])
     }
   }
   est_gamma <- obtain_gamma(object, level = "subject")
   for(s in 1:n_subj){
     emiss <- est_emiss[[s]]
     gamma    <- est_gamma[[s]]
-    probs    <- cat_Mult_HMM_fw(x = as.matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep),
-                                m = m, emiss = emiss, n_dep = n_dep, gamma = gamma)$forward_p
+    probs    <- cat_mult_fw_r_to_cpp(x = as.matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep),
+                                     m = m, emiss = emiss, gamma = gamma, n_dep = n_dep, delta=NULL)[[1]]
     state_seq[1:n_vary[s], s] <- apply(probs, 2, which.max)
   }
   colnames(state_seq) <- paste("Subj_", id, sep = "")
