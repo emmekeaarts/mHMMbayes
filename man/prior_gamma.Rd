@@ -178,11 +178,20 @@ start_EM <- list(matrix(c(0.05, 0.90, 0.05,
 # Note that for reasons of running time, J is set at a ridiculous low value.
 # One would typically use a number of iterations J of at least 1000,
 # and a burn_in of 200.
+\donttest{
 out_3st_infgamma <- mHMM(s_data = nonverbal,
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(start_TM), start_EM),
                     gamma_hyp_prior = manual_prior_gamma,
                     mcmc = list(J = 11, burn_in = 5))
+}
+\dontshow{
+out_3st_infgamma <- mHMM(s_data = nonverbal,
+                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                    start_val = c(list(start_TM), start_EM),
+                    gamma_hyp_prior = manual_prior_gamma,
+                    mcmc = list(J = 6, burn_in = 3))
+}
 
 out_3st_infgamma
 summary(out_3st_infgamma)

@@ -204,11 +204,21 @@
 #' # Note that for reasons of running time, J is set at a ridiculous low value.
 #' # One would typically use a number of iterations J of at least 1000,
 #' # and a burn_in of 200.
+#' \donttest{
 #' out_3st_infemiss <- mHMM(s_data = nonverbal,
 #'                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
 #'                     start_val = c(list(start_TM), start_EM),
 #'                     emiss_hyp_prior = manual_prior_emiss,
 #'                     mcmc = list(J = 11, burn_in = 5))
+#' }
+#' \dontshow{
+#' # executable in < 5 sec together with the examples above
+#' out_3st_infemiss <- mHMM(s_data = nonverbal,
+#'                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                     start_val = c(list(start_TM), start_EM),
+#'                     emiss_hyp_prior = manual_prior_emiss,
+#'                     mcmc = list(J = 6, burn_in = 3))
+#' }
 #'
 #' out_3st_infemiss
 #' summary(out_3st_infemiss)

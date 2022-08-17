@@ -119,11 +119,20 @@
 #' # Note that for reasons of running time, J is set at a ridiculous low value.
 #' # One would typically use a number of iterations J of at least 1000,
 #' # and a burn_in of 200.
+#' \donttest{
 #' out_3st_RWemiss <- mHMM(s_data = nonverbal,
 #'                          gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
 #'                          start_val = c(list(start_TM), start_EM),
 #'                          emiss_sampler = manual_emiss_sampler,
 #'                          mcmc = list(J = 11, burn_in = 5))
+#' }
+#' \dontshow{
+#' out_3st_RWemiss <- mHMM(s_data = nonverbal,
+#'                          gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#'                          start_val = c(list(start_TM), start_EM),
+#'                          emiss_sampler = manual_emiss_sampler,
+#'                          mcmc = list(J = 6, burn_in = 3))
+#' }
 #'
 #' out_3st_RWemiss
 #' summary(out_3st_RWemiss)
