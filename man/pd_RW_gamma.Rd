@@ -120,6 +120,13 @@ out_3st_RWgamma <- mHMM(s_data = nonverbal,
 out_3st_RWgamma
 summary(out_3st_RWgamma)
 
+# checking acceptance rate (for illustrative purposes, in the example,
+# J is too low for getting a fair indication)
+J_it <- 11 - 1 # accept/reject starts at iteration 2 of MCMC algorithm
+out_3st_RWgamma$gamma_naccept / J_it
+# average acceptance rate over all subjects per parameter
+apply(out_3st_RWgamma$gamma_naccept / J_it, 2, mean)
+
 }
 \references{
 \insertRef{gelman2014}{mHMMbayes}

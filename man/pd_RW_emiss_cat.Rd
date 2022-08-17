@@ -142,6 +142,16 @@ out_3st_RWemiss <- mHMM(s_data = nonverbal,
 out_3st_RWemiss
 summary(out_3st_RWemiss)
 
+# checking acceptance rate (for illustrative purposes, in the example,
+# J is too low for getting a fair indication)
+div_J <- function(x, J) x / J
+J_it <- 11 - 1 # accept/reject starts at iteration 2 of MCMC algorithm
+RW_emiss_accept <- sapply(out_3st_RWemiss$emiss_naccept, div_J, J_it, simplify = FALSE)
+
+# average acceptance rate over all subjects per parameter
+# rows represent each of the n_dep dependent variables, columns represent the m states
+t(sapply(RW_emiss_accept, apply, MARGIN = 2, mean, simplyfy = FALSE))
+
 }
 \references{
 \insertRef{gelman2014}{mHMMbayes}

@@ -71,7 +71,7 @@ gamma.}
   hyper-prior Inverse Wishart distribution on the covariance of the
   Multinomial logit intercepts.}
   \item{\code{n_xx_gamma}}{A numeric vector denoting the number of (level 2)
-  covariates used to predict the tansition probability matrix gamma. When no
+  covariates used to predict the transition probability matrix gamma. When no
   covariates are used, \code{n_xx_gamma} equals \code{NULL}.}
   }
 }

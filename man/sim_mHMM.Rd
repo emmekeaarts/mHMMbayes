@@ -79,14 +79,14 @@ emission distribution(s) is not predicted by covariates.}
 
 \item{beta}{List of 1 + \code{n_dep} matrices containing the regression
   parameters to predict \code{gamma} and/or \code{emiss_distr} in combination
-  with \code{xx_vec} using (multinomial logistic) regression. The first
+  with \code{xx_vec} using (Multinomial logistic) regression. The first
   matrix is used to predict the transition probability matrix \code{gamma}.
   The subsequent matrices are used to predict the emission distribution(s)
   \code{emiss_distr} of the dependent variable(s). For \code{gamma} and
   categorical emission distributions, one regression parameter is specified
   for each element in \code{gamma} and \code{emiss_distr}, with the following
   exception. The first element in each row of \code{gamma} and/or
-  \code{emiss_distr} is used as reference category in the multinomial
+  \code{emiss_distr} is used as reference category in the Multinomial
   logistic regression. As such, no regression parameters can be specified for
   these parameters. Hence, the first element in the list \code{beta} to
   predict \code{gamma} consist of a matrix with the number of rows equal to
@@ -95,7 +95,7 @@ emission distribution(s) is not predicted by covariates.}
   predict \code{emiss_distr} consist of a matrix with the number of rows
   equal to \code{m} and the number of columns equal to \code{q_emiss[k]} - 1
   for each of the \code{k} in \code{n_dep} emission distribution(s). See
-  \emph{details} for more information. For continuous emission distribuitons,
+  \emph{details} for more information. For continuous emission distributions,
   the subsequent elements in the list \code{beta} consist of a matrix with
   the number of rows equal to \code{m} and 1 column.
 
@@ -109,12 +109,12 @@ emission distribution(s) is not predicted by covariates.}
 
 \item{var_gamma}{A numeric vector with length 1 denoting the amount of variance between subjects in
 the transition probability matrix. Note that this value corresponds to the
-variance of the parameters of the multinomial distribution (i.e., the
-intercepts of the regression equation of the multinomial distribution used
+variance of the parameters of the Multinomial distribution (i.e., the
+intercepts of the regression equation of the Multinomial distribution used
 to sample the transition probability matrix), see details below. In
 addition, only one variance value can be specified for the complete
 transition probability matrix, hence the variance is assumed fixed across
-all components. The default equals 0.1, which corresponds to litlle
+all components. The default equals 0.1, which corresponds to little
 variation between subjects. If one wants to simulate data from exactly the
 same HMM for all subjects, var_gamma should be set to 0. Note that if data
 for only 1 subject is simulated (i.e., n = 1), \code{var_gamma} is set to
@@ -123,8 +123,8 @@ for only 1 subject is simulated (i.e., n = 1), \code{var_gamma} is set to
 \item{var_emiss}{A numeric vector with length \code{n_dep} denoting the
 amount of variance between subjects in the emission distribution(s). Note
 that this value corresponds to the variance of the parameters of the
-multinomial distribution (i.e., the intercepts of the regression equation
-of the multinomial distribution used to sample the components of the
+Multinomial distribution (i.e., the intercepts of the regression equation
+of the Multinomial distribution used to sample the components of the
 emission distribution), see details below. Only one variance value can be
 specified each emission distribution, hence the variance is assumed fixed
 across states and across categories within a state. The default equals 0.1,
@@ -205,7 +205,7 @@ specific transition probability matrices gamma.
 
 
 \code{beta}: As the first element in each row of \code{gamma} is used as
-reference category in the multinomial logistic regression, the first matrix
+reference category in the Multinomial logistic regression, the first matrix
 in the list \code{beta} used to predict transition probability matrix
 \code{gamma} has a number of rows equal to \code{m} and the number of columns
 equal to \code{m} - 1. The first element in the first row corresponds to the
