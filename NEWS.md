@@ -40,6 +40,7 @@ In the function sim_mHMM() used to simulate data for multiple subject - for whic
 * fixed error in tutorial vignette, section 'Graphically displaying outcomes'.
 * for subject specific transition probability matrix gamma and emission distributions: algorithm runs into problems when probabilities equal zero. To avoid this problem, a small constant (0.0001) is added to each probability in each iteration of the MCMC algorithm, ONLY done for the subject specific probabilities used in the forward algorithm, Multinomial intercept values and group level parameters are left untouched. 
 * intercept values for gamma returned for the first iteration of the MCMC algorithm were incorrect: gamma_int_bar[1,], should be transposed before using as.vector. Did not matter for calculations as it is only returned as output to help track the intercept values for gamma over the iteration of the MCMC algorithm. Fixed. 
+* fixed all existing problems at https://cran.rstudio.com//web/checks/check_results_mHMMbayes.html -> Escaped LaTeX specials: \& 
 
 
 # mHMMbayes 0.1.1
