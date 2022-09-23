@@ -10,6 +10,7 @@ sim_mHMM(
   data_distr = "categorical",
   m,
   n_dep = 1,
+  left_truncation,
   start_state = NULL,
   q_emiss = NULL,
   gamma,
@@ -32,7 +33,7 @@ which data is simulated.}
 
 \item{data_distr}{String vector with lenght 1 denoting the observation type
 of the data to be simulated. Should be set to either \code{'categorical'}
-or \code{'continuous'}. Note that when simulating multivariate data, all
+or \code{'tr_continuous'}. Note that when simulating multivariate data, all
 dependent variables are assumed to be of the same observation type. The
 default equals to \code{data_distr = 'categorical'}.}
 
@@ -41,6 +42,13 @@ of hidden states.}
 
 \item{n_dep}{Numeric vector with length 1 denoting the
 number of dependent variables}
+
+\item{left_truncation}{Numeric vector with length \code{n_dep} denoting the
+truncation point for each dependent variable. Within the emission
+distribution(s), only the normal distribution to the right-hand side of the
+given truncation point will be considered. If no truncation point should be
+used for emission distribution \code{q}, \code{left_truncation[q]} is set to
+\code{NA}.}
 
 \item{start_state}{Optional numeric vector with length 1 denoting in which
 state the simulated state sequence should start. If left unspecified, the
@@ -65,7 +73,7 @@ states for each of the dependent variables. If \code{data_distr =
 \code{q_emiss[k]} columns for each of the \code{k} in \code{n_dep} emission
 distribution(s). That is, the probability of observing category \emph{q}
 (column \emph{q}) in state \emph{i} (row \emph{i}). If \code{data_distr =
-'continuous'}, each element is a matrix with \code{m} rows and 2 columns;
+'tr_continuous'}, each element is a matrix with \code{m} rows and 2 columns;
 the first column denoting the mean of state \emph{i} (row \emph{i}) and the
 second column denoting the variance of state \emph{i} (row \emph{i}) of the
 Normal distribution.}
@@ -109,7 +117,7 @@ emission distribution(s) is not predicted by covariates.}
   predict \code{emiss_distr} consist of a matrix with the number of rows
   equal to \code{m} and the number of columns equal to \code{q_emiss[k]} - 1
   for each of the \code{k} in \code{n_dep} emission distribution(s). See
-  \emph{details} for more information. For continuous emission distribuitons,
+  \emph{details} for more information. For truncated continuous emission distributions,
   the subsequent elements in the list \code{beta} consist of a matrix with
   the number of rows equal to \code{m} and 1 column.
 
@@ -139,7 +147,7 @@ amount of variance between subjects in the emission distribution(s). For
 categorical data, this value corresponds to the variance of the parameters
 of the multinomial distribution (i.e., the intercepts of the regression
 equation of the multinomial distribution used to sample the components of
-the emission distribution), see details below.  For continuous data, this
+the emission distribution), see details below.  For truncated continuous data, this
 value corresponds to the variance in the mean of the emission
 distribution(s) across subjects. Note that only one variance value can be
 specified each emission distribution, hence the variance is assumed fixed
@@ -183,7 +191,7 @@ The following components are returned by the function \code{sim_mHMM}:
 }
 \description{
 \code{sim_mHMM} simulates data for multiple subjects, for which the data have
-either categorical or continuous (i.e., normally distributed)
+either categorical or continuous (i.e., normally distributed) left truncated
 observations that follow a hidden Markov model (HMM) with a multilevel
 structure. The multilevel structure implies that each subject is allowed to
 have its own set of parameters, and that the parameters at the subject level
@@ -207,7 +215,7 @@ One can simulate multivariate data. That is, the hidden states depend on more
 than 1 observed variable simultaneously. The distributions of multiple
 dependent variables for multivariate data are assumed to be independent, and
 all distributions for one dataset have to be of the same type (either
-categorical or continuous).
+categorical or truncated continuous).
 
 Note: the subject specific) initial state distributions (i.e., the
 probability of each of the states at the first time point) needed to simulate
@@ -280,7 +288,7 @@ data4 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 data4
 
-# simulating multivariate continuous data
+# simulating multivariate truncated continuous data
 n_t     <- 100
 n       <- 10
 m       <- 3
@@ -290,15 +298,16 @@ gamma   <- matrix(c(0.8, 0.1, 0.1,
                     0.2, 0.7, 0.1,
                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
 
-emiss_distr <- list(matrix(c( 5, 1,
-                             10, 1,
-                             15, 1), nrow = m, byrow = TRUE),
+emiss_distr <- list(matrix(c( 2, 2,
+                              6, 1,
+                             10, 1), nrow = m, byrow = TRUE),
                      matrix(c(0.5, 0.1,
                               1.0, 0.2,
                               2.0, 0.1), nrow = m, byrow = TRUE))
 
-data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
-                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.01))
+data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, left_truncation = c(0, NA),
+                      data_distr = 'tr_continuous', gamma = gamma, emiss_distr = emiss_distr,
+                      var_gamma = .5, var_emiss = c(.5, 0.01))
 
 head(data_cont$states)
 head(data_cont$obs)

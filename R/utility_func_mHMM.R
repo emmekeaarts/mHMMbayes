@@ -32,8 +32,8 @@ is.mHMM <- function(x) {
 }
 
 #' @keywords internal
-is.mHMM_cont <- function(x) {
-  inherits(x, "mHMM_cont")
+is.mHMM_tr_cont <- function(x) {
+  inherits(x, "mHMM_tr_cont")
 }
 
 #' @keywords internal

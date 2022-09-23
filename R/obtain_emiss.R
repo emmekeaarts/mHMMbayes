@@ -17,7 +17,7 @@
 #'   represents the subject specific emission distribution for a specific
 #'   dependent variable.
 #'
-#' @seealso \code{\link{mHMM}} and \code{\link{mHMM_cont}} for fitting the
+#' @seealso \code{\link{mHMM}} and \code{\link{mHMM_tr_cont}} for fitting the
 #'   multilevel hidden Markov model.
 #'
 #'
@@ -63,8 +63,8 @@
 #' @export
 #'
 obtain_emiss <- function(object, level = "group", burn_in = NULL){
-  if (!is.mHMM(object) & !is.mHMM_cont(object)){
-    stop("The input object used should either be from the class mHMM or mHMM_cont, obtained by using the function mHMM or mHMM_cont.")
+  if (!is.mHMM(object) & !is.mHMM_tr_cont(object)){
+    stop("The input object used should either be from the class mHMM or mHMM_tr_cont, obtained by using the function mHMM or mHMM_tr_cont.")
   }
   if (level != "group" & level != "subject"){
     stop("The specification at the input variable -level- should be set to either group or subject")
@@ -95,7 +95,7 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
         colnames(est[[i]]) <- paste("Category", 1:q_emiss[i])
         rownames(est[[i]]) <- paste("State", 1:m)
       }
-    } else if (is.mHMM_cont(object)){
+    } else if (is.mHMM_tr_cont(object)){
       est <- rep(list(matrix(, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "Variance")))), n_dep)
       names(est) <- dep_labels
       for(j in 1:n_dep){
@@ -124,7 +124,7 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
           est_emiss[[j]][[i]][] <- round(int_to_prob(est_emiss_int[[j]][[i]]),3)
         }
       }
-    } else if (is.mHMM_cont(object)){
+    } else if (is.mHMM_tr_cont(object)){
       est_emiss <- rep(list(rep(list(matrix(, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "Variance")))), n_subj)), n_dep)
       names(est_emiss) <- dep_labels
       for(j in 1:n_dep){

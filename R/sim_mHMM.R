@@ -1,7 +1,7 @@
 #' Simulate data using a multilevel hidden Markov model
 #'
 #' \code{sim_mHMM} simulates data for multiple subjects, for which the data have
-#' either categorical or continuous (i.e., normally distributed)
+#' either categorical or continuous (i.e., normally distributed) left truncated
 #' observations that follow a hidden Markov model (HMM) with a multilevel
 #' structure. The multilevel structure implies that each subject is allowed to
 #' have its own set of parameters, and that the parameters at the subject level
@@ -24,7 +24,7 @@
 #' than 1 observed variable simultaneously. The distributions of multiple
 #' dependent variables for multivariate data are assumed to be independent, and
 #' all distributions for one dataset have to be of the same type (either
-#' categorical or continuous).
+#' categorical or truncated continuous).
 #'
 #' Note: the subject specific) initial state distributions (i.e., the
 #' probability of each of the states at the first time point) needed to simulate
@@ -58,13 +58,19 @@
 #'   which data is simulated.
 #' @param data_distr String vector with lenght 1 denoting the observation type
 #'   of the data to be simulated. Should be set to either \code{'categorical'}
-#'   or \code{'continuous'}. Note that when simulating multivariate data, all
+#'   or \code{'tr_continuous'}. Note that when simulating multivariate data, all
 #'   dependent variables are assumed to be of the same observation type. The
 #'   default equals to \code{data_distr = 'categorical'}.
 #' @param m Numeric vector with length 1 denoting the number
 #'   of hidden states.
 #' @param n_dep Numeric vector with length 1 denoting the
 #'   number of dependent variables
+#' @param left_truncation Numeric vector with length \code{n_dep} denoting the
+#'   truncation point for each dependent variable. Within the emission
+#'   distribution(s), only the normal distribution to the right-hand side of the
+#'   given truncation point will be considered. If no truncation point should be
+#'   used for emission distribution \code{q}, \code{left_truncation[q]} is set to
+#'   \code{NA}.
 #' @param start_state Optional numeric vector with length 1 denoting in which
 #'   state the simulated state sequence should start. If left unspecified, the
 #'   simulated state for time point 1 is sampled from the initial state
@@ -85,7 +91,7 @@
 #'   \code{q_emiss[k]} columns for each of the \code{k} in \code{n_dep} emission
 #'   distribution(s). That is, the probability of observing category \emph{q}
 #'   (column \emph{q}) in state \emph{i} (row \emph{i}). If \code{data_distr =
-#'   'continuous'}, each element is a matrix with \code{m} rows and 2 columns;
+#'   'tr_continuous'}, each element is a matrix with \code{m} rows and 2 columns;
 #'   the first column denoting the mean of state \emph{i} (row \emph{i}) and the
 #'   second column denoting the variance of state \emph{i} (row \emph{i}) of the
 #'   Normal distribution.
@@ -127,7 +133,7 @@
 #'   predict \code{emiss_distr} consist of a matrix with the number of rows
 #'   equal to \code{m} and the number of columns equal to \code{q_emiss[k]} - 1
 #'   for each of the \code{k} in \code{n_dep} emission distribution(s). See
-#'   \emph{details} for more information. For continuous emission distribuitons,
+#'   \emph{details} for more information. For truncated continuous emission distributions,
 #'   the subsequent elements in the list \code{beta} consist of a matrix with
 #'   the number of rows equal to \code{m} and 1 column.
 #'
@@ -155,7 +161,7 @@
 #'   categorical data, this value corresponds to the variance of the parameters
 #'   of the multinomial distribution (i.e., the intercepts of the regression
 #'   equation of the multinomial distribution used to sample the components of
-#'   the emission distribution), see details below.  For continuous data, this
+#'   the emission distribution), see details below.  For truncated continuous data, this
 #'   value corresponds to the variance in the mean of the emission
 #'   distribution(s) across subjects. Note that only one variance value can be
 #'   specified each emission distribution, hence the variance is assumed fixed
@@ -248,7 +254,7 @@
 #'                   emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 #' data4
 #'
-#' # simulating multivariate continuous data
+#' # simulating multivariate truncated continuous data
 #' n_t     <- 100
 #' n       <- 10
 #' m       <- 3
@@ -258,15 +264,16 @@
 #'                     0.2, 0.7, 0.1,
 #'                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
 #'
-#' emiss_distr <- list(matrix(c( 5, 1,
-#'                              10, 1,
-#'                              15, 1), nrow = m, byrow = TRUE),
+#' emiss_distr <- list(matrix(c( 2, 2,
+#'                               6, 1,
+#'                              10, 1), nrow = m, byrow = TRUE),
 #'                      matrix(c(0.5, 0.1,
 #'                               1.0, 0.2,
 #'                               2.0, 0.1), nrow = m, byrow = TRUE))
 #'
-#' data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
-#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.01))
+#' data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, left_truncation = c(0, NA),
+#'                       data_distr = 'tr_continuous', gamma = gamma, emiss_distr = emiss_distr,
+#'                       var_gamma = .5, var_emiss = c(.5, 0.01))
 #'
 #' head(data_cont$states)
 #' head(data_cont$obs)
@@ -279,7 +286,7 @@
 # write stop to check that number of beta's specified corresponds to number of covariates
 #   specified in xx (besides checking that both of them are present)
 
-sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1,
+sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1, left_truncation,
                      start_state = NULL, q_emiss = NULL, gamma, emiss_distr, xx_vec = NULL, beta = NULL,
                      var_gamma = 0.1, var_emiss = NULL, return_ind_par = FALSE){
 
@@ -292,6 +299,9 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1,
   }
   if (dim(gamma)[2] != m){
     stop(paste("The transiton probability matrix gamma should be a", m, "by", m, "matrix."))
+  }
+  if(length(left_truncation) != n_dep){
+    stop("The input argument left_truncation should be numeric vector with length n_dep")
   }
   if(!isTRUE(all.equal(apply(gamma,1,sum), rep(1,m)))){
     stop("The elements in each row of the transition probability matrix gamma should sum up to 1")
@@ -319,7 +329,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1,
         stop("The elements in each row of the emission distribution matrix should sum up to 1, see emission distribution in element", i, ".")
       }
     }
-    # if(data_distr == 'continuous'){
+    # if(data_distr == 'tr_continuous'){
     #
     # }
   }
@@ -363,7 +373,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1,
       }
     }
     if (!is.null(beta[[2]]) & data_distr == 'categorical'){
-    # extend to all 1 + n_dep and continuous
+    # extend to all 1 + n_dep and tr_continuous
       if((dim(beta[[2]])[1] != (m)) | (dim(beta[[2]])[2] != (q_emiss[1]-1))){
       stop(paste("The second element of beta to predict the emission distribution should be a m (", m, ") by q_emiss - 1 (", q_emiss[1] - 1, ") matrix."))
       }
@@ -387,7 +397,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1,
     for(i in 2:(n_dep + 1)){
       if(data_distr == 'categorical'){
         beta[[i]] <- matrix(0, ncol = q_emiss[i-1] - 1, nrow = m)
-      } else if (data_distr == 'continuous'){
+      } else if (data_distr == 'tr_continuous'){
         beta[[i]] <- matrix(0, ncol = 1, nrow = m)
       }
     }
@@ -399,7 +409,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1,
       if (is.null(beta[[i]])) {
         if(data_distr == 'categorical'){
           beta[[i]] <- matrix(0, ncol = q_emiss[i-1] - 1, nrow = m)
-        } else if (data_distr == 'continuous'){
+        } else if (data_distr == 'tr_continuous'){
           beta[[i]] <- matrix(0, ncol = 1, nrow = m)
         }
       }
@@ -440,7 +450,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1,
       if(data_distr == "categorical"){
         sub_emiss[[j]][[i]] <- int_to_prob(mnl_emiss[[i]] + xx_vec[[1+i]][j] * beta[[1+i]] +
                                              rnorm(n = m * (q_emiss[i]-1), mean = 0, sd = sqrt(var_emiss[i])))
-      } else if(data_distr == "continuous"){
+      } else if(data_distr == "tr_continuous"){
         sub_emiss[[j]][[i]] <- emiss_distr[[i]]
         sub_emiss[[j]][[i]][,1] <- emiss_distr[[i]][,1] +  xx_vec[[1+i]][j] * beta[[1+i]] +
           rnorm(n = m, mean = 0, sd = sqrt(var_emiss[i]))
@@ -458,7 +468,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1,
         for(i in 1:n_dep){
           obs[((j-1) * n_t + 1), (1+i)] <- sample(x = 1:q_emiss[i], size = 1, prob = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],])
         }
-      } else if (data_distr == "continuous"){
+      } else if (data_distr == "tr_continuous"){
         for(i in 1:n_dep){
           obs[((j-1) * n_t + 1), (1+i)] <- rnorm(1, mean = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],1], sd = sqrt(sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],2]))
         }
@@ -469,12 +479,17 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', m, n_dep = 1,
           for(i in 1:n_dep){
             obs[((j-1) * n_t + t), (1+i)] <- sample(x = 1:q_emiss[i], size = 1, prob = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],])
           }
-        } else if (data_distr == "continuous"){
+        } else if (data_distr == "tr_continuous"){
           for(i in 1:n_dep){
             obs[((j-1) * n_t + t), (1+i)] <- rnorm(1, mean = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],1], sd = sqrt(sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],2]))
           }
         }
       }
+    }
+  }
+  if (data_distr == "tr_continuous"){
+    for(i in which(!is.na(left_truncation))){
+      obs[obs[, (1+i)] < left_truncation[i], (1+i)] <- left_truncation[i]
     }
   }
 

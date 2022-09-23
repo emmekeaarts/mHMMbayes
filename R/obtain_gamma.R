@@ -6,8 +6,8 @@
 #'   or at the subject level, returning the transition probability matrices for
 #'   each subject.
 #'
-#' @param object An object of class \code{mHMM} or \code{mHMM_cont}, generated
-#'   by the function \code{\link{mHMM}} or \code{\link{mHMM_cont}},
+#' @param object An object of class \code{mHMM} or \code{mHMM_tr_cont}, generated
+#'   by the function \code{\link{mHMM}} or \code{\link{mHMM_tr_cont}},
 #'   respectively.
 #' @param level String specifying if the returned transition probability matrix
 #'   gamma should be at the group level (\code{level = "group"}), i.e.,
@@ -16,7 +16,7 @@
 #' @param burn_in An integer which specifies the number of iterations to discard
 #'   when obtaining the model parameter summary statistics. When left
 #'   unspecified (\code{burn_in = NULL}), the burn in period specified when
-#'   creating the \code{mHMM} or \code{mHMM_cont} object will be used.
+#'   creating the \code{mHMM} or \code{mHMM_tr_cont} object will be used.
 #'
 #' @return \code{obtain_gamma} returns the object \code{est_gamma} of the class
 #'   \code{mHMM_gamma}. This object can be directly plotted using the function
@@ -28,7 +28,7 @@
 #'   where each matrix in the list represents a subject specific transition
 #'   probability matrix.
 #'
-#' @seealso \code{\link{mHMM}} and \code{\link{mHMM_cont}} for fitting the
+#' @seealso \code{\link{mHMM}} and \code{\link{mHMM_tr_cont}} for fitting the
 #'   multilevel hidden Markov model, and \code{\link{plot.mHMM_gamma}} for
 #'   plotting the obtained transition probabilities.
 #'
@@ -76,8 +76,8 @@
 #' @export
 #'
 obtain_gamma <- function(object, level = "group", burn_in = NULL){
-  if (!is.mHMM(object) & !is.mHMM_cont(object)){
-    stop("The input object used should either be from the class mHMM or mHMM_cont, obtained by using the function mHMM or mHMM_cont.")
+  if (!is.mHMM(object) & !is.mHMM_tr_cont(object)){
+    stop("The input object used should either be from the class mHMM or mHMM_tr_cont, obtained by using the function mHMM or mHMM_tr_cont.")
   }
   if (level != "group" & level != "subject"){
     stop("The specification at the input variable -level- should be set to either group or subject")

@@ -1,6 +1,6 @@
 #' @export
 #'
-print.mHMM_cont <- function(x, ...){
+print.mHMM_tr_cont <- function(x, ...){
   input   <- x$input
   n_subj  <- input$n_subj
   burn_in <- input$burn_in

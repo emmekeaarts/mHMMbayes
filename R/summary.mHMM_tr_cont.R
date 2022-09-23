@@ -1,6 +1,6 @@
 #' @export
 #'
-summary.mHMM_cont <- function(object, ...){
+summary.mHMM_tr_cont <- function(object, ...){
   input   <- object$input
   dep_labels <- input$dep_labels
   n_subj  <- input$n_subj

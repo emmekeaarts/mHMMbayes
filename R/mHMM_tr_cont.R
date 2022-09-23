@@ -1,18 +1,18 @@
 #' Multilevel hidden  Markov model using Bayesian estimation for continuous
 #' observations
 #'
-#' \code{mHMM_cont} fits a multilevel (also known as mixed or random effects)
+#' \code{mHMM_tr_cont} fits a multilevel (also known as mixed or random effects)
 #' hidden Markov model (HMM) to intense longitudinal data with continuous
-#' observations (i.e., normally distributed) of multiple subjects using Bayesian
-#' estimation, and creates an object of class mHMM_cont. By using a multilevel
-#' framework, we allow for heterogeneity in the model parameters between
-#' subjects, while estimating one overall HMM. The function includes the
-#' possibility to add covariates at level 2 (i.e., at the subject level) and
-#' have varying observation lengths over subjects. For a short description of
-#' the package see \link{mHMMbayes}. See \code{vignette("tutorial-mhmm")} for an
-#' introduction to multilevel hidden Markov models and the package, and see
-#' \code{vignette("estimation-mhmm")} for an overview of the used estimation
-#' algorithms.
+#' observations (i.e., normally distributed) with left truncated data of
+#' multiple subjects using Bayesian estimation, and creates an object of class
+#' mHMM_tr_cont. By using a multilevel framework, we allow for heterogeneity in
+#' the model parameters between subjects, while estimating one overall HMM. The
+#' function includes the possibility to add covariates at level 2 (i.e., at the
+#' subject level) and have varying observation lengths over subjects. For a
+#' short description of the package see \link{mHMMbayes}. See
+#' \code{vignette("tutorial-mhmm")} for an introduction to multilevel hidden
+#' Markov models and the package, and see \code{vignette("estimation-mhmm")} for
+#' an overview of the used estimation algorithms.
 #'
 #' Covariates specified in \code{xx} can either be dichotomous or continuous
 #' variables. Dichotomous variables have to be coded as 0/1 variables.
@@ -61,6 +61,12 @@
 #'   of hidden states}
 #'   \item{\code{n_dep}: numeric vector with length 1 denoting the
 #'   number of dependent variables}}
+#' @param left_truncation Numeric vector with length \code{n_dep} denoting the
+#'   truncation point for each dependent variable. Within the emission
+#'   distribution(s), only the normal distribution to the right-hand side of the
+#'   given truncation point will be considered. If no truncation point should be
+#'   used for emission distribution \code{q}, \code{left_truncation[q]} is set to
+#'   \code{NA}.
 #' @param xx An optional list of (level 2) covariates to predict the transition
 #'   matrix and/or the emission probabilities. Level 2 covariate(s) means that
 #'   there is one observation per subject of each covariate. The first element
@@ -207,7 +213,7 @@
 #'   0.1. See the section \emph{Scaling the proposal distribution of the RW
 #'   Metropolis sampler} in \code{vignette("estimation-mhmm")} for details.
 #'
-#' @return \code{mHMM_cont} returns an object of class \code{mHMM_cont}, which has
+#' @return \code{mHMM_tr_cont} returns an object of class \code{mHMM_tr_cont}, which has
 #'   \code{print} and \code{summary} methods to see the results.
 #'   The object contains the following components:
 #'   \describe{
@@ -324,19 +330,20 @@
 #'                     0.2, 0.7, 0.1,
 #'                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
 #'
-#' emiss_distr <- list(matrix(c( 5, 1,
-#'                               10, 1,
-#'                               15, 1), nrow = m, byrow = TRUE),
-#'                     matrix(c(0.5, 0.1,
-#'                              1.0, 0.2,
-#'                              2.0, 0.1), nrow = m, byrow = TRUE))
+#' emiss_distr <- list(matrix(c( 2, 2,
+#'                               6, 1,
+#'                              10, 1), nrow = m, byrow = TRUE),
+#'                      matrix(c(0.5, 0.1,
+#'                               1.0, 0.2,
+#'                               2.0, 0.1), nrow = m, byrow = TRUE))
 #'
-#' data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
-#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
+#' data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, left_truncation = c(0, NA),
+#'                       data_distr = 'tr_continuous', gamma = gamma, emiss_distr = emiss_distr,
+#'                       var_gamma = .5, var_emiss = c(.5, 0.01))
 #'
 #' # Specify hyper-prior for the continuous emission distribution
 #' hyp_pr <- list(
-#'                emiss_mu0 = list(matrix(c(3,7,17), nrow = 1), matrix(c(0.7, 0.8, 1.8), nrow = 1)),
+#'                emiss_mu0 = list(matrix(c(3,7,11), nrow = 1), matrix(c(0.7, 0.8, 1.8), nrow = 1)),
 #'                emiss_K0  = list(1, 1),
 #'                emiss_nu  = list(1, 1),
 #'                emiss_V   = list(rep(2, m), rep(1, m)),
@@ -344,8 +351,9 @@
 #'                emiss_b0  = list(rep(1, m), rep(1, m)))
 #'
 #' # Run the model on the simulated data:
-#' out_3st_cont_sim <- mHMM_cont(s_data = data_cont$obs,
+#' out_3st_cont_sim <- mHMM_tr_cont(s_data = data_cont$obs,
 #'                     gen = list(m = m, n_dep = n_dep),
+#'                     left_truncation = c(0, NA),
 #'                     start_val = c(list(gamma), emiss_distr),
 #'                     emiss_hyp_prior = hyp_pr,
 #'                     mcmc = list(J = 11, burn_in = 5))
@@ -355,7 +363,7 @@
 #'
 #'
 
-mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, return_path = FALSE, print_iter, show_progress = TRUE,
+mHMM_tr_cont <- function(s_data, gen, left_truncation, xx = NULL, start_val, emiss_hyp_prior, mcmc, return_path = FALSE, print_iter, show_progress = TRUE,
                       gamma_hyp_prior = NULL, gamma_sampler = NULL){
 
   if(!missing(print_iter)){
@@ -387,6 +395,9 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   }
   n_total 		<- dim(ypooled)[1]
 
+  if(length(left_truncation) != n_dep){
+    stop("The input argument left_truncation should be numeric vector with length n_dep")
+  }
   # covariates
   n_dep1 <- 1 + n_dep
   nx <- numeric(n_dep1)
@@ -679,13 +690,35 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
                                                                                      t(emiss_mu0[[q]][,i]) %*% emiss_K0[[q]] %*% emiss_mu0[[q]][,i] -
                                                                                      t(emiss_mu0_n) %*% (t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% emiss_mu0_n) / 2
         emiss_V_mu[[i]][[q]]       <- solve(stats::rgamma(1, shape = emiss_a_mu_n, rate = emiss_b_mu_n))
-        if(all(dim(emiss_V_mu[[i]][[q]]) == c(1,1))){ # CHECH THIS
-          # emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(as.numeric(emiss_V_mu[[i]][[q]]) * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))) # This step may produce negative values which is not acceptable
-          emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(diag(as.numeric(emiss_V_mu[[i]][[q]]) * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))))
+        # emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(as.numeric(emiss_V_mu[[i]][[q]]) * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))) # This step may produce negative values which is not acceptable
+        if(is.na(left_truncation[q])){
+          if(nx[1 + q] == 1){ ### CHECK
+            emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
+          } else {
+            emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(diag(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))))
+          }
         } else {
-          # emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
-          emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(diag(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))))
+          if(nx[1 + q] == 1){ ### CHECK
+            sd_tr_mean <- sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))
+            A <- pnorm(left_truncation[q], mean = emiss_mu0_n,
+                       sd = sd_tr_mean)
+            B <- 1 - A
+            renorm <- A + runif(1, 0, 1)*B
+            emiss_c_mu_bar[[i]][[q]]	  <-  matrix(qnorm(renorm, mean =  emiss_mu0_n, sd = sd_tr_mean))
+          } else {
+            sd_tr_mean <- sqrt(diag(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
+            A <- pnorm(left_truncation[q], mean = emiss_mu0_n[1,],
+                       sd = sd_tr_mean[1])
+            B <- 1 - A
+            renorm <- A + runif(1, 0, 1)*B
+            tr_mean <-  qnorm(renorm, mean =  emiss_mu0_n[1,], sd = sd_tr_mean[1])
+            emiss_c_mu_bar[[i]][[q]]	  <- matrix(c(tr_mean ,
+                                                   emiss_mu0_n[-1] + rnorm(1 + nx[1 + q] - 2, mean = 0, sd = sd_tr_mean[-1])),
+                                                   ncol = 1)
+          }
         }
+
+
         # emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
         # if(i > 1){
         #   if(emiss_c_mu_bar[[i]][[q]] < emiss_c_mu_bar[[i-1]][[q]]){
@@ -729,7 +762,15 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
         for (s in 1:n_subj){
           emiss_mu0_subj_n  <- (emiss_V_mu[[i]][[q]] * sum(cond_y[[s]][[i]][[q]]) +  emiss_c_V[[i]][[q]] * c(t(emiss_c_mu_bar[[i]][[q]]) %*% xx[[q+1]][s,])) /
             (n_cond_y[s] * emiss_V_mu[[i]][[q]] + emiss_c_V[[i]][[q]])
-          emiss[[s]][[q]][i,1] <- PD_subj[[s]][iter, ((q - 1) * m + i)] <- emiss_c_mu[[i]][[q]][s,1] <- rnorm(1, emiss_mu0_subj_n, sqrt(emiss_c_V_subj))
+          if(is.na(left_truncation[q])){
+            emiss[[s]][[q]][i,1] <- PD_subj[[s]][iter, ((q - 1) * m + i)] <- rnorm(1, emiss_mu0_subj_n, sqrt(emiss_c_V_subj))
+          } else {
+            # using inversion method to sample from distribution that is truncated, only observations to the right of truncation point
+            A <- pnorm(left_truncation[q], mean = emiss_mu0_subj_n, sd = sqrt(emiss_c_V_subj))
+            B <- 1 - A
+            renorm <- A + runif(1, 0, 1)*B
+            emiss[[s]][[q]][i,1] <- PD_subj[[s]][iter, ((q - 1) * m + i)] <- emiss_c_mu[[i]][[q]][s,1] <- qnorm(renorm, mean = emiss_mu0_subj_n, sd = sqrt(emiss_c_V_subj))
+          }
           emiss[[s]][[q]][i,2] <- PD_subj[[s]][iter, (n_dep * m + (q - 1) * m + i)] <- emiss_c_V[[i]][[q]]
         }
       }
@@ -787,6 +828,6 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
                 emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar,
                 label_switch = label_switch)
   }
-  class(out) <- append(class(out), "mHMM_cont")
+  class(out) <- append(class(out), "mHMM_tr_cont")
   return(out)
 }

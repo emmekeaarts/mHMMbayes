@@ -7,8 +7,8 @@
 obtain_gamma(object, level = "group", burn_in = NULL)
 }
 \arguments{
-\item{object}{An object of class \code{mHMM} or \code{mHMM_cont}, generated
-by the function \code{\link{mHMM}} or \code{\link{mHMM_cont}},
+\item{object}{An object of class \code{mHMM} or \code{mHMM_tr_cont}, generated
+by the function \code{\link{mHMM}} or \code{\link{mHMM_tr_cont}},
 respectively.}
 
 \item{level}{String specifying if the returned transition probability matrix
@@ -19,7 +19,7 @@ or at the subject level (\code{level = "subject"}).}
 \item{burn_in}{An integer which specifies the number of iterations to discard
 when obtaining the model parameter summary statistics. When left
 unspecified (\code{burn_in = NULL}), the burn in period specified when
-creating the \code{mHMM} or \code{mHMM_cont} object will be used.}
+creating the \code{mHMM} or \code{mHMM_tr_cont} object will be used.}
 }
 \value{
 \code{obtain_gamma} returns the object \code{est_gamma} of the class
@@ -80,7 +80,7 @@ obtain_gamma(out_2st, level = "subject")
 
 }
 \seealso{
-\code{\link{mHMM}} and \code{\link{mHMM_cont}} for fitting the
+\code{\link{mHMM}} and \code{\link{mHMM_tr_cont}} for fitting the
   multilevel hidden Markov model, and \code{\link{plot.mHMM_gamma}} for
   plotting the obtained transition probabilities.
 }
