@@ -21,7 +21,11 @@ emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
 )
 
 set.seed(4231)
+<<<<<<< HEAD
 data_sim <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, q_emiss = q_emiss, gamma = gamma,
+=======
+data_sim <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), gamma = gamma,
+>>>>>>> master
                      emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.5))
 colnames(data_sim$obs) <- c("subj", "output_1", "output_2")
 
@@ -79,3 +83,4 @@ test_that("output obtain emiss", {
   expect_equal(as.vector(emiss1_subj[[1]][[1]][3,]), c(0.086, 0.049, 0.248, 0.618))
   expect_equal(as.vector(emiss1_subj[[2]][[n]][1,]), c(0.665, 0.334))
 })
+

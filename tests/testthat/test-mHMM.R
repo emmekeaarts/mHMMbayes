@@ -18,6 +18,7 @@ gamma <- matrix(c(0.8, 0.1, 0.1,
                   0.2, 0.6, 0.2,
                   0.1, 0.2, 0.7), ncol = m, byrow = TRUE)
 emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
+<<<<<<< HEAD
                              0.1, 0.1, 0.8, 0.0,
                              0.1, 0.1, 0.2, 0.6), nrow = m, ncol = q_emiss[1], byrow = TRUE),
                     matrix(c(0.7, 0.3,
@@ -28,6 +29,18 @@ emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
 set.seed(4231)
 data_sim <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, q_emiss = q_emiss, gamma = gamma,
                      emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.5))
+=======
+                        0.1, 0.1, 0.8, 0.0,
+                        0.1, 0.1, 0.2, 0.6), nrow = m, ncol = q_emiss[1], byrow = TRUE),
+                    matrix(c(0.7, 0.3,
+                             0.9, 0.1,
+                             0.8, 0.2), nrow = m, ncol = q_emiss[2], byrow = TRUE)
+                )
+
+set.seed(4231)
+data_sim <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), gamma = gamma,
+                  emiss_distr = emiss_distr, var_gamma = .5, var_emiss = c(.5, 0.5))
+>>>>>>> master
 colnames(data_sim$obs) <- c("subj", "output_1", "output_2")
 
 # Fit the mHMM on 2 dep variable data
@@ -45,9 +58,15 @@ for(i in 2:(n_dep + 1)){
 }
 set.seed(3523)
 out_2st_sim_cov1 <- mHMM(s_data = data_sim$obs, xx = xx,
+<<<<<<< HEAD
                          gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                          start_val = c(list(gamma), emiss_distr),
                          mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
+=======
+                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                     start_val = c(list(gamma), emiss_distr),
+                     mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
+>>>>>>> master
 
 xx_gamma_only <- rep(list(matrix(1, ncol = 1, nrow = n)), (n_dep + 1))
 xx_gamma_only[[1]] <- cbind(xx_gamma_only[[i]], nonverbal_cov$std_CDI_change)

@@ -68,29 +68,29 @@ xx_vec3[[1]] <-  c(rep(0,4), rep(1,5))
 test_that("expected errors simulating data", {
 
   # wrong input of either gamma or the emission distribution
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma =
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma =
                           matrix(c(.3, .4, .2,
                                    .1, .1, .8,
                                    .3, .2, .5), byrow = TRUE, ncol = m),
                         emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1),
                "row of the transition probability matrix gamma should sum up to 1")
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = list(matrix(c(0.5, 0.5, 0.0, 0.0,
                                         0.1, 0.1, 0.8, 0.2,
                                         0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE)),
                         var_gamma = 1, var_emiss = 1),
                "row of the emission distribution matrix should sum up to 1")
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma =
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma =
                           matrix(c(.5, .5,
                                    .5, .5), byrow = TRUE, ncol = 2),
                         emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1),
                paste("matrix gamma should be a", m, "by", m, "matrix"))
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = list(matrix(c(0.5, 0.5, 0.0, 0.0,
                                                0.1, 0.1, 0.8, 0.2), nrow = m-1, ncol = q_emiss, byrow = TRUE)),
                         var_gamma = 1, var_emiss = 1),
                "rows of emission distribution matrix in element")
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = list(matrix(c(0.5, 0.5, 0.0,
                                                0.1, 0.1, 0.8,
                                                0.1, 0.1, 0.8), nrow = m, ncol = q_emiss-1, byrow = TRUE)),
@@ -98,37 +98,37 @@ test_that("expected errors simulating data", {
                "columns of the emission distribution matrix should be")
 
   # wrong input of covariates and/or beta
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = emiss_distr, xx_vec = xx_vec, var_gamma = 1, var_emiss = 1),
                "Either only xx_vec or only beta is specified.")
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = emiss_distr, beta = beta, var_gamma = 1, var_emiss = 1),
                "Either only xx_vec or only beta is specified.")
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = emiss_distr, xx_vec = xx_vec, beta = beta2,
                         var_gamma = 1, var_emiss = 1),
                "Either only xx_vec or only beta is specified in one of the elements")
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = emiss_distr, xx_vec = xx_vec2, beta = beta,
                         var_gamma = 1, var_emiss = 1),
                "Either only xx_vec or only beta is specified in one of the elements")
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = emiss_distr, xx_vec = xx_vec3, beta = beta,
                         var_gamma = 1, var_emiss = 1),
                "length of the vectors in xx_vec should be equal")
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = emiss_distr, xx_vec = xx_vec, beta = beta3,
                         var_gamma = 1, var_emiss = 1),
                "first element of beta to predict the transiton probability matrix gamma should be")
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = emiss_distr, xx_vec = xx_vec, beta = beta4,
                         var_gamma = 1, var_emiss = 1),
                "first element of beta to predict the transiton probability matrix gamma should be")
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = emiss_distr, xx_vec = xx_vec2, beta = beta5,
                         var_gamma = 1, var_emiss = 1),
                "second element of beta to predict the emission")
-  expect_error(sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                         emiss_distr = emiss_distr, xx_vec = xx_vec2, beta = beta6,
                         var_gamma = 1, var_emiss = 1),
                "second element of beta to predict the emission")
@@ -137,11 +137,11 @@ test_that("expected errors simulating data", {
 
 test_that("output simulated dat", {
   set.seed(2432)
-  data1 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  data1 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                     emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
 
 
-  data2 <- sim_mHMM(n_t = n_t, n = n, m = m, q_emiss = q_emiss, gamma = gamma,
+  data2 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                     emiss_distr = emiss_distr, beta = beta, xx_vec = xx_vec,
                     var_gamma = 1, var_emiss = 1)
 

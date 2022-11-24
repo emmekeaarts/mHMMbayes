@@ -42,6 +42,26 @@ is.mHMM_gamma <- function(x) {
 }
 
 #' @keywords internal
+is.mHMM_prior_gamma <- function(x) {
+  inherits(x, "mHMM_prior_gamma")
+}
+
+#' @keywords internal
+is.mHMM_prior_emiss <- function(x) {
+  inherits(x, "mHMM_prior_emiss")
+}
+
+#' @keywords internal
+is.mHMM_pdRW_gamma <- function(x) {
+  inherits(x, "mHMM_pdRW_gamma")
+}
+
+#' @keywords internal
+is.mHMM_pdRW_emiss <- function(x) {
+  inherits(x, "mHMM_pdRW_emiss")
+}
+
+#' @keywords internal
 hms <- function(t){
   paste(formatC(t %/% (60*60) %% 24, width = 2, format = "d", flag = "0"),
         formatC(t %/% 60 %% 60, width = 2, format = "d", flag = "0"),
