@@ -29,7 +29,7 @@ Description: An implementation of the multilevel (also known as mixed or random
     sampler. The package also includes various visualization options, a function 
     to simulate data, and a function to obtain the most likely hidden state 
     sequence for each individual using the Viterbi algorithm.
-URL: https://github.com/emmekeaarts/mHMMbayes
+URL: https://CRAN.R-project.org/package=mHMMbayes
 BugReports: https://github.com/emmekeaarts/mHMMbayes/issues
 License: GPL-3
 Encoding: UTF-8
