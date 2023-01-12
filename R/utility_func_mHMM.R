@@ -52,6 +52,16 @@ is.mHMM_prior_emiss <- function(x) {
 }
 
 #' @keywords internal
+is.cat <- function(x) {
+  inherits(x, "cat")
+}
+
+#' @keywords internal
+is.cont <- function(x) {
+  inherits(x, "cont")
+}
+
+#' @keywords internal
 is.mHMM_pdRW_gamma <- function(x) {
   inherits(x, "mHMM_pdRW_gamma")
 }
