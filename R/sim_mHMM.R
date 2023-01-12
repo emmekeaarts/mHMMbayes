@@ -56,7 +56,7 @@
 #'   (and no data), set \code{t} to 0.
 #' @param n Numeric vector with length 1 denoting the number of subjects for
 #'   which data is simulated.
-#' @param data_distr String vector with lenght 1 denoting the observation type
+#' @param data_distr String vector with length 1 denoting the observation type
 #'   of the data to be simulated. Should be set to either \code{'categorical'}
 #'   or \code{'continuous'}. Note that when simulating multivariate data, all
 #'   dependent variables are assumed to be of the same observation type. The
@@ -64,9 +64,10 @@
 #' @param m The argument \code{m} is deprecated; please specify using the input
 #'   parameter \code{gen}.
 #' @param n_dep The argument \code{n_dep} is deprecated; please specify using
-#'   the input parameter \code{n_dep}.
+#'   the input parameter \code{gen}.
 #' @param q_emiss The argument \code{q_emiss} is deprecated; please specify
-#'   using the input parameter \code{q_emiss}.
+#'   using the input parameter \code{gen} (only to be specified when simulating
+#'   categorical data).
 #' @param start_state Optional numeric vector with length 1 denoting in which
 #'   state the simulated state sequence should start. If left unspecified, the
 #'   simulated state for time point 1 is sampled from the initial state
@@ -251,7 +252,6 @@
 #' n       <- 10
 #' m       <- 3
 #' n_dep   <- 2
-#' q_emiss <- c(0,0)
 #'
 #' gamma   <- matrix(c(0.8, 0.1, 0.1,
 #'                     0.2, 0.7, 0.1,
@@ -264,7 +264,7 @@
 #'                               1.0, 0.2,
 #'                               2.0, 0.1), nrow = m, byrow = TRUE))
 #'
-#' data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+#' data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep),
 #'                       data_distr = 'continuous', gamma = gamma, emiss_distr = emiss_distr,
 #'                       var_gamma = .5, var_emiss = c(.5, 0.01))
 #'
@@ -289,12 +289,14 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
   }
 
   if(!missing(gen)){
-    if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1 | sum(objects(gen) %in% "q_emiss") != 1){
+    if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1 | (sum(objects(gen) %in% "q_emiss") != 1 & data_distr == 'categorical')){
       stop("The input argument gen should contain the elements m, n_dep and q_emiss.")
     }
     m <- gen$m
     n_dep <- gen$n_dep
-    q_emiss <- gen$q_emiss
+    if(data_distr == 'categorical'){
+      q_emiss <- gen$q_emiss
+    }
   }
 
   if(missing(m) & missing(gen)){
@@ -304,8 +306,10 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
     n_dep <- 1
     warning("Please specify the number of dependent variables n_dep via the input parameter gen. Model now assums n_dep = 1")
   }
-  if(missing(q_emiss) & missing(gen)){
-    stop("Please specify the number of observed categories for each categorical emission distribtution q_emiss via the input parameter gen.")
+  if(data_distr == 'categorical'){
+    if(missing(q_emiss) & missing(gen)){
+      stop("Please specify the number of observed categories for each categorical emission distribtution q_emiss via the input parameter gen.")
+    }
   }
 
   if (dim(gamma)[1] != m | dim(gamma)[2] != m){
@@ -320,8 +324,10 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
   if(length(emiss_distr) != n_dep){
     stop("The number of dependent variables specified in n_dep and the number of elements specified in the list emiss_distr should be equal")
   }
-  if(data_distr == 'categorical' & length(q_emiss) != n_dep){
-    stop("The lenght of q_emiss specifying the number of output categories for each of the number of dependent variables should equal the number of dependent variables specified in n_dep")
+  if(data_distr == 'categorical'){
+    if(length(q_emiss) != n_dep){
+      stop("The lenght of q_emiss specifying the number of output categories for each of the number of dependent variables should equal the number of dependent variables specified in n_dep")
+    }
   }
   for(i in 1:n_dep){
     if (dim(emiss_distr[[i]])[1] != m){
