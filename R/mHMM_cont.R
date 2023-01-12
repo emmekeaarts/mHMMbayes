@@ -27,25 +27,8 @@
 #' correspond to the predicted probabilities at the average value of the
 #' covariate(s).
 #'
-#' If covariates are specified and the user wants to set the values for the
-#' parameters of the hyper-prior distributions manually, the specification of
-#' the elements in the arguments of the hyper-prior parameter values of the
-#' normal distribution on the means change as follows: the number of rows in the
-#' matrices \code{gamma_mu0} and \code{emiss_mu0} are equal to 1 + the number of
-#' covariates used to predict the transition probability matrix for
-#' \code{gamma_mu0} and the emission distribution for \code{emiss_mu0} (i.e.,
-#' the first row correspond to the hyper-prior mean values of the intercepts,
-#' the subsequent rows correspond to the hyper-prior mean values of the
-#' regression coefficients connected to each of the covariates), and
-#' \code{gamma_K0} and \code{emiss_K0} are now a matrix with the number of
-#' hypothetical prior subjects on which the vectors of means (i.e., the rows in
-#' \code{gamma_mu0} or \code{emiss_mu0}) are based on the diagonal, and
-#' off-diagonal elements equal to 0. Note that the hyper-prior parameter values
-#' of the inverse Wishart distribution on the covariance matrix remains
-#' unchanged, as the estimates of the regression coefficients for the covariates
-#' are fixed over subjects.
 #'
-#' @param s_data A matrix containing the observations to be modelled, where the
+#' @param s_data A matrix containing the observations to be modeled, where the
 #'   rows represent the observations over time. In \code{s_data}, the first
 #'   column indicates subject id number. Hence, the id number is repeated over
 #'   rows equal to the number of observations for that subject. The subsequent
@@ -104,108 +87,19 @@
 #'   progress bar in the \code{R} console to represent the progress of the
 #'   algorithm (\code{show_progress = TRUE}) or not (\code{show_progress =
 #'   FALSE}). Defaults to \code{show_progress = TRUE}.
-#' @param gamma_hyp_prior An optional list containing user specified parameters
-#'  of the hyper-prior distribution on the multivariate normal distribution
-#'  of the intercepts (and regression coefficients given that covariates are
-#'  used) of the multinomial regression model of the transition probability
-#'  matrix gamma. The hyper-prior of the mean intercepts is a multivariate
-#'  Normal distribution, the hyper-prior of the covariance matrix between the
-#'  set of (state specific) intercepts is an Inverse Wishart distribution.
-#'
-#'  Hence, the list \code{gamma_hyp_prior} contains the following elements:
-#'  \itemize{\item{\code{gamma_mu0}: a list containing m matrices; one matrix
-#'  for each row of the transition probability matrix gamma. Each matrix
-#'  contains the hypothesized mean values of the intercepts. Hence, each matrix
-#'  consists of one row (when not including covariates in the model) and
-#'  \code{m} - 1 columns}
-#'  \item{\code{gamma_K0}: numeric vector with length 1 denoting the number of
-#'  hypothetical prior subjects on which the vector of means \code{gamma_mu0} is
-#'  based}
-#'  \item{\code{gamma_nu}: numeric vector with length 1 denoting the degrees of
-#'  freedom of the Inverse Wishart distribution}
-#'  \item{\code{gamma_V}: matrix of \code{m} - 1 by \code{m} - 1 containing the
-#'  hypothesized variance-covariance matrix between the set of intercepts.}}
-#'  Note that \code{gamma_K0}, \code{gamma_nu} and \code{gamma_V} are assumed
-#'  equal over the states. The mean values of the intercepts (and regression
-#'  coefficients of the covariates) denoted by \code{gamma_mu0} are allowed to
-#'  vary over the states.
-#'
-#'  The default values for the hyper-prior on gamma are: all elements of the
-#'  matrices contained in \code{gamma_mu0} set to 0, \code{gamma_K0} set to 1,
-#'  \code{gamma_nu} set to 3 + m - 1, and the diagonal of \code{gamma_V} (i.e.,
-#'  the variance) set to 3 + m - 1 and the off-diagonal elements (i.e., the
-#'  covariance) set to 0.
-#'
-#'  See \emph{Details} below if covariates are used for changes in the settings
-#'  of the arguments of \code{gamma_hyp_prior}.
-#' @param emiss_hyp_prior A list containing user specified parameters
-#'   of the hyper-prior distribution on the Normal (i.e., Gaussian) emission
-#'   distributions (and regression coefficients given that covariates are used)
-#'   for each of the states. The hyper-prior connected to the means of the
-#'   Normal emission distribution(s) is a Normal-Inverse-Gamma distribution
-#'   (i.e., assuming both unknown populaltion mean and variance between subject
-#'   level means). The hyper-prior on each of fixed variances of the Normal
-#'   emission distribuitons is an Inverse gamma distribution (i.e., assuming a
-#'   known mean).
-#'
-#'  Hence, the list \code{emiss_hyp_prior} contains the following elements:
-#'  \itemize{\item{\code{emiss_mu0}: a list containing \code{n_dep} matrices
-#'  with one row (when not including covariates in the model) and \code{m}
-#'  columns denoting the hypothesized mean values of the Normal emission
-#'  distributions in each of the states for each dependent variable \code{k}}.
-#'  \item{\code{emiss_K0}: a list containing \code{n_dep} elements corresponding
-#'  to each of the dependent variables, where each element is an integer denoting
-#'  the number of hypothetical prior subjects on which the vector of means
-#'  \code{emiss_mu0} is based}.
-#'  \item{\code{emiss_nu}: a list containing \code{n_dep} elements corresponding
-#'  to each of the dependent variables, where each element is an integer
-#'  denoting the degrees of freedom of the Inverse Gamma hyper-prior
-#'  distribution connected to the emission distribution means (note: here, the
-#'  Inverse Gamma hyper-prior distribution is parametrized as a scaled inverse
-#'  chi-squared distribution).}
-#'  \item{\code{emiss_V}: a list containing \code{n_dep} elements corresponding
-#'  to each of the dependent variables \code{k}, where each element is a vector
-#'  with lenght \code{m} containing the hypothesized variances between the
-#'  between subject level means of the Inverse Gamma hyper-prior distribution
-#'  connected to the emission distribution means (note: here, the Inverse Gamma
-#'  hyper-prior distribution is parametrized as a scaled inverse chi-squared
-#'  distribution).}
-#'  \item{\code{emiss_a0}: a list containing \code{n_dep} elements corresponding
-#'  to each of the dependent variables \code{k}, where each element is a vector
-#'  with lenght \code{m} containing the shape values of the Inverse Gamma
-#'  hyper-prior on each of fixed variances of the Normal emission distribuitons
-#'  (note: here the standard Inverse Gamma parametrization is used).}
-#'  \item{\code{emiss_b0}: a list containing \code{n_dep} elements corresponding
-#'  to each of the dependent variables \code{k}, where each element is a vector
-#'  with lenght \code{m} containing the scale values of the Inverse Gamma
-#'  hyper-prior on each of fixed variances of the Normal emission distribuitons
-#'  (note: here the standard Inverse Gamma parametrization is used).}}
-#'  Note that \code{emiss_K0} and \code{emiss_nu} are assumed
-#'  equal over the states.
-#'
-#'
-#'  See \emph{Details} below if covariates are used for changes in the settings
-#'  of the arguments of \code{emiss_hyp_prior}.
-#' @param gamma_sampler An optional list containing user specified settings for
-#'   the proposal distribution of the random walk (RW) Metropolis sampler for
-#'   the subject level parameter estimates of the intercepts modeling the
-#'   transition probability matrix. The list \code{gamma_sampler} contains the
-#'   following elements:
-#'  \itemize{\item{\code{gamma_int_mle0}: a numeric vector with length \code{m}
-#'  - 1 denoting the start values for the maximum likelihood estimates of the
-#'  intercepts for the transition probability matrix gamma, based on the pooled
-#'  data (data over all subjects)}
-#'  \item{\code{gamma_scalar}: a numeric vector with length 1 denoting the scale
-#'  factor \code{s}. That is, The scale of the proposal distribution is composed
-#'  of a covariance matrix Sigma, which is then tuned by multiplying it by a
-#'  scaling factor \code{s}^2}
-#'  \item{\code{gamma_w}: a numeric vector with length 1 denoting the weight for
-#'  the overall log likelihood (i.e., log likelihood based on the pooled data
-#'  over all subjects) in the fractional likelihood.}}
-#'   Default settings are: all elements in \code{gamma_int_mle0} set to 0,
-#'   \code{gamma_scalar} set to 2.93 / sqrt(\code{m} - 1), and \code{gamma_w} set to
-#'   0.1. See the section \emph{Scaling the proposal distribution of the RW
-#'   Metropolis sampler} in \code{vignette("estimation-mhmm")} for details.
+#' @param gamma_hyp_prior An optional object of class \code{mHMM_prior_gamma}
+#'   containing user specified parameter values for the hyper-prior distribution
+#'   on the transition probability matrix gamma, generated by the function
+#'   \code{\link{prior_gamma}}.
+#' @param emiss_hyp_prior An object of the class \code{mHMM_prior_emiss}
+#'   containing user specified parameter values for the hyper-prior distribution
+#'   on the continuous emission distribution, generated by the function
+#'   \code{\link{prior_emiss_cont}}.
+#' @param gamma_sampler An optional object of the class \code{mHMM_pdRW_gamma}
+#'   containing user specified settings for the proposal distribution of the
+#'   random walk (RW) Metropolis sampler on the subject level transition
+#'   probability matrix parameters, generated by the function
+#'   \code{\link{pd_RW_gamma}}.
 #'
 #' @return \code{mHMM_cont} returns an object of class \code{mHMM_cont}, which has
 #'   \code{print} and \code{summary} methods to see the results.
@@ -331,23 +225,28 @@
 #'                              1.0, 0.2,
 #'                              2.0, 0.1), nrow = m, byrow = TRUE))
 #'
-#' data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
+#' data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep), data_distr = 'continuous',
 #'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
 #'
 #' # Specify hyper-prior for the continuous emission distribution
-#' hyp_pr <- list(
-#'                emiss_mu0 = list(matrix(c(3,7,17), nrow = 1), matrix(c(0.7, 0.8, 1.8), nrow = 1)),
-#'                emiss_K0  = list(1, 1),
-#'                emiss_nu  = list(1, 1),
-#'                emiss_V   = list(rep(2, m), rep(1, m)),
-#'                emiss_a0  = list(rep(1, m), rep(1, m)),
-#'                emiss_b0  = list(rep(1, m), rep(1, m)))
+#' manual_prior_emiss <- prior_emiss_cont(
+#'                         gen = list(m = m, n_dep = n_dep),
+#'                         emiss_mu0 = list(matrix(c(3.0, 7.0, 17.0), nrow = 1),
+#'                                          matrix(c(0.7, 0.8, 1.8), nrow = 1)),
+#'                         emiss_K0 = list(1, 1),
+#'                         emiss_V =  list(rep(2, m), rep(1, m)),
+#'                         emiss_nu = list(1, 1),
+#'                         emiss_a0 = list(rep(1, m), rep(1, m)),
+#'                         emiss_b0 = list(rep(1, m), rep(1, m)))
 #'
 #' # Run the model on the simulated data:
+#' # Note that for reasons of running time, J is set at a ridiculous low value.
+#' # One would typically use a number of iterations J of at least 1000,
+#' # and a burn_in of 200.
 #' out_3st_cont_sim <- mHMM_cont(s_data = data_cont$obs,
 #'                     gen = list(m = m, n_dep = n_dep),
 #'                     start_val = c(list(gamma), emiss_distr),
-#'                     emiss_hyp_prior = hyp_pr,
+#'                     emiss_hyp_prior = manual_prior_emiss,
 #'                     mcmc = list(J = 11, burn_in = 5))
 #'
 #'
@@ -431,10 +330,16 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   # Initalize priors and hyper priors --------------------------------
   # Initialize gamma sampler
   if(is.null(gamma_sampler)) {
-    gamma_int_mle0  <- rep(0, m - 1)
+    gamma_int_mle0  <- matrix(0, nrow = m, ncol = m - 1)
     gamma_scalar    <- 2.93 / sqrt(m - 1)
     gamma_w         <- .1
   } else {
+    if (!is.mHMM_pdRW_gamma(gamma_sampler)){
+      stop("The input object specified for gamma_sampler should be from the class mHMM_pdRW_gamma, obtained by using the function pd_RW_gamma")
+    }
+    if (gamma_sampler$m != m){
+      stop("The number of states specified in m is not equal to the number of states specified when setting the proposal distribution of the RW Metropolis sampler on gamma using the function pd_RW_gamma")
+    }
     gamma_int_mle0  <- gamma_sampler$gamma_int_mle0
     gamma_scalar    <- gamma_sampler$gamma_scalar
     gamma_w         <- gamma_sampler$gamma_w
@@ -449,9 +354,22 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
     gamma_nu			<- 3 + m - 1
     gamma_V			  <- gamma_nu * diag(m - 1)
   } else {
-    ###### BUILD in a warning / check if gamma_mu0 is a matrix when given, with  nrows equal to the number of covariates
+    if (!is.mHMM_prior_gamma(gamma_hyp_prior)){
+      stop("The input object specified for gamma_hyp_prior should be from the class mHMM_prior_gamma, obtained by using the function prior_gamma.")
+    }
+    if (gamma_hyp_prior$m != m){
+      stop("The number of states specified in m is not equal to the number of states specified when creating the informative hper-prior distribution gamma using the function prior_gamma.")
+    }
+    if(is.null(gamma_hyp_prior$n_xx_gamma) & nx[1] > 1){
+      stop("Covariates were specified to predict gamma, but no covariates were specified when creating the informative hyper-prior distribution on gamma using the function prior_gamma.")
+    }
+    if(!is.null(gamma_hyp_prior$n_xx_gamma)){
+      if(gamma_hyp_prior$n_xx_gamma != nx[1]){
+        stop("The number of covariates specified to predict gamma is not equal to the number of covariates specified when creating the informative hper-prior distribution on gamma using the function prior_gamma.")
+      }
+    }
     gamma_mu0			<- gamma_hyp_prior$gamma_mu0
-    gamma_K0			<- diag(gamma_hyp_prior$gamma_K0, nx[1])
+    gamma_K0			<- gamma_hyp_prior$gamma_K0
     gamma_nu			<- gamma_hyp_prior$gamma_nu
     gamma_V			  <- gamma_hyp_prior$gamma_V
   }
@@ -461,28 +379,33 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   if(missing(emiss_hyp_prior)){
     stop("The hyper-prior values for the Normal emission distribution(s) denoted by emiss_hyp_prior needs to be specified")
   }
-
-  # emiss_mu0: a list containing n_dep matrices with in the first row the hypothesized mean values of the Normal emission
-  # distributions in each of the states over the m coloumns. Subsequent rows contain the hypothesised regression
-  # coefficients for covariates influencing the state dependent mean value of the normal distribution
-  emiss_mu0	  <- rep(list(NULL), n_dep)
-  emiss_a0	  <- rep(list(NULL), n_dep)
-  emiss_b0	  <- rep(list(NULL), n_dep)
-  emiss_V	  <- rep(list(NULL), n_dep)
-  emiss_nu	    <- rep(list(NULL), n_dep)
-  emiss_K0     <- rep(list(NULL), n_dep)
-  for(q in 1:n_dep){
-    # emiss_hyp_prior[[q]]$emiss_mu0 has to contain a list with lenght equal to m, and each list contains matrix with number of rows equal to number of covariates for that dep. var.
-    # stil build in a CHECK, with warning / stop / switch to default prior
-    emiss_mu0[[q]]	 <- emiss_hyp_prior$emiss_mu0[[q]]
-    emiss_nu[[q]]	 <- emiss_hyp_prior$emiss_nu[[q]]
-    emiss_V[[q]]		 <- emiss_hyp_prior$emiss_V[[q]]
-    emiss_K0[[q]]	 <- diag(emiss_hyp_prior$emiss_K0, nx[1 + q])
-    emiss_a0[[q]] <- emiss_hyp_prior$emiss_a0[[q]]
-    emiss_b0[[q]] <- emiss_hyp_prior$emiss_b0[[q]]
+  if (!is.mHMM_prior_emiss(emiss_hyp_prior) | !is.cont(emiss_hyp_prior)){
+    stop("The input object specified for emiss_hyp_prior should be from the class mHMM_prior_emiss, obtained by using the function for continuous data: prior_emiss_cont.")
+  }
+  if (emiss_hyp_prior$gen$m != m){
+    stop("The number of states specified in m is not equal to the number of states specified when creating the informative hper-prior distribution on the emission distribution(s) using the function prior_emiss_cont.")
+  }
+  if (emiss_hyp_prior$gen$n_dep != n_dep){
+    stop("The number of dependent variables specified in n_dep is not equal to the number of dependent variables specified when creating the informative hper-prior distribution on the emission distribution(s) using the function prior_emiss_cont.")
+  }
+  if(is.null(emiss_hyp_prior$n_xx_emiss) & sum(nx[2:n_dep1] > 1) > 0){
+    stop("Covariates were specified to predict the emission distribution(s), but no covariates were specified when creating the informative hyper-prior distribution on the emission distribution(s) using the function prior_emiss_cont.")
+  }
+  if(!is.null(emiss_hyp_prior$n_xx_emiss)){
+    if(sum(emiss_hyp_prior$n_xx_emiss != nx[2:n_dep1]) > 0){
+      stop("The number of covariates specified to predict the emission distribution(s) is not equal to the number of covariates specified when creating the informative hper-prior distribution on the emission distribution(s) using the function prior_emiss_cat.")
+    }
   }
 
-
+  # emiss_mu0: a list containing n_dep matrices with in the first row the hypothesized mean values of the Normal emission
+  # distributions in each of the states over the m columns. Subsequent rows contain the hypothesized regression
+  # coefficients for covariates influencing the state dependent mean value of the normal distribution
+  emiss_mu0	  <- emiss_hyp_prior$emiss_mu0
+  emiss_a0	  <- emiss_hyp_prior$emiss_a0
+  emiss_b0	  <- emiss_hyp_prior$emiss_b0
+  emiss_V	  <- emiss_hyp_prior$emiss_V
+  emiss_nu	    <- emiss_hyp_prior$emiss_nu
+  emiss_K0     <- emiss_hyp_prior$emiss_K0
 
   # Define objects used to store data in mcmc algorithm, not returned ----------------------------
   # overall
@@ -630,7 +553,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
 
       # population level, transition matrix
       trans_pooled			  <- factor(c(unlist(sapply(trans, "[[", i)), c(1:m)))
-      gamma_mle_pooled		<- optim(gamma_int_mle0, llmnl_int, Obs = trans_pooled,
+      gamma_mle_pooled		<- optim(gamma_int_mle0[i,], llmnl_int, Obs = trans_pooled,
                                  n_cat = m, method = "BFGS", hessian = TRUE,
                                  control = list(fnscale = -1))
       gamma_int_mle_pooled[[i]]  <- gamma_mle_pooled$par
