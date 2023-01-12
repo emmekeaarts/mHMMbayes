@@ -79,16 +79,17 @@
 #'   used: each element is a numeric vector with length 1 + n_xx denoting the
 #'   number of hypothetical prior subjects on which the set of intercepts (first
 #'   value) and set of regression coefficients (subsequent values) are based.
-#' @param emiss_nu Optional list containing \code{n_dep} elements corresponding
-#'   to each dependent variable \code{k}. Each element \code{k} is
-#'   a numeric vector with length 1 denoting the degrees of freedom of the
-#'   hyper-prior Inverse Wishart distribution on the covariance of the
-#'   Multinomial logit intercepts.
 #' @param emiss_V Optional list containing \code{n_dep} elements corresponding
 #'   to each dependent variable \code{k}, where each element \code{k} is a
 #'   matrix of \code{q_emiss[k]} - 1 by \code{q_emiss[k]} - 1 containing the
 #'   variance-covariance of the hyper-prior Inverse Wishart distribution on the
 #'   covariance of the Multinomial logit intercepts.
+#' @param emiss_nu Optional list containing \code{n_dep} elements corresponding
+#'   to each dependent variable \code{k}. Each element \code{k} is
+#'   a numeric vector with length 1 denoting the degrees of freedom of the
+#'   hyper-prior Inverse Wishart distribution on the covariance of the
+#'   Multinomial logit intercepts.
+
 #'
 #' @return \code{prior_emiss_cat} returns an object of class \code{mHMM_prior_emiss},
 #'   containing informative hyper-prior values for the categorical emission
@@ -227,7 +228,7 @@
 #'
 
 
-prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, emiss_V = NULL, n_xx_emiss = NULL){
+prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_V = NULL, emiss_nu = NULL, n_xx_emiss = NULL){
   if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1 | sum(objects(gen) %in% "q_emiss") != 1){
     stop("The input argument gen should contain the elements m, n_dep and q_emiss.")
   }
@@ -245,6 +246,8 @@ prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, em
   if(length(q_emiss) != n_dep){
     stop("The lenght of q_emiss specifying the number of output categories for each of the number of dependent variables should equal the number of dependent variables specified in n_dep")
   }
+
+  #### checking emiss_mu0 ####
   if(!is.list(emiss_mu0)){
     stop(paste("emiss_mu0 should be a list of lists containing", n_dep, "lists; one list for each dependent variable."))
   }
@@ -268,7 +271,8 @@ prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, em
       stop(paste("According to the input paramter n_xx_emiss", n_xx_emiss[k], "covariates are used to predict the emission distribution of dependent variable", k, ". Hence, within input argument emiss_mu0, in the list relating to dependent variable", k, ", each element should be a matrix with 1 + n_xx_emiss =", 1 + n_xx_emiss[k], "rows."))
     }
   }
-  emiss_mu0 <- emiss_mu0
+
+  #### checking emiss_K0 ####
   if(is.null(emiss_K0)){
     emiss_K0     <- rep(list(NULL), n_dep)
     for(k in 1:n_dep){
@@ -287,6 +291,8 @@ prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, em
     }
     emiss_K0 <- emiss_K0_list
   }
+
+  #### checking emiss_nu ####
   if(is.null(emiss_nu)){
     emiss_nu	    <- rep(list(NULL), n_dep)
     for(k in 1:n_dep){
@@ -300,8 +306,9 @@ prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, em
        sum(sapply(emiss_nu, is.double)) != n_dep | sum(sapply(emiss_nu, is.matrix)) > 0){
       stop(paste("emiss_nu should be a list containing n_dep, here", n_dep,", elements, where each element is a numeric vector with length 1 "))
     }
-    emiss_nu <- emiss_nu
   }
+
+  #### checking emiss_V ####
   if(is.null(emiss_V)){
     emiss_V	    <- rep(list(NULL), n_dep)
     for(k in 1:n_dep){
@@ -314,9 +321,11 @@ prior_emiss_cat <- function(gen, emiss_mu0, emiss_K0 = NULL, emiss_nu = NULL, em
     if(length(emiss_V) != n_dep | sum(sapply(emiss_V, is.matrix)) != n_dep | sum(q_emiss-1 == sapply(emiss_V, dim)[1,]) != n_dep | sum(q_emiss-1 == sapply(emiss_V, dim)[2,]) != n_dep){
       stop(paste("emiss_V should be a list containing n_dep, here", n_dep,", elements, where each element is a matrix with the following dimensions: ", paste(paste(q_emiss - 1, "by", q_emiss - 1), collapse = ", "), "."))
     }
-    emiss_V <- emiss_V
   }
+
+  #### return output ####
   out <- list(gen = gen, emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0, emiss_nu = emiss_nu, emiss_V = emiss_V, n_xx_emiss = n_xx_emiss)
-  class(out) <- append(class(out), "mHMM_prior_emiss")
+  class(out) <- append(class(out), c("mHMM_prior_emiss", "cat"))
   return(out)
 }
+
