@@ -13,7 +13,8 @@ properties:
 of hidden states}
 \item{\code{n_dep}: numeric vector with length 1 denoting the
 number of dependent variables}
-\item{\code{q_emiss}: numeric vector with length \code{n_dep} denoting the
+\item{\code{q_emiss}: only to be specified if the data represents
+categorical data. Numeric vector with length \code{n_dep} denoting the
 number of observed categories for the categorical emission distribution
 for each of the dependent variables.}}}
 
