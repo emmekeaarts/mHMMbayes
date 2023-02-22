@@ -216,6 +216,12 @@ over all subjects) in the fractional likelihood.}}
   probabilities over the iterations of the hybrid Metropolis within Gibbs
   sampler. The iterations of the sampler are contained in the rows, and the
   columns contain the group level intercepts.}
+  \item{\code{gamma_V_int_bar}}{A matrix containing the (co-)variance
+  components for the subject-level intercepts
+  of the multinomial logistic regression modeling the transition
+  probabilities over the iterations of the hybrid Metropolis within Gibbs
+  sampler. The iterations of the sampler are contained in the rows, and the
+  columns contain the variance components for the subject level intercepts.}
   \item{\code{gamma_cov_bar}}{A matrix containing the group level regression
   coefficients of the multinomial logistic regression predicting the
   transition probabilities over the iterations of the hybrid Metropolis within
