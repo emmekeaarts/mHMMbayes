@@ -230,6 +230,12 @@
 #'   probabilities over the iterations of the hybrid Metropolis within Gibbs
 #'   sampler. The iterations of the sampler are contained in the rows, and the
 #'   columns contain the group level intercepts.}
+#'   \item{\code{gamma_V_int_bar}}{A matrix containing the (co-)variance
+#'   components for the subject-level intercepts
+#'   of the multinomial logistic regression modeling the transition
+#'   probabilities over the iterations of the hybrid Metropolis within Gibbs
+#'   sampler. The iterations of the sampler are contained in the rows, and the
+#'   columns contain the variance components for the subject level intercepts.}
 #'   \item{\code{gamma_cov_bar}}{A matrix containing the group level regression
 #'   coefficients of the multinomial logistic regression predicting the
 #'   transition probabilities over the iterations of the hybrid Metropolis within
@@ -542,6 +548,11 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   gamma_int_bar				<- matrix(, nrow = J, ncol = ((m-1) * m))
   colnames(gamma_int_bar) <- paste("int_S", rep(1:m, each = m-1), "toS", rep(2:m, m), sep = "")
   gamma_int_bar[1,] <- as.vector(prob_to_int(matrix(gamma_prob_bar[1,], byrow = TRUE, ncol = m, nrow = m)))
+
+  gamma_V_int_bar <- matrix(NA_real_, nrow = J, ncol = ((m-1) * (m-1) * m))
+  colnames(gamma_V_int_bar) <- paste("var_int_S", rep(1:m, each = (m-1)*(m-1)), "toS", rep(2:m, each=m-1), "_with_", "int_S", rep(1:m, each = (m-1)*(m-1)), "toS", rep(2:m, m), sep = "")
+  gamma_V_int_bar[1,] <- unlist(lapply(gamma_V, function(e) as.vector(t(e))))
+
   if(nx[1] > 1){
     gamma_cov_bar				<- matrix(, nrow = J, ncol = ((m-1) * m) * (nx[1] - 1))
     # colnames(gamma_cov_bar) <- paste( paste("cov", rep(1 : (nx[1] - 1),each = nx[1]-1), "_", sep = ""), "S", rep(1:m, each = (m-1) * (nx[1] - 1)), "toS", rep(2:m, m * (nx[1] - 1)), sep = "")
@@ -740,6 +751,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
 
     # End of MCMC iteration, save output values --------
     gamma_int_bar[iter, ]				   	<- unlist(lapply(gamma_mu_int_bar, "[",1,))
+    gamma_V_int_bar[iter, ] <- unlist(lapply(gamma_V_int, function(e) as.vector(t(e))))
     if(nx[1] > 1){
       gamma_cov_bar[iter, ]      	<- unlist(lapply(gamma_mu_int_bar, "[",-1,))
     }
@@ -772,7 +784,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
     out <- list(input = list(m = m, n_dep = n_dep, J = J,
                              burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                 PD_subj = PD_subj, gamma_int_subj = gamma_int_subj,
-                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
+                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,gamma_V_int_bar = gamma_V_int_bar,
                 emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
                 emiss_mu_bar = emiss_mu_bar, gamma_naccept = gamma_naccept,
                 emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar,
@@ -781,7 +793,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
     out <- list(input = list(m = m, n_dep = n_dep, J = J,
                              burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                 PD_subj = PD_subj, gamma_int_subj = gamma_int_subj,
-                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
+                gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,gamma_V_int_bar = gamma_V_int_bar,
                 emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
                 emiss_mu_bar = emiss_mu_bar, gamma_naccept = gamma_naccept,
                 emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar,
