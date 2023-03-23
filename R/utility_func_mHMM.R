@@ -47,9 +47,41 @@ is.mHMM_gamma <- function(x) {
 }
 
 #' @keywords internal
+is.mHMM_emiss <- function(x) {
+  inherits(x, "mHMM_emiss")
+}
+
+#' @keywords internal
+is.mHMM_emiss_cont <- function(x) {
+  inherits(x, "mHMM_emiss_cont")
+}
+
+#' @keywords internal
 hms <- function(t){
   paste(formatC(t %/% (60*60) %% 24, width = 2, format = "d", flag = "0"),
         formatC(t %/% 60 %% 60, width = 2, format = "d", flag = "0"),
         formatC(t %% 60, width = 2, format = "d", flag = "0"),
         sep = ":")
+}
+#' @keywords internal
+isNested <- function(x) {
+  out <- FALSE
+  strout <- utils::capture.output(str(x))
+  idx <- grep("\\$.*List", strout)
+  if (length(idx)) {
+    out <- TRUE
+  }
+  return(out)
+}
+
+#' @keywords internal
+t_col <- function(color, percent = 60, name = NULL) {
+
+  rgb.val <- col2rgb(color)
+
+  t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
+               max = 255,
+               alpha = (100 - percent) * 255 / 100,
+               names = name)
+    invisible(t.col)
 }
