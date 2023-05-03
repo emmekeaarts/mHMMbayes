@@ -540,7 +540,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
         trans[[s]][[i]] <- c(trans[[s]][[i]], 1:m)
         trans[[s]][[i]] <- rev(trans[[s]][[i]])
         for(q in 1:n_dep){
-          cond_y[[s]][[i]][[q]] <- c(subj_data[[s]]$y[sample_path[[s]][, iter] == i, q])
+          cond_y[[s]][[i]][[q]] <- na.omit(c(subj_data[[s]]$y[sample_path[[s]][, iter] == i, q]))
         }
       }
     }
