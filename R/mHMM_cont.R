@@ -273,15 +273,15 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   for(s in 1:n_subj){
     subj_data[[s]]$y <- as.matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep)
   }
-  ypooled    <- n <- NULL
+  ypooled    <- n_t <- NULL
   n_vary     <- numeric(n_subj)
   m          <- gen$m
 
   for(s in 1:n_subj){
     ypooled   <- rbind(ypooled, subj_data[[s]]$y)
-    n         <- dim(subj_data[[s]]$y)[1]
-    n_vary[s] <- n
-    subj_data[[s]]	<- c(subj_data[[s]], n = n, list(gamma_converge = numeric(m), gamma_int_mle = matrix(, m, (m - 1)),
+    n_t         <- dim(subj_data[[s]]$y)[1]
+    n_vary[s] <- n_t
+    subj_data[[s]]	<- c(subj_data[[s]], n_t = n_t, list(gamma_converge = numeric(m), gamma_int_mle = matrix(, m, (m - 1)),
                                                     gamma_mhess = matrix(, (m - 1) * m, (m - 1))))
   }
   n_total 		<- dim(ypooled)[1]
@@ -392,7 +392,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
     stop("Covariates were specified to predict the emission distribution(s), but no covariates were specified when creating the informative hyper-prior distribution on the emission distribution(s) using the function prior_emiss_cont.")
   }
   if(!is.null(emiss_hyp_prior$n_xx_emiss)){
-    if(sum(emiss_hyp_prior$n_xx_emiss != nx[2:n_dep1]) > 0){
+    if(sum(emiss_hyp_prior$n_xx_emiss != (nx[2:n_dep1] - 1)) > 0){
       stop("The number of covariates specified to predict the emission distribution(s) is not equal to the number of covariates specified when creating the informative hper-prior distribution on the emission distribution(s) using the function prior_emiss_cat.")
     }
   }
@@ -524,15 +524,15 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
       # Run forward algorithm, obtain subject specific forward proababilities and log likelihood
       forward				<- cont_mult_fw_r_to_cpp(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], gamma = gamma[[s]], n_dep = n_dep, delta=NULL)
       alpha         <- forward[[1]]
-      c             <- max(forward[[2]][, subj_data[[s]]$n])
-      llk           <- c + log(sum(exp(forward[[2]][, subj_data[[s]]$n] - c)))
+      c             <- max(forward[[2]][, subj_data[[s]]$n_t])
+      llk           <- c + log(sum(exp(forward[[2]][, subj_data[[s]]$n_t] - c)))
       PD_subj[[s]][iter, sum(n_dep * m * 2) + m * m + 1] <- llk
 
       # Using the forward probabilites, sample the state sequence in a backward manner.
       # In addition, saves state transitions in trans, and conditional observations within states in cond_y
       trans[[s]]					                  <- vector("list", m)
       sample_path[[s]][n_vary[[s]], iter] 	<- sample(1:m, 1, prob = c(alpha[, n_vary[[s]]]))
-      for(t in (subj_data[[s]]$n - 1):1){
+      for(t in (subj_data[[s]]$n_t - 1):1){
         sample_path[[s]][t,iter] 	              <- sample(1:m, 1, prob = (alpha[, t] * gamma[[s]][,sample_path[[s]][t + 1, iter]]))
         trans[[s]][[sample_path[[s]][t,iter]]]	<- c(trans[[s]][[sample_path[[s]][t, iter]]], sample_path[[s]][t + 1, iter])
       }
@@ -540,7 +540,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
         trans[[s]][[i]] <- c(trans[[s]][[i]], 1:m)
         trans[[s]][[i]] <- rev(trans[[s]][[i]])
         for(q in 1:n_dep){
-          cond_y[[s]][[i]][[q]] <- na.omit(c(subj_data[[s]]$y[sample_path[[s]][, iter] == i, q]))
+          cond_y[[s]][[i]][[q]] <- stats::na.omit(c(subj_data[[s]]$y[sample_path[[s]][, iter] == i, q]))
         }
       }
     }
@@ -561,7 +561,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
 
       # subject level
       for (s in 1:n_subj){
-        wgt 				<- subj_data[[s]]$n / n_total
+        wgt 				<- subj_data[[s]]$n_t / n_total
 
         # subject level, transition matrix
         gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_int_frac, Obs = c(trans[[s]][[i]], c(1:m)),
@@ -601,21 +601,8 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
         emiss_b_mu_n                   <- (emiss_nu[[q]] * emiss_V[[q]][i]) / 2 + (t(emiss_c_mu[[i]][[q]]) %*% emiss_c_mu[[i]][[q]] +
                                                                                      t(emiss_mu0[[q]][,i]) %*% emiss_K0[[q]] %*% emiss_mu0[[q]][,i] -
                                                                                      t(emiss_mu0_n) %*% (t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% emiss_mu0_n) / 2
-        emiss_V_mu[[i]][[q]]       <- solve(stats::rgamma(1, shape = emiss_a_mu_n, rate = emiss_b_mu_n))
-        if(all(dim(emiss_V_mu[[i]][[q]]) == c(1,1))){ # CHECH THIS
-          # emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(as.numeric(emiss_V_mu[[i]][[q]]) * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))) # This step may produce negative values which is not acceptable
-          emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(diag(as.numeric(emiss_V_mu[[i]][[q]]) * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))))
-        } else {
-          # emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
-          emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(diag(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))))
-        }
-        # emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]])))
-        # if(i > 1){
-        #   if(emiss_c_mu_bar[[i]][[q]] < emiss_c_mu_bar[[i-1]][[q]]){
-        #     label_switch[i,q] <- label_switch[i,q] + 1
-        #
-        #   }
-        # }
+        emiss_V_mu[[i]][[q]]       <- as.numeric(solve(stats::rgamma(1, shape = emiss_a_mu_n, rate = emiss_b_mu_n)))
+        emiss_c_mu_bar[[i]][[q]]	  <- emiss_mu0_n + rnorm(1 + nx[1 + q] - 1, mean = 0, sd = sqrt(diag(emiss_V_mu[[i]][[q]] * solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]))))
       }
 
       # Sample subject values  -----------
@@ -673,8 +660,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
       ))
       if(nx[1+q] > 1){
         emiss_cov_bar[[q]][iter, ]  <- as.vector(unlist(lapply(
-          # lapply(emiss_mu_int_bar, "[[", q), "[",-1,)
-          lapply(emiss_c_mu_bar, "[[", q), "[",-1,) # CHECK THIS
+          lapply(emiss_c_mu_bar, "[[", q), "[",-1,)
         ))
       }
       emiss_varmu_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_V_mu, "[[", q)))
