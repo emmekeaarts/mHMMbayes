@@ -17,7 +17,8 @@
 #'   represents the subject specific emission distribution for a specific
 #'   dependent variable.
 #'
-#' @seealso \code{\link{mHMM}} for fitting the multilevel hidden Markov model.
+#' @seealso \code{\link{mHMM}} and \code{\link{mHMM_cont}} for fitting the
+#'   multilevel hidden Markov model.
 #'
 #'
 #' @examples
@@ -62,8 +63,8 @@
 #' @export
 #'
 obtain_emiss <- function(object, level = "group", burn_in = NULL){
-  if (!is.mHMM(object)){
-    stop("The input object used should be from the class mHMM, obtained by using the function mHMM.")
+  if (!is.mHMM(object) & !is.mHMM_cont(object)){
+    stop("The input object used should either be from the class mHMM or mHMM_cont, obtained by using the function mHMM or mHMM_cont.")
   }
   if (level != "group" & level != "subject"){
     stop("The specification at the input variable -level- should be set to either group or subject")

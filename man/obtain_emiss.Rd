@@ -79,5 +79,6 @@ obtain_emiss(out_2st, level = "subject")
 
 }
 \seealso{
-\code{\link{mHMM}} for fitting the multilevel hidden Markov model.
+\code{\link{mHMM}} and \code{\link{mHMM_cont}} for fitting the
+  multilevel hidden Markov model.
 }
