@@ -314,6 +314,11 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   if(sum(sapply(s_data, is.factor)) > 0 ){
     stop("Your data contains factorial variables, which cannot be used as input in the function mHMM. All variables have to be numerical.")
   }
+  if(sum(apply(s_data[,2:(n_dep + 1)], 2, function(x) length(unique(x))) != q_emiss) > 0 |
+     min(s_data[,2:(n_dep + 1)]) < 1 |
+     sum(apply(s_data[,2:(n_dep + 1)], 2, max) > q_emiss[q]) > 0){
+    stop("For categorical input variables, the values should be integers ranging from 1 to number of observed categories specified for each of the dependent variables in q_emiss")
+  }
   for(s in 1:n_subj){
     subj_data[[s]]$y <- as.matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep)
   }
