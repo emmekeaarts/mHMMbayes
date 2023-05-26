@@ -40,16 +40,14 @@ out_2st_simb <- mHMM(s_data = data_sim$obs,
 test_that("expected errors viterbi", {
   expect_error(vit_mHMM(out_2st_simb, s_data = data_sim$obs, burn_in = 10), "burn in period should be at least 2 points smaller")
   ab <- c(2,3,4)
-  expect_error(vit_mHMM(ab, s_data = data_sim$obs), "should be from the class mHMM")
+  expect_error(vit_mHMM(ab, s_data = data_sim$obs), "should either be from the class mHMM")
   expect_error(vit_mHMM(out_2st_simb, s_data = data_sim$obs[1:200,]), "number of subjects in the datasets")
 })
 
 test_that("output viterbi", {
   states1 <- vit_mHMM(out_2st_simb, s_data = data_sim$obs)
-  expect_equal(dim(states1), c(n_t, n))
-  expect_equal(sort(unique(states1[,1])), c(1:m))
-  expect_equal(sort(unique(states1[,n])), c(1:m))
-  expect_equal(sum(states1[,2]), 197)
-  expect_equal(sum(states1[2,]), 21)
+  expect_equal(dim(states1), c(n_t * n, 2))
+  expect_equal(sort(unique(states1[,2])), c(1:m))
+  expect_equal(sum(states1[,2]), 1815)
 })
 

@@ -59,6 +59,8 @@ xx_vec2[[2]] <-  c(rep(0,5), rep(1,5))
 xx_vec3     <- rep(list(NULL),2)
 xx_vec3[[1]] <-  c(rep(0,4), rep(1,5))
 
+xx_vec4      <- rep(list(NULL),3)
+xx_vec4[[1]] <-  c(rep(0,5), rep(1,5))
 
 beta7      <- rep(list(NULL), 3)
 beta7[[2]] <- matrix(c(-1,
@@ -67,6 +69,12 @@ beta7[[2]] <- matrix(c(-1,
 beta7[[3]] <- matrix(c(-0.1,
                        0.2,
                        0.2), byrow = TRUE, ncol = 1)
+
+beta8      <- rep(list(NULL), 3)
+beta8[[1]] <- matrix(c(0.5, 1.0,
+                      -0.5, 0.5,
+                      0.0, 1.0), byrow = TRUE, ncol = 2)
+
 xx_vec7      <- rep(list(NULL),3)
 xx_vec7[[2]] <-  c(rep(0,5), rep(1,5))
 xx_vec7[[3]] <-  c(0.1, 0.0, 1.0, 0.5, 1.0, 0.1, 0.5, 1.0, 0.0, 0.5)
@@ -77,14 +85,15 @@ n_dep_cont   <- 2
 emiss_distr_cont <- list(matrix(c( 5, 1,
                               10, 1,
                               15, 1), nrow = m, byrow = TRUE),
-                    matrix(c(0.5, 0.1,
-                             1.0, 0.2,
-                             2.0, 0.1), nrow = m, byrow = TRUE))
+                    matrix(c(0.5, 0.2,
+                             1.0, 0.5,
+                             2.0, 0.3), nrow = m, byrow = TRUE))
 data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_cont),
                       data_distr = 'continuous', gamma = gamma, emiss_distr = emiss_distr_cont,
                       var_gamma = .5, var_emiss = c(.5, 0.01))
+
 data_cont2 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_cont),
-                       data_distr = 'continuous', gamma = gamma, emiss_distr = emiss_distr_cont, xx_vec = xx_vec, beta = beta,
+                       data_distr = 'continuous', gamma = gamma, emiss_distr = emiss_distr_cont, xx_vec = xx_vec4, beta = beta8,
                        var_gamma = .5, var_emiss = c(0, 0), return_ind_par = TRUE)
 # data_cont2$subject_emiss
 
