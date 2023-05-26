@@ -66,9 +66,10 @@
 #'   element of the list contains a \code{m} by \code{m} matrix with the start
 #'   values for gamma. The subsequent elements are matrices with \code{m} rows
 #'   and 2 columns; the first column denoting the mean of state \emph{i} (row
-#'   \emph{i}) and the second column denoting the variance of state \emph{i}
-#'   (row \emph{i}) of the Normal distribution. Note that \code{start_val}
-#'   should not contain nested lists (i.e., lists within lists).
+#'   \emph{i}) and the second column denoting the standard deviation of state
+#'   \emph{i} (row \emph{i}) of the Normal distribution. Note that
+#'   \code{start_val} should not contain nested lists (i.e., lists within
+#'   lists).
 #' @param mcmc List of Markov chain Monte Carlo (MCMC) arguments, containing the
 #'   following elements:
 #'   \itemize{\item{\code{J}: numeric vector with length 1 denoting the number
@@ -110,7 +111,7 @@
 #'   iterations of the hybrid Metropolis within Gibbs sampler. The iterations of
 #'   the sampler are contained in the rows, and the columns contain the subject
 #'   level estimates of subsequently the emission means, the (fixed over subjects)
-#'   emission variances, the transition probabilities and the log likelihood.}
+#'   emission standard deviations, the transition probabilities and the log likelihood.}
 #'   \item{\code{gamma_prob_bar}}{A matrix containing the group level parameter
 #'   estimates of the transition probabilities over the iterations of the hybrid
 #'   Metropolis within Gibbs sampler. The iterations of the sampler are
@@ -150,14 +151,14 @@
 #'   dichotomous covariates.}
 #'   \item{\code{emiss_varmu_bar}}{A list containing one matrix per dependent
 #'   variable, denoting the variance between the subject level means of the
-#'   Normal emision distributions. over the iterations of the Gibbs sampler. The
+#'   Normal emission distributions. over the iterations of the Gibbs sampler. The
 #'   iterations of the sampler are contained in the rows of the matrix, and the
 #'   columns contain the group level variance in the mean.}
-#'   \item{\code{emiss_var_bar}}{A list containing one matrix per dependent
-#'   variable, denoting the (fixed over subjects) variance of the Normal emision
-#'   distributions over the iterations of the Gibbs sampler. The iterations of
-#'   the sampler are contained in the rows of the matrix, and the columns
-#'   contain the group level emission variances.}
+#'   \item{\code{emiss_sd_bar}}{A list containing one matrix per dependent
+#'   variable, denoting the (fixed over subjects) standard deviation of the
+#'   Normal emission distributions over the iterations of the Gibbs sampler. The
+#'   iterations of the sampler are contained in the rows of the matrix, and the
+#'   columns contain the group level emission variances.}
 #'   \item{\code{emiss_cov_bar}}{A list containing one matrix per dependent
 #'   variable, denoting the group level regression coefficients predicting the
 #'   emission means within each of the dependent variables over the iterations
@@ -166,8 +167,8 @@
 #'   coefficients.}
 #'   \item{\code{label_switch}}{A matrix of \code{m} rows and \code{n_dep}
 #'   columns containing the percentage of times the group mean of the emission
-#'   distriubion of state \code{i} was sampled to be a smaller value compared to
-#'   the group mean of of the emission distriubion of state \code{i-1}. If the
+#'   distribution of state \code{i} was sampled to be a smaller value compared to
+#'   the group mean of of the emission distribution of state \code{i-1}. If the
 #'   state dependent means of the emission distributions were given in a ranked
 #'   order (low to high) to both the start values and hyper-priors, a high
 #'   percentage in \code{label_switch} indicates that label switching possibly
@@ -221,9 +222,9 @@
 #' emiss_distr <- list(matrix(c( 5, 1,
 #'                               10, 1,
 #'                               15, 1), nrow = m, byrow = TRUE),
-#'                     matrix(c(0.5, 0.1,
-#'                              1.0, 0.2,
-#'                              2.0, 0.1), nrow = m, byrow = TRUE))
+#'                     matrix(c(0.5, 0.2,
+#'                              1.0, 0.5,
+#'                              2.0, 0.3), nrow = m, byrow = TRUE))
 #'
 #' data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep), data_distr = 'continuous',
 #'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
@@ -442,13 +443,13 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   }
   PD 					  <- matrix(, nrow = J, ncol = n_dep * m * 2 + m * m + 1)
   colnames(PD) 	<- c(paste("dep", rep(1:n_dep, each = m), "_mu", "_S", rep(1:m), sep = ""),
-                     paste("dep", rep(1:n_dep, each = m), "_fixvar", "_S", rep(1:m), sep = ""),
+                     paste("dep", rep(1:n_dep, each = m), "_sd", "_S", rep(1:m), sep = ""),
                      paste("S", rep(1:m, each = m), "toS", rep(1:m, m), sep = ""), "LL")
 
   PD[1, ((n_dep * m * 2 + 1)) :((n_dep * m * 2 + m * m))] <- unlist(sapply(start_val, t))[1:(m*m)]
   for(q in 1:n_dep){
     PD[1, ((q-1) * m + 1):(q * m)] <- start_val[[q + 1]][,1]
-    PD[1, (n_dep * m + (q-1) * m + 1):(n_dep * m + q * m)] <- start_val[[q + 1]][,2]
+    PD[1, (n_dep * m + (q-1) * m + 1):(n_dep * m + q * m)] <- start_val[[q + 1]][,2]^2
   }
 
   PD_subj				<- rep(list(PD), n_subj)
@@ -475,10 +476,10 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
   }
   emiss_varmu_bar			<- rep(list(matrix(, ncol = m, nrow = J, dimnames = list(NULL, c(paste("varmu_", 1:m, sep = ""))))), n_dep)
   names(emiss_varmu_bar) <- dep_labels
-  emiss_var_bar			<- rep(list(matrix(, ncol = m, nrow = J, dimnames = list(NULL, c(paste("var_", 1:m, sep = ""))))), n_dep)
-  names(emiss_var_bar) <- dep_labels
+  emiss_sd_bar			<- rep(list(matrix(, ncol = m, nrow = J, dimnames = list(NULL, c(paste("sd_", 1:m, sep = ""))))), n_dep)
+  names(emiss_sd_bar) <- dep_labels
   for(q in 1:n_dep){
-    emiss_var_bar[[q]][1,] <- PD[1, (n_dep * m + (q-1) * m + 1):(n_dep * m + q * m)]
+    emiss_sd_bar[[q]][1,] <- PD[1, (n_dep * m + (q-1) * m + 1):(n_dep * m + q * m)]
   }
   if(sum(nx[-1]) > n_dep){
     emiss_cov_bar			<- lapply(m * (nx[-1] - 1 ), dif_matrix, rows = J)
@@ -621,7 +622,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
       }
       # Sample subject values for normal emission distribution using Gibbs sampler   ---------
 
-      # population level, conditional probabilities, seperate for each dependent variable
+      # population level, conditional probabilities, separate for each dependent variable
       for(q in 1:n_dep){
         for (s in 1:n_subj){
           ss_subj[s] <- t(matrix(cond_y[[s]][[i]][[q]] - emiss_c_mu[[i]][[q]][s,1], nrow = 1) %*%
@@ -630,7 +631,8 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
         }
         emiss_a_resvar_n <- sum(n_cond_y) / 2 + emiss_a0[[q]][i]
         emiss_b_resvar_n <- (sum(ss_subj) + 2 * emiss_b0[[q]][i]) / 2
-        emiss_c_V[[i]][[q]] <- emiss_var_bar[[q]][iter, i] <- solve(stats::rgamma(1, shape = emiss_a_resvar_n, rate = emiss_b_resvar_n))
+        emiss_c_V[[i]][[q]] <- solve(stats::rgamma(1, shape = emiss_a_resvar_n, rate = emiss_b_resvar_n))
+        emiss_sd_bar[[q]][iter, i] <- sqrt(emiss_c_V[[i]][[q]])
       }
 
       ### sampling subject specific means for the emission distributions, assuming known mean and var, see Lynch p. 244
@@ -640,7 +642,8 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
           emiss_mu0_subj_n  <- (emiss_V_mu[[i]][[q]] * sum(cond_y[[s]][[i]][[q]]) +  emiss_c_V[[i]][[q]] * c(t(emiss_c_mu_bar[[i]][[q]]) %*% xx[[q+1]][s,])) /
             (n_cond_y[s] * emiss_V_mu[[i]][[q]] + emiss_c_V[[i]][[q]])
           emiss[[s]][[q]][i,1] <- PD_subj[[s]][iter, ((q - 1) * m + i)] <- emiss_c_mu[[i]][[q]][s,1] <- rnorm(1, emiss_mu0_subj_n, sqrt(emiss_c_V_subj))
-          emiss[[s]][[q]][i,2] <- PD_subj[[s]][iter, (n_dep * m + (q - 1) * m + i)] <- emiss_c_V[[i]][[q]]
+          emiss[[s]][[q]][i,2] <- emiss_c_V[[i]][[q]]
+          PD_subj[[s]][iter, (n_dep * m + (q - 1) * m + i)] <- sqrt(emiss_c_V[[i]][[q]])
         }
       }
     }
@@ -684,7 +687,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
                 gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
                 emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
                 emiss_mu_bar = emiss_mu_bar, gamma_naccept = gamma_naccept,
-                emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar,
+                emiss_varmu_bar = emiss_varmu_bar, emiss_sd_bar = emiss_sd_bar,
                 sample_path = sample_path, label_switch = label_switch)
   } else {
     out <- list(input = list(m = m, n_dep = n_dep, J = J,
@@ -693,7 +696,7 @@ mHMM_cont <- function(s_data, gen, xx = NULL, start_val, emiss_hyp_prior, mcmc, 
                 gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar,
                 emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
                 emiss_mu_bar = emiss_mu_bar, gamma_naccept = gamma_naccept,
-                emiss_varmu_bar = emiss_varmu_bar, emiss_var_bar = emiss_var_bar,
+                emiss_varmu_bar = emiss_varmu_bar, emiss_sd_bar = emiss_sd_bar,
                 label_switch = label_switch)
   }
   class(out) <- append(class(out), "mHMM_cont")

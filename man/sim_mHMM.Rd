@@ -62,8 +62,8 @@ distribution(s). That is, the probability of observing category \emph{q}
 (column \emph{q}) in state \emph{i} (row \emph{i}). If \code{data_distr =
 'continuous'}, each element is a matrix with \code{m} rows and 2 columns;
 the first column denoting the mean of state \emph{i} (row \emph{i}) and the
-second column denoting the variance of state \emph{i} (row \emph{i}) of the
-Normal distribution.}
+second column denoting the standard deviation of state \emph{i}
+(row \emph{i}) of the Normal distribution.}
 
 \item{start_state}{Optional numeric vector with length 1 denoting in which
 state the simulated state sequence should start. If left unspecified, the
@@ -303,9 +303,9 @@ gamma   <- matrix(c(0.8, 0.1, 0.1,
 emiss_distr <- list(matrix(c( 5, 1,
                              10, 1,
                              15, 1), nrow = m, byrow = TRUE),
-                     matrix(c(0.5, 0.1,
-                              1.0, 0.2,
-                              2.0, 0.1), nrow = m, byrow = TRUE))
+                     matrix(c(0.5, 0.2,
+                              1.0, 0.5,
+                              2.0, 0.3), nrow = m, byrow = TRUE))
 
 data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep),
                       data_distr = 'continuous', gamma = gamma, emiss_distr = emiss_distr,

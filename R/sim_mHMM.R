@@ -87,8 +87,8 @@
 #'   (column \emph{q}) in state \emph{i} (row \emph{i}). If \code{data_distr =
 #'   'continuous'}, each element is a matrix with \code{m} rows and 2 columns;
 #'   the first column denoting the mean of state \emph{i} (row \emph{i}) and the
-#'   second column denoting the variance of state \emph{i} (row \emph{i}) of the
-#'   Normal distribution.
+#'   second column denoting the standard deviation of state \emph{i}
+#'   (row \emph{i}) of the Normal distribution.
 #' @param xx_vec List of 1 + \code{n_dep} vectors containing the covariate(s) to
 #'   predict the transition probability matrix \code{gamma} and/or (specific)
 #'   emission distribution(s) \code{emiss_distr} using the regression parameters
@@ -260,9 +260,9 @@
 #' emiss_distr <- list(matrix(c( 5, 1,
 #'                              10, 1,
 #'                              15, 1), nrow = m, byrow = TRUE),
-#'                      matrix(c(0.5, 0.1,
-#'                               1.0, 0.2,
-#'                               2.0, 0.1), nrow = m, byrow = TRUE))
+#'                      matrix(c(0.5, 0.2,
+#'                               1.0, 0.5,
+#'                               2.0, 0.3), nrow = m, byrow = TRUE))
 #'
 #' data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep),
 #'                       data_distr = 'continuous', gamma = gamma, emiss_distr = emiss_distr,
@@ -484,7 +484,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
       } else if (data_distr == "continuous"){
         for(i in 1:n_dep){
           obs[((j-1) * n_t + 1), (1+i)] <- rnorm(1, mean = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],1],
-                                                 sd = sqrt(sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],2]))
+                                                 sd = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],2])
         }
       }
       for(t in 2:n_t){
@@ -496,7 +496,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
         } else if (data_distr == "continuous"){
           for(i in 1:n_dep){
             obs[((j-1) * n_t + t), (1+i)] <- rnorm(1, mean = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],1],
-                                                   sd = sqrt(sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],2]))
+                                                   sd = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],2])
           }
         }
       }

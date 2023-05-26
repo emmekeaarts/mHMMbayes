@@ -19,8 +19,8 @@ summary.mHMM_cont <- function(object, ...){
   EM_pop <- vector("list", n_dep)
   names(EM_pop) <- dep_labels
   for(i in 1:n_dep){
-    EM_pop[[i]] <- matrix(round(c(apply(object$emiss_mu_bar[[i]][((burn_in + 1): J),], 2, median), apply(object$emiss_var_bar[[i]][((burn_in + 1): J),], 2, median)),3), ncol = 2, nrow = m)
-    colnames(EM_pop[[i]]) <- c("Mean", "Variance")
+    EM_pop[[i]] <- matrix(round(c(apply(object$emiss_mu_bar[[i]][((burn_in + 1): J),], 2, median), apply(object$emiss_sd_bar[[i]][((burn_in + 1): J),], 2, median)),3), ncol = 2, nrow = m)
+    colnames(EM_pop[[i]]) <- c("Mean", "SD")
     rownames(EM_pop[[i]]) <- paste("State", 1:m)
   }
   print(EM_pop)

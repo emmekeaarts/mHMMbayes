@@ -48,10 +48,11 @@ value) and set of regression coefficients (subsequent values) are based.}
 
 \item{emiss_V}{A list containing \code{n_dep} elements corresponding to each
 of the dependent variables \code{k}, where each element \code{k} is a
-vector with length \code{m} containing the hypothesized variance of the
-Inverse Gamma hyper-prior distribution on the between subject variance of
-the emission distribution means (note: here, the Inverse Gamma hyper-prior
-distribution is parametrized as a scaled inverse chi-squared distribution).}
+vector with length \code{m} containing the hypothesized variance between
+the subject (emission distribution) means, which are assumed to follow a
+Inverse Gamma hyper-prior distribution (note: here, the Inverse Gamma
+hyper-prior distribution is parametrized as a scaled inverse chi-squared
+distribution).}
 
 \item{emiss_nu}{A list containing \code{n_dep} elements corresponding to each
 dependent variable \code{k}. Each element \code{k} is a numeric vector with
