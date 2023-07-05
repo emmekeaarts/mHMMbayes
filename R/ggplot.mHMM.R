@@ -52,7 +52,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         ggplot2::scale_linetype_discrete(name = "level", labels = c("group", "subject"))+
         ggplot2::scale_color_discrete(name = "", labels = paste0("to S", 1:m))+
         ggplot2::facet_grid(~from_state, labeller = as_labeller(function(string, prefix = "from") paste(prefix, string))) +
-        ggplot2::guides(alpha = "none", size = "none") +
+        ggplot2::guides(alpha = "none", linewidth = "none") +
         ggplot2::theme_bw()+
         ggplot2::theme(panel.spacing.x = unit(4, "mm"),
                        legend.position = "bottom",
@@ -130,11 +130,13 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         ggplot2::scale_linetype_discrete(name = "level", labels = c("group", "subject"))+
         ggplot2::scale_color_discrete(name = "", labels = cat_lab) +
         ggplot2::facet_grid(~state, labeller = as_labeller(function(string, prefix = paste0(dep_lab, ", ")) paste(prefix, string))) +
-        ggplot2::guides(alpha = "none", size = "none") +
+        ggplot2::guides(alpha = "none", linewidth = "none") +
         ggplot2::theme_bw()+
         ggplot2::theme(panel.spacing.x = unit(4, "mm"),
               legend.position = "bottom",
-              axis.text.y = element_blank()
+              axis.text.y = element_blank(),
+              axis.ticks.y = element_line(),
+              axis.ticks.y = element_line()
         ) +
         ggplot2::labs(x = "conditional probability")
 
