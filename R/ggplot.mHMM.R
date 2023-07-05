@@ -35,8 +35,8 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
       peak <- gg %>% dplyr::select(where(is.numeric)) %>% apply(2, function(x) stats::density(x)$y) %>% max()
       # subject level gamma
       sg <- object$PD_subj %>% purrr::map(
-        ~ tibble::as_tibble(.x) %>% dplyr::select(tidyselect::starts_with("S"))
-      )  %>% dplyr::slice(burn_in:J) %>% dplyr::bind_rows(.id="id")
+        ~ tibble::as_tibble(.x) %>% dplyr::select(tidyselect::starts_with("S")) %>% dplyr::slice(burn_in:J)
+      ) %>% dplyr::bind_rows(.id="id")
       # structure df for plotting
       df <- rbind(sg, gg) %>%
         tidyr::pivot_longer(cols = !id, names_to = "class", values_to = "value") %>%
