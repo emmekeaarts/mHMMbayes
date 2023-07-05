@@ -116,7 +116,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
       )  %>% dplyr::bind_rows(.id="id") %>% magrittr::set_colnames(colnames(ge))
 
       # structure df for plotting
-      df <- rbind(se, gg) %>%
+      df <- rbind(se, ge) %>%
         tidyr::pivot_longer(cols = !id, names_to = "class", values_to = "value") %>%
         dplyr::mutate(category = stringr::str_split(class, "_", simplify = T)[,1],
                state = stringr::str_split(class, "_", simplify = T)[,2],
