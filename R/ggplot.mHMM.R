@@ -27,7 +27,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
 
   # if plotting gamma
   if(component == "gamma"){
-    # if ggplot2 and dplyr is available
+    # if ggplot2 and dplyr are available
     if(nzchar(system.file(package = "ggplot2")) && nzchar(system.file(package = "dplyr"))){
       # group level gamma
       gg <- object$gamma_prob_bar %>% tibble::as_tibble() %>% dplyr::slice(burn_in:J) %>% dplyr::mutate(id = "group")
@@ -104,7 +104,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
     if (missing(dep_lab)){
       dep_lab <- input$dep_labels[dep]
     }
-    # if ggplot2 and dplyr is available
+    # if ggplot2 and dplyr are available
     if(nzchar(system.file(package = "ggplot2")) && nzchar(system.file(package = "dplyr"))){
       # group level emission
       ge <- object$emiss_prob_bar[[dep]] %>% tibble::as_tibble() %>% dplyr::slice(burn_in:J) %>% dplyr::mutate(id = "group") %>% dplyr::relocate(id)
