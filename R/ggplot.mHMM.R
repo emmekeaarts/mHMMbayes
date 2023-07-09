@@ -40,7 +40,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
       # structure df for plotting
       df <- rbind(sg, gg) %>%
         tidyr::pivot_longer(cols = !id, names_to = "class", values_to = "value") %>%
-        mutate(from_state = stringr::str_split(class, "to", simplify = T)[,1],
+        dplyr::mutate(from_state = stringr::str_split(class, "to", simplify = T)[,1],
                to_state = stringr::str_split(class, "to", simplify = T)[,2],
                lty = as.factor(ifelse(id == "group", 1, 2)))
       # create plots
