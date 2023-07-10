@@ -8,7 +8,11 @@ Imports:
     mvtnorm,
     stats,
     Rdpack,
-    Rcpp
+    Rcpp,
+    ggplot2,
+    dplyr,
+    tidyr,
+    purrr
 Authors@R: c(person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
                   role = c("aut", "cre")),
              person("Sebastian", "Mildiner Moraga", role = "ctb"))      
