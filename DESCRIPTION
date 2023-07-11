@@ -8,11 +8,7 @@ Imports:
     mvtnorm,
     stats,
     Rdpack,
-    Rcpp,
-    ggplot2,
-    dplyr,
-    tidyr,
-    purrr
+    Rcpp
 Authors@R: c(person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
                   role = c("aut", "cre")),
              person("Sebastian", "Mildiner Moraga", role = "ctb"))      
@@ -45,7 +41,11 @@ Suggests:
     alluvial,
     grDevices,
     RColorBrewer,
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    ggplot2,
+    dplyr,
+    tidyr,
+    purrr
 VignetteBuilder: knitr
 RdMacros: Rdpack
 SystemRequirements: GNU make

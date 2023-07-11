@@ -135,7 +135,6 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         ggplot2::theme(panel.spacing.x = unit(4, "mm"),
               legend.position = "bottom",
               axis.text.y = element_blank(),
-              axis.ticks.y = element_line(),
               axis.ticks.y = element_line()
         ) +
         ggplot2::labs(x = "conditional probability")
