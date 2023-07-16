@@ -28,7 +28,6 @@ summary.mHMM <- function(object, ...){
 
       ) %>%
       dplyr::relocate(Beta, .after = To_state)
-
     cat("Regression coefficients predicting the transition probabilities","\n",  "(at the group level):", "\n", "\n")
     print(regr_coeff_gamma, row.names = F)
     cat("Note: [*] 95% credible interval does not include zero.")
@@ -58,7 +57,6 @@ summary.mHMM <- function(object, ...){
         ) %>%
         dplyr::relocate(Beta, .after = State)
     }
-
     cat("Regression coefficients predicting the emission probabilities for each of the dependent variables","\n",  "(at the group level):", "\n", "\n")
     print(regr_coeff_emiss, row.names = F)
     cat("Note: [*] 95% credible interval does not include zero.")
@@ -67,4 +65,4 @@ summary.mHMM <- function(object, ...){
 }
 
 
-globalVariables(c("quantile", "CrI_lower", "CrI_upper", "Beta", "To_state", "State"))
+utils::globalVariables(c("quantile", "CrI_lower", "CrI_upper", "Beta", "To_state", "State"))
