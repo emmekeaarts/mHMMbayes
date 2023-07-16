@@ -1,15 +1,3 @@
-
-
-
-# 1) first add the type of covariates  in the output of the main function
-
-
-# 2) summary.HMM needs to add betas under each gamma and emiss (if covariates are used ... : )
-
-
-# 3) function outputs a predicted probability conditioned on certain value of covariates
-
-
 #' Compute predicted transition/emission probabilities given certain values of covariates
 #'
 #'
@@ -64,6 +52,7 @@ pred_probs <- function(object, covariate, component = "gamma", dep = 1, cat_lab,
         res[[i]] <- pred_tr2
       }
     res <- purrr::list_rbind(res)
+    # if predict emiss
   } else if (component == "emiss"){
     if (missing(cat_lab)){
       cat_lab <- paste("Category", 1:q_emiss[dep])
@@ -80,7 +69,7 @@ pred_probs <- function(object, covariate, component = "gamma", dep = 1, cat_lab,
 
       reg_mat <- exp(int_mat + cov_mat)
       res[[c]] <- as.data.frame(t(apply(reg_mat, 1, function(x) x / as.vector(x%*% c(rep(1, length(x))))))) %>%
-        dplyr::rename_with(~paste0("Category", 1:q_emiss[dep]))%>%
+        dplyr::rename_with(~paste0("Category", 1:q_emiss[dep])) %>%
         dplyr::mutate(
           State = paste0("State", 1:m),
           covariate = covariate[c]
@@ -88,19 +77,23 @@ pred_probs <- function(object, covariate, component = "gamma", dep = 1, cat_lab,
         dplyr::relocate(State, covariate, .before = Category1)
     }
     res <- purrr::list_rbind(res)
-    cat("Dependent variable:", dep_lab, "\n")
+    #cat("Dependent variable:", dep_lab, "\n")
   }
   return(res)
 }
 
+utils::globalVariables(c("From_state", "To_state_1", "Category1"))
 
-pred_probs(object, h)
 
-pred_probs(object, 0.4)
+# try out
 
-pred_probs(object, covariate= h, component = "emiss", dep = 1)
-
-pred_probs(object, covariate= 0.3)
+# pred_probs(object, h)
+#
+# pred_probs(object, 0.4)
+#
+# pred_probs(object, covariate= h, component = "emiss", dep = 1)
+#
+# pred_probs(object, covariate= 0.3)
 
 
 # map_dfr(h, ~pred_prob(object, x = .x, component = "emiss"))
@@ -109,13 +102,5 @@ pred_probs(object, covariate= 0.3)
 #
 # map_dfr(h, ~pred_prob(object, x = .x))
 # pred_prob(object, x = h)
-
-# - include * when interval does not include zero
-# - From_state, To_state, Beta, credibility intervals, and starts for summary statistics
-# - depends on covariate type (dichotomous / continuous covariates)
-
-
-# 4) use sim function to create simulated data
-
 
 
