@@ -11,6 +11,7 @@
 #' the user has to indicate a specific dependent variable, see \code{dep}.
 #' @param dep Integer specifying for which dependent variable the predicted e
 #' mission probabilities are computed.
+#' @export
 
 pred_probs <- function(object, covariate, component = "gamma", dep = 1, cat_lab, dep_lab,...){
   if (!is.mHMM(object)){

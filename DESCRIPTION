@@ -45,7 +45,10 @@ Suggests:
     ggplot2,
     dplyr,
     tidyr,
-    purrr
+    purrr,
+    stringr,
+    tibble,
+    tidyselect
 VignetteBuilder: knitr
 RdMacros: Rdpack
 SystemRequirements: GNU make

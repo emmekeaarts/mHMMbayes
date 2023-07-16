@@ -3,10 +3,12 @@
 # w = xx_emiss[[1]][,2]
 # covariate <- w
 
-v = sample(c(0,1), object$input$n_subj, replace = T)
-covariate <- v
+# v = sample(c(0,1), object$input$n_subj, replace = T)
+# covariate <- v
 
 #' @param covariate A numeric vector specifying the values of a single covariate.
+#' @export
+
 plot_pred <- function(object, component = "gamma", covariate, dep = 1, cat_lab, dep_lab, ...) {
   input   <- object$input
   dep_labels <- input$dep_labels
@@ -45,7 +47,7 @@ plot_pred <- function(object, component = "gamma", covariate, dep = 1, cat_lab, 
       ggplot2::geom_point(data = gg_subj, ggplot2::aes(x = covariate, y = prob, color = To_state), alpha = 0.1, size = 0.3) +
       ggplot2::labs(x = "Covariate", y = "Transition probability", title = "Predicted transition probability per covariate value", color = "To state") +
       ggplot2::ylim(0,1) +
-      ggplot2::facet_grid(~From_state, labeller = as_labeller(function(string, prefix = "From") paste(prefix, string))) +
+      ggplot2::facet_grid(~From_state, labeller = ggplot2::as_labeller(function(string, prefix = "From") paste(prefix, string))) +
       ggplot2::theme_bw()+
       ggplot2::theme(legend.position = "bottom")
 
@@ -55,7 +57,7 @@ plot_pred <- function(object, component = "gamma", covariate, dep = 1, cat_lab, 
         ggplot2::geom_jitter(data = gg_subj, ggplot2::aes(x = factor(covariate), y = prob, color = To_state), alpha = 0.1, size = 0.3) +
         ggplot2::labs(x = "Covariate", y = "Transition probability", title = "Predicted transition probability per covariate value", color = "To state") +
         ggplot2::ylim(0,1) +
-        ggplot2::facet_grid(~From_state, labeller = as_labeller(function(string, prefix = "From") paste(prefix, string))) +
+        ggplot2::facet_grid(~From_state, labeller = ggplot2::as_labeller(function(string, prefix = "From") paste(prefix, string))) +
         ggplot2::theme_bw()+
         ggplot2::theme(legend.position = "bottom")
 
@@ -93,7 +95,7 @@ plot_pred <- function(object, component = "gamma", covariate, dep = 1, cat_lab, 
     plot <- if(covar_type_emiss == "continuous"){
       ggplot2::ggplot(preds, ggplot2::aes(x = covariate, y = prob, color = Category)) +
       ggplot2::geom_line() +
-      ggplot2::geom_point(data = gg_subj, aes(x = covariate, y = prob, color = Category),
+      ggplot2::geom_point(data = gg_subj, ggplot2::aes(x = covariate, y = prob, color = Category),
                  alpha = 0.1, size = 0.3) +
       ggplot2::labs(x = "Covariate", y = "Emission probability", title = "Predicted emission probability per covariate value") +
       ggplot2::ylim(0,1) +
@@ -104,7 +106,7 @@ plot_pred <- function(object, component = "gamma", covariate, dep = 1, cat_lab, 
     } else if(covar_type_emiss == "dichotomous") {
       ggplot2::ggplot(preds, ggplot2::aes(x = factor(covariate), y = prob, color = Category)) +
         ggplot2::geom_boxplot(outlier.size = 0.5, outlier.alpha=0.3, size = 0.3) +
-        ggplot2::geom_jitter(data = gg_subj, aes(x = factor(covariate), y = prob, color = Category), alpha = 0.1, size = 0.3) +
+        ggplot2::geom_jitter(data = gg_subj, ggplot2::aes(x = factor(covariate), y = prob, color = Category), alpha = 0.1, size = 0.3) +
         ggplot2::labs(x = "Covariate", y = "Emission probability", title = "Predicted emission probability per covariate value", color = "To state") +
         ggplot2::ylim(0,1) +
         ggplot2::facet_grid(~State) +
@@ -114,6 +116,8 @@ plot_pred <- function(object, component = "gamma", covariate, dep = 1, cat_lab, 
   }
   return(plot)
 }
+
+utils::globalVariables(c("subject", "states", "prob", "cats", "Category"))
 
 
 # plot_pred(object, covariate = w)
