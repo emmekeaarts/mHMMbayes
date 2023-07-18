@@ -22,3 +22,4 @@ Meta
 # Output files from R CMD check
 /*.Rcheck/
 .DS_Store
+.DS_Store
