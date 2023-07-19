@@ -276,7 +276,7 @@ test_that("output gamma_prob_bar", {
 
 test_that("output input", {
   # test output dimensions
-  expect_equal(length(out_2st_simb$input), 9)
+  expect_equal(length(out_2st_simb$input), 10)
   # test correct output
   expect_equal(out_2st_simb$input[[1]], m)
   expect_equal(out_2st_simb$input[[2]], n_dep)
