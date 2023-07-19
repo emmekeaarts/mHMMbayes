@@ -113,12 +113,13 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
   return(plot)
 }
 
-utils::globalVariables(c("subject", "states", "prob", "cats", "Category", "covariate"))
-
-
-plot_pred(object, covariate = w)
-plot_pred(object, covariate = v)
-
-plot_pred(object, covariate = w, component = "emiss")
-plot_pred(object, covariate = v, component = "emiss")
-
+utils::globalVariables(c("subject", "prob", "Category", "covariate"))
+#
+#
+# plot_pred(object, covariate = w)
+# plot_pred(object, covariate = v)
+#
+# plot_pred(object, covariate = w, component = "emiss")
+# plot_pred(object, covariate = v, component = "emiss")
+#
+# pred_probs(object)

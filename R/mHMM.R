@@ -311,7 +311,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   n_subj     <- length(id)
   subj_data  <- rep(list(NULL), n_subj)
   dep_labels <- colnames(s_data[,2:(n_dep+1)])
-  if(is.na(dep_labels)||is.null(dep_labels)) dep_labels <- paste0("DV_", 1:n_dep)
+  if(any(is.na(dep_labels))||any(is.null(dep_labels))) dep_labels <- paste0("DV_", 1:n_dep)
   if(sum(sapply(s_data, is.factor)) > 0 ){
     stop("Your data contains factorial variables, which cannot be used as input in the function mHMM. All variables have to be numerical.")
   }

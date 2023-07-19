@@ -18,7 +18,7 @@
 #'
 #' @export
 
-pred_probs <- function(object, component = "gamma", dep = 1, print.df = TRUE,...){
+pred_probs <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, print.df = TRUE,...){
   if (!is.mHMM(object)){
     stop("The input object should be from the class mHMM, obtained with the function mHMM.")
   }
@@ -53,8 +53,8 @@ pred_probs <- function(object, component = "gamma", dep = 1, print.df = TRUE,...
         pred_tr2[[c]] <- pred_tr |>
           dplyr::rename_with(~paste0("To_state_", 1:m)) |>
           dplyr::mutate(From_state = paste("State", i),
-                        covariate = covar_gamma[c]) |>
-          dplyr::relocate(From_state, covariate, .before = To_state_1)
+                        Covariate = covar_gamma[c]) |>
+          dplyr::relocate(From_state, Covariate, .before = To_state_1)
         }
         pred_tr2 <- purrr::list_rbind(pred_tr2)
         res[[i]] <- pred_tr2
@@ -63,7 +63,12 @@ pred_probs <- function(object, component = "gamma", dep = 1, print.df = TRUE,...
 
     # if predict emiss
   } else if (component == "emiss"){
-    dep_lab <- input$dep_labels[dep]
+    if (missing(cat_lab)){
+      cat_lab <- paste("Category", 1:q_emiss[dep])
+    }
+    if (missing(dep_lab)){
+      dep_lab <- input$dep_labels[dep]
+    }
     int <- object$emiss_int_bar[[dep]]
     cov <- object$emiss_cov_bar[[dep]]
     res <- list()
@@ -73,12 +78,12 @@ pred_probs <- function(object, component = "gamma", dep = 1, print.df = TRUE,...
 
       reg_mat <- exp(int_mat + cov_mat)
       res[[c]] <- as.data.frame(t(apply(reg_mat, 1, function(x) x / as.vector(x%*% c(rep(1, length(x))))))) |>
-        dplyr::rename_with(~paste("Category", 1:q_emiss[dep])) |>
+        dplyr::rename_with(~cat_lab) |>
         dplyr::mutate(
           State = paste("State", 1:m),
-          covariate = covar_emiss[c]
+          Covariate = covar_emiss[c]
         ) |>
-        dplyr::relocate(State, covariate)
+        dplyr::relocate(State, Covariate)
     }
     if(print.df == TRUE) res <- purrr::list_rbind(res)
     cat("Dependent variable:", dep_lab, "\n")
@@ -86,4 +91,4 @@ pred_probs <- function(object, component = "gamma", dep = 1, print.df = TRUE,...
   return(res)
 }
 
-utils::globalVariables(c("Covariate"))
+utils::globalVariables(c("From_state", "To_state_1", "Category 1"))
