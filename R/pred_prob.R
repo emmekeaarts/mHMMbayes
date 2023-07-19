@@ -11,9 +11,11 @@
 #'    the user has to indicate a specific dependent variable, see \code{dep}.
 #' @param dep Integer specifying for which dependent variable the predicted e
 #'    mission probabilities are computed.
-#' @param print.df Logical argument specifying whether the output should be
-#'    returned as a   dataframe (`TRUE`) or lists (`FALSE`). Default is `TRUE`.
+#' @param print.df A logical argument specifying whether the output should be
+#'    returned as a dataframe (`TRUE`) or lists (`FALSE`). Default is `TRUE`.
 #'
+#' @return Either a dataframe or lists of dataframes containing predicted
+#'    transition/emission probabilities.
 #' @export
 
 pred_probs <- function(object, covariate, component = "gamma", dep = 1, cat_lab, dep_lab, print.df = TRUE,...){
@@ -74,12 +76,12 @@ pred_probs <- function(object, covariate, component = "gamma", dep = 1, cat_lab,
 
       reg_mat <- exp(int_mat + cov_mat)
       res[[c]] <- as.data.frame(t(apply(reg_mat, 1, function(x) x / as.vector(x%*% c(rep(1, length(x))))))) |>
-        dplyr::rename_with(~paste0("Category", 1:q_emiss[dep])) |>
+        dplyr::rename_with(~paste("Category", 1:q_emiss[dep])) |>
         dplyr::mutate(
-          State = paste0("State", 1:m),
+          State = paste("State", 1:m),
           covariate = covariate[c]
         ) |>
-        dplyr::relocate(State, covariate, .before = Category1)
+        dplyr::relocate(State, covariate, .before = "Category 1")
     }
     if(print.df == TRUE) res <- purrr::list_rbind(res)
     #cat("Dependent variable:", dep_lab, "\n")
@@ -87,4 +89,4 @@ pred_probs <- function(object, covariate, component = "gamma", dep = 1, cat_lab,
   return(res)
 }
 
-utils::globalVariables(c("From_state", "To_state_1", "Category1"))
+utils::globalVariables(c("From_state", "To_state_1", "Category 1"))
