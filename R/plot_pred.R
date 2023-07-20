@@ -88,13 +88,12 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
     # prepare emiss predicted values
     preds <- purrr::quietly(pred_probs)(object, component = "emiss", dep = dep)$result |>
       tidyr::pivot_longer(!c(State, covariate), names_to = "Category", values_to = "prob")
-
     if(covar_type_emiss == "continuous"){
       plot <- ggplot2::ggplot(data = gg_subj, ggplot2::aes(x = covariate, y = prob, color = Category)) +
         ggplot2::geom_point(alpha = 0.6, size = 0.7) +
         ggplot2::geom_line(data = preds) +
-      ggplot2::scale_color_brewer(palette="Accent") +
-      ggplot2::labs(x = "Covariate", y = "Emission probability", title = "Predicted emission probability per covariate value") +
+      ggplot2::scale_color_brewer(palette="Accent", labels = cat_lab) +
+      ggplot2::labs(x = "Covariate", y = "Emission probability", title = paste("Predicted emission probability per covariate value of", dep_lab)) +
       ggplot2::ylim(0,1) +
       ggplot2::facet_grid(~State) +
       common_theme
@@ -103,8 +102,8 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
       plot <- ggplot2::ggplot(data = gg_subj, ggplot2::aes(x = factor(covariate), y = prob, color = Category)) +
         ggplot2::geom_point(alpha = 0.6, size = 0.7) +
         ggplot2::geom_boxplot(data = preds, width = 0.7, size = 0.5) +
-        ggplot2::scale_color_brewer(palette="Accent") +
-        ggplot2::labs(x = "Covariate", y = "Emission probability", title = "Predicted emission probability per covariate value", color = "To state") +
+        ggplot2::scale_color_brewer(palette="Accent", labels = cat_lab) +
+        ggplot2::labs(x = "Covariate", y = "Emission probability", title = paste("Predicted emission probability per covariate value of", dep_lab), color = "To state") +
         ggplot2::ylim(0,1) +
         ggplot2::facet_grid(~State) +
         common_theme
@@ -119,7 +118,7 @@ utils::globalVariables(c("subject", "prob", "Category", "covariate"))
 # plot_pred(object, covariate = w)
 # plot_pred(object, covariate = v)
 #
-# plot_pred(object, covariate = w, component = "emiss")
+# plot_pred(object, covariate = w, component = "emiss", cat_lab=c("a", "b", "c", "d"), dep_lab = "aabbcc")
 # plot_pred(object, covariate = v, component = "emiss")
 #
 # pred_probs(object)
