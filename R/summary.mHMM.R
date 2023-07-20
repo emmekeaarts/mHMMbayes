@@ -1,5 +1,8 @@
 #' Summary of a \code{mHMM} object
 #'
+#' @param object A \code{mHMM} object.
+#' @param ... Other parameters passed down to \code{summary()}.
+#'
 #' @export
 
 summary.mHMM <- function(object, ...){
