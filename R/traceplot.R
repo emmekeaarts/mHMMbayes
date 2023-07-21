@@ -68,11 +68,12 @@ traceplot <- function(L, component = "gamma", dep = 1, cat_lab,
       if (nchain <= 1) {
         f <- ggplot2::ggplot(object, ggplot2::aes(x = iteration, y = value))
       } else {
-        f <- ggplot2::ggplot(object, ggplot2::aes(x = iteration, y = value, colour = as.factor(chain)))
+        f <- ggplot2::ggplot(object, ggplot2::aes(x = iteration, y = value,
+                                                  colour = as.factor(chain)))
       }
-      f <- f + ggplot2::geom_line(alpha=0.7, size = 0.3) +
-        ggplot2::facet_wrap(~ states, ncol=2, scales="free") +
-        ggplot2::scale_color_brewer(palette="Set2", name = "Chain") +
+      f <- f + ggplot2::geom_line(alpha = 0.7, size = 0.3) +
+        ggplot2::facet_wrap(~ states, scales = "free") +
+        ggplot2::scale_color_brewer(palette = "Set2", name = "Chain") +
         ggplot2::labs(title = "Parameter estimates of transition probabilities",
                       subtitle = "At the group level", y = "") +
         ggplot2::theme_bw() +
@@ -126,7 +127,8 @@ traceplot <- function(L, component = "gamma", dep = 1, cat_lab,
       object <- purrr::map_dfr(1:length(L), ~ {
         L[[.x]]$emiss_prob_bar[[dep]] |>
           as.data.frame() |>
-          dplyr::rename_with(~stringi::stri_replace_all_regex(.x, pattern = paste0("Emiss", 1:q_emiss[dep]), replacement = cat_lab)) |>
+          dplyr::rename_with(~stringi::stri_replace_all_regex(
+            .x, pattern = paste0("Emiss", 1:q_emiss[dep]), replacement = cat_lab)) |>
           dplyr::mutate(iteration = dplyr::row_number()) |>
           dplyr::slice(-(1:burn_in))
       } , .id="chain") |>
@@ -135,13 +137,15 @@ traceplot <- function(L, component = "gamma", dep = 1, cat_lab,
       if (nchain <= 1) {
         f <- ggplot2::ggplot(object, ggplot2::aes(x = iteration, y = value))
       } else {
-        f <- ggplot2::ggplot(object, ggplot2::aes(x = iteration, y = value, colour = as.factor(chain)))
+        f <- ggplot2::ggplot(object, ggplot2::aes(x = iteration, y = value,
+                                                  colour = as.factor(chain)))
       }
-      f <- f + ggplot2::geom_line(alpha=0.7, size = 0.3) +
-        ggplot2::facet_wrap(~ states, ncol=2, scales="free") +
-        ggplot2::labs(title = dep_lab, y = "") +
+      f <- f + ggplot2::geom_line(alpha = 0.7, size = 0.3) +
+        ggplot2::facet_wrap(~ states, scales = "free") +
         ggplot2::scale_color_brewer(palette="Set2", name = "Chain") +
-        ggplot2::labs(title = paste("Parameter estimates of emission probabilities for", dep_lab), subtitle = "At the group level", y = "") +
+        ggplot2::labs(title = paste("Parameter estimates of emission
+                                    probabilities for", dep_lab),
+                      subtitle = "At the group level", y = "") +
         ggplot2::theme_bw() +
         ggplot2::theme(legend.position = "bottom")
 
