@@ -142,15 +142,32 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
     trans <- as.vector(t(x[[subj_nr]]))
     foo <- data.frame(From, To, trans)
     if(missing(col)){
-      col <- c(rep(grDevices::rainbow(m), eac = m))
+      col <- c(rep(grDevices::rainbow(m), each = m))
     }
     if (missing(hide)){
       hide <- foo$trans == 0
     }
-    alluvial::alluvial(foo[,1:2], freq=foo$trans,
-                       cex = cex,
-                       col = col,
-                       hide = hide, ...)
+    # if ggplot2 is available
+    if(nzchar(system.file(package = "ggplot2"))){
+      plt <- ggplot2::ggplot(foo, ggplot2::aes(axis1 = From, axis2 = To, y = trans)) +
+        ggalluvial::geom_alluvium(ggplot2::aes(fill = From)) +
+        ggplot2::scale_fill_brewer(palette = "Accent") +
+        ggalluvial::geom_stratum() +
+        ggplot2::geom_text(stat = "stratum", ggplot2::aes(
+          label = ggplot2::after_stat(stratum))) +
+        ggplot2::theme_void() +
+        ggplot2::theme(legend.position = "bottom",
+                       plot.title = element_text(hjust = 0.5)) +
+        ggplot2::labs(title= paste0("Transition probabilities for subject", subj_nr))
+      ggplot2:::print.ggplot(plt) %>% suppressWarnings()
+
+      #if ggplot2 is not available, original function follows
+    } else {
+      alluvial::alluvial(foo[,1:2], freq=foo$trans,
+                         cex = cex,
+                         col = col,
+                         hide = hide, ...)
+    }
   } else {
     if(!is.null(subj_nr)){
       warning("The subject number can only be specified when plotting the subject level transition probabilities. Currently, the group level transition probabilities are plotted.")
@@ -161,16 +178,31 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
     trans <- as.vector(t(x))
     foo <- data.frame(From, To, trans)
     if(missing(col)){
-      col <- c(rep(grDevices::rainbow(m), eac = m))
+      col <- c(rep(grDevices::rainbow(m), each = m))
     }
     if (missing(hide)){
       hide <- foo$trans == 0
     }
-    alluvial::alluvial(foo[,1:2], freq=foo$trans,
-                     cex = cex,
-                     col = col,
-                     hide =  hide, ...)
+    # if ggplot2 is available
+    if(nzchar(system.file(package = "ggplot2"))){
+      plt <- ggplot2::ggplot(foo, ggplot2::aes(axis1 = From, axis2 = To, y = trans)) +
+        ggalluvial::geom_alluvium(ggplot2::aes(fill = From)) +
+        ggplot2::scale_fill_brewer(palette = "Accent") +
+        ggalluvial::geom_stratum() +
+        ggplot2::geom_text(stat = "stratum", ggplot2::aes(
+          label = ggplot2::after_stat(stratum))) +
+        ggplot2::theme_void() +
+        ggplot2::theme(legend.position = "bottom",
+                       plot.title = element_text(hjust = 0.5)) +
+        ggplot2::labs(title= "Transition probabilities at the group level")
+      ggplot2:::print.ggplot(plt) %>% suppressWarnings()
+
+      #if ggplot2 is not available, original function follows
+    } else {
+      alluvial::alluvial(foo[,1:2], freq=foo$trans,
+                         cex = cex,
+                         col = col,
+                         hide =  hide, ...)
+    }
   }
 }
-
-
