@@ -15,6 +15,11 @@
 #'     should be plotted. Only required if one wishes to plot the
 #'    emission distribution probabilities and the model is based on multiple
 #'    dependent variables.
+#' @param col Vector of colors for the traceplot lines when using `Base R`.
+#'    The vector should have a length equal to the number of \code{mHMM}
+#'    objects in the list \code{L}. If `ggplot2` is installed, colors are
+#'    already specified by default. However, when using `Base R` and not
+#'    specifying colors, they will be automatically assigned.
 #' @param cat_lab Optional vector of strings when plotting for the emission
 #'    probabilities, denoting the labels of the categorical outcome values.
 #'    Automatically generated when not provided.

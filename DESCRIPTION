@@ -47,6 +47,7 @@ Suggests:
     tidyr,
     purrr,
     stringr,
+    stringi,
     tibble,
     tidyselect
 VignetteBuilder: knitr
