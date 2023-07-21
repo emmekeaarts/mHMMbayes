@@ -33,12 +33,14 @@ summary.mHMM <- function(object, ...){
                     CrI_upper = round(apply(object$gamma_cov_bar[(burn_in + 1): J,],
                                             2, quantile, probs = 0.975),3),
                     ` ` = ifelse(CrI_lower < 0 & CrI_upper > 0, " ", "*"))
-    cat("Regression coefficients predicting the transition probabilities","\n",  "(at the group level):", "\n", "\n")
+    cat("Regression coefficients predicting the transition probabilities","\n",
+        "(at the group level):", "\n", "\n")
     print(regr_coeff_gamma, row.names = F)
     cat("Note: [*] 95% credible interval does not include zero.")
     cat("\n", "\n")
   }
-  cat("Emission distribution for each of the dependent variables","\n",  "(at the group level):", "\n", "\n")
+  cat("Emission distribution for each of the dependent variables","\n",
+      "(at the group level):", "\n", "\n")
   EM_int <- EM_pop <- vector("list", n_dep)
   names(EM_pop) <- dep_labels
   for(i in 1:n_dep){
