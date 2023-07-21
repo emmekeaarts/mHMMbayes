@@ -43,13 +43,16 @@ Suggests:
     RColorBrewer,
     testthat (>= 2.1.0),
     ggplot2,
+    ggalluvial,
     dplyr,
     tidyr,
     purrr,
     stringr,
     stringi,
     tibble,
-    tidyselect
+    tidyselect,
+    rlang,
+    magrittr
 VignetteBuilder: knitr
 RdMacros: Rdpack
 SystemRequirements: GNU make

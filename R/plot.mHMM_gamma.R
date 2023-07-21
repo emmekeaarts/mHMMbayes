@@ -115,7 +115,6 @@
 #'
 #' @export
 
-
 plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
   if (!requireNamespace("alluvial", quietly = TRUE)) {
     stop("Package \"alluvial\" needed for this function to work. Please install it.",
@@ -153,13 +152,13 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
         ggalluvial::geom_alluvium(ggplot2::aes(fill = From)) +
         ggplot2::scale_fill_brewer(palette = "Accent") +
         ggalluvial::geom_stratum() +
-        ggplot2::geom_text(stat = "stratum", ggplot2::aes(
+        ggplot2::geom_text(stat = ggalluvial::StatStratum, ggplot2::aes(
           label = ggplot2::after_stat(stratum))) +
         ggplot2::theme_void() +
         ggplot2::theme(legend.position = "bottom",
-                       plot.title = element_text(hjust = 0.5)) +
+                       plot.title = ggplot2::element_text(hjust = 0.5)) +
         ggplot2::labs(title= paste0("Transition probabilities for subject", subj_nr))
-      ggplot2:::print.ggplot(plt) %>% suppressWarnings()
+      print.ggplot(plt) |> suppressWarnings()
 
       #if ggplot2 is not available, original function follows
     } else {
@@ -189,13 +188,13 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
         ggalluvial::geom_alluvium(ggplot2::aes(fill = From)) +
         ggplot2::scale_fill_brewer(palette = "Accent") +
         ggalluvial::geom_stratum() +
-        ggplot2::geom_text(stat = "stratum", ggplot2::aes(
+        ggplot2::geom_text(stat = ggalluvial::StatStratum, ggplot2::aes(
           label = ggplot2::after_stat(stratum))) +
         ggplot2::theme_void() +
         ggplot2::theme(legend.position = "bottom",
-                       plot.title = element_text(hjust = 0.5)) +
+                       plot.title = ggplot2::element_text(hjust = 0.5)) +
         ggplot2::labs(title= "Transition probabilities at the group level")
-      ggplot2:::print.ggplot(plt) %>% suppressWarnings()
+      print.ggplot(plt) |> suppressWarnings()
 
       #if ggplot2 is not available, original function follows
     } else {
@@ -206,3 +205,6 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
     }
   }
 }
+
+print.ggplot <- utils::getFromNamespace("print.ggplot", "ggplot2")
+utils::globalVariables("stratum")
