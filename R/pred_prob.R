@@ -11,13 +11,14 @@
 #'    mission probabilities are computed.
 #' @param print.df A logical argument specifying whether the output should be
 #'    returned as a dataframe (`TRUE`) or lists (`FALSE`). Default is `TRUE`.
+#' @param ... Other parameters passed down to \code{pred_probs()}.
 #'
 #' @return Either a dataframe or lists of dataframes containing predicted
 #'    transition/emission probabilities.
 #'
 #' @export
 
-pred_probs <- function(object, component = "gamma", dep = 1, print.df = TRUE,...){
+pred_prob <- function(object, component = "gamma", dep = 1, print.df = TRUE,...){
   if (!is.mHMM(object)){
     stop("The input object should be from the class mHMM, obtained with the function mHMM.")
   }
@@ -53,7 +54,7 @@ pred_probs <- function(object, component = "gamma", dep = 1, print.df = TRUE,...
           dplyr::rename_with(~paste0("To_state_", 1:m)) |>
           dplyr::mutate(From_state = paste("State", i),
                         covariate = covar_gamma[c]) |>
-          dplyr::relocate(From_state, covariate, .before = To_state_1)
+          dplyr::relocate(From_state, covariate)
         }
         pred_tr2 <- purrr::list_rbind(pred_tr2)
         res[[i]] <- pred_tr2
@@ -85,4 +86,4 @@ pred_probs <- function(object, component = "gamma", dep = 1, print.df = TRUE,...
   return(res)
 }
 
-utils::globalVariables(c("Covariate"))
+utils::globalVariables(c("Covariate", "From_state"))

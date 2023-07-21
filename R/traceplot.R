@@ -24,9 +24,10 @@
 #' @param burn_in An integer which specifies the number of iterations to discard.
 #'    When left unspecified, the burn in period specified at creating the
 #'    \code{mHMM} object with the function \code{\link{mHMM}} will be used.
+#' @param ... Other parameters passed down to \code{traceplot()}.
 #'
 #' @export
-#'
+
 traceplot <- function(L, component = "gamma", dep = 1, cat_lab,
                            dep_lab, burn_in, ...){
   if(!any(sapply(L, is.mHMM))){

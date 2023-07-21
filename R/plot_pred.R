@@ -13,6 +13,7 @@
 #' @param dep_lab Optional string when plotting the predicted the emission
 #'    probabilities with length 1, denoting the label for the dependent variable
 #'    plotted. Automatically obtained from the input object \code{x} when not specified.
+#' @param ... Other parameters passed down to \code{plot_pred()}.
 #'
 #' @export
 
@@ -48,7 +49,7 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
                                   "To state|From state", "State"))
 
     # prepare emiss predicted value df
-    preds <- pred_probs(object) |>
+    preds <- pred_prob(object) |>
       tidyr::pivot_longer(!c(From_state, covariate), names_to = "To_state",
                           values_to = "prob") |>
       dplyr::mutate(dplyr::across(To_state, stringr::str_replace,
@@ -102,7 +103,7 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
                           names_to = "Category", values_to="prob")
 
     # prepare emiss predicted values
-    preds <- purrr::quietly(pred_probs)(object, component = "emiss", dep = dep)$result |>
+    preds <- purrr::quietly(pred_prob)(object, component = "emiss", dep = dep)$result |>
       tidyr::pivot_longer(!c(State, covariate), names_to = "Category", values_to = "prob")
     if(covar_type_emiss == "continuous"){
       plot <- ggplot2::ggplot(data = gg_subj, ggplot2::aes(
@@ -134,4 +135,4 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
   return(plot)
 }
 
-utils::globalVariables(c("subject", "prob", "Category", "covariate"))
+utils::globalVariables(c("subject", "prob", "Category", "covariate", "From_state"))
