@@ -32,7 +32,7 @@
 #' @export
 
 traceplot <- function(L, component = "gamma", dep = 1, col, cat_lab,
-                           dep_lab, burn_in, ...){
+                      dep_lab, burn_in, ...){
   if(!any(sapply(L, is.mHMM))){
     stop("Every input object of list L should be from the class mHMM, obtained with the function mHMM.")
   }
@@ -56,8 +56,8 @@ traceplot <- function(L, component = "gamma", dep = 1, col, cat_lab,
   } else {col <- col}
   # if plotting gamma
   if(component == "gamma"){
-    # # when ggplot2 & dplyr are available
-    # if(nzchar(system.file(package = "ggplot2")) && nzchar(system.file(package = "dplyr"))){
+    # when ggplot2 is available
+    if(nzchar(system.file(package = "ggplot2"))){
       # extract gamma matrices
       object <- purrr::map_dfr(1:length(L), ~ {
         L[[.x]]["gamma_prob_bar"]|>
@@ -66,7 +66,12 @@ traceplot <- function(L, component = "gamma", dep = 1, col, cat_lab,
           dplyr::mutate(iteration = dplyr::row_number()) |>
           dplyr::slice(-(1:burn_in))
       } , .id="chain") |>
-        tidyr::pivot_longer(!c(chain, iteration), names_to = "states", values_to = "value")
+        tidyr::pivot_longer(!c(chain, iteration), names_to = "states",
+                            values_to = "value") |>
+        dplyr::mutate(dplyr::across(states, stringi::stri_replace_all_regex,
+                                    pattern = c("S", "to"),
+                                    replacement = c("State", " to "),
+                                    vectorize_all=FALSE))
 
       # create traceplots
       if (nchain <= 1) {
@@ -75,50 +80,50 @@ traceplot <- function(L, component = "gamma", dep = 1, col, cat_lab,
         f <- ggplot2::ggplot(object, ggplot2::aes(x = iteration, y = value,
                                                   colour = as.factor(chain)))
       }
-      f <- f + ggplot2::geom_line(alpha = 0.7, size = 0.3) +
-        ggplot2::facet_wrap(~ states, scales = "free") +
+      f + ggplot2::geom_line(alpha = 0.7, size = 0.3) +
+        ggplot2::facet_wrap(~states,  scales = "free", labeller = ggplot2::as_labeller(
+          function(string, prefix = "From") paste(prefix, string))) +
         ggplot2::scale_color_manual(values = col, name = "Chain") +
-        # ggplot2::scale_color_brewer(palette = "Set2", name = "Chain") +
         ggplot2::labs(title = "Parameter estimates of transition probabilities",
                       subtitle = "At the group level", y = "") +
         ggplot2::theme_bw() +
         ggplot2::theme(legend.position = "bottom")
 
-    #   # when ggplot2 is not available, use baseR
-    # } else {
-      # old_par <- graphics::par(no.readonly =TRUE)
-      # on.exit(graphics::par(old_par))
-    #   if (missing(col)){
-    #     state_col <- grDevices::rainbow(m)
-    #   } else {
-    #     state_col <- col
-    #   }
-    #   # specify layout
-    #   graphics::par(mfrow = c(m * m, 1))
-    #   # graphics::par(mfrow = c(2, ceiling(m/2)), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
-    #   f <- for(i in 1:m){
-    #     # find min and max y
-    #     maxy <- miny <- 0
-    #     for(j in 1:m){
-    #       newmax <- max(sapply(L, function(x) max(x$gamma_prob_bar[burn_in:J, m * (i-1) + j])))
-    #       newmin <- min(sapply(L, function(x) min(x$gamma_prob_bar[burn_in:J, m * (i-1) + j])))
-    #       if(newmax > maxy) maxy <- newmax
-    #       if(newmin < miny) miny <- newmin
-    #     }
-    #     for(j in 1:m){
-    #       graphics::plot.default(x = 1, xlim = c(burn_in, J), ylim = c(miny, maxy), type = "n", cex = .8,
-    #                              ylab = "transition probability", xlab = "iteration")
-    #       for(k in 1:nchain){
-    #         graphics::lines(x = burn_in:J, y = L[[k]]$gamma_prob_bar[burn_in:J, m * (i-1) + j],
-    #                         ylab = "transition probability",
-    #                         xlab = "iteration", col = state_col[k])
-    #       }
-    #       graphics::title(main = paste("From state", i, "to State", j))
-    #       graphics::legend("topright", col = state_col, legend = paste("Chain", 1:nchain),
-    #                        bty = 'n', lty = 1, lwd = 2, cex = .8)
-    #     }
-    #   }
-    # }
+      # when ggplot2 is not available, use baseR
+    } else {
+      old_par <- graphics::par(no.readonly =TRUE)
+      on.exit(graphics::par(old_par))
+      if (missing(col)){
+        state_col <- grDevices::rainbow(m)
+      } else {
+        state_col <- col
+      }
+      # specify layout
+      # graphics::par(mfrow = c(m * m, 1))
+      graphics::par(mfrow = c(2, ceiling(m/2)), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
+      for(i in 1:m){
+        # find min and max y
+        maxy <- miny <- 0
+        for(j in 1:m){
+          newmax <- max(sapply(L, function(x) max(x$gamma_prob_bar[burn_in:J, m * (i-1) + j])))
+          newmin <- min(sapply(L, function(x) min(x$gamma_prob_bar[burn_in:J, m * (i-1) + j])))
+          if(newmax > maxy) maxy <- newmax
+          if(newmin < miny) miny <- newmin
+        }
+        for(j in 1:m){
+          graphics::plot.default(x = 1, xlim = c(burn_in, J), ylim = c(miny, maxy), type = "n", cex = .8,
+                                 ylab = "transition probability", xlab = "iteration")
+          for(k in 1:nchain){
+            graphics::lines(x = burn_in:J, y = L[[k]]$gamma_prob_bar[burn_in:J, m * (i-1) + j],
+                            ylab = "transition probability",
+                            xlab = "iteration", col = state_col[k])
+          }
+          graphics::title(main = paste("From state", i, "to State", j))
+          graphics::legend("topright", col = state_col, legend = paste("Chain", 1:nchain),
+                           bty = 'n', lty = 1, lwd = 2, cex = .8)
+        }
+      }
+    }
 
     # if plotting emiss
   } else if (component == "emiss"){
@@ -128,8 +133,8 @@ traceplot <- function(L, component = "gamma", dep = 1, col, cat_lab,
     if (missing(dep_lab)){
       dep_lab <- L[[1]]$input$dep_labels[dep]
     }
-    # # if ggplot2 and dplyr are available
-    # if(nzchar(system.file(package = "ggplot2")) && nzchar(system.file(package = "dplyr"))){
+    # if ggplot2 is available
+    if(nzchar(system.file(package = "ggplot2"))){
       # extract emission prob matrices
       object <- purrr::map_dfr(1:length(L), ~ {
         L[[.x]]$emiss_prob_bar[[dep]] |>
@@ -139,7 +144,10 @@ traceplot <- function(L, component = "gamma", dep = 1, col, cat_lab,
           dplyr::mutate(iteration = dplyr::row_number()) |>
           dplyr::slice(-(1:burn_in))
       } , .id="chain") |>
-        tidyr::pivot_longer(!c(chain, iteration), names_to = "states", values_to = "value")
+        tidyr::pivot_longer(!c(chain, iteration), names_to = "states",
+                            values_to = "value") |>
+        dplyr::mutate(dplyr::across(states, stringr::str_replace, "S", "State "))
+
       # create traceplots
       if (nchain <= 1) {
         f <- ggplot2::ggplot(object, ggplot2::aes(x = iteration, y = value))
@@ -147,47 +155,46 @@ traceplot <- function(L, component = "gamma", dep = 1, col, cat_lab,
         f <- ggplot2::ggplot(object, ggplot2::aes(x = iteration, y = value,
                                                   colour = as.factor(chain)))
       }
-      f <- f + ggplot2::geom_line(alpha = 0.7, size = 0.3) +
+      f + ggplot2::geom_line(alpha = 0.7, size = 0.3) +
         ggplot2::facet_wrap(~ states, scales = "free") +
         ggplot2::scale_color_manual(values = col, name = "Chain") +
-        # ggplot2::scale_color_brewer(palette="Set2", name = "Chain") +
-        ggplot2::labs(title = paste("Parameter estimates of emission probabilities for", dep_lab), subtitle = "At the group level", y = "") +
+        ggplot2::labs(title = paste("Parameter estimates of emission probabilities for",
+                                    dep_lab), subtitle = "At the group level", y = "") +
         ggplot2::theme_bw() +
         ggplot2::theme(legend.position = "bottom")
 
-    #   # if ggplot2 is not available, use baseR
-    # } else {
-      # old_par <- graphics::par(no.readonly =TRUE)
-      # on.exit(graphics::par(old_par))
-    #   # specify layout
-    #   graphics::par(mfrow = c(m * q_emiss[dep], 1))
-    #
-    #   f <- for(i in 1:m){
-    #     # find min and max y
-    #     maxy <- miny <- 0
-    #     for(q in 1:q_emiss[dep]){
-    #       newmax <- max(sapply(L, function(x) max(x$emiss_prob_bar[[dep]]
-    #                                               [burn_in:J,q_emiss[dep] * (i-1) + q])))
-    #       newmin <- min(sapply(L, function(x) min(x$emiss_prob_bar[[dep]]
-    #                                               [burn_in:J,q_emiss[dep] * (i-1) + q])))
-    #       if(newmax > maxy) maxy <- newmax
-    #       if(newmin < miny) miny <- newmin
-    #     }
-    #     for(q in 1:q_emiss[dep]){
-    #       graphics::plot.default(x = 1, ylim = c(miny, maxy), xlim = c(burn_in, J), type = "n", cex = .8,
-    #                              ylab = "emission probability", xlab = "iteration")
-    #       for(k in 1:nchain){
-    #         graphics::lines(x = burn_in:J, y = L[[k]]$emiss_prob_bar[[dep]]
-    #                         [burn_in:J, (i-1) * q_emiss[dep] +q], col = state_col[k])
-    #       }
-    #       graphics::title(main = paste(dep_lab, cat_lab[q], "in State", i))
-    #       graphics::legend("topright", col = state_col, legend = paste("Chain", 1:nchain),
-    #                        bty = 'n', lty = 1, lwd = 2, cex = .8)
-    #     }
-    #   }
-    # }
+      # if ggplot2 is not available, use baseR
+    } else {
+      old_par <- graphics::par(no.readonly =TRUE)
+      on.exit(graphics::par(old_par))
+      # specify layout
+      # graphics::par(mfrow = c(m * q_emiss[dep], 1))
+      graphics::par(mfrow = c(2, ceiling(m/2)), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
+
+      for(i in 1:m){
+        # find min and max y
+        maxy <- miny <- 0
+        for(q in 1:q_emiss[dep]){
+          newmax <- max(sapply(L, function(x) max(x$emiss_prob_bar[[dep]]
+                                                  [burn_in:J,q_emiss[dep] * (i-1) + q])))
+          newmin <- min(sapply(L, function(x) min(x$emiss_prob_bar[[dep]]
+                                                  [burn_in:J,q_emiss[dep] * (i-1) + q])))
+          if(newmax > maxy) maxy <- newmax
+          if(newmin < miny) miny <- newmin
+        }
+        for(q in 1:q_emiss[dep]){
+          graphics::plot.default(x = 1, ylim = c(miny, maxy), xlim = c(burn_in, J), type = "n", cex = .8, ylab = "emission probability", xlab = "iteration")
+          for(k in 1:nchain){
+            graphics::lines(x = burn_in:J, y = L[[k]]$emiss_prob_bar[[dep]]
+                            [burn_in:J, (i-1) * q_emiss[dep] +q], col = state_col[k])
+          }
+          graphics::title(main = paste(dep_lab, cat_lab[q], "in State", i))
+          graphics::legend("topright", col = state_col, legend = paste("Chain", 1:nchain),
+                           bty = 'n', lty = 1, lwd = 2, cex = .8)
+        }
+      }
+    }
   }
-  return(f)
 }
 
-utils::globalVariables(c("chain", "iteration", "value"))
+utils::globalVariables(c("chain", "iteration", "value", "states"))
