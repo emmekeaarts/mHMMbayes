@@ -117,7 +117,8 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
   if(component == "gamma"){
     # if ggplot2 is available
     if(nzchar(system.file(package = "ggplot2"))){
-      if (missing(col)){state_col <- scales::hue_pal()(m) #RColorBrewer::brewer.pal(m, "Pastel1")
+      if (missing(col)){
+        state_col <- scales::hue_pal()(m) #RColorBrewer::brewer.pal(m, "Pastel1")
       } else {state_col <- col}
       # group level gamma
       gg <- object$gamma_prob_bar |>
@@ -207,7 +208,8 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
 
     # if plotting emiss
   } else if (component == "emiss"){
-    if (missing(col)){cat_col <- scales::hue_pal()(q_emiss[dep]) #RColorBrewer::brewer.pal(q_emiss[dep], "Pastel1")
+    if (missing(col)){
+      cat_col <- scales::hue_pal()(q_emiss[dep]) #RColorBrewer::brewer.pal(q_emiss[dep], "Pastel1")
     } else {cat_col <- col}
     if (missing(cat_lab)){
       cat_lab <- paste("Category", 1:q_emiss[dep])

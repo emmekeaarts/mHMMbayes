@@ -7,6 +7,12 @@
 #'    or for the emission distribution probabilities (\code{component = "emiss"}).
 #' @param dep Integer specifying for which dependent variable the predicted
 #'    emission probabilities should be plotted.
+#' @param col Vector of colors for the plots. If one is plotting the predicted
+#'    transition probabilities, the vector has length \code{m} (i.e., number of
+#'    hidden states). If one is plotting the predicted emission probabilities,
+#'    the vector has length \code{q_emiss[k]} (i.e., the number of outcome
+#'    categories for the dependent variable \code{k}).
+#'    If not specified, colors will be assigned automatically.
 #' @param cat_lab Optional vector of strings when plotting the predicted
 #'    emission probabilities, denoting the labels of the categorical outcome values.
 #'    Automatically generated when not provided.
@@ -17,7 +23,7 @@
 #'
 #' @export
 
-plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ...) {
+plot_pred <- function(object, component = "gamma", dep = 1, col, cat_lab, dep_lab, ...) {
   input   <- object$input
   n_subj  <- input$n_subj
   dep_labels <- input$dep_labels
@@ -37,12 +43,15 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
 
   # if plotting gamma
   if(component == "gamma"){
+    if (missing(col)){
+      col <- scales::hue_pal()(m) #RColorBrewer::brewer.pal(m, "Accent")
+    } else {col <- col}
     # prepare subject df
     gg_subj <- obtain_gamma(object, level = "subject", burn_in = burn_in) |>
-    purrr::reduce(rbind) |>
-    tibble::as_tibble(rownames="From_state") |>
-    dplyr::mutate(subject = rep(1:n_subj, each = m),
-           covariate = rep(covar_gamma, each = m)) |>
+      purrr::reduce(rbind) |>
+      tibble::as_tibble(rownames="From_state") |>
+      dplyr::mutate(subject = rep(1:n_subj, each = m),
+                    covariate = rep(covar_gamma, each = m)) |>
       tidyr::pivot_longer(cols=!c(subject, covariate, From_state),
                           names_to = "To_state", values_to="prob") |>
       dplyr::mutate(dplyr::across(c(To_state, From_state), stringr::str_replace,
@@ -60,7 +69,7 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
         x = covariate, y = prob, color = To_state)) +
         ggplot2::geom_point(alpha = 0.6, size = 0.7) +
         ggplot2::geom_line(data = preds) +
-        ggplot2::scale_color_brewer(palette="Accent") +
+        ggplot2::scale_color_manual(values = col) +
         ggplot2::labs(x = "Covariate", y = "Transition probability",
                       title = "Predicted transition probability per covariate value",
                       color = "To state") +
@@ -74,7 +83,7 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
         x = factor(covariate), y = prob, color = To_state)) +
         ggplot2::geom_point(alpha = 0.6, size = 0.7) +
         ggplot2::geom_boxplot(data = preds, width = 0.7, size = 0.5) +
-        ggplot2::scale_color_brewer(palette="Accent") +
+        ggplot2::scale_color_manual(values = col) +
         ggplot2::labs(x = "Covariate", y = "Transition probability",
                       title = "Predicted transition probability per covariate value",
                       color = "To state") +
@@ -93,6 +102,9 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
     if (missing(dep_lab)){
       dep_lab <- input$dep_labels[dep]
     }
+    if (missing(col)){
+      col <- scales::hue_pal()(q_emiss[dep]) #RColorBrewer::brewer.pal(q_emiss[dep], "Accent")
+    } else {col <- col}
     # prepare subject df
     gg_subj <- obtain_emiss(object, level = "subject", burn_in = burn_in)[[dep]] |>
       purrr::reduce(rbind) |>
@@ -103,17 +115,18 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
                           names_to = "Category", values_to="prob")
 
     # prepare emiss predicted values
-    preds <- purrr::quietly(pred_prob)(object, component = "emiss", dep = dep)$result |>
-      tidyr::pivot_longer(!c(State, covariate), names_to = "Category", values_to = "prob")
+    preds <- purrr::quietly(pred_prob)(object, component = "emiss",
+                                       dep = dep)$result |>
+      tidyr::pivot_longer(!c(State, covariate), names_to = "Category",
+                          values_to = "prob")
     if(covar_type_emiss == "continuous"){
       plot <- ggplot2::ggplot(data = gg_subj, ggplot2::aes(
         x = covariate, y = prob, color = Category)) +
         ggplot2::geom_point(alpha = 0.6, size = 0.7) +
         ggplot2::geom_line(data = preds) +
-      ggplot2::scale_color_brewer(palette="Accent", labels = cat_lab) +
+        ggplot2::scale_color_manual(values = col, labels = cat_lab) +
       ggplot2::labs(x = "Covariate", y = "Emission probability",
-                    title = paste("Predicted emission probability per
-                                  covariate value of", dep_lab)) +
+                    title = paste("Predicted emission probability per covariate value of", dep_lab)) +
       ggplot2::ylim(0,1) +
       ggplot2::facet_grid(~State) +
       common_theme
@@ -123,10 +136,9 @@ plot_pred <- function(object, component = "gamma", dep = 1, cat_lab, dep_lab, ..
         x = factor(covariate), y = prob, color = Category)) +
         ggplot2::geom_point(alpha = 0.6, size = 0.7) +
         ggplot2::geom_boxplot(data = preds, width = 0.7, size = 0.5) +
-        ggplot2::scale_color_brewer(palette="Accent", labels = cat_lab) +
+        ggplot2::scale_color_manual(values = col, labels = cat_lab) +
         ggplot2::labs(x = "Covariate", y = "Emission probability",
-                      title = paste("Predicted emission probability per
-                                    covariate value of", dep_lab), color = "To state") +
+                      title = paste("Predicted emission probability per covariate value of", dep_lab), color = "To state") +
         ggplot2::ylim(0,1) +
         ggplot2::facet_grid(~State) +
         common_theme
