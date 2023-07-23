@@ -16,9 +16,11 @@
 #'   object represents the subject specific transition probability matrices.
 #' @param cex An integer specifying scaling of fonts of category labels. When
 #'   not specified, defaults to \code{cex = 0.8}.
-#' @param col An optional vector with length \code{m} * \code{m} (i.e., where
-#'   \code{m} denotes the number of hidden states) specifying the used colors in
-#'   the alluvial plot.
+#' @param col An optional vector specifying colors. When ggplot2 is available,
+#'   the length of the vector should be equal to \code{m} (i.e., the number of
+#'   hidden states). When using the base R plotting function, the length of the
+#'   vector should be \code{m * m}, specifying the used colors in the alluvial
+#'   plot. If not specified, colors will be assigned automatically.
 #' @param hide An optional logical vector with  length \code{m} * \code{m}
 #'   (i.e., where \code{m} denotes the number of hidden states) specifying
 #'   whether particular stripes should be plotted. When not specified, omits
@@ -127,8 +129,7 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
   if (!is.mHMM_gamma(x)){
     stop("The input object x should be from the class mHMM_gamma, obtained with the function obtain_gamma.")
   }
-  old_par <- graphics::par(no.readonly =TRUE)
-  on.exit(graphics::par(old_par))
+
   if (is.list(x)){
     if (is.null(subj_nr)){
       stop("When the input object x represents the subject specific transition
@@ -140,28 +141,33 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
     To <-  paste("State", rep(1:m, m))
     trans <- as.vector(t(x[[subj_nr]]))
     foo <- data.frame(From, To, trans)
-    if(missing(col)){
-      col <- c(rep(grDevices::rainbow(m), each = m))
-    }
-    if (missing(hide)){
-      hide <- foo$trans == 0
-    }
     # if ggplot2 is available
     if(nzchar(system.file(package = "ggplot2"))){
+      if (missing(col)){col <- RColorBrewer::brewer.pal(m, "Accent")
+      } else {col <- col}
       plt <- ggplot2::ggplot(foo, ggplot2::aes(axis1 = From, axis2 = To, y = trans)) +
         ggalluvial::geom_alluvium(ggplot2::aes(fill = From)) +
-        ggplot2::scale_fill_brewer(palette = "Accent") +
+        ggplot2::scale_fill_manual(values = col) +
         ggalluvial::geom_stratum() +
         ggplot2::geom_text(stat = ggalluvial::StatStratum, ggplot2::aes(
           label = ggplot2::after_stat(stratum))) +
         ggplot2::theme_void() +
         ggplot2::theme(legend.position = "bottom",
                        plot.title = ggplot2::element_text(hjust = 0.5)) +
-        ggplot2::labs(title= paste0("Transition probabilities for subject", subj_nr))
+        ggplot2::labs(title = paste0("Transition probabilities for subject", subj_nr))
       print.ggplot(plt) |> suppressWarnings()
 
-      #if ggplot2 is not available, original function follows
+      # if ggplot2 is not available, original function follows
     } else {
+      if(missing(col)){
+        col <- c(rep(grDevices::rainbow(m), each = m))
+      }
+      if (missing(hide)){
+        hide <- foo$trans == 0
+      }
+      old_par <- graphics::par(no.readonly =TRUE)
+      on.exit(graphics::par(old_par))
+
       alluvial::alluvial(foo[,1:2], freq=foo$trans,
                          cex = cex,
                          col = col,
@@ -176,32 +182,35 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
     To <-  paste("State", rep(1:m, m))
     trans <- as.vector(t(x))
     foo <- data.frame(From, To, trans)
-    if(missing(col)){
-      col <- c(rep(grDevices::rainbow(m), each = m))
-    }
-    if (missing(hide)){
-      hide <- foo$trans == 0
-    }
+
     # if ggplot2 is available
     if(nzchar(system.file(package = "ggplot2"))){
+      if (missing(col)){col <- RColorBrewer::brewer.pal(m, "Accent")
+      } else {col <- col}
       plt <- ggplot2::ggplot(foo, ggplot2::aes(axis1 = From, axis2 = To, y = trans)) +
         ggalluvial::geom_alluvium(ggplot2::aes(fill = From)) +
-        ggplot2::scale_fill_brewer(palette = "Accent") +
+        ggplot2::scale_fill_manual(values = col) +
         ggalluvial::geom_stratum() +
         ggplot2::geom_text(stat = ggalluvial::StatStratum, ggplot2::aes(
           label = ggplot2::after_stat(stratum))) +
         ggplot2::theme_void() +
         ggplot2::theme(legend.position = "bottom",
                        plot.title = ggplot2::element_text(hjust = 0.5)) +
-        ggplot2::labs(title= "Transition probabilities at the group level")
+        ggplot2::labs(title = "Transition probabilities at the group level")
       print.ggplot(plt) |> suppressWarnings()
 
       #if ggplot2 is not available, original function follows
     } else {
-      alluvial::alluvial(foo[,1:2], freq=foo$trans,
-                         cex = cex,
-                         col = col,
-                         hide =  hide, ...)
+      if(missing(col)){
+        col <- c(rep(grDevices::rainbow(m), each = m))
+      }
+      if (missing(hide)){
+        hide <- foo$trans == 0
+        alluvial::alluvial(foo[,1:2], freq=foo$trans,
+                           cex = cex,
+                           col = col,
+                           hide =  hide, ...)
+      }
     }
   }
 }

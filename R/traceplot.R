@@ -15,6 +15,9 @@
 #'     should be plotted. Only required if one wishes to plot the
 #'    emission distribution probabilities and the model is based on multiple
 #'    dependent variables.
+#' @param col Optional vector of colors for the traceplot lines. The vector
+#'    should have a length equal to the number of \code{mHMM} objects in the
+#'    list \code{L}. If not specified, colors will be automatically assigned.
 #' @param cat_lab Optional vector of strings when plotting for the emission
 #'    probabilities, denoting the labels of the categorical outcome values.
 #'    Automatically generated when not provided.
@@ -28,7 +31,7 @@
 #'
 #' @export
 
-traceplot <- function(L, component = "gamma", dep = 1, cat_lab,
+traceplot <- function(L, component = "gamma", dep = 1, col, cat_lab,
                            dep_lab, burn_in, ...){
   if(!any(sapply(L, is.mHMM))){
     stop("Every input object of list L should be from the class mHMM, obtained with the function mHMM.")
@@ -44,13 +47,13 @@ traceplot <- function(L, component = "gamma", dep = 1, cat_lab,
     stop(paste("The specified burn in period should be at least 2 points smaller
                compared to the number of iterations J, J =", J))
   }
-  # old_par <- graphics::par(no.readonly =TRUE)
-  # on.exit(graphics::par(old_par))
   m       <- L[[1]]$input$m
   q_emiss <- L[[1]]$input$q_emiss
   n_dep   <- L[[1]]$input$n_dep
   nchain <- length(L)
-
+  if (missing(col)){
+    col <- scales::hue_pal()(nchain)
+  } else {col <- col}
   # if plotting gamma
   if(component == "gamma"){
     # # when ggplot2 & dplyr are available
@@ -74,7 +77,8 @@ traceplot <- function(L, component = "gamma", dep = 1, cat_lab,
       }
       f <- f + ggplot2::geom_line(alpha = 0.7, size = 0.3) +
         ggplot2::facet_wrap(~ states, scales = "free") +
-        ggplot2::scale_color_brewer(palette = "Set2", name = "Chain") +
+        ggplot2::scale_color_manual(values = col, name = "Chain") +
+        # ggplot2::scale_color_brewer(palette = "Set2", name = "Chain") +
         ggplot2::labs(title = "Parameter estimates of transition probabilities",
                       subtitle = "At the group level", y = "") +
         ggplot2::theme_bw() +
@@ -82,6 +86,8 @@ traceplot <- function(L, component = "gamma", dep = 1, cat_lab,
 
     #   # when ggplot2 is not available, use baseR
     # } else {
+      # old_par <- graphics::par(no.readonly =TRUE)
+      # on.exit(graphics::par(old_par))
     #   if (missing(col)){
     #     state_col <- grDevices::rainbow(m)
     #   } else {
@@ -143,15 +149,16 @@ traceplot <- function(L, component = "gamma", dep = 1, cat_lab,
       }
       f <- f + ggplot2::geom_line(alpha = 0.7, size = 0.3) +
         ggplot2::facet_wrap(~ states, scales = "free") +
-        ggplot2::scale_color_brewer(palette="Set2", name = "Chain") +
-        ggplot2::labs(title = paste("Parameter estimates of emission
-                                    probabilities for", dep_lab),
-                      subtitle = "At the group level", y = "") +
+        ggplot2::scale_color_manual(values = col, name = "Chain") +
+        # ggplot2::scale_color_brewer(palette="Set2", name = "Chain") +
+        ggplot2::labs(title = paste("Parameter estimates of emission probabilities for", dep_lab), subtitle = "At the group level", y = "") +
         ggplot2::theme_bw() +
         ggplot2::theme(legend.position = "bottom")
 
     #   # if ggplot2 is not available, use baseR
     # } else {
+      # old_par <- graphics::par(no.readonly =TRUE)
+      # on.exit(graphics::par(old_par))
     #   # specify layout
     #   graphics::par(mfrow = c(m * q_emiss[dep], 1))
     #

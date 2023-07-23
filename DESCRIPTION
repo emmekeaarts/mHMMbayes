@@ -52,7 +52,8 @@ Suggests:
     tibble,
     tidyselect,
     rlang,
-    magrittr
+    magrittr,
+    scales
 VignetteBuilder: knitr
 RdMacros: Rdpack
 SystemRequirements: GNU make
