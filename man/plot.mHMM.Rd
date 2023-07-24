@@ -41,7 +41,7 @@ plotting the posterior densities for gamma, the vector has length \code{m}
 (i.e., number of hidden states). If one is plotting the posterior densities
 for the emission probabilities, the vector has length \code{q_emiss[k]}
 (i.e., the number of outcome categories for the dependent variable
-\code{k}).}
+\code{k}). If not specified, colors will be assigned automatically.}
 
 \item{cat_lab}{Optional vector of strings when plotting the posterior
 densities of the emission probabilities, denoting the labels of the
@@ -53,19 +53,20 @@ for the dependent variable plotted. Automatically obtained from the input
 object \code{x} when not specified.}
 
 \item{lwd1}{Positive number indicating the line width of the posterior
-density at the group level.}
+density at the group level (when using base R plotting function).}
 
 \item{lwd2}{Positive number indicating the line width of the posterior
-density at the subject level.}
+density at the subject level (when using base R plotting function).}
 
 \item{lty1}{Positive number indicating the line type of the posterior
-density at the group level.}
+density at the group level (when using base R plotting function).}
 
 \item{lty2}{Positive number indicating the line type of the posterior
-density at the subject level.}
+density at the subject level (when using base R plotting function).}
 
 \item{legend_cex}{A numerical value giving the amount by which plotting text
-and symbols in the legend should be magnified relative to the default.}
+and symbols in the legend should be magnified relative to the default
+(when using base R plotting function).}
 
 \item{burn_in}{An integer which specifies the number of iterations to discard
 when obtaining the model parameter summary statistics. When left
@@ -84,7 +85,8 @@ object with the function \code{\link{mHMM}} will be used.}
 \code{plot.mHMM} plots the posterior densities for a fitted multilevel hidden
 Markov model for the group and subject level parameters simultaneously. The
 plotted posterior densities are either for the transition probability matrix
-gamma, or for the emission distribution probabilities.
+gamma, or for the emission distribution probabilities. If the ggplot2 package
+is available, it generates a ggplot; otherwise, it generates a base R plot.
 }
 \examples{
 ###### Example on package example data, see ?nonverbal
