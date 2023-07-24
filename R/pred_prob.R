@@ -25,6 +25,9 @@ pred_prob <- function(object, component = "gamma", dep = 1, print.df = TRUE,...)
   if (component != "gamma" & component != "emiss"){
     stop("The input specified under component should be a string, restrectid to state either gamma or emiss.")
   }
+  if(is.null(object$input$covar_type)){
+    stop("A covariate is required for predicting either transition or emission probabilities given the covariate values.")}
+
   input   <- object$input
   burn_in <- input$burn_in
   J       <- input$J
@@ -37,6 +40,8 @@ pred_prob <- function(object, component = "gamma", dep = 1, print.df = TRUE,...)
 
   # if predict gamma
   if(component == "gamma"){
+    if(dim(object$input$covariate[[1]])[2] == 1){
+      stop("Please include a covariate to predict gamma.")}
     int <- object$gamma_int_bar
     cov <- object$gamma_cov_bar
     regr_cov <- matrix(NA, nrow = 2, ncol = m-1)
@@ -53,7 +58,9 @@ pred_prob <- function(object, component = "gamma", dep = 1, print.df = TRUE,...)
         pred_tr2[[c]] <- pred_tr |>
           dplyr::rename_with(~paste0("To_state_", 1:m)) |>
           dplyr::mutate(From_state = paste("State", i),
-                        covariate = covar_gamma[c]) |>
+                        covariate = covar_gamma[c],
+                        dplyr::across(tidyselect::where(is.numeric), \(x) round(x, 3))
+          ) |>
           dplyr::relocate(From_state, covariate)
         }
         pred_tr2 <- purrr::list_rbind(pred_tr2)
@@ -63,6 +70,8 @@ pred_prob <- function(object, component = "gamma", dep = 1, print.df = TRUE,...)
 
     # if predict emiss
   } else if (component == "emiss"){
+    if(dim(object$input$covariate[[2]])[2] == 1){
+      stop("Please include a covariate to predict emission probabilities.")}
     dep_lab <- input$dep_labels[dep]
     int <- object$emiss_int_bar[[dep]]
     cov <- object$emiss_cov_bar[[dep]]
@@ -72,11 +81,12 @@ pred_prob <- function(object, component = "gamma", dep = 1, print.df = TRUE,...)
       cov_mat <- cbind(rep(0, m), matrix(apply(cov[((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = q_emiss[dep]-1, nrow = m) * covar_emiss[c])
 
       reg_mat <- exp(int_mat + cov_mat)
-      res[[c]] <- as.data.frame(t(apply(reg_mat, 1, function(x) x / as.vector(x%*% c(rep(1, length(x))))))) |>
+      res[[c]] <- as.data.frame(t(apply(reg_mat, 1, function(x) x / as.vector(x %*% c(rep(1, length(x))))))) |>
         dplyr::rename_with(~paste("Category", 1:q_emiss[dep])) |>
         dplyr::mutate(
           State = paste("State", 1:m),
-          covariate = covar_emiss[c]
+          covariate = covar_emiss[c],
+          dplyr::across(tidyselect::where(is.numeric), \(x) round(x, 3))
         ) |>
         dplyr::relocate(State, covariate)
     }

@@ -143,7 +143,8 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
     foo <- data.frame(From, To, trans)
     # if ggplot2 is available
     if(nzchar(system.file(package = "ggplot2"))){
-      if (missing(col)){col <- RColorBrewer::brewer.pal(m, "Accent")
+      if (missing(col)){
+        col <- scales::hue_pal()(m)
       } else {col <- col}
       plt <- ggplot2::ggplot(foo, ggplot2::aes(axis1 = From, axis2 = To, y = trans)) +
         ggalluvial::geom_alluvium(ggplot2::aes(fill = From)) +
@@ -185,7 +186,8 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
 
     # if ggplot2 is available
     if(nzchar(system.file(package = "ggplot2"))){
-      if (missing(col)){col <- RColorBrewer::brewer.pal(m, "Accent")
+      if (missing(col)){
+        col <- scales::hue_pal()(m)
       } else {col <- col}
       plt <- ggplot2::ggplot(foo, ggplot2::aes(axis1 = From, axis2 = To, y = trans)) +
         ggalluvial::geom_alluvium(ggplot2::aes(fill = From)) +

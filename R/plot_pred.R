@@ -24,6 +24,12 @@
 #' @export
 
 plot_pred <- function(object, component = "gamma", dep = 1, col, cat_lab, dep_lab, ...) {
+  if (!is.mHMM(object)){
+    stop("The input object should be from the class mHMM, obtained with the function mHMM.")
+  }
+  if (component != "gamma" & component != "emiss"){
+    stop("The input specified under component should be a string, restrectid to state either gamma or emiss.")
+  }
   input   <- object$input
   n_subj  <- input$n_subj
   dep_labels <- input$dep_labels
@@ -36,6 +42,10 @@ plot_pred <- function(object, component = "gamma", dep = 1, col, cat_lab, dep_la
   covar_emiss <- input$covariate[[2]][,-1] # given that all DVs share the same covariates
   covar_type_gamma <- input$covar_type[[1]]
   covar_type_emiss <- input$covar_type[[2]] # given that all DVs share the same covariates
+
+  if (is.null(covar_type_gamma) & is.null(covar_type_emiss)){
+    stop("A covariate is required for predicting either transition or emission probabilities given the covariate values.")
+  }
 
   # common theme
   common_theme <- ggplot2::theme_bw() +
@@ -82,7 +92,7 @@ plot_pred <- function(object, component = "gamma", dep = 1, col, cat_lab, dep_la
       plot <- ggplot2::ggplot(data = gg_subj, ggplot2::aes(
         x = factor(covariate), y = prob, color = To_state)) +
         ggplot2::geom_point(alpha = 0.6, size = 0.7) +
-        ggplot2::geom_boxplot(data = preds, width = 0.7, size = 0.5) +
+        ggplot2::geom_boxplot(data = preds, width = 0.7, size = 0.5, outlier.shape = NA) +
         ggplot2::scale_color_manual(values = col) +
         ggplot2::labs(x = "Covariate", y = "Transition probability",
                       title = "Predicted transition probability per covariate value",
@@ -135,7 +145,7 @@ plot_pred <- function(object, component = "gamma", dep = 1, col, cat_lab, dep_la
       plot <- ggplot2::ggplot(data = gg_subj, ggplot2::aes(
         x = factor(covariate), y = prob, color = Category)) +
         ggplot2::geom_point(alpha = 0.6, size = 0.7) +
-        ggplot2::geom_boxplot(data = preds, width = 0.7, size = 0.5) +
+        ggplot2::geom_boxplot(data = preds, width = 0.7, size = 0.5, outlier.shape = NA) +
         ggplot2::scale_color_manual(values = col, labels = cat_lab) +
         ggplot2::labs(x = "Covariate", y = "Emission probability",
                       title = paste("Predicted emission probability per covariate value of", dep_lab), color = "To state") +

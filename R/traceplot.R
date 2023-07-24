@@ -80,7 +80,7 @@ traceplot <- function(L, component = "gamma", dep = 1, col, cat_lab,
         f <- ggplot2::ggplot(object, ggplot2::aes(x = iteration, y = value,
                                                   colour = as.factor(chain)))
       }
-      f + ggplot2::geom_line(alpha = 0.7, size = 0.3) +
+      f + ggplot2::geom_line(alpha = 0.7, linewidth = 0.3) +
         ggplot2::facet_wrap(~states,  scales = "free", labeller = ggplot2::as_labeller(
           function(string, prefix = "From") paste(prefix, string))) +
         ggplot2::scale_color_manual(values = col, name = "Chain") +
@@ -155,7 +155,7 @@ traceplot <- function(L, component = "gamma", dep = 1, col, cat_lab,
         f <- ggplot2::ggplot(object, ggplot2::aes(x = iteration, y = value,
                                                   colour = as.factor(chain)))
       }
-      f + ggplot2::geom_line(alpha = 0.7, size = 0.3) +
+      f + ggplot2::geom_line(alpha = 0.7, linewidth = 0.3) +
         ggplot2::facet_wrap(~ states, scales = "free") +
         ggplot2::scale_color_manual(values = col, name = "Chain") +
         ggplot2::labs(title = paste("Parameter estimates of emission probabilities for",

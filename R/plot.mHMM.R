@@ -143,7 +143,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         dplyr::mutate(from_state = stringr::str_split(class, "to", simplify = T)[,1],
                       to_state = stringr::str_split(class, "to", simplify = T)[,2],
                       lty = as.factor(ifelse(id == "group", 1, 2)),
-                      dplyr::across(from_state:to_state, stringr::str_replace, "S", "state "))
+                      dplyr::across(from_state:to_state, \(x) stringr::str_replace(x, "S", "state ")))
       # create plots
       plt <- df |>
         ggplot2::ggplot(ggplot2::aes(x = value, color = to_state,
@@ -243,7 +243,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         dplyr::mutate(category = stringr::str_split(class, "_", simplify = T)[,1],
                       state = stringr::str_split(class, "_", simplify = T)[,2],
                       lty = as.factor(ifelse(id == "group", 1, 2)),
-                      dplyr::across(state, stringr::str_replace, "S", "State "))
+                      dplyr::across(state, \(x) stringr::str_replace(x, "S", "State ")))
 
       plt <- df |>
         ggplot2::ggplot(ggplot2::aes(x = value, color = category,
