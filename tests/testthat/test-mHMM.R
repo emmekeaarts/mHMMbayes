@@ -286,12 +286,7 @@ test_that("output input", {
   expect_equal(out_2st_simb$input[[6]], n)
   expect_equal(out_2st_simb$input[[7]], rep(n_t, n))
   expect_equal(out_2st_simb$input[[8]], c("output_1", "output_2"))
+  expect_equal(out_2st_simb$input[[9]], c(list(matrix(rep(1, n), ncol = 1)), rep(list(matrix(rep(1, n), ncol = 1)), n_dep)))
+  expect_equal(out_2st_simb$input[[10]], NULL)
+
 })
-
-
-
-
-
-
-
-
