@@ -1,0 +1,27 @@
+# Prior distributions {#sec-prior}
+
+In the Bayesian estimation of the multilevel hidden Markov model, it is essential to define [(hyper-)prior](https://en.wikipedia.org/wiki/Hyperprior) distributions for the group level parameters, such as the emission and transition probabilities. By default, non-informative priors are utilized, but users can specify alternative prior distributions if desired. Below, we provide some information on this topic. For a more comprehensive explanation of the specific (hyper-)prior distributions and their parameters, please refer to the vignette [Estimation of the multilevel hidden Markov model](https://cran.r-project.org/web/packages/mHMMbayes/vignettes/estimation-mhmm.pdf).\
+
+::: {.callout-note}
+
+## Pay Attention
+
+It is important to note that the prior distributions are *not* directly applied to the probabilities themselves but to the intercepts (and regression coefficients if covariates are used) of the Multinomial regression model employed to account for the multilevel structure of the data.  
+Additionally, each parameters does *not* have their own independent prior distribution. As each row of the emission distribution matrix and transition probability matrix sum to one, the individual parameters of these rows are connected. Hence, each row is seen as a set of parameters which are estimated jointly, and each set of parameters has a multivariate prior distribution.
+:::
+
+
+The sets of intercepts of the Multinomial regression model have a multivariate normal distribution. The (hyper-) prior for these intercepts thus consists of a prior distribution on the vector of means, and a prior distribution on the covariance matrix. The hyper-prior for the mean intercepts is a *multivariate Normal distribution*, with, as default, a vector of means equal to 0, and a parameter $K_0$ with which the covariance matrix is multiplied. Here, $K_0$ denotes the number of observations (i.e., the number of hypothetical prior subjects) on which the prior mean vector of zero's is based. By default, $K_0$ is set to 1. 
+The hyper-prior for the covariance matrix between the set of (state specific) intercepts has an *Inverse Wishart distribution*, for which the variance in the default setting equals 3 + $m$ - 1 for the transition probabilities and 3 + $q$ - 1 for the emission probabilities, and the covariance equals 0. The degrees of freedom of the Inverse Wishart distribution is set to 3 + $m$ - 1 for the transition probabilities and 3 + $q$ - 1 for the emission probabilities.[^1]
+
+[^1]: $m$ denotes the number of distinct states and $q$ denotes the number of distinct observation cateogories. 
+
+## How to specify prior distributions
+To specify user specific prior distributions, one uses the input option `emiss_hyp_prior` for the emission distribution and `gamma_hyp_prior` for the transition probabilities in the function `mHMM`. These input arguments take an object from the class `mHMM_prior_emiss` and `mHMM_prior_gamma` created by the functions `prior_emiss_cat` and `prior_gamma`, respectively. Both objects are a list, containing the following key elements:
+
+-   **`mu0`**, a lists containing the hypothesized hyper-prior mean values of the intercepts of the Multinomial logit model.
+-   **`K0`**, the number of hypothetical prior subjects on which the set of hyper-prior mean intercepts specified in `mu0` are based.
+-   **`nu`**, degrees of freedom of the hyper-prior Inverse Wishart distribution on the covariance of the Multinomial logit intercepts.
+-   **`V`**, the variance-covariance of the hyper-prior Inverse Wishart distribution on the covariance of the Multinomial logit intercepts.
+
+Note that `K0`, `nu` and `V` are assumed equal over the states. The mean values of the intercepts (and regression coefficients of the covariates) denoted by `mu0` are allowed to vary over the states. All elements in the list either have the prefix `gamma_` or `emiss_`, depending on which list they belong to. When specifying prior distributions, note that the first element of each row in the probability domain does not have an intercept, as it serves as baseline category in the Multinomial logit regression model. This means, for example, that if we would specify a model with 3 states, `mu0` is a vector with 2 elements, `K0` and `nu` contain 1 element and `V` is a 2 by 2 matrix.

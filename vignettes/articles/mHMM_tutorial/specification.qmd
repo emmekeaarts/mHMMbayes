@@ -1,0 +1,67 @@
+# Model specification {#sec-modspec}
+
+
+Let's proceed with fitting a simple 2-state multilevel model using the mHMM function. First, we need to set some general model properties and starting values:
+
+
+```{r settings and load 2 state model, include = FALSE}
+# specifying general model properties
+m <- 2
+n_dep <- 4
+q_emiss <- c(3, 2, 3, 2)
+
+# specifying starting values
+start_TM <- diag(.8, m)
+start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+start_EM <- list(matrix(c(0.05, 0.90, 0.05, 
+                          0.90, 0.05, 0.05), byrow = TRUE,
+                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
+                  matrix(c(0.1, 0.9, 
+                           0.1, 0.9), byrow = TRUE, nrow = m,
+                         ncol = q_emiss[2]), # looking patient
+                  matrix(c(0.90, 0.05, 0.05, 
+                           0.05, 0.90, 0.05), byrow = TRUE,
+                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+                  matrix(c(0.1, 0.9, 
+                           0.1, 0.9), byrow = TRUE, nrow = m,
+                         ncol = q_emiss[4])) # looking therapist
+
+load("data/nonv_2st_1000it.rda")
+out_2st <- out1
+```
+
+```{r show specifying 2 state model, eval = FALSE}
+
+# Load the mHMMbayes package 
+library(mHMMbayes)
+
+# Specify general model properties:
+m <- 2
+n_dep <- 4
+q_emiss <- c(3, 2, 3, 2)
+
+# Specify starting values for transition matrix (TM) and emission probabilities (EM)
+start_TM <- diag(.8, m)
+start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+start_EM <- list(matrix(c(0.05, 0.90, 0.05, 
+                          0.90, 0.05, 0.05), byrow = TRUE,
+                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
+                  matrix(c(0.1, 0.9, 
+                           0.1, 0.9), byrow = TRUE, nrow = m,
+                         ncol = q_emiss[2]), # looking patient
+                  matrix(c(0.90, 0.05, 0.05, 
+                           0.05, 0.90, 0.05), byrow = TRUE,
+                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+                  matrix(c(0.1, 0.9, 
+                           0.1, 0.9), byrow = TRUE, nrow = m,
+                         ncol = q_emiss[4])) # looking therapist
+```
+
+The first line of code loads the `mHMMbayes` package and the `nonverbal` data.  
+Then, we specify the general model properties:  
+
+- the number of states used is set by `m <- 2`.
+- the number of dependent variables in the dataset used to infer the hidden states is specified by `n_dep <- 4`.
+- the number of categorical outcomes for each of the dependent variables is specified by `q_emiss <- c(3, 2, 3, 2)`.
+
+The subsequent lines of code specify the starting values for the transition probability matrix (`start_TM`) and the emission distributions (`start_EM`). Next, we will delve into more detail on how to specify these starting values.
