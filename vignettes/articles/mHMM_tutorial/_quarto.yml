@@ -1,0 +1,46 @@
+project:
+  type: book
+
+book:
+  title: "Multilevel HMM Tutorial"
+  author:
+  - name: Emmeke Aarts
+    affiliations:
+    - name: Department of Methodology and Statistics, Utrecht University
+  cover-image: images/cover.png
+  reader-mode: true
+  repo-url: https://github.com/emmekeaarts/mHMMbayes
+  repo-actions: [edit, issue]
+
+
+  chapters:
+    - index.qmd
+
+    - part: Introduction
+      chapters:
+      - preface.qmd
+      - HMM.qmd
+      - mHMM.qmd
+
+    - part: Package `mHMMbayes`
+      chapters:
+        - data.qmd
+        - specification.qmd
+        - startingval.qmd
+        - prior.qmd
+        - fittingmodel.qmd
+        - plotting.qmd
+
+    - references.qmd
+    - untitled.Rmd
+
+bibliography: bibliography.bib
+
+format:
+  html:
+    theme: cosmo
+    number-sections: true
+    code-link: true
+
+editor: visual
+
