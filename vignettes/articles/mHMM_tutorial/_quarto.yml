@@ -39,8 +39,17 @@ bibliography: bibliography.bib
 format:
   html:
     theme: cosmo
+    fontsize: 1.05em
     number-sections: true
     code-link: true
+    css: styles.css
 
-editor: visual
+knitr:
+  opts_chunk:
+    comment: "#>"
+    message: FALSE
+    warning: FALSE
+    fig.align: "center"
+
+editor: source
 
