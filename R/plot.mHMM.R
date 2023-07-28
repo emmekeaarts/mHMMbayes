@@ -125,11 +125,20 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         tibble::as_tibble() |>
         dplyr::slice(-(1:burn_in)) |>
         dplyr::mutate(id = "group")
+
       # extract the peak of density for group level gamma
       peak <- gg |>
-        dplyr::select(tidyselect::where(is.numeric)) |>
-        apply(2, function(x) stats::density(x)$y) |>
-        max()
+        tidyr::pivot_longer(!id) |>
+        dplyr::summarize(ymax = max(stats::density(value)$y), .by = name) |>
+        dplyr::mutate(name = gsub("to.*", "", name)) |>
+        dplyr::summarize(ymax = max(ymax), .by = name) |>
+        dplyr::mutate(ymin = 0) |>
+        dplyr::group_split(name) |>
+        setNames(paste("From state", 1:m)) |>
+        purrr::map(~
+                     ggplot2::scale_y_continuous(limits = c(.x$ymin, .x$ymax))
+        )
+
       # subject level gamma
       sg <- object$PD_subj |>
         purrr::map(
@@ -137,6 +146,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
             dplyr::select(tidyselect::starts_with("S")) |>
             dplyr::slice(-(1:burn_in))) |>
         dplyr::bind_rows(.id="id")
+
       # structure df for plotting
       df <- rbind(sg, gg) |>
         tidyr::pivot_longer(cols = !id, names_to = "class", values_to = "value") |>
@@ -144,19 +154,20 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
                       to_state = stringr::str_split(class, "to", simplify = T)[,2],
                       lty = as.factor(ifelse(id == "group", 1, 2)),
                       dplyr::across(from_state:to_state, \(x) stringr::str_replace(x, "S", "state ")))
+
       # create plots
       plt <- df |>
         ggplot2::ggplot(ggplot2::aes(x = value, color = to_state,
                                      alpha = id, linetype = lty, linewidth = lty)) +
         ggplot2::geom_density() +
-        ggplot2::ylim(0, peak) +
         ggplot2::xlim(0, 1) +
         ggplot2::scale_linewidth_manual(values = c("1" = 0.8, "2" = 0.2)) +
         ggplot2::scale_linetype_discrete(name = "Level", labels = c("group", "subject")) +
         ggplot2::scale_color_manual(values = state_col, name = "",
                                     labels = paste("To state", 1:m)) +
-        ggplot2::facet_grid(~from_state, labeller = ggplot2::as_labeller(
-          function(string, prefix = "From") paste(prefix, string))) +
+        ggplot2::facet_wrap(~from_state, labeller = ggplot2::as_labeller(
+          function(string, prefix = "From") paste(prefix, string)), scales = "free_y") +
+        ggh4x::facetted_pos_scales(y = peak) +
         ggplot2::guides(alpha = "none", linewidth = "none") +
         ggplot2::labs(title = "Posterior densities of transition probabilities",
                       y = "", x = "") +
@@ -225,10 +236,20 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         dplyr::slice(-(1:burn_in)) |>
         dplyr::mutate(id = "group") |>
         dplyr::relocate(id)
-      # extract the peak
-      peak <- ge|>dplyr::select(tidyselect::where(is.numeric)) |>
-        apply(2, function(x) stats::density(x)$y) |>
-        max()
+
+      # extract the peak per state
+      peak <- ge |>
+        tidyr::pivot_longer(!id) |>
+        dplyr::summarize(ymax = max(stats::density(value)$y), .by = name) |>
+        dplyr::mutate(name = gsub(".*_", "", name)) |>
+        dplyr::summarize(ymax = max(ymax), .by = name) |>
+        dplyr::mutate(ymin = 0) |>
+        dplyr::group_split(name) |>
+        setNames(paste("State", 1:m)) |>
+        purrr::map(~
+                     ggplot2::scale_y_continuous(limits = c(.x$ymin, .x$ymax))
+        )
+
       # subject level emission
       se <- object$PD_subj|>purrr::map(
         ~ tibble::as_tibble(.x) |>
@@ -244,24 +265,25 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
                       state = stringr::str_split(class, "_", simplify = T)[,2],
                       lty = as.factor(ifelse(id == "group", 1, 2)),
                       dplyr::across(state, \(x) stringr::str_replace(x, "S", "State ")))
-
+      # create plots
       plt <- df |>
         ggplot2::ggplot(ggplot2::aes(x = value, color = category,
                                      alpha = id, linetype = lty, linewidth = lty)) +
         ggplot2::geom_density() +
-        ggplot2::ylim(0, peak) +
         ggplot2::xlim(0, 1) +
         ggplot2::scale_linewidth_manual(values = c("1" = 0.8, "2" = 0.2))+
         ggplot2::scale_linetype_discrete(name = "Level", labels = c("group", "subject"))+
         ggplot2::scale_color_manual(values = cat_col, name = "", labels = cat_lab) +
-        ggplot2::facet_grid(~state) +
+        ggplot2::facet_wrap(~state, scales = "free_y") +
+        ggh4x::facetted_pos_scales(y = peak) +
         ggplot2::guides(alpha = "none", linewidth = "none") +
         ggplot2::labs(title = paste("Posterior densities of emission probabilities for",
                                     dep_lab), x = "", y = "") +
         ggplot2::theme_bw() +
         ggplot2::theme(panel.spacing.x = ggplot2::unit(4, "mm"),
                        legend.position = "bottom",
-                       axis.text.y = ggplot2::element_blank())
+                       axis.text.y = ggplot2::element_blank(),
+                       axis.ticks.y = ggplot2::element_blank())
       print.ggplot(plt) |> suppressWarnings()
 
       # if ggplot2 is not available, original function follows
