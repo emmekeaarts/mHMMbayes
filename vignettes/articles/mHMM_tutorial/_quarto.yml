@@ -31,6 +31,12 @@ book:
         - fittingmodel.qmd
         - plotting.qmd
 
+    - part: Analyses
+      chapters:
+        - hiddenstate.qmd
+        - sequence.qmd
+        - convergence.qmd
+
     - references.qmd
     - untitled.Rmd
 
