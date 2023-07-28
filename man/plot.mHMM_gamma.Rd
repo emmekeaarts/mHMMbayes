@@ -19,7 +19,7 @@ not specified, defaults to \code{cex = 0.8}.}
 
 \item{col}{An optional vector specifying colors. When ggplot2 is available,
 the length of the vector should be equal to \code{m} (i.e., the number of
-hidden states). When using the base R plotting function, the length of the
+hidden states). When using the base R plot function, the length of the
 vector should be \code{m * m}, specifying the used colors in the alluvial
 plot. If not specified, colors will be assigned automatically.}
 

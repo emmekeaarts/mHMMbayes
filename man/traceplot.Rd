@@ -32,7 +32,7 @@ Automatically generated when not provided.}
 
 \item{dep_lab}{Optional string when plotting for the emission probabilities,
 denoting the label for the dependent variable plotted.
-Automatically obtained from the input object \code{x} when not specified.}
+Automatically obtained from the input object \code{L} when not specified.}
 
 \item{burn_in}{An integer which specifies the number of iterations to discard.
 When left unspecified, the burn in period specified at creating the
@@ -41,6 +41,6 @@ When left unspecified, the burn in period specified at creating the
 \item{...}{Other parameters passed down to \code{traceplot()}.}
 }
 \description{
-\code{traceplot.mHMM} creates the traceplots for the group-level parameter
+\code{traceplot} creates the traceplot(s) for the group-level parameter
    estimates corresponding to a fitted multilevel hidden Markov model.
 }

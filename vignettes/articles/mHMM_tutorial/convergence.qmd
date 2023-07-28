@@ -1,8 +1,8 @@
 # Model convergence and label switching {#sec-convergence}
 
-When using Bayesian estimation procedures, it is strongly advised to check model convergence and label switching. That is, one should check if the algorithm reaches the same solution when a set of different (but often conceptually similar) starting values are used, and if label switching is not a problem. With label switching, the label (i.e., which state represents what) ordering of the states switches over the iterations of the estimation algorithm. For example, what started out as state 1, now becomes state 2. 
+When employing Bayesian estimation procedures, it is crucial to ensure model convergence and address label switching issues. Model convergence refers to checking whether the algorithm reaches a consistent solution when different starting values are utilized (but conceptually similar ones). On the other hand, label switching occurs when the ordering of the states switches during the estimation iterations. For example, the state initially labeled as 1 may later become state 2.
 
-One can check model convergence and label switching visually by inspecting the trace plots of parameters of a set of identical models that used varying starting values. Trace plots are plots of the sampled parameter values over the iterations. First, we fit the model with 2 states again, but with different starting values:
+To visually inspect model convergence and label switching, one can utilize **traceplots** of parameters from identical models with varying starting values. These traceplots display the sampled parameter values over the iterations and can be generated using the `traceplot` function. Below, we demonstrate how this is done using the 2-state models with different starting values.
 
 ```{r loading model convergence, include = FALSE}
 # specifying general model properties
@@ -25,7 +25,6 @@ start_EM_b <- list(matrix(c(0.2, 0.6, 0.2,
                  matrix(c(0.4, 0.6,
                           0.4, 0.6), byrow = TRUE, nrow = m,
                         ncol = q_emiss[4])) # looking therapist
-
 ```
 
 ```{r showing model convergence I, eval= FALSE}
@@ -58,27 +57,42 @@ out_2st_b <- mHMM(s_data = nonverbal,
 
 ```
 
-The group level parameter estimates of the emission probabilities and the transition probability matrix at each iteration of the estimation algorithm are stored in the objects `emiss_prob_bar` and `gamma_prob_bar`, respectively. The subject level parameter estimates are stored in the object `PD_subj`, where PD is an abbreviation for posterior density. If we, for example, want to inspect the trace plots for the emission probabilities for looking behavior of the patient at the group level, we use the following code:
 
-```{r showing model convergence II trace plots, fig.width = 7.2, fig.height = 7}
-par(mfrow = c(m,q_emiss[2]))
-Look_lab <- c("Not looking", "looking")
+If we, for example, want to inspect the traceplots for the transition probabilities, we can do the following:
 
-for(i in 1:m){
-  for(q in 1:q_emiss[2]){
-     plot(x = 1:1000, y = out_2st$emiss_prob_bar[[2]][,(i-1) * q_emiss[2] + q], 
-          ylim = c(0,1.4), yaxt = 'n', type = "l", ylab = "Transition probability",
-          xlab = "Iteration", main = paste("Patient", Look_lab[q], "in state", i), col = "#8da0cb") 
-    axis(2, at = seq(0,1, .2), las = 2)
-    lines(x = 1:1000, y = out_2st_b$emiss_prob_bar[[2]][,(i-1) * q_emiss[2] + q], col = "#e78ac3")
-    legend("topright", col = c("#8da0cb", "#e78ac3"), lwd = 2, 
-           legend = c("Starting value set 1", "Starting value set 2"), bty = "n")
-  }
-}
+```{r}
+#| label: fig-traceplot_trans
+#| fig-cap: "Traceplot of transition probabilities"
+
+# two models with different starting values
+L <- list(out_2st, out_2st_b)
+traceplot(L)
 ```
 
-It can be observed that the parameter estimates converge to the same parameter space, and that the chains mix well. Also, there is no evidence of label switching.
+If we want to inspect emission probabilities for looking behavior of the patient at the group level, we can use the following code:
 
-```{r, include = FALSE}
-graphics::par(old_par)
+```{r}
+#| label: fig-traceplot_emiss
+#| fig-cap: "Traceplot of emission probabilities"
+traceplot(L, component = "emiss", dep = 2, dep_lab = "patient looking behavior", 
+          cat_lab = c("not looking at therapist", "looking at therapist"), 
+          col = brewer.pal(2, name = "Set2"))
 ```
+
+
+::: {.callout-tip}
+## Arguments for `traceplot` function
+
+`traceplot` creates the traceplot(s) for the group-level parameter estimates corresponding to a fitted multilevel hidden Markov model. It takes the following arguments:
+
+- `L`: list of objects of class `mHMM`.
+- `component`: string is used to specify whether the traceplot should be created for the parameter estimates of the transition probabilities `component = "gamma"` or the emission probabilities `component = "emiss"`. Default is `component = "gamma"`.
+- `dep`: integer specifying for which dependent variable the traceplot should be plotted. Only required if one wishes to plot the emission distribution probabilities.
+- `col`: optional vector of colors for the traceplot lines. The vector should have a length equal to the number of `mHMM` objects in the list `L`.
+- `cat_lab`: optional vector of strings denoting the labels of the categorical outcome values. 
+- `dep_lab`: optional string when plotting for the emission probabilities, denoting the label for the dependent variable plotted.
+- `burn_in`: optional integer which specifies the number of iterations to discard.
+:::
+
+In the figures @fig-traceplot_trans and @fig-traceplot_emiss, we can observe that the parameter estimates converge to the same parameter space, indicating a stable estimation. Additionally, the chains appear to mix well, showing smooth and consistent movements throughout the iterations. Furthermore, there is no evidence of label switching. These are positive signs that the Bayesian estimation procedure is reliable and that the model has converged to a consistent solution.
+
