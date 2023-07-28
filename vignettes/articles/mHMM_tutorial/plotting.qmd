@@ -1,1 +1,84 @@
-# plotting
+# Graphically displaying outcomes {#sec-plotting}
+
+The package includes several plot functions to visualize the fitted model and its parameters.
+
+## Posterior densities plot
+One can plot the posterior densities of a fitted model, for both the transition probability matrix gamma and for the emission distribution probabilities. These densities are displayed for both the group level and the subject level simultaneously. When the `ggplot2` package is installed, the functions will utilize ggplot by default. However, if `ggplot2` is not available, the base R `plot` function will be used instead.
+
+Here's an example demonstrating how to create a plot of the emission distribution for the variable `p_vocalizing`:
+
+```{r show plot posterior densities, fig.width = 7.2, fig.height = 4}
+library(RColorBrewer)
+# specify color and label
+Voc_col <- c(brewer.pal(3,"PuBuGn")[c(1,3,2)])
+Voc_lab <- c("Not Speaking", "Speaking", "Back channeling")
+# use base R plot function
+plot(out_2st, component = "emiss", dep = 1, col = Voc_col, 
+     dep_lab = c("Patient vocalizing"), cat_lab = Voc_lab)
+```
+
+```{r, eval=FALSE}
+# when ggplot2 is available
+library(ggplot2)
+plot(out_2st, component = "emiss", dep = 1, col = brewer.pal(3, "Accent"),
+     dep_lab = c("Patient vocalizing"), cat_lab = Voc_lab)
+```
+
+```{r, echo=FALSE}
+#| echo: false
+#| fig-height: 4
+#| fig-width: 7
+devtools::load_all() # when function is offcially updated to the package, then remove this.
+plot(out_2st, component = "emiss", dep = 1, col = brewer.pal(3, "Accent"),
+     dep_lab = c("Patient vocalizing"), cat_lab = Voc_lab)
+```
+
+In the plots above, the solid line visualizes the posterior density at the group level, while each of the dotted lines visualizes the posterior density of one subject.
+
+::: {.callout-note icon=false}
+
+## Plot Function Arguments
+
+- `component` specifies whether we want to visualize the posterior densities for the transition probability matrix gamma (`component = "gamma"`) or for the emission distribution probabilities (`component = "emiss"`). 
+- When using `component = "emiss"`, the argument `dep` specifies which dependent variable we want to inspect. Here, we set `dep = 1` as the variable `p_vocolizing` is the first variable in the set. 
+- `col` specifies the colors to be used when plotting the lines.
+- `dep_lab` denotes the label of the dependent variable we are plotting.
+- `cat_lab` denotes the labels of the categorical outcomes in the corresponding dependent variable.  
+For more detailed information, check the help file of the function (`?plot.mHMM`).
+:::
+
+
+## Transition probabilities plot (riverplot)
+
+Additionally, the package provides a way to plot the transition probabilities obtained using the function `obtain_gamma` in the form of a riverplot. The visualization showcases the transitions between hidden states in a visually appealing manner. Just like with the other plot function above, this function will automatically choose between base R plot or ggplot functions based on the presence of the `ggplot2` package in your R environment.
+
+Below, we provide examples of how to create riverplots (when `ggplot2` is available).
+
+```{r, include=FALSE}
+m <- 2
+gamma_pop <- obtain_gamma(out_2st)
+gamma_subj <- obtain_gamma(out_2st, level = "subject")
+```
+
+```{r show plot transition prob, fig.show='hold'}
+#| label: fig-transition
+#| fig-subcap:
+#|   - "At group level"
+#|   - "For subject number 1" 
+#| layout-ncol: 2
+# Transition probabilities at the group level
+plot(gamma_pop)
+# Transition probabilities for subject number 1:
+plot(gamma_subj, subj_nr = 1)
+```
+
+Graphically displaying the transition probabilities becomes more informative as the number of hidden states increases. See an example plot below that demonstrates this with four specified hidden states. As the number of states increases, the visual representation becomes more intricate!
+
+```{r}
+#| echo: false
+#| out-width: 80%
+m <- 4
+plot(obtain_gamma(out_4st))
+
+```
+

@@ -1,7 +1,8 @@
+# Model convergence and label switching {#sec-convergence}
 
-# Model convergence and label switching {#convergence-sec}
+When using Bayesian estimation procedures, it is strongly advised to check model convergence and label switching. That is, one should check if the algorithm reaches the same solution when a set of different (but often conceptually similar) starting values are used, and if label switching is not a problem. With label switching, the label (i.e., which state represents what) ordering of the states switches over the iterations of the estimation algorithm. For example, what started out as state 1, now becomes state 2. 
 
-When using Bayesian estimation procedures, it is strongly advised to check model convergence and label switching. That is, one should check if the algorithm reaches the same solution when a set of different (but often conceptually similar) starting values are used, and if label switching is not a problem. With label switching, the label (i.e., which state represents what) ordering of the states switches over the iterations of the estimation algorithm. For example, what started out as state 1, now becomes state 2. One can check model convergence and label switching visually by inspecting the trace plots of parameters of a set of identical models that used varying starting values. Trace plots are plots of the sampled parameter values over the iterations. First, we fit the model with 2 states again, but with different starting values:
+One can check model convergence and label switching visually by inspecting the trace plots of parameters of a set of identical models that used varying starting values. Trace plots are plots of the sampled parameter values over the iterations. First, we fit the model with 2 states again, but with different starting values:
 
 ```{r loading model convergence, include = FALSE}
 # specifying general model properties
