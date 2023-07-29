@@ -16,8 +16,8 @@ or for the emission distribution probabilities (\code{component = "emiss"}).
 In case of the latter and the model is based on multiple dependent variables,
 the user has to indicate a specific dependent variable, see \code{dep}.}
 
-\item{dep}{Integer specifying for which dependent variable the predicted e
-mission probabilities are computed.}
+\item{dep}{Integer specifying for which dependent variable the predicted
+emission probabilities are computed.}
 
 \item{print.df}{A logical argument specifying whether the output should be
 returned as a dataframe (`TRUE`) or lists (`FALSE`). Default is `TRUE`.}

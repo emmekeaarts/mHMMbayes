@@ -7,8 +7,8 @@
 #'    or for the emission distribution probabilities (\code{component = "emiss"}).
 #'    In case of the latter and the model is based on multiple dependent variables,
 #'    the user has to indicate a specific dependent variable, see \code{dep}.
-#' @param dep Integer specifying for which dependent variable the predicted e
-#'    mission probabilities are computed.
+#' @param dep Integer specifying for which dependent variable the predicted
+#'    emission probabilities are computed.
 #' @param print.df A logical argument specifying whether the output should be
 #'    returned as a dataframe (`TRUE`) or lists (`FALSE`). Default is `TRUE`.
 #' @param ... Other parameters passed down to \code{pred_probs()}.

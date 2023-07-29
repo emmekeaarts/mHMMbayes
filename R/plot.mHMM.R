@@ -134,7 +134,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         dplyr::summarize(ymax = max(ymax), .by = name) |>
         dplyr::mutate(ymin = 0) |>
         dplyr::group_split(name) |>
-        setNames(paste("From state", 1:m)) |>
+        stats::setNames(paste("From state", 1:m)) |>
         purrr::map(~
                      ggplot2::scale_y_continuous(limits = c(.x$ymin, .x$ymax))
         )
@@ -245,7 +245,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
         dplyr::summarize(ymax = max(ymax), .by = name) |>
         dplyr::mutate(ymin = 0) |>
         dplyr::group_split(name) |>
-        setNames(paste("State", 1:m)) |>
+        stats::setNames(paste("State", 1:m)) |>
         purrr::map(~
                      ggplot2::scale_y_continuous(limits = c(.x$ymin, .x$ymax))
         )
@@ -336,4 +336,4 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, cat_lab,
   }
 }
 print.ggplot <- utils::getFromNamespace("print.ggplot", "ggplot2")
-utils::globalVariables(c("id", "from_state", "to_state", "lty", "state", "category"))
+utils::globalVariables(c("id", "from_state", "to_state", "lty", "state", "category", "name", "ymax"))
