@@ -4,7 +4,7 @@ project:
 book:
   title: "Multilevel HMM Tutorial"
   author:
-  - name: Emmeke Aarts
+  - name: Emmeke Aarts, Kyuri Park
     affiliations:
     - name: Department of Methodology and Statistics, Utrecht University
   cover-image: images/cover.png
