@@ -2,7 +2,7 @@
 
 The first step in developing a HMM is to determine the number of states $m$ that best describes the observed data, and is a model selection problem. When modelling, for example, behavior, the task is to define the states by clusters of observed behavioral outcomes that provide a reasonable, theoretically interpretable, description of the data.
 
-We suggest using a combination of the **Akaike Information Criterion (AIC)** and the **theoretical interpretability** of the estimated states to choose between models[^hiddenstate-1]. In the example dataset, the 2-, 3- and 4-state model result in an *AIC* of *3279*, *3087*, and <span style="color:#000080;">*2959*</span>, respectively. According to model fit indices, the <span style="color:#000080;">4 -state model</span> is clearly the best model[^hiddenstate-2]. Let's inspect the composition of the states for the 4 state model, and the transition probabilities.
+We suggest using a combination of the **Akaike Information Criterion (AIC)** and the **theoretical interpretability** of the estimated states to choose between models[^hiddenstate-1]. In the example dataset, the 2-, 3- and 4-state model result in an *AIC* of *3279*, *3087*, and [*2959*]{style="color:#000080;"}, respectively. According to model fit indices, the [4 -state model]{style="color:#000080;"} is clearly the best model[^hiddenstate-2]. Let's inspect the composition of the states for the 4 state model, and the transition probabilities.
 
 [^hiddenstate-1]: Note that the likelihood ratio test, commonly used to compare nested models, cannot be used in case of the HMM (i.e., the difference in the log-likelihoods between models is not $\chi^2$ distributed @ryden2008).
 
@@ -20,5 +20,3 @@ summary(out_4st)
 m <- 4
 plot(obtain_gamma(out_4st))
 ```
-
-

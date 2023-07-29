@@ -29,6 +29,8 @@ book:
         - startingval.qmd
         - prior.qmd
         - fittingmodel.qmd
+        - simulate.qmd
+        - covariate.qmd
         - plotting.qmd
 
     - part: Analyses
@@ -49,6 +51,8 @@ format:
     number-sections: true
     code-link: true
     css: styles.css
+    # highlight-style: pygments
+    # code-block-border-left: true
 
 knitr:
   opts_chunk:

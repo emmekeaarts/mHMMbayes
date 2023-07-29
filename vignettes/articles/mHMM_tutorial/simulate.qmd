@@ -1,0 +1,200 @@
+# Simulating data {#sec-sim}
+
+`sim_mHMM` is a function used to simulate data for multiple subjects following a hidden Markov model (HMM) with a multilevel structure. In this context, the multilevel structure allows each subject to have its own set of parameters, while tying these parameters together through a population distribution at a higher level.
+
+The population distribution for each parameter is assumed to be a *normal distribution*. The simulation process takes into account both natural heterogeneity between subjects and the potential influence of a covariate on the subjects' parameters.
+
+When simulating the data, the parameters for each subject are sampled from the population level distribution corresponding to each parameter. The user specifies the *average population transition probability matrix and its variance*, as well as the *average population emission distribution and its variance*. For now, the variance of the mean population parameters is assumed to be fixed for all components of the transition probability matrix and emission distribution.
+
+Moreover, `sim_mHMM` allows for the simulation of multivariate data, where hidden states depend on more than one observed variable simultaneously. In this case, the distributions of multiple dependent variables are assumed to be independent.
+
+::: {.callout-note}
+The subject specific initial state distributions (i.e., the
+probability of each of the states at the first time point) needed to simulate
+the data are obtained from the stationary distributions of the subject
+specific transition probability matrices gamma.
+:::
+
+## Basics of simulating data 
+
+Below, we provide several examples demonstrating the usage of `sim_mHHMM`.
+Some basic arguments you need to specify are as follows:
+
+- `n_t`: Numeric vector with length 1 denoting the length of the observed
+sequence to be simulated for each subject. To only simulate subject
+specific transition probability matrices gamma and emission distributions
+(and no data), set `t` to 0.
+
+- `n`: Numeric vector with length 1 denoting the number of subjects for
+which data is simulated.
+- `gen`: List containing the following elements denoting the general model properties (e.g., `m`, `n_dep`, `q_emiss`).
+
+- `gamma`: A `m` by `m` matrix containing the average population transition probability matrix used for simulating the data. That is, the probability to switch from hidden state $i$ to hidden state $j$.
+
+- `emiss_distr`:  A list with `n_dep` elements containing the average
+population emission distribution(s) of the observations given the hidden
+states for each of the dependent variables. Each element is a matrix with
+`m` rows and `q_emiss[k]` columns for each of the `k` in
+`n_dep` emission distribution(s). That is, the probability of
+observing category $q$ in state $i$.
+
+- `var_gamma`: A numeric vector with length 1 denoting the amount of variance between 
+ subjects in the transition probability matrix. 
+   
+- `var_emiss`: A numeric vector with length `n_dep` denoting the amount of variance between subjects in the emission distribution(s).
+
+::: {.callout-note}
+Note that `var_gamma`/`var_emiss` value corresponds to the variance of the parameters of the Multinomial distribution (i.e., the intercepts of the regression equation of the Multinomial distribution used to sample the transition probability matrix). 
+Only one variance value can be specified for the complete transition probability matrix / emission distribution, hence the variance is assumed fixed across all components. The default equals *0.1*, which corresponds to little variation between subjects. If one wants to simulate data from exactly the same HMM for all subjects, `var_gamma`/`var_emiss` should be set to 0. Note that if data for only 1 subject is simulated (i.e., n = 1), `var_gamma`/`var_emiss` is set to 0.
+:::
+```{r}
+## 1. Simulating data for 10 subjects with each 100 observations
+# number of observations
+n_t     <- 100 
+# number of subjects
+n       <- 10
+# number of hidden states
+m       <- 3
+# number of dependent variables (DV)
+n_dep   <- 1
+# number of categories for the corresponding DV
+q_emiss <- 4
+# m by m matrix containing the average population transition probabilities
+gamma   <- matrix(c(0.8, 0.1, 0.1,
+                    0.2, 0.7, 0.1,
+                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
+# a list with n_dep number of matrices containing the average population
+# emission distribution(s)
+emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
+                             0.1, 0.1, 0.8, 0.0,
+                             0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
+# simulate data using sim_mHMM
+data1 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
+
+```
+
+The simulated `data1` structures are depicted in @tbl-data1 below.
+The following components are returned by the function `sim_mHMM`:
+ 
+- `states`: A matrix containing the simulated hidden state
+   sequences, with one row per hidden state per subject. The first column
+   indicates subject id number. The second column contains the simulated
+   hidden state sequence, consecutively for all subjects. Hence, the id number
+   is repeated over the rows (with the number of repeats equal to the length
+   of the simulated hidden state sequence `T` for each subject).
+- `obs`: A matrix containing the simulated observed outputs, with
+   one row per simulated observation per subject. The first column indicates
+   subject id number. The second column contains the simulated observation
+   sequence, consecutively for all subjects. Hence, the id number is repeated
+   over rows as in `states`.
+
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-data1
+#| tbl-cap: "`data1` structure"
+#| tbl-subcap:
+#|   - "states"
+#|   - "observations"
+#| layout-ncol: 2
+
+knitr::kable(head(data1$states))
+knitr::kable(head(data1$obs))
+
+```
+
+
+## Simulating data with a covariate
+
+Now, let's proceed to simulate data with a covariate. First, we'll explore some additional arguments that are used when a covariate is included.
+
+- `xx_vec`: List of 1 + `n_dep` vectors containing the covariate(s) to predict the transition probability matrix `gamma` and/or (specific) emission distribution(s) `emiss_distr` using the regression parameters specified in `beta` (see below). The first element in the list `xx_vec` is used to predict the transition matrix. Subsequent elements in the list are used to predict the emission distribution of (each of) the dependent variable(s). This means that the covariate used to predict `gamma` and `emiss_distr` can either be the same covariate, different covariates, or a covariate for certain elements and none for the other. 
+
+::: {.callout-note}
+For all elements in the list, the number of observations in the vectors should be  equal to the number of subjects to be simulated `n`. If `xx_vec` is omitted completely, `xx_vec` defaults to `NULL`, resembling no covariates at all. Specific elements in the list can also be left empty to signify that either the transition probability matrix or (one of) the emission distribution(s) is not predicted by covariates.
+:::
+
+- `beta`: List of 1 + `n_dep` matrices containing the regression parameters to predict and/or `emiss_distr` in combination with using (Multinomial logistic) regression. The first matrix is used to predict the transition probability matrix `gamma`. The subsequent matrices are used to predict the emission distribution(s) of the dependent variable(s) `emiss_distr`. For `gamma` and categorical emission distributions, one regression parameter is specified for each element in `gamma` and `emiss_distr`, with the following exceptions. 
+
+::: {.callout-warning}
+## Exceptions
+In Multinomial logistic regression, the first element in each row of `gamma` and/or `emiss_distr` serves as the reference category. Consequently, no regression parameters can be specified for these reference elements. Therefore, the first element in the `beta` list used to predict `gamma` consists of a matrix with `m` rows and `m` - 1 columns. 
+For categorical emission distributions, the subsequent elements in the `beta` list used to predict `emiss_distr` consist of matrices with `m` rows and `q_emiss[k]` - 1 columns for each of the `k` in `n_dep` emission distribution(s). 
+For continuous emission distributions, the subsequent elements in the `beta` list consist of matrices with `m` rows and 1 column.
+:::
+
+
+```{r}
+## 2. Including a covariate to predict (only) the transition probability matrix gamma
+# create beta list
+beta      <- rep(list(NULL), 2)
+# first list to predict gamma
+beta[[1]] <- matrix(c(0.5, 1.0,
+                     -0.5, 0.5,
+                      0.0, 1.0), byrow = TRUE, ncol = 2)
+# covariate list
+xx_vec      <- rep(list(NULL),2)
+# first list to predict gamma
+xx_vec[[1]] <-  c(rep(0,5), rep(1,5))
+# simulate data with a covariate
+data2 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                  gamma = gamma, emiss_distr = emiss_distr, beta = beta, xx_vec = xx_vec,
+                  var_gamma = 1, var_emiss = 1)
+
+```
+
+
+## Simulating subject-specific gamma/emission distribution(s)
+Lastly, as mentioned above, we can also simulate the subject-specific gamma and emission distributions. There are two ways to achieve this; by either setting `n_t` to zero or use an argument called `return_ind_par`. Below, we provide examples of both methods.
+
+```{r}
+## 3. simulating only the subject-specific transition probability matrices 
+## and emission distributions by setting n_t = 0
+n_t <- 0 # set n_t to zero
+n <- 5
+m <- 3
+n_dep   <- 1
+q_emiss <- 4
+gamma <- matrix(c(0.8, 0.1, 0.1,
+                  0.2, 0.7, 0.1,
+                  0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
+emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
+                             0.1, 0.1, 0.8, 0.0,
+                             0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
+
+data3 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
+```
+
+<details>
+<summary>See the list of subject-specific gamma and emission distributions from the output `data3`.</summary>
+
+```{r, echo=FALSE}
+data3
+```
+</details>
+
+This time, we set `return_ind_par` to true to simulate the subject-specific transition probability matrices and emission distributions. The distinction from setting `n_t` to zero is that, in the latter case, it only returns the simulated subject-specific transition probability matrices and emission distributions without generating any data. However, when using `return_ind_par`, it not only returns the simulated subject-specific parameters but also provides the simulated data.
+
+```{r}
+## 4. simulating the subject-specific transition probability matrices 
+## and emission distributions by setting return_ind_par = TRUE
+data4 <- sim_mHMM(n_t = 10, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss =.5,
+                  return_ind_par = TRUE)
+```
+<details>
+<summary>See the details of the output `data4`.</summary>
+
+```{r, echo=FALSE}
+data4
+```
+</details>
+
+
+
+
+
+

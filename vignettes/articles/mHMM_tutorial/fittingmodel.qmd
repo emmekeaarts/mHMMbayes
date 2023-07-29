@@ -11,15 +11,16 @@ out_2st <- mHMM(s_data = nonverbal,
                     mcmc = list(J = 1000, burn_in = 200))
 ```
 
-The call to `mHMM` specifies the model with several arguments. 
+The call to `mHMM` specifies the model with several arguments.
 
-- `s_data` argument specifies the input data used to infer the hidden states over time. 
-- `gen` and `start_val` arguments specify the general model properties and the starting values, as discussed previously in @sec-modspec and @sec-startval. 
-- The arguments needed for the MCMC algorithm are given in `mcmc`:
+-   `s_data` argument specifies the input data used to infer the hidden states over time.
 
-    - `J` specifies the number of iterations used by the hybrid metropolis within Gibbs algorithm.
-    - `burn_in` specifies the number of iterations to discard when obtaining the model parameter summary statistics. 
+-   `gen` and `start_val` arguments specify the general model properties and the starting values, as discussed previously in @sec-modspec and @sec-startval.
 
+-   The arguments needed for the MCMC algorithm are given in `mcmc`:
+
+    -   `J` specifies the number of iterations used by the hybrid metropolis within Gibbs algorithm.
+    -   `burn_in` specifies the number of iterations to discard when obtaining the model parameter summary statistics.
 
 The function `mHMM` returns an object of class `mHMM`, and you can use the `print` and `summary` methods to view the results. The `print` method provides essential information about the fitted model, including the number of subjects in the dataset, the number of iterations performed, the burn-in period, the average log likelihood across all subjects, and model fit indices such as [AIC](https://en.wikipedia.org/wiki/Akaike_information_criterion). Additionally, it displays the number of states specified and the number of dependent variables used for modeling the states. The information displayed is as follow.
 
@@ -40,20 +41,25 @@ The resulting model indicates two well-separated states: one where the patient i
 gamma_pop <- obtain_gamma(out_2st)
 gamma_pop
 ```
+
 ```{r, eval=FALSE}
 # To obtain the subject specific parameter estimates:
 gamma_subj <- obtain_gamma(out_2st, level = "subject")
 gamma_subj
 ```
+
 <details>
-    <summary>See the list of subject-specific parameter estimates: `gamma_subj` </summary>
+
+<summary>See the list of subject-specific parameter estimates: `gamma_subj`</summary>
+
 ```{r, echo=FALSE}
 # To obtain the subject specific parameter estimates:
 gamma_subj <- obtain_gamma(out_2st, level = "subject")
 gamma_subj
 ```
+
 </details>
 
-::: {.callout-tip}
+::: callout-tip
 An additional option provided by the functions `obtain_gamma` and `obtain_emiss` is the ability to change the burn-in period used for obtaining the summary statistics. This can be done by specifying the input argument `burn_in`.
 :::
