@@ -1,57 +1,54 @@
 # Starting values {#sec-startval}
 
-Previously in @sec-dat, we specified the starting values for the transition probability matrix (`start_TM`) and the emission distributions (`start_EM`), which are given to the model in the argument `start_val` (see the code snippet provided in @sec-prior). 
+Previously in @sec-dat, we specified the starting values for the transition probability matrix (`start_TM`) and the emission distributions (`start_EM`), which are given to the model in the argument `start_val` (see the code snippet provided in @sec-prior).
 
-These starting values are used for the first run of the forward backward algorithm. Although the hidden states cannot be observed, one often has an idea for probable compositions of the states. 
+These starting values are used for the first run of the forward backward algorithm. Although the hidden states cannot be observed, one often has an idea for probable compositions of the states.
 
 In this example, we expect that there is a state in which the patient mostly speaks, and the therapist is silent, and a state during which the patient is silent and the therapists speaks. In addition, we expect that during both states, the therapist and the patient will be mainly looking at each other instead of looking away. Below in @tbl-panel, we illustrate how these expectations can be specified.
 
-::: {#tbl-panel layout-ncol=2}
-|          | Not Speaking | Speaking | Back channeling |
-|:--------:|:------------:|:--------:|:---------------:|
-|**State1**|       0.05   |  0.90    |         0.05    |
-|**State2**|       0.90   |  0.05    |         0.05    |
+::: {#tbl-panel layout-ncol="2"}
+|            | Not Speaking | Speaking | Back channeling |
+|:----------:|:------------:|:--------:|:---------------:|
+| **State1** |     0.05     |   0.90   |      0.05       |
+| **State2** |     0.90     |   0.05   |      0.05       |
 
 : vocalizing patient {#tbl-first}
 
-|          | Not Speaking | Speaking | Back channeling |
-|:--------:|:------------:|:--------:|:---------------:|
-|**State1**|       0.90   |  0.05    |         0.05    |
-|**State2**|       0.05   |  0.90    |         0.05    |
+|            | Not Speaking | Speaking | Back channeling |
+|:----------:|:------------:|:--------:|:---------------:|
+| **State1** |     0.90     |   0.05   |      0.05       |
+| **State2** |     0.05     |   0.90   |      0.05       |
 
 : vocalizing therapist {#tbl-second}
 
-|          | Not looking | Looking | 
-|:--------:|:-----------:|:-------:|
-|**State1**|      0.1    |   0.9   |
-|**State2**|      0.1    |   0.9   | 
+|            | Not looking | Looking |
+|:----------:|:-----------:|:-------:|
+| **State1** |     0.1     |   0.9   |
+| **State2** |     0.1     |   0.9   |
 
 : looking patient {#tbl-third}
 
-|          | Not looking | Looking | 
-|:--------:|:-----------:|:-------:|
-|**State1**|      0.1    |   0.9   |
-|**State2**|      0.1    |   0.9   | 
+|            | Not looking | Looking |
+|:----------:|:-----------:|:-------:|
+| **State1** |     0.1     |   0.9   |
+| **State2** |     0.1     |   0.9   |
 
 : looking therapist {#tbl-fourth}
 
 Starting values for emission distributions
 :::
 
-
 One usually also has some (vague) idea on likely and unlikely switches between states, and the size of self-transition probabilities. In this example, we think a state will usually last quite some seconds, and thus expect a rather high self-transition probability. Below in @tbl-gamma, we illustrate how these expectations can be specified.
 
-|             | State1 | State2|
-|:-----------:|:------:|:-----:|
-| **State1**  | 0.8    |  0.2  |
-| **State2**  | 0.2    |  0.8  | 
+|            | State1 | State2 |
+|:----------:|:------:|:------:|
+| **State1** |  0.8   |  0.2   |
+| **State2** |  0.2   |  0.8   |
 
 : Starting values for transition probabilities {#tbl-gamma}
 
-All these ideas can be used to construct a set of sensible starting values. Using sensible starting values increases convergence speed, and often prevents a problem called *label switching*. Hence, using random or uniform starting values is not recommended, and a default option to do so is not included in the package. 
+All these ideas can be used to construct a set of sensible starting values. Using sensible starting values increases convergence speed, and often prevents a problem called *label switching*. Hence, using random or uniform starting values is not recommended, and a default option to do so is not included in the package.
 
-::: {.callout-note}
-Note that it is strongly advised to check model convergence and label switching. That is, one should check if the algorithm reaches the same solution when a set of different (but often conceptually similar) starting values are used, and if label switching is not a problem. See the section @sec-convergence for an example. See the vignette [Estimation of the multilevel hidden Markov model](https://cran.r-project.org/web/packages/mHMMbayes/vignettes/estimation-mhmm.pdf) for more information on the forward backward algorithm and on the problem of label switching.
+::: callout-note
+Note that it is strongly advised to check model convergence and label switching. That is, one should check if the algorithm reaches the same solution when a set of different (but often conceptually similar) starting values are used, and if label switching is not a problem. See @sec-convergence for an example. See the vignette [Estimation of the multilevel hidden Markov model](https://cran.r-project.org/web/packages/mHMMbayes/vignettes/estimation-mhmm.pdf) for more information on the forward backward algorithm and on the problem of label switching.
 :::
-
-

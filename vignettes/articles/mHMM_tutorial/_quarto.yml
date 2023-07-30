@@ -4,7 +4,7 @@ project:
 book:
   title: "Multilevel HMM Tutorial"
   author:
-  - name: Emmeke Aarts, Kyuri Park
+  - name: Emmeke Aarts
     affiliations:
     - name: Department of Methodology and Statistics, Utrecht University
   cover-image: images/cover.png
@@ -40,7 +40,6 @@ book:
         - convergence.qmd
 
     - references.qmd
-    - untitled.Rmd
 
 bibliography: bibliography.bib
 
@@ -51,6 +50,7 @@ format:
     number-sections: true
     code-link: true
     css: styles.css
+    linkcolor: hsla(200deg 60% 35% / 90%);
     # highlight-style: pygments
     # code-block-border-left: true
 

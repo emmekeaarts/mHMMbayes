@@ -48,17 +48,19 @@ gamma_subj <- obtain_gamma(out_2st, level = "subject")
 gamma_subj
 ```
 
-<details>
 
-<summary>See the list of subject-specific parameter estimates: `gamma_subj`</summary>
+::: {.callout-note appearance="minimal" collapse="true"}
+
+## See the list of subject-specific parameter estimates: `gamma_subj`
 
 ```{r, echo=FALSE}
 # To obtain the subject specific parameter estimates:
 gamma_subj <- obtain_gamma(out_2st, level = "subject")
 gamma_subj
 ```
+:::
 
-</details>
+
 
 ::: callout-tip
 An additional option provided by the functions `obtain_gamma` and `obtain_emiss` is the ability to change the burn-in period used for obtaining the summary statistics. This can be done by specifying the input argument `burn_in`.

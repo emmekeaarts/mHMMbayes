@@ -11,6 +11,10 @@ pre.sourceCode{
 pre > code{
   font-size: 10pt;
 }
+
+code {
+  color: #1E0A6E;
+}
 /*
 h2 {
     border-bottom: 4px solid #f7f7f7;

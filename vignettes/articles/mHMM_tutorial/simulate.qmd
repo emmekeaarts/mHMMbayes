@@ -150,7 +150,7 @@ data2 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q
 Lastly, as mentioned above, we can also simulate the subject-specific gamma and emission distributions. There are two ways to achieve this; by either setting `n_t` to zero or use an argument called `return_ind_par`. Below, we provide examples of both methods.
 
 ```{r}
-## 3. simulating only the subject-specific transition probability matrices 
+## 3. Simulating only the subject-specific transition probability matrices 
 ## and emission distributions by setting n_t = 0
 n_t <- 0 # set n_t to zero
 n <- 5
@@ -168,30 +168,38 @@ data3 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
 ```
 
-<details>
-<summary>See the list of subject-specific gamma and emission distributions from the output `data3`.</summary>
+
+::: {.callout-note appearance="minimal" collapse="true"}
+
+## See the list of subject-specific gamma and emission distributions from the output `data3`
 
 ```{r, echo=FALSE}
 data3
 ```
-</details>
+:::
+
+
 
 This time, we set `return_ind_par` to true to simulate the subject-specific transition probability matrices and emission distributions. The distinction from setting `n_t` to zero is that, in the latter case, it only returns the simulated subject-specific transition probability matrices and emission distributions without generating any data. However, when using `return_ind_par`, it not only returns the simulated subject-specific parameters but also provides the simulated data.
 
 ```{r}
-## 4. simulating the subject-specific transition probability matrices 
+## 4. Simulating the subject-specific transition probability matrices 
 ## and emission distributions by setting return_ind_par = TRUE
 data4 <- sim_mHMM(n_t = 10, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss =.5,
                   return_ind_par = TRUE)
 ```
-<details>
-<summary>See the details of the output `data4`.</summary>
+
+
+::: {.callout-note appearance="minimal" collapse="true"}
+
+## See the details of the output `data4`
 
 ```{r, echo=FALSE}
 data4
 ```
-</details>
+:::
+
 
 
 

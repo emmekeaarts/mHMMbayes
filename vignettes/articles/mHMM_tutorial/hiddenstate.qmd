@@ -16,7 +16,5 @@ devtools::load_all()
 
 ```{r show 4 state model, fig.width = 5, fig.height = 3}
 summary(out_4st)
-
-m <- 4
 plot(obtain_gamma(out_4st))
 ```

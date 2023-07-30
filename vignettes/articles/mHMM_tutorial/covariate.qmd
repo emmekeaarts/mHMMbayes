@@ -1,0 +1,106 @@
+# Using covariates {#sec-covariate}
+
+In @sec-fitting, we show how to fit a multilevel hidden Markov model using the `mHMM` function. Here, we extend the scenario by including a covariate.
+When utilizing a covariate, we need to use `xx` argument in the `mHMM` function.
+
+- `xx`: An optional list of (level 2) covariates to predict the transition
+ matrix and/or the emission probabilities. Level 2 covariate(s) means that
+ there is one observation per subject of each covariate. The first element
+ in the list `xx` is used to predict the transition matrix. Subsequent
+ elements in the list are used to predict the emission distribution of (each
+ of) the dependent variable(s). Each element in the list is a matrix, with
+ the number of rows equal to the number of subjects. The first column of
+ each matrix represents the *intercept*, that is, a column only consisting of
+ ones. Subsequent columns correspond to covariates used to predict the
+ transition matrix / emission distribution. 
+ 
+::: {.callout-note}
+Covariates specified in `xx` can either be *dichotomous* or *continuous*
+variables. Dichotomous variables have to be coded as 0/1 variables.
+Categorical or factor variables can as yet not be used as predictor
+covariates. The user can however break up the categorical variable in
+multiple dummy variables (i.e., dichotomous variables), which can be used
+simultaneously in the analysis. Continuous predictors are automatically
+*centered*. This is done such that the presented probabilities in the output 
+correspond to the predicted probabilities at the average value of the
+covariate(s).
+:::
+
+As an illustrative example, we fit a multilevel HMM that includes covariates using the `nonverbal_cov` dataset (see `?nonverbal_cov`). Since this is just for demonstration purposes, the MCMC iterations (`J`) and burn-in period (`burn_in`) are set to very small values; 10 and 5, respectively.
+```{r, eval = FALSE}
+## Run a model including covariates to predict the gamma & emission distributions for each of the 4 dependent variables:
+
+# specifying general model properties:
+m <- 2
+n_dep <- 4
+q_emiss <- c(3, 2, 3, 2)
+n_subj <- 10
+
+# specifying starting values
+start_TM <- diag(.8, m)
+start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+start_EM <- list(matrix(c(0.05, 0.90, 0.05,
+                          0.90, 0.05, 0.05), byrow = TRUE,
+                        nrow = m, ncol = q_emiss[1]), # vocalizing patient
+                 matrix(c(0.1, 0.9,
+                          0.1, 0.9), byrow = TRUE, nrow = m,
+                        ncol = q_emiss[2]), # looking patient
+                 matrix(c(0.90, 0.05, 0.05,
+                          0.05, 0.90, 0.05), byrow = TRUE,
+                        nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+                 matrix(c(0.1, 0.9,
+                          0.1, 0.9), byrow = TRUE, nrow = m,
+                        ncol = q_emiss[4])) # looking therapist
+
+# specifying covariates for gamma (xx_gamma) & emission distributions (xx_emiss)
+xx_gamma <- rep(list(matrix(c(rep(1, n_subj), nonverbal_cov$` std_SCA_change`),
+                            ncol = 2, nrow = n_subj)))
+xx_emiss <- rep(list(matrix(c(rep(1, n_subj), nonverbal_cov$std_CDI_change, 
+                     nonverbal_cov$diagnosis), ncol = 3, nrow = n_subj)), n_dep)
+xx <- c(xx_gamma, xx_emiss)
+
+# fit the model
+out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
+                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                  start_val = c(list(start_TM), start_EM),
+                  mcmc = list(J = 10, burn_in = 5))
+```
+
+We can again check the result by using the `print` and `summary` functions.
+
+```{r show print model}
+print(out_2st_c)
+```
+
+When covariates are used, the `summary` function also returns *regression coefficients* ($\beta$) along with their credible intervals. See below for an example of the output.
+
+```{r show summary model, eval=FALSE}
+summary(out_2st_c)
+```
+
+::: {.callout-note appearance="minimal" collapse="true"}
+
+## See the summary output when covariates are included: `summary(out_2st_c)`
+
+```{r, echo=FALSE}
+summary(out_2st_c)
+```
+
+:::
+
+
+::: {.callout-tip}
+## Interpretation of coefficients ($\beta$)
+
+The interpretation of regression coefficients in the context of a multilevel hidden Markov model (HMM) with covariates can depend on the specific application and the nature of the covariates used. In general, the interpretation of regression coefficients can be similar to that in traditional regression models, but with some additional considerations due to the hidden Markov nature of the data.
+
+- Transition Probability Matrix:
+In the case of covariates influencing the transition probability matrix (gamma), the regression coefficients represent the change in the log-odds of transitioning from one state to another, for a one-unit change in the covariate. The coefficients can be positive or negative, indicating an increase or decrease in the likelihood of transitioning between states based on the covariate value.
+
+- Emission Probabilities:
+For categorical emission distributions, the regression coefficients represent the log-odds of the probability of observing a particular category of the dependent variable, given a one-unit change in the covariate. Positive coefficients indicate an increase in the log-odds of observing a specific category, while negative coefficients indicate a decrease.
+
+:::
+
+
+

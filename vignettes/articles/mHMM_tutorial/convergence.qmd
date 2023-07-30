@@ -48,7 +48,7 @@ start_EM_b <- list(matrix(c(0.2, 0.6, 0.2,
                           0.4, 0.6), byrow = TRUE, nrow = m,
                         ncol = q_emiss[4])) # looking therapist
 
-# Run a model identical to out_2st, but with different starting values:
+# run a model identical to out_2st, but with different starting values:
 set.seed(9843)
 out_2st_b <- mHMM(s_data = nonverbal, 
                       gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
@@ -56,7 +56,6 @@ out_2st_b <- mHMM(s_data = nonverbal,
                       mcmc = list(J = 1000, burn_in = 200))
 
 ```
-
 
 If we, for example, want to inspect the traceplots for the transition probabilities, we can do the following:
 
@@ -79,20 +78,18 @@ traceplot(L, component = "emiss", dep = 2, dep_lab = "patient looking behavior",
           col = brewer.pal(2, name = "Set2"))
 ```
 
-
-::: {.callout-tip}
+::: callout-tip
 ## Arguments for `traceplot` function
 
 `traceplot` creates the traceplot(s) for the group-level parameter estimates corresponding to a fitted multilevel hidden Markov model. It takes the following arguments:
 
-- `L`: list of objects of class `mHMM`.
-- `component`: string is used to specify whether the traceplot should be created for the parameter estimates of the transition probabilities `component = "gamma"` or the emission probabilities `component = "emiss"`. Default is `component = "gamma"`.
-- `dep`: integer specifying for which dependent variable the traceplot should be plotted. Only required if one wishes to plot the emission distribution probabilities.
-- `col`: optional vector of colors for the traceplot lines. The vector should have a length equal to the number of `mHMM` objects in the list `L`.
-- `cat_lab`: optional vector of strings denoting the labels of the categorical outcome values. 
-- `dep_lab`: optional string when plotting for the emission probabilities, denoting the label for the dependent variable plotted.
-- `burn_in`: optional integer which specifies the number of iterations to discard.
+-   `L`: list of objects of class `mHMM`.
+-   `component`: string is used to specify whether the traceplot should be created for the parameter estimates of the transition probabilities `component = "gamma"` or the emission probabilities `component = "emiss"`. Default is `component = "gamma"`.
+-   `dep`: integer specifying for which dependent variable the traceplot should be plotted. Only required if one wishes to plot the emission distribution probabilities.
+-   `col`: optional vector of colors for the traceplot lines. The vector should have a length equal to the number of `mHMM` objects in the list `L`.
+-   `cat_lab`: optional vector of strings denoting the labels of the categorical outcome values.
+-   `dep_lab`: optional string when plotting for the emission probabilities, denoting the label for the dependent variable plotted.
+-   `burn_in`: optional integer which specifies the number of iterations to discard.
 :::
 
-In the figures @fig-traceplot_trans and @fig-traceplot_emiss, we can observe that the parameter estimates converge to the same parameter space, indicating a stable estimation. Additionally, the chains appear to mix well, showing smooth and consistent movements throughout the iterations. Furthermore, there is no evidence of label switching. These are positive signs that the Bayesian estimation procedure is reliable and that the model has converged to a consistent solution.
-
+In the figures @fig-traceplot_trans and @fig-traceplot_emiss, we can observe that the parameter estimates converge to the same parameter space, indicating a stable estimation. Additionally, the chains appear to mix well, showing smooth and consistent movements throughout the iterations. Furthermore, there is no evidence of label switching. These are positive signs that the model has converged to a consistent solution.

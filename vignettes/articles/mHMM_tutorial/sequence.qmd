@@ -1,6 +1,5 @@
 # Determining the most likely state sequence {#sec-sequence}
 
-
 Given a well-fitting HMM, it may be of interest to determine the actual *sequence*, or order of succession, of hidden states that has most likely given rise to the sequence of outcomes as observed in a subject. One can either use local decoding, in which the probabilities of the hidden state sequence are obtained simultaneously with the model parameters estimates, or the well-known Viterbi algorithm [@viterbi1967; @forney1973]. In local decoding, the most likely state is determined separately at each time point $t$, in contrast to the Viterbi algorithm in which one determines the joint probability of the complete sequence of observations $O_{1:T}$ and the complete sequence of hidden states $S_{1:T}$.
 
 In the package, local decoding can be achieved by saving the sampled hidden state sequence at each iteration of the Gibbs sampler, by setting the input variable `return_path = TRUE` for the function `mHMM`. This will result in very large output files, however. Global decoding can be performed by using the function `vit_mHMM`:
@@ -50,5 +49,4 @@ legend("topright", bty = "n", fill = c(Look_col, "white", Voc_col), legend = c(L
 legend("topleft", bty = "n", fill = State_col, legend = c("State 1", "State 2"))
 
 graphics::par(old_par)
-
 ```
