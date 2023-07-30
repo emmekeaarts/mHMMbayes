@@ -1,0 +1,191 @@
+# Prior distributions {#sec-prior}
+
+In the Bayesian estimation of the multilevel hidden Markov model, it is essential to define [(hyper-)prior](https://en.wikipedia.org/wiki/Hyperprior) distributions for the group level parameters, such as the emission and transition probabilities. By default, non-informative priors are utilized, but users can specify alternative prior distributions if desired. Below, we provide some information on this topic. For a more comprehensive explanation of the specific (hyper-)prior distributions and their parameters, please refer to the vignette [Estimation of the multilevel hidden Markov model](https://cran.r-project.org/web/packages/mHMMbayes/vignettes/estimation-mhmm.pdf).\
+
+::: callout-note
+## Pay Attention
+
+It is important to note that the prior distributions are *not* directly applied to the probabilities themselves but to the intercepts (and regression coefficients if covariates are used) of the Multinomial regression model employed to account for the multilevel structure of the data.\
+Additionally, each parameters does *not* have their own independent prior distribution. As each row of the emission distribution matrix and transition probability matrix sum to one, the individual parameters of these rows are connected. Hence, each row is seen as a set of parameters which are estimated jointly, and each set of parameters has a multivariate prior distribution.
+:::
+
+The sets of intercepts of the Multinomial regression model have a multivariate normal distribution. The (hyper-) prior for these intercepts thus consists of a prior distribution on the vector of means, and a prior distribution on the covariance matrix.
+
+The hyper-prior for the mean intercepts is a *multivariate normal distribution*, with, as default, a vector of means equal to 0, and a parameter $K_0$ with which the covariance matrix is multiplied. Here, $K_0$ denotes the number of observations (i.e., the number of hypothetical prior subjects) on which the prior mean vector of zero's is based. By default, $K_0$ is set to 1.
+
+The hyper-prior for the covariance matrix between the set of (state specific) intercepts has an *Inverse Wishart distribution*, for which the variance in the default setting equals 3 + $m$ - 1 for the transition probabilities and 3 + $q$ - 1 for the emission probabilities, and the covariance equals 0. The degrees of freedom of the Inverse Wishart distribution is set to 3 + $m$ - 1 for the transition probabilities and 3 + $q$ - 1 for the emission probabilities.[^prior-1]
+
+[^prior-1]: $m$ denotes the number of distinct states and $q$ denotes the number of distinct observation categories.
+
+For illustrative purposes, below are example inverse-Wishart distributions. The general characteristic is that the inverse-Wishart distribution becomes more informative as the degrees of freedom ($\nu$) *increase* and the variance ($\sigma^2$) becomes *smaller*.
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+#| fig-height: 4
+library(MCMCpack)   # Wishart distribution
+library(actuar)     # inverse gamma distribution
+
+## Hyperparameters of the inverse-Wishart prior
+nu  <- c(4, 8)                  # Degrees of Freedom
+Phi <- matrix(c(4,0,0,8),2,2)   # Scale matrix
+
+## Marginal priors of the variances
+##
+## Use the fact that, if S ~ invW(Phi, nu), then
+## s_ii ~ invGa(alpha = nu/2, beta = Phi_ii/2)
+y <- list()
+for(i in 1:length(nu)){
+  limits <- sapply(diag(Phi),
+                   function(x) qinvgamma(c(.01, .99), shape = nu[i]/2, scale = x/2))
+  
+  ## To plot the marginal prior variances under the same scale,
+  ## we use the maximal interval
+  limits <- c(min(limits[1, ]), max(limits[2, ]))
+  x <- seq(limits[1], limits[2], length = 500)
+  y[[i]] <- do.call('c',
+                    lapply(diag(Phi),
+                           function(ss) dinvgamma(x,
+                                                  shape = nu[i]/2,
+                                                  scale = ss/2))) |>
+    cbind(rep(x,2), c(rep(diag(Phi)[1], length(x)), rep(diag(Phi)[2], length(x)))) |>
+    as.data.frame() |> rename(y = V1, x = V2, sigmasq = V3) |>
+    mutate(across(y:x, as.numeric))
+}
+
+priordf <- y |> bind_rows(.id="nu") |> mutate(nu = if_else(nu == 1, paste("nu:",diag(Phi)[1]), paste("nu:",diag(Phi)[2])))
+
+## Plot prior curves and true value
+ggplot(priordf, aes(x, y, col = factor(sigmasq))) + 
+  geom_line(size=0.3) +
+  theme_bw() +
+  xlim(0, 10) + 
+  scale_color_brewer(palette = "Set2") +
+  facet_wrap(~nu, labeller = label_parsed) +
+  labs(title = "Example Inverse-Wishart distributions", 
+       subtitle = expression(nu~"= degrees of freedom / "~sigma^2~"= variance"), 
+       x = "", y = "", color = expression(sigma^2)) +
+  theme(legend.position = "bottom",
+        legend.box.spacing = unit(-13, "pt"))
+```
+
+## How to specify prior distributions
+
+To specify user specific prior distributions, one uses the input option `emiss_hyp_prior` for the emission distribution and `gamma_hyp_prior` for the transition probabilities in the function `mHMM`. These input arguments take an object from the class `mHMM_prior_emiss` and `mHMM_prior_gamma` created by the functions `prior_emiss_cat` and `prior_gamma`, respectively. Both objects are a list, containing the following key elements:
+
+-   **`mu0`**, a lists containing the hypothesized hyper-prior mean values of the intercepts of the Multinomial logit model.
+-   **`K0`**, the number of hypothetical prior subjects on which the set of hyper-prior mean intercepts specified in `mu0` are based.
+-   **`nu`**, degrees of freedom of the hyper-prior Inverse Wishart distribution on the covariance of the Multinomial logit intercepts.
+-   **`V`**, the variance-covariance of the hyper-prior Inverse Wishart distribution on the covariance of the Multinomial logit intercepts.
+
+Note that `K0`, `nu` and `V` are assumed equal over the states. The mean values of the intercepts (and regression coefficients of the covariates) denoted by `mu0` are allowed to vary over the states. All elements in the list either have the prefix `gamma_` or `emiss_`, depending on which list they belong to.
+
+::: callout-caution
+## Caution
+
+When specifying prior distributions, note that the first element of each row in the probability domain does *not* have an intercept, as it serves as baseline category in the Multinomial logit regression model.\
+This means, for example, that if we would specify a model with 3 states, `mu0` is a vector with 2 elements, `K0` and `nu` contain 1 element and `V` is a 2 by 2 matrix.
+:::
+
+### Hyper-prior on transition probability matrix
+
+When using the `prior_gamma` function to specify informative hyper-prior on gamma, and if the hyper-prior values for `gamma_K0`, `gamma_nu` and `gamma_V` are not manually specified, the default values are as follows:
+
+-   `gamma_K0` is set to $1$.
+-   `gamma_nu` is set to $3 + m- 1$.
+-   the diagonal elements of `gamma_V` (i.e., the variance) are set to $3 + m - 1$, while the off-diagonal elements (i.e., the covariance) are set to 0.
+
+Thus, the user only needs to specify the number of states `m` and the hypothesized hyper-prior mean values of the multinomial logit intercepts, as default values are available for all other hyper-prior distribution parameters. The following code snippet provides an example of how to specify these values.
+
+```{r}
+# 1. specify general model properties
+m <- 3
+
+# 2. represent a prior belief: switching to state 3 does not occur often 
+# and state 3 has a relative short duration
+prior_prob_gamma <- matrix(c(0.70, 0.25, 0.05,
+                             0.25, 0.70, 0.05,
+                             0.30, 0.30, 0.40), nrow = m, ncol = m, byrow = TRUE)
+
+# 3. use the function prob_to_int() to obtain intercept values for the 
+# above specified transition probability matrix gamma
+prior_int_gamma <- prob_to_int(prior_prob_gamma)
+gamma_mu0 <- list(matrix(prior_int_gamma[1,], nrow = 1, ncol = m-1),
+                  matrix(prior_int_gamma[2,], nrow = 1, ncol = m-1),
+                  matrix(prior_int_gamma[3,], nrow = 1, ncol = m-1))
+
+# 4. feed them to the function prior_gamma()
+manual_prior_gamma <- prior_gamma(m = m, gamma_mu0 = gamma_mu0)
+
+# 5. use the informative hyper-prior when fitting a model using the function mHHM()
+# mHHM(s_data = ..., ..., gamma_hyp_prior = manual_prior_gamma)
+```
+
+::: callout-note
+When no manual values for the hyper-prior on gamma are specified at all (that is, the function `prior_gamma` is not used), all elements of the matrices contained in `gamma_mu0` are set to 0 in the function `mHMM`.
+:::
+
+### Hyper-prior on categorical emission distribution(s)
+
+When using the `prior_emiss_cat` function to specify informative hyper-prior on the categorical emission distirbution(s), and if the hyper-prior values for `emiss_K0`, `emiss_nu` and `emiss_V` are not manually specified, the default values are as follows:
+
+-   `emiss_K0` is set to $1$.
+-   `emiss_nu` is set to $3 + q\_emiss[k] - 1$.
+-   the diagonal elements of `emiss_V` (i.e., the variance) are set to $3 + q\_emiss[k] - 1$, while the off-diagonal elements (i.e., the covariance) are set to 0.
+
+Similarly to the transition probabilities above, if no manual values for the hyper-prior on the categorical emission distribution are specified at all (i.e., the function `prior_emiss_cat` is not used), all elements of the matrices contained in `emiss_mu0` are set to 0 in the function `mHMM`. The following example code demonstrates how to specify the hyper-prior on emission distributions using the `prior_emiss_cat` function.
+
+```{r}
+# 1. specify general model properties
+m <- 3
+n_dep <- 4
+q_emiss <- c(3, 2, 3, 2)
+
+# 2. specify hypothesized mean emission probabilities
+prior_prob_emiss_cat <- list(matrix(c(0.10, 0.80, 0.10,
+                                      0.80, 0.10, 0.10,
+                                      0.40, 0.40, 0.20), byrow = TRUE,
+                                    nrow = m, ncol = q_emiss[1]), # vocalizing patient,
+                             # prior belief: state 1 - much talking, state 2 -
+                             # no talking, state 3 - mixed
+                             matrix(c(0.30, 0.70,
+                                      0.30, 0.70,
+                                      0.30, 0.70), byrow = TRUE, nrow = m,
+                                    ncol = q_emiss[2]), # looking patient
+                             # prior belief: all 3 states show frequent looking
+                             # behavior
+                             matrix(c(0.80, 0.10, 0.10,
+                                      0.10, 0.80, 0.10,
+                                      0.40, 0.40, 0.20), byrow = TRUE,
+                                    nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+                             # prior belief: state 1 - no talking, state 2 -
+                             # frequent talking, state 3 - mixed
+                             matrix(c(0.30, 0.70,
+                                      0.30, 0.70,
+                                      0.30, 0.70), byrow = TRUE, nrow = m,
+                                    ncol = q_emiss[4])) # looking therapist
+# prior belief: all 3 states show frequent looking
+# behavior
+
+# 3. use the function prob_to_int() to obtain intercept values for the above specified
+# categorical emission distributions
+prior_int_emiss <- sapply(prior_prob_emiss_cat, prob_to_int)
+emiss_mu0 <- rep(list(vector(mode = "list", length = m)), n_dep)
+for(k in 1:n_dep){
+  for(i in 1:m){
+    emiss_mu0[[k]][[i]] <- matrix(prior_int_emiss[[k]][i,], nrow = 1)
+  }
+}
+
+# 4. feed them to the function prior_emiss_cat()
+manual_prior_emiss <- prior_emiss_cat(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                                      emiss_mu0 = emiss_mu0)
+
+# 5. use the informative hyper-prior when fitting a model using the function mHHM()
+# mHHM(s_data = ..., ..., emiss_hyp_prior = manual_prior_emiss)
+```
+
+::: callout-note
+In case covariates are specified, the hyper-prior parameter values of the inverse Wishart distribution on the covariance matrix remain unchanged, as the estimates of the regression coefficients for the covariates are fixed over subjects.
+:::

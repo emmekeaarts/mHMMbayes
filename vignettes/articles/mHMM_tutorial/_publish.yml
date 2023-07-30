@@ -1,0 +1,4 @@
+- source: project
+  quarto-pub:
+    - id: 73a5dd4f-5251-475d-9034-d24694243480
+      url: 'https://quartopub.com/sites/kyurip/multilevel-hmm-tutorial'

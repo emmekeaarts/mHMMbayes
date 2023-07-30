@@ -184,8 +184,9 @@
 #'   \code{q_emiss}, the number of iterations \code{J} and the specified burn in
 #'   period \code{burn_in} of the hybrid Metropolis within Gibbs sampler, the
 #'   number of subjects \code{n_subj}, the observation length for each subject
-#'   \code{n_vary}, and the column names of the dependent variables
-#'   \code{dep_labels}.}
+#'   \code{n_vary}, the column names of the dependent variables
+#'   \code{dep_labels}, the specified covariate variables \code{covariate}, and
+#'   the type of covariate variables \code{covar_type}. }
 #'   \item{\code{sample_path}}{A list containing one matrix per subject with the
 #'   sampled hidden state sequence over the hybrid Metropolis within Gibbs
 #'   sampler. The time points of the dataset are contained in the rows, and the
@@ -306,10 +307,11 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
     stop("The input argument gen should contain the elements m, n_dep and q_emiss.")
   }
   n_dep			 <- gen$n_dep
-  dep_labels <- colnames(s_data[,2:(n_dep+1)])
   id         <- unique(s_data[,1])
   n_subj     <- length(id)
   subj_data  <- rep(list(NULL), n_subj)
+  dep_labels <- colnames(s_data[,2:(n_dep+1)])
+  if(any(is.na(dep_labels))||any(is.null(dep_labels))) dep_labels <- paste0("DV_", 1:n_dep)
   if(sum(sapply(s_data, is.factor)) > 0 ){
     stop("Your data contains factorial variables, which cannot be used as input in the function mHMM. All variables have to be numerical.")
   }
@@ -341,10 +343,13 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   if (is.null(xx)){
     xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), n_dep1)
     nx[] <- 1
+    covar_type <- NULL
+    covtype <- NULL
   } else {
     if(!is.list(xx) | length(xx) != n_dep1){
       stop("If xx is specified, xx should be a list, with the number of elements equal to the number of dependent variables + 1")
     }
+    covar_type <- list()
     for(i in 1:n_dep1){
       if (is.null(xx[[i]])){
         xx[[i]] <- matrix(1, ncol = 1, nrow = n_subj)
@@ -355,6 +360,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
           stop("If xx is specified, the first column in each element of xx has to represent the intercept. That is, a column that only consists of the value 1")
         }
         if(nx[i] > 1){
+          covtype <- c()
           for(j in 2:nx[i]){
             if(is.factor(xx[[i]][,j])){
               stop("Factors currently cannot be used as covariates, see help file for alternatives")
@@ -362,10 +368,15 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
             if((length(unique(xx[[i]][,j])) == 2) & (sum(xx[[i]][,j] != 0 & xx[[i]][,j] !=1) > 0)){
               stop("Dichotomous covariates in xx need to be coded as 0 / 1 variables. That is, only conisting of the values 0 and 1")
             }
+            if(length(unique(xx[[i]][,j])) == 2){
+              covtype[j-1] <- "dichotomous"
+            }
             if(length(unique(xx[[i]][,j])) > 2){
               xx[[i]][,j] <- xx[[i]][,j] - mean(xx[[i]][,j])
+              covtype[j-1] <- "continuous"
             }
           }
+          covar_type[[i]] <- covtype
         }
       }
     }
@@ -765,7 +776,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
   message(paste("Total time elapsed (hh:mm:ss):", hms(ctime-itime)))
   if(return_path == TRUE){
     out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
-                             burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
+                             burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels, covariate = xx, covar_type = covar_type),
                 PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
                 gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, emiss_int_bar = emiss_int_bar,
                 emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
@@ -773,7 +784,7 @@ mHMM <- function(s_data, gen, xx = NULL, start_val, mcmc, return_path = FALSE, p
                 sample_path = sample_path)
   } else {
     out <- list(input = list(m = m, n_dep = n_dep, q_emiss = q_emiss, J = J,
-                             burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
+                             burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels, covariate = xx, covar_type = covar_type),
                 PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
                 gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, emiss_int_bar = emiss_int_bar,
                 emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,

@@ -34,14 +34,27 @@ BugReports: https://github.com/emmekeaarts/mHMMbayes/issues
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
 Suggests: 
     knitr,
     rmarkdown,
     alluvial,
     grDevices,
     RColorBrewer,
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    ggplot2,
+    ggalluvial,
+    dplyr,
+    tidyr,
+    purrr,
+    stringr,
+    stringi,
+    tibble,
+    tidyselect,
+    rlang,
+    magrittr,
+    scales,
+    ggh4x
 VignetteBuilder: knitr
 RdMacros: Rdpack
 SystemRequirements: GNU make

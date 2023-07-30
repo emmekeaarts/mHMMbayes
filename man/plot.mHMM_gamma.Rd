@@ -17,9 +17,11 @@ object represents the subject specific transition probability matrices.}
 \item{cex}{An integer specifying scaling of fonts of category labels. When
 not specified, defaults to \code{cex = 0.8}.}
 
-\item{col}{An optional vector with length \code{m} * \code{m} (i.e., where
-\code{m} denotes the number of hidden states) specifying the used colors in
-the alluvial plot.}
+\item{col}{An optional vector specifying colors. When ggplot2 is available,
+the length of the vector should be equal to \code{m} (i.e., the number of
+hidden states). When using the base R plot function, the length of the
+vector should be \code{m * m}, specifying the used colors in the alluvial
+plot. If not specified, colors will be assigned automatically.}
 
 \item{hide}{An optional logical vector with  length \code{m} * \code{m}
 (i.e., where \code{m} denotes the number of hidden states) specifying
