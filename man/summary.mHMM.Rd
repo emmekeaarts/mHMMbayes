@@ -12,5 +12,10 @@
 \item{...}{Other parameters passed down to \code{summary()}.}
 }
 \description{
-Summary of a \code{mHMM} object
+The summary function is used to obtain a summary of the results rom fitting
+a multilevel hidden Markov model (mHMM), including the point estimates of the
+posterior distribution for the transition probability matrix and the emission
+distribution of each of the dependent variables at the group level.
+When covariates are utilized, it also returns the regression coefficients
+along with their credible intervals. For now, it
 }

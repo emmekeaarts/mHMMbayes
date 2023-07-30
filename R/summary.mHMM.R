@@ -1,5 +1,12 @@
 #' Summary of a \code{mHMM} object
 #'
+#' The summary function is used to obtain a summary of the results rom fitting
+#' a multilevel hidden Markov model (mHMM), including the point estimates of the
+#' posterior distribution for the transition probability matrix and the emission
+#' distribution of each of the dependent variables at the group level.
+#' When covariates are utilized, it also returns the regression coefficients
+#' along with their credible intervals. For now, it
+#'
 #' @param object A \code{mHMM} object.
 #' @param ... Other parameters passed down to \code{summary()}.
 #'
@@ -24,15 +31,22 @@ summary.mHMM <- function(object, ...){
   print(gamma_pop)
   cat("\n")
   if (!is.null(type_covar[[1]])){
-    regr_coeff_gamma <- data.frame(From_state = c(rep(1:m, each = m - 1)),
-                                   To_state = rep(2:m, m))|>
-      dplyr::mutate(Beta = round(apply(object$gamma_cov_bar[(burn_in + 1): J,],
-                                       2, median),3),
-                    CrI_lower = round(apply(object$gamma_cov_bar[(burn_in + 1): J,],
-                                            2, quantile, probs = 0.025),3),
-                    CrI_upper = round(apply(object$gamma_cov_bar[(burn_in + 1): J,],
-                                            2, quantile, probs = 0.975),3),
-                    ` ` = ifelse(CrI_lower < 0 & CrI_upper > 0, " ", "*"))
+    regr_coeff_gamma <- vector("list", length(type_covar[[1]]))
+    names(regr_coeff_gamma) <- paste0("cov", 1:length(type_covar[[1]]))
+    for (g in 1:length(type_covar[[1]])){
+      regr_coeff_gamma[[g]] <- data.frame(From_state = c(rep(1:m, each = m - 1)),
+                                          To_state = rep(2:m, m))|>
+        dplyr::mutate(Beta = round(apply(object$gamma_cov_bar[(burn_in + 1):J,
+                             grepl(paste0("cov", g), colnames(object$gamma_cov_bar))], 2, median),3),
+                      CrI_lower = round(apply(object$gamma_cov_bar[(burn_in + 1): J,
+                                  grepl(paste0("cov", g), colnames(object$gamma_cov_bar))], 2,
+                                  quantile, probs = 0.025),3),
+                      CrI_upper = round(apply(object$gamma_cov_bar[(burn_in + 1): J,
+                                  grepl(paste0("cov", g), colnames(object$gamma_cov_bar))], 2,
+                                  quantile, probs = 0.975),3),
+                      ` ` = ifelse(CrI_lower < 0 & CrI_upper > 0, " ", "*"))
+    }
+
     cat("Regression coefficients predicting the transition probabilities","\n",
         "(at the group level):", "\n", "\n")
     print(regr_coeff_gamma, row.names = F)
@@ -54,21 +68,31 @@ summary.mHMM <- function(object, ...){
   cat("\n")
   # assume covar lists for emiss are the same
   if (!is.null(type_covar[[2]])){
-    regr_coeff_emiss <- vector("list", n_dep)
-    names(regr_coeff_emiss) <- dep_labels
-    for (i in 1:n_dep){
-      regr_coeff_emiss[[i]] <- data.frame(Category = c(rep(2:q_emiss[i], m)),
-                                          State = rep(1:m, each = q_emiss[i]-1))|>
-        dplyr::mutate(Beta = round(apply(object$emiss_cov_bar[[i]][(burn_in + 1): J,],
-                                         2, median),3),
-          CrI_lower = round(apply(object$emiss_cov_bar[[i]][(burn_in + 1): J,],
-                                  2, quantile, probs = 0.025),3),
-          CrI_upper = round(apply(object$emiss_cov_bar[[i]][(burn_in + 1): J,],
-                                  2, quantile, probs = 0.975),3),
-          ` ` = ifelse(CrI_lower < 0 & CrI_upper > 0, " ", "*")
+    regr_coeff_emiss <- vector("list", length(type_covar[[2]]))
+    regr_coeff_dep <- vector("list", n_dep)
+    names(regr_coeff_emiss) <- paste0("cov", 1:length(type_covar[[2]]))
+    names(regr_coeff_dep) <- dep_labels
+    for(g in 1:length(type_covar[[2]])){
+      for (i in 1:n_dep){
+        regr_coeff_dep[[i]] <- data.frame(Category = c(rep(2:q_emiss[i], m)),
+                                            State = rep(1:m, each = q_emiss[i]-1))|>
+          dplyr::mutate(Beta = round(apply(object$emiss_cov_bar[[i]]
+                                    [(burn_in + 1): J, grepl(paste0("cov", g),
+                                    colnames(object$emiss_cov_bar[[i]]))], 2, median),3),
+                        CrI_lower = round(apply(object$emiss_cov_bar[[i]]
+                                    [(burn_in + 1): J, grepl(paste0("cov", g),
+                                    colnames(object$emiss_cov_bar[[i]]))], 2, quantile,
+                                    probs = 0.025),3),
+                        CrI_upper = round(apply(object$emiss_cov_bar[[i]]
+                                    [(burn_in + 1): J, grepl(paste0("cov", g),
+                                    colnames(object$emiss_cov_bar[[i]]))],2, quantile,
+                                    probs = 0.975),3),
+                        ` ` = ifelse(CrI_lower < 0 & CrI_upper > 0, " ", "*")
           )
+      }
+      regr_coeff_emiss[[g]] <- regr_coeff_dep
     }
-    cat("Regression coefficients predicting the emission probabilities for each of the dependent variables","\n",  "(at the group level):", "\n", "\n")
+    cat("Regression coefficients predicting the emission probabilities","\n", "for each of the dependent variables","\n",  "(at the group level):", "\n", "\n")
     print(regr_coeff_emiss, row.names = F)
     cat("Note: [*] 95% credible interval does not include zero.")
   }

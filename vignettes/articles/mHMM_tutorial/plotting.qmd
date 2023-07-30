@@ -1,1 +1,116 @@
-# plotting
+# Graphically displaying outcomes {#sec-plotting}
+
+The package includes several plot functions to visualize the fitted model and its parameters.
+
+## Posterior densities plot
+
+One can plot the posterior densities of a fitted model, for both the transition probability matrix gamma and for the emission distribution probabilities. These densities are displayed for both the group level and the subject level simultaneously. When the `ggplot2` package is installed, the functions will utilize ggplot by default. However, if `ggplot2` is not available, the base R `plot` function will be used instead.
+
+Here's an example demonstrating how to create a plot of the emission distribution for the variable `p_vocalizing`:
+
+```{r show plot posterior densities, fig.width = 7.2, fig.height = 4}
+library(RColorBrewer)
+# Specify color and label
+Voc_col <- c(brewer.pal(3,"PuBuGn")[c(1,3,2)])
+Voc_lab <- c("Not Speaking", "Speaking", "Back channeling")
+
+# Use base R plot function
+plot(out_2st, component = "emiss", dep = 1, col = Voc_col, 
+     dep_lab = c("Patient vocalizing"), cat_lab = Voc_lab)
+```
+
+```{r, eval=FALSE}
+# When ggplot2 is available
+library(ggplot2)
+plot(out_2st, component = "emiss", dep = 1, col = brewer.pal(3, "Accent"),
+     dep_lab = c("Patient vocalizing"), cat_lab = Voc_lab)
+```
+
+```{r, echo=FALSE}
+#| echo: false
+#| fig-height: 4
+#| fig-width: 7
+plot(out_2st, component = "emiss", dep = 1, col = brewer.pal(3, "Accent"),
+     dep_lab = c("Patient vocalizing"), cat_lab = Voc_lab)
+```
+
+In the plots above, the solid line visualizes the posterior density at the group level, while each of the dotted lines visualizes the posterior density of one subject.
+
+::: {.callout-tip}
+## Arguments for `plot` function
+
+-   `component` specifies whether we want to visualize the posterior densities for the transition probability matrix gamma (`component = "gamma"`) or for the emission distribution probabilities (`component = "emiss"`).
+-   When using `component = "emiss"`, the argument `dep` specifies which dependent variable we want to inspect. Here, we set `dep = 1` as the variable `p_vocolizing` is the first variable in the set.
+-   `col` specifies the colors to be used when plotting the lines.
+-   `dep_lab` denotes the label of the dependent variable we are plotting.
+-   `cat_lab` denotes the labels of the categorical outcomes in the corresponding dependent variable.\
+    For more detailed information, check the help file of the function (`?plot.mHMM`).
+:::
+
+## Transition probabilities plot (riverplot)
+
+Additionally, the package provides a way to plot the transition probabilities obtained using the function `obtain_gamma` in the form of a riverplot. The visualization showcases the transitions between hidden states in a visually appealing manner. Just like with the other plot function above, this function will automatically choose between base R plot or ggplot functions based on the presence of the `ggplot2` package in your R environment.
+
+Below, we provide examples of how to create riverplots (when `ggplot2` is available).
+
+```{r show plot transition prob, fig.show='hold'}
+#| label: fig-transition
+#| fig-subcap:
+#|   - "At group level"
+#|   - "For subject number 1" 
+#| layout-ncol: 2
+# Transition probabilities at the group level
+gamma_pop <- obtain_gamma(out_2st)
+# Transition probabilities for the subject number 1
+gamma_subj <- obtain_gamma(out_2st, level = "subject")
+plot(gamma_pop, col = brewer.pal(2, "Set2")) # specify color
+plot(gamma_subj, subj_nr = 1) # specify subj_nr
+```
+
+Graphically displaying the transition probabilities becomes more informative as the number of hidden states increases. See an example plot below that demonstrates this with four specified hidden states. As the number of states increases, the visual representation becomes more intricate!
+
+```{r}
+#| echo: false
+#| out-width: 70%
+plot(obtain_gamma(out_4st))
+
+```
+
+
+## Prediction plot with covariates
+When covariates are included, we have the option to visualize the predicted transition probabilities and emission probabilities conditioned on covariate values using the `plot_pred` function. This visualization overlays the predicted probabilities on top of the probabilities per subject (dots &#9679; in the plot), allowing us to understand how much the covariate can explain the variability in these probabilities.
+
+Depending on the type of covariates (dichotomous or continuous), `plot_pred` generates either boxplots or line plots. It's important to note that you can only plot *one covariate at a time*. You can specify which covariate you want to plot using the `cov` argument, especially when there are multiple covariates available. See below for the detailed arguments used in the `plot_pred` function:
+
+::: {.callout-tip}
+## Arguments for `plot_pred` function
+
+- `object`: Object of class `mHMM`.
+- `component`: String specifying if the plot is made for the transition 
+probability matrix gamma (default: `component = "gamma"`) or for the emission distribution probabilities (`component = "emiss"`).
+- `cov`: Integer that specifies which covariate to use for plotting when there are multiple covariates available. The default value is 1, which indicates the first covariate in the list of covariates.
+- `dep`: Integer specifying for which dependent variable the predicted emission probabilities are plotted.
+- `col`: Vector of colors for the plots. If one is plotting the predicted transition probabilities, the vector has length `m`. If one is plotting the predicted emission probabilities, the vector has length `q_emiss[k]`. If not specified, colors will be assigned automatically.
+- `cat_lab`: Optional vector of strings when plotting the predicted emission probabilities, denoting the labels of the categorical outcome values. Automatically generated when not provided.
+- `dep_lab`: Optional string when plotting the predicted the emission probabilities with length 1, denoting the label for the dependent variable plotted. Automatically obtained from the input object when not specified.
+- `cov_lab`:Optional string denoting the label for the covariate variable plotted. Automatically generated when not provided.
+:::
+```{r}
+#| fig-height: 4
+
+# Plot of predicted gamma vs covariate 
+plot_pred(out_2st_c, cov = 1, col = brewer.pal(2, "Accent"),  
+          cov_lab = "change in anxiety after therapy") 
+```
+
+```{r}
+#| layout-nrow: 2
+#| fig-height: 4
+
+# Plot of predicted emission prob vs covariate
+plot_pred(out_2st_c, cov = 1, component = "emiss", dep_lab = "patient vocalizing", 
+          col = brewer.pal(3, "Accent"))
+plot_pred(out_2st_c, cov = 2, component = "emiss", cat_lab = 
+            c("Not Speaking", "Speaking", "Back channeling"), col = brewer.pal(3, "Set2"))
+
+```

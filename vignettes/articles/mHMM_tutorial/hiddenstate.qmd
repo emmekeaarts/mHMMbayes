@@ -1,0 +1,20 @@
+# Determining the number of hidden states {#sec-hidden}
+
+The first step in developing a HMM is to determine the number of states $m$ that best describes the observed data, and is a model selection problem. When modelling, for example, behavior, the task is to define the states by clusters of observed behavioral outcomes that provide a reasonable, theoretically interpretable, description of the data.
+
+We suggest using a combination of the **Akaike Information Criterion (AIC)** and the **theoretical interpretability** of the estimated states to choose between models[^hiddenstate-1]. In the example dataset, the 2-, 3- and 4-state model result in an *AIC* of *3279*, *3087*, and [*2959*]{style="color:#000080;"}, respectively. According to model fit indices, the [4 -state model]{style="color:#000080;"} is clearly the best model[^hiddenstate-2]. Let's inspect the composition of the states for the 4 state model, and the transition probabilities.
+
+[^hiddenstate-1]: Note that the likelihood ratio test, commonly used to compare nested models, cannot be used in case of the HMM (i.e., the difference in the log-likelihoods between models is not $\chi^2$ distributed @ryden2008).
+
+[^hiddenstate-2]: We note, however, that the AIC approximates the posterior distribution of the parameters by a Gaussian distribution, which might not be appropriate for models including parameters on the boundary of the parameter space (e.g., close to 0 or 1 in case of probability estimates), or for small data sets, as exemplified by @scott2002. Model selection is therefore not a straightforward procedure in the context of HMM, and the choices remain subjective.
+
+We can see that we have a state in which the patient speaks and the therapist is silent (state 1), a state in which the patient is silent and the therapist speaks (state 2), a state in which both the patient and therapist speak (state 3) and a state in which the therapist speaks but does not look at the patient (in contrast to the looking behavior in all other states), and the patient is silent. In addition, all states are quite stable as the probability of remaining in the same state is above .6 for all states.
+
+```{r, include = FALSE}
+devtools::load_all()
+```
+
+```{r show 4 state model, fig.width = 5, fig.height = 3}
+summary(out_4st)
+plot(obtain_gamma(out_4st))
+```

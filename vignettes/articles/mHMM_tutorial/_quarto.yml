@@ -29,18 +29,37 @@ book:
         - startingval.qmd
         - prior.qmd
         - fittingmodel.qmd
+        - simulate.qmd
+        - covariate.qmd
         - plotting.qmd
 
+    - part: Analyses
+      chapters:
+        - hiddenstate.qmd
+        - sequence.qmd
+        - convergence.qmd
+
     - references.qmd
-    - untitled.Rmd
 
 bibliography: bibliography.bib
 
 format:
   html:
     theme: cosmo
+    fontsize: 1.05em
     number-sections: true
     code-link: true
+    css: styles.css
+    linkcolor: hsla(200deg 60% 35% / 90%);
+    # highlight-style: pygments
+    # code-block-border-left: true
 
-editor: visual
+knitr:
+  opts_chunk:
+    comment: "#>"
+    message: FALSE
+    warning: FALSE
+    fig.align: "center"
+
+editor: source
 

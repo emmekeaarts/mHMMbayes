@@ -1,4 +1,5 @@
-# Data {#sec-dat}
+# Example data {#sec-dat}
+
 We illustrate using the `mHMMbayes` package using the embedded example data `nonverbal`. The data contains the nonverbal communication of *10 patient-therapist couples*, recorded for *15 minutes* at a frequency of *1 observation per second* (= 900 observations per couple).\
 The following variables are contained in the dataset:
 

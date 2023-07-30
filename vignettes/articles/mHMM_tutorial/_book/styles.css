@@ -2,17 +2,20 @@
 
 body{ /* Normal  */
   font-family: 'Lato', sans-serif;
-  font-style: normal;
-  /*background-color: #fff; */
-  margin: 1em auto;
-  max-width: 700px;
-  overflow: visible;
-  padding-left: 2em;
-  padding-right: 2em;
-  font-size: 14.5px;
-  line-height: 1.5;
 }
 
+pre.sourceCode{
+  font-size: .8em;
+}
+
+pre > code{
+  font-size: 10pt;
+}
+
+code {
+  color: #1E0A6E;
+}
+/*
 h2 {
     border-bottom: 4px solid #f7f7f7;
     padding-top: 10px;
@@ -46,4 +49,4 @@ li {
   font-style: normal;
   font-size: 13px;
 }
-
+*/

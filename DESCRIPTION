@@ -53,7 +53,8 @@ Suggests:
     tidyselect,
     rlang,
     magrittr,
-    scales
+    scales,
+    ggh4x
 VignetteBuilder: knitr
 RdMacros: Rdpack
 SystemRequirements: GNU make
