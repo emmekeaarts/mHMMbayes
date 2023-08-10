@@ -31,15 +31,16 @@ specific transition probability matrices gamma and emission distributions
 \item{n}{Numeric vector with length 1 denoting the number of subjects for
 which data is simulated.}
 
-\item{data_distr}{String vector with length 1 denoting the observation type
-of the data to be simulated. Should be set to either \code{'categorical'}
-or \code{'continuous'}. Note that when simulating multivariate data, all
-dependent variables are assumed to be of the same observation type. The
-default equals to \code{data_distr = 'categorical'}.}
+\item{data_distr}{String vector with length 1 describing the
+observation type of the data. Currently supported are \code{'categorical'}
+and \code{'continuous'}. Note that for multivariate data, all dependent
+variables are assumed to be of the same observation type. The default
+equals to \code{data_distr = 'categorical'}.}
 
 \item{gen}{List containing the following elements denoting the general model
 properties:
-\itemize{\item{\code{m}: numeric vector with length 1 denoting the number
+\itemize{
+\item{\code{m}: numeric vector with length 1 denoting the number
 of hidden states}
 \item{\code{n_dep}: numeric vector with length 1 denoting the
 number of dependent variables}
@@ -241,7 +242,7 @@ first row corresponds to the probability of observing the last category in
 state one.
 }
 \examples{
-# simulating data for 10 subjects with each 100 observations
+# simulating data for 10 subjects with each 100 categorical observations
 n_t     <- 100
 n       <- 10
 m       <- 3
@@ -300,15 +301,16 @@ gamma   <- matrix(c(0.8, 0.1, 0.1,
                     0.2, 0.7, 0.1,
                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
 
-emiss_distr <- list(matrix(c( 5, 1,
-                             10, 1,
-                             15, 1), nrow = m, byrow = TRUE),
-                     matrix(c(0.5, 0.2,
-                              1.0, 0.5,
-                              2.0, 0.3), nrow = m, byrow = TRUE))
+emiss_distr <- list(matrix(c( 50, 10,
+                              100, 10,
+                              150, 10), nrow = m, byrow = TRUE),
+                    matrix(c(5, 2,
+                             10, 5,
+                             20, 3), nrow = m, byrow = TRUE))
 
-data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep),
-                      data_distr = 'continuous', gamma = gamma, emiss_distr = emiss_distr,
+data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous',
+                      gen = list(m = m, n_dep = n_dep),
+                      gamma = gamma, emiss_distr = emiss_distr,
                       var_gamma = .5, var_emiss = c(.5, 0.01))
 
 head(data_cont$states)

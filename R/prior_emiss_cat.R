@@ -1,8 +1,10 @@
 #' Specifying informative hyper-prior on the categorical emission distribution(s)  of the multilevel hidden Markov model
 #'
-#' \code{prior_emiss_cat} provides a framework to manually specify an informative
-#' hyper-prior on the categorical emission distribution(s), and creates an object
-#' of class \code{mHMM_prior_emiss} used by the function \code{mHMM}. Note that the
+#' \code{prior_emiss_cat} provides a framework to manually specify an
+#' informative hyper-prior on the categorical emission distribution(s).
+#' \code{prior_emiss_cat} creates an object of class \code{mHMM_prior_emiss}
+#' used by the function \code{mHMM}, and additionally attaches the class
+#' \code{cat} to signal use for categorical observations. Note that the
 #' hyper-prior distribution on the categorical emission probabilities are on the
 #' intercepts (and, if subject level covariates are used, regression
 #' coefficients) of the Multinomial logit model used to accommodate the

@@ -18,7 +18,8 @@ prior_emiss_cont(
 \arguments{
 \item{gen}{List containing the following elements denoting the general model
 properties:
-\itemize{\item{\code{m}: numeric vector with length 1 denoting the number
+\itemize{
+\item{\code{m}: numeric vector with length 1 denoting the number
 of hidden states}
 \item{\code{n_dep}: numeric vector with length 1 denoting the
 number of dependent variables}
@@ -64,16 +65,16 @@ parametrized as a scaled inverse chi-squared distribution).}
 \item{emiss_a0}{A list containing \code{n_dep} elements corresponding to each
 of the dependent variables \code{k}, where each element \code{k} is a
 vector with length \code{m} containing the shape values of the Inverse
-Gamma hyper-prior on each of the (fixed over subjects) emission variances
-of the Normal emission distributions (note: here the standard Inverse Gamma
-parametrization is used).}
+Gamma hyper-prior on each of the (fixed over subjects) emission standard
+deviation^2 of the Normal emission distributions (note: here the standard
+Inverse Gamma parametrization is used).}
 
 \item{emiss_b0}{A list containing \code{n_dep} elements corresponding to each
 of the dependent variables \code{k}, where each element \code{k} is a
 vector with length \code{m} containing the scale values of the Inverse
-Gamma hyper-prior on each of the (fixed over subjects) emission variances
-of the Normal emission distributions (note: here the standard Inverse Gamma
-parametrization is used).}
+Gamma hyper-prior on each of the (fixed over subjects) emission standard
+deviation^2 of the Normal emission distributions (note: here the standard
+Inverse Gamma parametrization is used).}
 
 \item{n_xx_emiss}{Optional numeric vector with length \code{n_dep} denoting
 the number of (level 2) covariates used to predict the emission
@@ -85,13 +86,13 @@ distribution(s).}
 \code{prior_emiss_cont} returns an object of class \code{mHMM_prior_emiss},
   containing informative hyper-prior values for the continuous emission
   distribution(s) of the multilevel hidden Markov model. The object is
-  specifically created and formatted for use by the function \code{mHMM_cont},
+  specifically created and formatted for use by the function \code{mHMM},
   and thoroughly checked for correct input dimensions.
   The object contains the following components:
   \describe{
   \item{\code{gen}}{A list containing the elements \code{m}, and \code{n_dep},
   used for checking equivalent general model properties
-  specified under \code{prior_emiss_cont} and \code{mHMM_cont}.}
+  specified under \code{prior_emiss_cont} and \code{mHMM}.}
   \item{\code{emiss_mu0}}{A lists containing the hypothesized
   hyper-prior means of the Normal distribution on
   the continuous emission probabilities.}
@@ -106,10 +107,12 @@ distribution(s).}
   between subject variance of the emission distribution means.}
   \item{\code{emiss_a0}}{A list containing \code{n_dep} elements denoting
   the shape values of the Inverse Gamma hyper-prior on each of the (fixed
-  over subjects) emission variances of the Normal emission distributions.}
+  over subjects) emission standard deviation^2 of the Normal emission
+  distributions.}
   \item{\code{emiss_b0}}{A list containing \code{n_dep} elements denoting
   the scale values of the Inverse Gamma hyper-prior on each of the (fixed
-  over subjects) emission variances of the Normal emission distributions.}
+  over subjects) emission standard deviation^2 of the Normal emission
+  distributions.}
   \item{\code{n_xx_emiss}}{A numeric vector denoting the number of (level 2)
   covariates used to predict the emission distribution of each of the
   dependent variables. When no covariates are used, \code{n_xx_emiss} equals
@@ -119,13 +122,14 @@ distribution(s).}
 \description{
 \code{prior_emiss_cont} provides a framework to manually specify an
 informative hyper-prior on the Normal (i.e., Gaussian) emission
-distributions, and creates an object of class \code{mHMM_prior_emiss} used by
-the function \code{mHMM_cont}. The set of hyper-prior distributions consists
-of a Normal-Inverse-Gamma distribution (i.e., assuming both unknown
-population mean and variance between subject level means) on the vector of
-means (i.e., intercepts and regression coefficients), and an Inverse gamma
-distribution (i.e., assuming a known mean) on each of the (fixed over
-subjects) emission variances.
+distributions. \code{prior_emiss_cont} creates an object of class
+\code{mHMM_prior_emiss} used by the function \code{mHMM}, and additionally
+attaches the class \code{cont} to signal use for continuous observations. The
+set of hyper-prior distributions consists of a Normal-Inverse-Gamma
+distribution (i.e., assuming both unknown population mean and variance
+between subject level means) on the vector of means (i.e., intercepts and
+regression coefficients), and an Inverse gamma distribution (i.e., assuming a
+known mean) on each of the (fixed over subjects) emission variances.
 }
 \details{
 Estimation of the mHMM proceeds within a Bayesian context, hence a
@@ -149,13 +153,13 @@ covariates are fixed over subjects.
 m <- 3
 n_dep <- 2
 
-# hypothesized mean emission probabilities
+# hypothesized hyper-prior values for the continuous emission distribution
 manual_prior_emiss <- prior_emiss_cont(
                         gen = list(m = m, n_dep = n_dep),
-                        emiss_mu0 = list(matrix(c(3.0, 7.0, 17.0), nrow = 1),
-                                         matrix(c(0.7, 0.8, 1.8), nrow = 1)),
+                        emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
+                                         matrix(c(7, 8, 18), nrow = 1)),
                         emiss_K0 = list(1, 1),
-                        emiss_V =  list(rep(2, m), rep(1, m)),
+                        emiss_V =  list(rep(100, m), rep(25, m)),
                         emiss_nu = list(1, 1),
                         emiss_a0 = list(rep(1, m), rep(1, m)),
                         emiss_b0 = list(rep(1, m), rep(1, m)))
@@ -168,14 +172,14 @@ gamma   <- matrix(c(0.8, 0.1, 0.1,
                     0.2, 0.7, 0.1,
                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
 
-emiss_distr <- list(matrix(c( 5, 1,
-                              10, 1,
-                              15, 1), nrow = m, byrow = TRUE),
-                    matrix(c(0.5, 0.1,
-                             1.0, 0.2,
-                             2.0, 0.1), nrow = m, byrow = TRUE))
+emiss_distr <- list(matrix(c( 50, 10,
+                              100, 10,
+                              150, 10), nrow = m, byrow = TRUE),
+                    matrix(c(5, 2,
+                             10, 5,
+                             20, 3), nrow = m, byrow = TRUE))
 
-data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep), data_distr = 'continuous',
+data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous', gen = list(m = m, n_dep = n_dep),
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
 
 # using the informative hyper-prior in a model
@@ -195,5 +199,5 @@ summary(out_3st_cont_sim_infemiss)
 \seealso{
 \code{\link{prior_gamma}} for manually specifying an informative
  hyper-prior on the transition probability matrix gamma, and
- \code{\link{mHMM_cont}} for fitting a multilevel hidden Markov model.
+ \code{\link{mHMM}} for fitting a multilevel hidden Markov model.
 }

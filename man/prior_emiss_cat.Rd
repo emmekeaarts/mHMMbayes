@@ -16,7 +16,8 @@ prior_emiss_cat(
 \arguments{
 \item{gen}{List containing the following elements denoting the general model
 properties:
-\itemize{\item{\code{m}: numeric vector with length 1 denoting the number
+\itemize{
+\item{\code{m}: numeric vector with length 1 denoting the number
 of hidden states}
 \item{\code{n_dep}: numeric vector with length 1 denoting the
 number of dependent variables}
@@ -95,9 +96,11 @@ distribution(s).}
   }
 }
 \description{
-\code{prior_emiss_cat} provides a framework to manually specify an informative
-hyper-prior on the categorical emission distribution(s), and creates an object
-of class \code{mHMM_prior_emiss} used by the function \code{mHMM}. Note that the
+\code{prior_emiss_cat} provides a framework to manually specify an
+informative hyper-prior on the categorical emission distribution(s).
+\code{prior_emiss_cat} creates an object of class \code{mHMM_prior_emiss}
+used by the function \code{mHMM}, and additionally attaches the class
+\code{cat} to signal use for categorical observations. Note that the
 hyper-prior distribution on the categorical emission probabilities are on the
 intercepts (and, if subject level covariates are used, regression
 coefficients) of the Multinomial logit model used to accommodate the

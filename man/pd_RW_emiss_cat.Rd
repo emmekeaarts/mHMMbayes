@@ -9,7 +9,8 @@ pd_RW_emiss_cat(gen, emiss_int_mle0, emiss_scalar, emiss_w)
 \arguments{
 \item{gen}{List containing the following elements denoting the general model
 properties:
-\itemize{\item{\code{m}: numeric vector with length 1 denoting the number
+\itemize{
+\item{\code{m}: numeric vector with length 1 denoting the number
 of hidden states}
 \item{\code{n_dep}: numeric vector with length 1 denoting the
 number of dependent variables}
