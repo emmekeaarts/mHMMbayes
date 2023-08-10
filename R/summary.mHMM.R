@@ -7,7 +7,10 @@ summary.mHMM <- function(object, ...){
   burn_in <- input$burn_in
   J       <- input$J
   m       <- input$m
-  q_emiss <- input$q_emiss
+  data_distr <- input$data_distr
+  if(data_distr == 'categorical'){
+    q_emiss <- input$q_emiss
+  }
   n_dep   <- input$n_dep
   gamma_int <- matrix(apply(object$gamma_int_bar[((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = m-1, nrow = m)
   gamma_pop <- round(int_to_prob(gamma_int),3)
@@ -16,14 +19,23 @@ summary.mHMM <- function(object, ...){
   cat("State transition probability matrix","\n",  "(at the group level):", "\n", "\n")
   print(gamma_pop)
   cat("\n", "\n")
-  cat("Emission distribution for each of the dependent variables","\n",  "(at the group level):", "\n", "\n")
-  EM_int <- EM_pop <- vector("list", n_dep)
+  cat("Emission distribution (", data_distr, ") for each of the dependent variables","\n",  "(at the group level):", "\n", "\n")
+  EM_pop <- vector("list", n_dep)
   names(EM_pop) <- dep_labels
-  for(i in 1:n_dep){
-    EM_int[[i]] <- matrix(apply(object$emiss_int_bar[[i]][((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = q_emiss[i]-1, nrow = m)
-    EM_pop[[i]] <- round(int_to_prob(EM_int[[i]]),3)
-    colnames(EM_pop[[i]]) <- paste("Category", 1:q_emiss[i])
-    rownames(EM_pop[[i]]) <- paste("State", 1:m)
+  if(data_distr == 'categorical'){
+    EM_int <- vector("list", n_dep)
+    for(i in 1:n_dep){
+      EM_int[[i]] <- matrix(apply(object$emiss_int_bar[[i]][((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = q_emiss[i]-1, nrow = m)
+      EM_pop[[i]] <- round(int_to_prob(EM_int[[i]]),3)
+      colnames(EM_pop[[i]]) <- paste("Category", 1:q_emiss[i])
+      rownames(EM_pop[[i]]) <- paste("State", 1:m)
+    }
+  } else if (data_distr == 'continuous'){
+    for(i in 1:n_dep){
+      EM_pop[[i]] <- matrix(round(c(apply(object$emiss_mu_bar[[i]][((burn_in + 1): J),], 2, median), apply(object$emiss_sd_bar[[i]][((burn_in + 1): J),], 2, median)),3), ncol = 2, nrow = m)
+      colnames(EM_pop[[i]]) <- c("Mean", "SD")
+      rownames(EM_pop[[i]]) <- paste("State", 1:m)
+    }
   }
   print(EM_pop)
   cat("\n")

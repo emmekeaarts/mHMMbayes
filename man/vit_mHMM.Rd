@@ -8,20 +8,20 @@ algorithm}
 vit_mHMM(object, s_data, burn_in = NULL, return_state_prob = FALSE)
 }
 \arguments{
-\item{object}{An object of class \code{mHMM} or \code{mHMM_cont}, generated
-by the function \code{\link{mHMM}} or \code{\link{mHMM_cont}},
-respectively.}
+\item{object}{An object of class \code{mHMM}, generated
+by the function \code{\link{mHMM}}.}
 
 \item{s_data}{A matrix containing the observations to be modeled, where the
 rows represent the observations over time. In \code{s_data}, the first
 column indicates subject id number. Hence, the id number is repeated over
 rows equal to the number of observations for that subject. The subsequent
-columns contain the dependent variable(s). Note that the dependent
-variables have to be numeric, i.e., they cannot be a (set of) factor
-variable(s). The total number of rows are equal to the sum over the number
-of observations of each subject, and the number of columns are equal to the
-number of dependent variables (\code{n_dep}) + 1. The number of
-observations can vary over subjects.}
+columns contain the dependent variable(s). Note that in case of categorical
+dependent  variable(s), input are integers (i.e., whole numbers) that range
+from 1 to \code{q_emiss} (see below) and is numeric (i.e., not be a (set
+of) factor variable(s)). The total number of rows are equal to the sum over
+the number of observations of each subject, and the number of columns are
+equal to the number of dependent variables (\code{n_dep}) + 1. The number
+of observations can vary over subjects.}
 
 \item{burn_in}{The number of iterations to be discarded from the MCMC
 algorithm when inferring the transition probability matrix gamma and the
@@ -100,12 +100,12 @@ gamma   <- matrix(c(0.8, 0.1, 0.1,
                     0.2, 0.7, 0.1,
                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
 
-emiss_distr <- list(matrix(c( 5, 1,
-                              10, 1,
-                              15, 1), nrow = m, byrow = TRUE),
-                    matrix(c(0.5, 0.1,
-                             1.0, 0.2,
-                             2.0, 0.1), nrow = m, byrow = TRUE))
+emiss_distr <- list(matrix(c( 50, 10,
+                              100, 10,
+                              150, 10), nrow = m, byrow = TRUE),
+                    matrix(c(5, 2,
+                             10, 5,
+                             20, 3), nrow = m, byrow = TRUE))
 
 data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep), data_distr = 'continuous',
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
@@ -113,10 +113,10 @@ data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep), data_d
 # Specify hyper-prior for the continuous emission distribution
 manual_prior_emiss <- prior_emiss_cont(
                         gen = list(m = m, n_dep = n_dep),
-                        emiss_mu0 = list(matrix(c(3.0, 7.0, 17.0), nrow = 1),
-                                         matrix(c(0.7, 0.8, 1.8), nrow = 1)),
+                        emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
+                                         matrix(c(7, 8, 18), nrow = 1)),
                         emiss_K0 = list(1, 1),
-                        emiss_V =  list(rep(2, m), rep(1, m)),
+                        emiss_V =  list(rep(100, m), rep(25, m)),
                         emiss_nu = list(1, 1),
                         emiss_a0 = list(rep(1, m), rep(1, m)),
                         emiss_b0 = list(rep(1, m), rep(1, m)))

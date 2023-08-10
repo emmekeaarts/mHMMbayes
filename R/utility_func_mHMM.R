@@ -32,11 +32,6 @@ is.mHMM <- function(x) {
 }
 
 #' @keywords internal
-is.mHMM_cont <- function(x) {
-  inherits(x, "mHMM_cont")
-}
-
-#' @keywords internal
 is.mHMM_gamma <- function(x) {
   inherits(x, "mHMM_gamma")
 }
@@ -77,4 +72,12 @@ hms <- function(t){
         formatC(t %/% 60 %% 60, width = 2, format = "d", flag = "0"),
         formatC(t %% 60, width = 2, format = "d", flag = "0"),
         sep = ":")
+}
+
+depth <- function(x,xdepth=0){
+  if(!is.list(x)){
+    return(xdepth)
+  }else{
+    return(max(unlist(lapply(x,depth,xdepth=xdepth+1))))
+  }
 }

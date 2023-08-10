@@ -12,9 +12,8 @@
 #' each iteration of the MCMC algorithm. This information is contained in the
 #' output object \code{return_path} of the function \code{mHMM()}.
 #'
-#' @param object An object of class \code{mHMM} or \code{mHMM_cont}, generated
-#'   by the function \code{\link{mHMM}} or \code{\link{mHMM_cont}},
-#'   respectively.
+#' @param object An object of class \code{mHMM}, generated
+#'   by the function \code{\link{mHMM}}.
 #' @inheritParams mHMM
 #' @param burn_in The number of iterations to be discarded from the MCMC
 #'   algorithm when inferring the transition probability matrix gamma and the
@@ -78,12 +77,12 @@
 #'                     0.2, 0.7, 0.1,
 #'                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
 #'
-#' emiss_distr <- list(matrix(c( 5, 1,
-#'                               10, 1,
-#'                               15, 1), nrow = m, byrow = TRUE),
-#'                     matrix(c(0.5, 0.1,
-#'                              1.0, 0.2,
-#'                              2.0, 0.1), nrow = m, byrow = TRUE))
+#' emiss_distr <- list(matrix(c( 50, 10,
+#'                               100, 10,
+#'                               150, 10), nrow = m, byrow = TRUE),
+#'                     matrix(c(5, 2,
+#'                              10, 5,
+#'                              20, 3), nrow = m, byrow = TRUE))
 #'
 #' data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep), data_distr = 'continuous',
 #'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
@@ -91,10 +90,10 @@
 #' # Specify hyper-prior for the continuous emission distribution
 #' manual_prior_emiss <- prior_emiss_cont(
 #'                         gen = list(m = m, n_dep = n_dep),
-#'                         emiss_mu0 = list(matrix(c(3.0, 7.0, 17.0), nrow = 1),
-#'                                          matrix(c(0.7, 0.8, 1.8), nrow = 1)),
+#'                         emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
+#'                                          matrix(c(7, 8, 18), nrow = 1)),
 #'                         emiss_K0 = list(1, 1),
-#'                         emiss_V =  list(rep(2, m), rep(1, m)),
+#'                         emiss_V =  list(rep(100, m), rep(25, m)),
 #'                         emiss_nu = list(1, 1),
 #'                         emiss_a0 = list(rep(1, m), rep(1, m)),
 #'                         emiss_b0 = list(rep(1, m), rep(1, m)))
@@ -130,14 +129,11 @@
 #'
 vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
   message("Please note that the output format is changed from wide to long format to facilitate aditionally returning the state probabilities, see the section 'Value' in the help file for more information.")
-  if (!is.mHMM(object) & !is.mHMM_cont(object)){
-    stop("The input object used should either be from the class mHMM or mHMM_cont, obtained by using the function mHMM or mHMM_cont.")
+  if (!is.mHMM(object)){
+    stop("The input object used should be from the class mHMM, obtained by using the function mHMM.")
   }
-  if(is.mHMM(object)){
-    data_distr <- "categorical"
-  } else if(is.mHMM_cont(object)){
-    data_distr <- "continuous"
-  }
+  input      <- object$input
+  data_distr <- input$data_distr
   id         <- unique(s_data[,1])
   n_subj     <- length(id)
   if(length(object$PD_subj) != n_subj){
@@ -148,13 +144,8 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
   max_n      <- max(n_vary)
   state_seq  <- matrix(,ncol = n_subj, nrow = max_n)
   probs      <- vector(mode = "list", length = n_subj)
-
-  input      <- object$input
   n_dep      <- input$n_dep
   m          <- input$m
-  if(data_distr == "categorical"){
-    q_emiss    <- input$q_emiss
-  }
   if(is.null(burn_in)){
     burn_in  <- input$burn_in
   }
@@ -164,6 +155,7 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
                compared to the number of iterations J, J =", J))
   }
   if(data_distr == "categorical"){
+    q_emiss    <- input$q_emiss
     int_est_emiss <- rep(list(lapply(q_emiss-1, dif_matrix, rows = m)), n_subj)
     est_emiss  <- rep(list(lapply(q_emiss, dif_matrix, rows = m)), n_subj)
     for(s in 1:n_subj){
@@ -177,13 +169,9 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
     est_emiss  <- rep(list(rep(list(matrix(,nrow = m, ncol = 2)),n_dep)), n_subj)
     for(s in 1:n_subj){
       for(q in 1:n_dep){
-        est_emiss[[s]][[q]][] <- matrix(round(apply(object$PD_subj[[s]][burn_in:J, (1+(q-1)*m) : (m+(q-1)*m)], 2, median), 4),
-                                        byrow = TRUE, nrow = m, ncol = 1)
-        est_emiss[[s]][[q]][] <- matrix(round(c(apply(object$PD_subj[[s]][burn_in:J, ((q-1) * m + 1) : ((q-1) * m + m)], 2, median),
-                                                apply(object$PD_subj[[s]][burn_in:J, (n_dep * m + (q-1) * m + 1) : (n_dep * m + (q-1) * m + m)], 2, median)),
-                                              3),
-                                        ncol = 2,
-                                        nrow = m)
+        est_emiss[[s]][[q]][] <- matrix(round(c(apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median),
+                                                apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J), (n_dep * m + (q-1) * m + 1):(n_dep * m + q * m)], 2, median)),3),
+                                        ncol = 2, nrow = m)
       }
     }
   }

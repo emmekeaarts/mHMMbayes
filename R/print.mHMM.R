@@ -6,21 +6,29 @@ print.mHMM <- function(x, ...){
   burn_in <- input$burn_in
   J       <- input$J
   m       <- input$m
-  q_emiss <- input$q_emiss
+  data_distr <- input$data_distr
   n_dep   <- input$n_dep
   cat("Number of subjects:", n_subj, "\n")
   cat("\n")
   cat(J, "iterations used in the MCMC algorithm with a burn in of", burn_in, "\n")
   LL      <- numeric(n_subj)
-  for(i in 1:n_subj){
-    LL[i] <- median(x$PD_subj[[i]][((burn_in + 1): J), (sum(q_emiss * m) + m*m + 1)])
+  for(s in 1:n_subj){
+    LL[s] <- median(x$PD_subj[[s]]$log_likl[((burn_in + 1): J), 1])
   }
-  AIC<-2*(sum((q_emiss-1)*m)+(m-1)*m) - (2*LL)
+  if(data_distr == 'categorical'){
+    q_emiss <- input$q_emiss
+    AIC<-2*(sum((q_emiss-1)*m)+(m-1)*m) - (2*LL)
+  } else if (data_distr == 'continuous'){
+    AIC<-2*(m * n_dep * 2 + (m - 1) * m) - (2 * LL)
+  }
+
   cat("Average Log likelihood over all subjects:", mean(LL), "\n")
   cat("Average AIC over all subjects:", mean(AIC), "\n")
   cat("\n")
   cat("Number of states used:", m, "\n")
   cat("\n")
   cat("Number of dependent variables used:", n_dep, "\n")
+  cat("\n")
+  cat("Type of dependent variable(s):", data_distr, "\n")
   cat("\n")
 }

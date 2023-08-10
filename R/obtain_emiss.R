@@ -1,23 +1,24 @@
 #' Obtain the emission distribution probabilities for a fitted multilevel HMM
 #'
-#' \code{obtain_emiss} obtains the emission distribution for a fitted multilevel
-#' hidden Markov model, for either the group level, i.e., representing the
-#' average emission distribution over all subjects, or at the subject level,
-#' returning the emission distribution for each subject.
+#' \code{obtain_emiss} obtains the emission distribution for an object
+#' containing a fitted multilevel hidden Markov model, either at the group
+#' level, i.e., representing the average emission distribution over all
+#' subjects, or at the subject level, returning the emission distribution for
+#' each subject.
 #'
 #' @inheritParams obtain_gamma
 #'
-#' @return \code{obtain_emiss} returns the object \code{est_emiss}. Depending on
-#'   the specification at the input variable \code{level}, \code{est_emiss} is
-#'   either a list of matrices with the emission distribution at the group level
-#'   (if \code{level = "group"}) for each dependent variable, or a list of
-#'   lists, where for each dependent variable a list is returned with the number
-#'   of elements equal to the number of subjects analyzed, if \code{level =
-#'   'subject'}). In the latter scenario, each matrix in the lower level list
-#'   represents the subject specific emission distribution for a specific
+#' @return \code{obtain_emiss} creates an object of the class \code{mHMM_emiss}.
+#'   Depending on the specification at the input variable \code{level}, the
+#'   output is either a list of matrices with the emission distribution at the
+#'   group level (if \code{level = "group"}) for each dependent variable, or a
+#'   list of lists, where for each dependent variable a list is returned with
+#'   the number of elements equal to the number of subjects analyzed (if
+#'   \code{level = 'subject'}). In the latter scenario, each matrix in the lower
+#'   level list represents the subject specific emission distribution for a specific
 #'   dependent variable.
 #'
-#' @seealso \code{\link{mHMM}} and \code{\link{mHMM_cont}} for fitting the
+#' @seealso \code{\link{mHMM}} for fitting the
 #'   multilevel hidden Markov model.
 #'
 #'
@@ -63,8 +64,8 @@
 #' @export
 #'
 obtain_emiss <- function(object, level = "group", burn_in = NULL){
-  if (!is.mHMM(object) & !is.mHMM_cont(object)){
-    stop("The input object used should either be from the class mHMM or mHMM_cont, obtained by using the function mHMM or mHMM_cont.")
+  if (!is.mHMM(object)){
+    stop("The input object used should be from the class mHMM, obtained by using the function mHMM.")
   }
   if (level != "group" & level != "subject"){
     stop("The specification at the input variable -level- should be set to either group or subject")
@@ -81,62 +82,64 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
                compared to the number of iterations J, J =", J))
   }
   m       <- input$m
-  if(is.mHMM(object)){
+  data_distr <- input$data_distr
+  if(data_distr == 'categorical'){
     q_emiss <- input$q_emiss
   }
   n_dep   <- input$n_dep
 
   if (level == "group"){
-    if(is.mHMM(object)){
+    if(data_distr == 'categorical'){
       est_int <- est <- vector("list", n_dep)
       names(est) <- dep_labels
-      for(i in 1:n_dep){
-        est_int[[i]] <- matrix(apply(object$emiss_int_bar[[i]][((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = q_emiss[i]-1, nrow = m)
-        est[[i]] <- round(int_to_prob(est_int[[i]]),3)
-        colnames(est[[i]]) <- paste("Category", 1:q_emiss[i])
-        rownames(est[[i]]) <- paste("State", 1:m)
+      for(q in 1:n_dep){
+        est_int[[q]] <- matrix(apply(object$emiss_int_bar[[q]][((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = q_emiss[q]-1, nrow = m)
+        est[[q]] <- round(int_to_prob(est_int[[q]]),3)
+        colnames(est[[q]]) <- paste("Category", 1:q_emiss[q])
+        rownames(est[[q]]) <- paste("State", 1:m)
       }
-    } else if (is.mHMM_cont(object)){
-      est <- rep(list(matrix(, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "Variance")))), n_dep)
+    } else if (data_distr == 'continuous'){
+      est <- rep(list(matrix(, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "SD")))), n_dep)
       names(est) <- dep_labels
-      for(j in 1:n_dep){
-        est[[j]][] <-  matrix(round(c(apply(object$emiss_mu_bar[[j]][((burn_in + 1): J),], 2, median), apply(object$emiss_var_bar[[j]][((burn_in + 1): J),], 2, median)),3), ncol = 2, nrow = m)
+      for(q in 1:n_dep){
+        est[[q]][] <-  matrix(round(c(apply(object$emiss_mu_bar[[q]][((burn_in + 1): J),], 2, median), apply(object$emiss_sd_bar[[q]][((burn_in + 1): J),], 2, median)),3), ncol = 2, nrow = m)
       }
     }
 
   est_emiss <- est
   }
   if (level == "subject"){
-    if(is.mHMM(object)){
+    if(data_distr == 'categorical'){
       est_emiss <- est_emiss_int <- vector("list", n_dep)
       names(est_emiss) <- dep_labels
-      for(j in 1:n_dep){
-       est <- matrix(, ncol = q_emiss[j], nrow = m)
-       colnames(est) <- paste("Category", 1:q_emiss[j])
+      for(q in 1:n_dep){
+       est <- matrix(, ncol = q_emiss[q], nrow = m)
+       colnames(est) <- paste("Category", 1:q_emiss[q])
        rownames(est) <- paste("State", 1:m)
-       est_emiss[[j]] <- rep(list(est), n_subj)
-       names(est_emiss[[j]]) <- paste("Subject", 1:n_subj)
-       est_int <-  matrix(, ncol = q_emiss[j] - 1, nrow = m)
-       est_emiss_int[[j]] <- rep(list(est_int), n_subj)
+       est_emiss[[q]] <- rep(list(est), n_subj)
+       names(est_emiss[[q]]) <- paste("Subject", 1:n_subj)
+       est_int <-  matrix(, ncol = q_emiss[q] - 1, nrow = m)
+       est_emiss_int[[q]] <- rep(list(est_int), n_subj)
      }
-      for(i in 1:n_subj){
-      for(j in 1:n_dep){
-          est_emiss_int[[j]][[i]][] <- matrix(apply(object$emiss_int_subj[[i]][[j]][burn_in:J, ], 2, median),
-                                              byrow = TRUE, ncol = q_emiss[j]-1, nrow = m)
-          est_emiss[[j]][[i]][] <- round(int_to_prob(est_emiss_int[[j]][[i]]),3)
+      for(s in 1:n_subj){
+      for(q in 1:n_dep){
+          est_emiss_int[[q]][[s]][] <- matrix(apply(object$emiss_int_subj[[s]][[q]][burn_in:J, ], 2, median),
+                                              byrow = TRUE, ncol = q_emiss[q]-1, nrow = m)
+          est_emiss[[q]][[s]][] <- round(int_to_prob(est_emiss_int[[q]][[s]]),3)
         }
       }
-    } else if (is.mHMM_cont(object)){
-      est_emiss <- rep(list(rep(list(matrix(, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "Variance")))), n_subj)), n_dep)
+    } else if (data_distr == 'continuous'){
+      est_emiss <- rep(list(rep(list(matrix(, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "SD")))), n_subj)), n_dep)
       names(est_emiss) <- dep_labels
-      for(j in 1:n_dep){
-        names(est_emiss[[j]]) <- paste("Subject", 1:n_subj)
-        for(i in 1:n_subj){
-          est_emiss[[j]][[i]][] <- matrix(round(c(apply(object$PD_subj[[i]][((burn_in + 1): J),((j-1) * m + 1) : ((j-1) * m + m)], 2, median), apply(object$PD_subj[[i]][((burn_in + 1): J),(n_dep * m + (j-1) * m + 1) : (n_dep * m + (j-1) * m + m)], 2, median)),3), ncol = 2, nrow = m)
+      for(q in 1:n_dep){
+        names(est_emiss[[q]]) <- paste("Subject", 1:n_subj)
+        for(s in 1:n_subj){
+          est_emiss[[q]][[s]][] <- matrix(round(c(apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median), apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J), (n_dep * m + (q-1) * m + 1):(n_dep * m + q * m)], 2, median)),3), ncol = 2, nrow = m)
         }
       }
     }
   }
+  class(est_emiss) <- append(class(est_emiss), "mHMM_emiss")
   return(est_emiss)
 }
 
