@@ -130,6 +130,7 @@ plot.mHMM_gamma <- function(x, subj_nr = NULL, cex = 0.8, col, hide, ...){
   }
   old_par <- graphics::par(no.readonly =TRUE)
   on.exit(graphics::par(old_par))
+  graphics::plot.new()
   if (is.list(x)){
     if (is.null(subj_nr)){
       stop("When the input object x represents the subject specific transition
