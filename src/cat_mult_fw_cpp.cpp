@@ -4,6 +4,8 @@ using namespace Rcpp;
 // This is a c++ version of the the forward part of the forward backward algorithm
 // for a categorical emission distribution
 //' @keywords internal
+// [[Rcpp::plugins(cpp11)]]
+
 // [[Rcpp::export(rng = false)]]
 List cat_mult_fw_cpp(NumericMatrix allprobs, NumericMatrix gamma, int m, int n, NumericVector delta) {
 
