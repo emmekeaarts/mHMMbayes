@@ -51,7 +51,7 @@ This is a basic example which shows you how to run the model using categorical e
 included with the package. Below we include an example on continuous data and how to simulate data. For a more elaborate
 introduction, see the vignette "tutorial-mhmm" accompanying the package.
 
-```{r example}
+```{r example1}
 library(mHMMbayes)
 
 ##### Simple 2 state model
@@ -104,7 +104,7 @@ out_2st_c <- mHMM(s_data = nonverbal, xx = xx,
 
 This is a basic example which shows you how to run the model on data that includes continuous (i.e., normally distributed) observations, and how to simulate (this type of) data. 
 
-```{r example}
+```{r example2}
 library(mHMMbayes)
 
 ###### Example on simulated data
@@ -118,33 +118,36 @@ gamma   <- matrix(c(0.8, 0.1, 0.1,
                     0.2, 0.7, 0.1,
                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
 
-emiss_distr <- list(matrix(c( 5, 1,
-                              10, 1,
-                              15, 1), nrow = m, byrow = TRUE),
-                    matrix(c(0.5, 0.1,
-                             1.0, 0.2,
-                             2.0, 0.1), nrow = m, byrow = TRUE))
+emiss_distr <- list(matrix(c( 50, 10,
+                              100, 10,
+                              150, 10), nrow = m, byrow = TRUE),
+                    matrix(c(5, 2,
+                             10, 5,
+                             20, 3), nrow = m, byrow = TRUE))
 
 set.seed(2327)
-data_cont <- sim_mHMM(n_t = n_t, n = n, m = m, n_dep = n_dep, data_distr = 'continuous',
+data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous', gen = list(m = m, n_dep = n_dep),
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
 
 # Specify hyper-prior for the continuous emission distribution
-hyp_pr <- list(
-               emiss_mu0 = list(matrix(c(3,7,17), nrow = 1), matrix(c(0.7, 0.8, 1.8), nrow = 1)),
-               emiss_K0  = list(1, 1),
-               emiss_nu  = list(1, 1),
-               emiss_V   = list(rep(2, m), rep(1, m)),
-               emiss_a0  = list(rep(1, m), rep(1, m)),
-               emiss_b0  = list(rep(1, m), rep(1, m)))
+manual_prior_emiss <- prior_emiss_cont(
+                        gen = list(m = m, n_dep = n_dep),
+                        emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
+                                         matrix(c(7, 8, 18), nrow = 1)),
+                        emiss_K0 = list(1, 1),
+                        emiss_V =  list(rep(100, m), rep(25, m)),
+                        emiss_nu = list(1, 1),
+                        emiss_a0 = list(rep(1, m), rep(1, m)),
+                        emiss_b0 = list(rep(1, m), rep(1, m)))
 
 # Run the model on the simulated data:
 set.seed(9834)
-out_3st_cont_sim <- mHMM_cont(s_data = data_cont$obs,
-                    gen = list(m = m, n_dep = n_dep),
-                    start_val = c(list(gamma), emiss_distr),
-                    emiss_hyp_prior = hyp_pr,
-                    mcmc = list(J = 1000, burn_in = 200))
+out_3st_cont_sim <- mHMM(s_data = data_cont$obs,
+                         data_distr = 'continuous',
+                         gen = list(m = m, n_dep = n_dep),
+                         start_val = c(list(gamma), emiss_distr),
+                         emiss_hyp_prior = manual_prior_emiss,
+                          mcmc = list(J = 1000, burn_in = 200))
 
 out_3st_cont_sim
 summary(out_3st_cont_sim)
@@ -155,6 +158,6 @@ obtain_gamma(out_3st_cont_sim, level = 'group')
 obtain_emiss(out_3st_cont_sim, level = 'subject')
 
 # Inferring the most likely state at each point in time
-inferred_states <- vit_mHMM_cont(out_3st_cont_sim, data_cont$obs)
+inferred_states <- vit_mHMM(out_3st_cont_sim, data_cont$obs)
 head(inferred_states)
 ```
