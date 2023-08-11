@@ -803,6 +803,12 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
   }
 
   # Put starting values in place for fist run forward algorithm
+  if(data_distr == 'categorical'){
+    if(sum(unlist(start_val[2:(n_dep + 1)]) == 0) > 0){
+      message("The starting vaules for your categorical emission distribution(s) contain values equalling zero.
+              This can cause estimation problems, please consider using (very small) non-zero values instead.")
+    }
+  }
   emiss				<- rep(list(start_val[2:(n_dep + 1)]), n_subj)
   if(data_distr == 'continuous'){
     emiss <- lapply(emiss, function(x) {
@@ -811,6 +817,10 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
         return(x)
       })
     })
+  }
+  if(sum(start_val[[1]] == 0) > 0){
+    message("The starting vaules for your transition probability matrix gamma contains values equalling zero.
+              This can cause estimation problems, please consider using (very small) non-zero values instead.")
   }
   gamma 			<- rep(start_val[1], n_subj)
   delta 			<- rep(list(solve(t(diag(m) - gamma[[1]] + 1), rep(1, m))), n_subj)
@@ -828,13 +838,30 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
 
     # For each subject, obtain sampled state sequence with subject individual parameters ----------
     for(s in 1:n_subj){
-      # Run forward algorithm, obtain subject specific forward proababilities and log likelihood
+      # Run forward algorithm, obtain subject specific forward probabilities and log likelihood
       if(data_distr == 'categorical'){
         forward				<- cat_mult_fw_r_to_cpp(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], gamma = gamma[[s]], n_dep = n_dep, delta=NULL)
       } else if(data_distr == 'continuous'){
         forward				<- cont_mult_fw_r_to_cpp(x = subj_data[[s]]$y, m = m, emiss = emiss[[s]], gamma = gamma[[s]], n_dep = n_dep, delta=NULL)
       }
       alpha         <- forward[[1]]
+      if(sum(is.nan(alpha)) > 0){
+        if(iter == 2){
+          if(data_distr == 'continuous'){
+            stop("The forward-backward algorithm ran into a fatal error during the first MCMC iteration. Most likely, starting values that do not match the data
+                 were specified, e.g., using means and (too small) standard deviations that do not sufficiently support the full range of the observed data
+                 (i.e., resulting in observation(s) that have an extremely small probability of being observed).")
+          } else if(data_distr == 'categorical'){
+            stop("The forward-backward algorithm ran into a fatal error during the first MCMC iteration. Most likely, starting values that do not match the data
+                 were specified, e.g., using emission categorical probabilities that do no sufficently support the full range of the observed data
+                 (i.e., resulting in observation(s) that have an extremely small probability of being observed).")
+          }
+        } else {
+          "The forward-backward algorithm ran into a fatal error while running the MCMC algortihm. One possible cause could be the specification of hyper-prior
+          distribution parameters that do not match the observed data. E.g., for continous data, setting prior possible values of the emission standard deviation
+          by emiss_a0 and emiss_b0 too small. Please consider using differnt hyper-parameter values. "
+        }
+      }
       c             <- max(forward[[2]][, subj_data[[s]]$n_t])
       llk           <- c + log(sum(exp(forward[[2]][, subj_data[[s]]$n_t] - c)))
       PD_subj[[s]]$log_likl[iter, 1] <- llk
