@@ -8,11 +8,12 @@
 #'   (transition probability matrix and conditional distribution), while
 #'   estimating one overall HMM. The model has a great potential of application
 #'   in  many fields, such as the social sciences and medicine. The model can be
-#'   fitted on multivariate data with a categorical  distribution, and include
-#'   individual level covariates (allowing for e.g., group comparisons on model
-#'   parameters). Parameters are estimated using Bayesian estimation utilizing
-#'   the forward-backward recursion within a hybrid Metropolis within Gibbs
-#'   sampler.
+#'   fitted on multivariate data with either a categorical or Normal
+#'   distribution, and include individual level covariates (allowing for e.g.,
+#'   group comparisons on model parameters). Parameters are estimated using
+#'   Bayesian estimation utilizing the forward-backward recursion within a
+#'   hybrid Metropolis within Gibbs sampler. Missing data (NA) in the dependent
+#'   variables is accommodated assuming MAR.
 #'
 #'   The \code{mHMMbayes} package provides three main functions: \code{\link{mHMM}}
 #'   , \code{\link{sim_mHMM}} and \code{\link{vit_mHMM}}, described below. For a more
@@ -29,19 +30,20 @@
 #' covariates at the subject level varying observation lengths over
 #' subjects. Estimation is performed using a hybrid Metropolis
 #' within Gibbs sampler, and completes the forward backward algorithm for all
-#' subjects in a sequential manner.
+#' subjects in a sequential manner. Missing data (NA) in the dependent
+#'   variables is accommodated assuming MAR.
 #'
 #' @section \code{sim_mHMM}:
-#' The function \code{sim_mHMM} simulates data for multiple subjects,
-#' for which the data have categorical observations that follow a hidden Markov
-#' model (HMM) with an multilevel structure. The multilevel structure implies
-#' that each subject is allowed to have it's own set of parameters, and that the
-#' parameters at the subject level (level 1) are tied together by a population
-#' distribution at level 2 for each of the corresponding parameters. The shape
-#' of the population distribution for each of the parameters is a normal (i.e.,
-#' Gaussian) distribution. In addition to (natural and/or unexplained)
-#' heterogeneity between subjects, the subjects parameters can also depend on a
-#' (set of) covariate(s).
+#' The function \code{sim_mHMM} simulates data for multiple subjects, for which
+#' the data have (multivariate) categorical or continuous observations that
+#' follow a hidden Markov model (HMM) with an multilevel structure. The
+#' multilevel structure implies that each subject is allowed to have it's own
+#' set of parameters, and that the parameters at the subject level (level 1) are
+#' tied together by a population distribution at level 2 for each of the
+#' corresponding parameters. The shape of the population distribution for each
+#' of the parameters is a normal (i.e., Gaussian) distribution. In addition to
+#' (natural and/or unexplained) heterogeneity between subjects, the subjects
+#' parameters can also depend on a (set of) covariate(s).
 #'
 #' @section \code{vit_mHMM}:
 #' The function \code{vit_mHMM} obtains the most likely hidden state
@@ -52,7 +54,7 @@
 # not sure if all functions given below for packages are actually still used, check!
 #' @importFrom mvtnorm dmvnorm rmvnorm dmvt rmvt
 #' @importFrom MCMCpack rdirichlet rwish
-#' @importFrom stats optim rnorm runif median
+#' @importFrom stats optim rnorm runif median na.omit quantile
 # to include bib references in help file
 #' @importFrom Rdpack reprompt
 # for RCpp

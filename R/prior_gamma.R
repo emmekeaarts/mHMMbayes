@@ -49,10 +49,10 @@
 #' are fixed over subjects.
 #'
 #' @param m Numeric vector with length 1 denoting the number of hidden states.
-#' @param n_xx_gamma Optional numeric vector with length 1 denoting the number of
-#'   (level 2) covariates used to predict the transition probability matrix
-#'   gamma. When omitted, the model assumes no covariates are used to predict
-#'   gamma.
+#' @param n_xx_gamma Optional numeric vector with length 1 denoting the number
+#'   of (level 2) covariates (excluding the intercept) used to predict the
+#'   transition probability matrix gamma. When omitted, the model assumes no
+#'   covariates are used to predict gamma.
 #' @param gamma_mu0 A list containing m matrices; one matrix for each row of the
 #'   transition probability matrix gamma. Each matrix contains the hypothesized
 #'   hyper-prior mean values of the intercepts of the Multinomial logit

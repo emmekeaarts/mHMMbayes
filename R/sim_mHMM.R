@@ -1,7 +1,8 @@
 #' Simulate data using a multilevel hidden Markov model
 #'
 #' \code{sim_mHMM} simulates data for multiple subjects, for which the data have
-#' categorical observations that follow a hidden Markov model (HMM) with a
+#' either categorical or continuous (i.e., normally distributed)
+#' observations that follow a hidden Markov model (HMM) with a
 #' multilevel structure. The multilevel structure implies that each subject is
 #' allowed to have its own set of parameters, and that the parameters at the
 #' subject level (level 1) are tied together by a population distribution at
@@ -21,7 +22,9 @@
 #'
 #' One can simulate multivariate data. That is, the hidden states depend on more
 #' than 1 observed variable simultaneously. The distributions of multiple
-#' dependent variables for multivariate data are assumed to be independent.
+#' dependent variables for multivariate data are assumed to be independent, and
+#' all distributions for one dataset have to be of the same type (either
+#' categorical or continuous).
 #'
 #' Note: the subject specific) initial state distributions (i.e., the
 #' probability of each of the states at the first time point) needed to simulate
@@ -56,9 +59,10 @@
 #' @param m The argument \code{m} is deprecated; please specify using the input
 #'   parameter \code{gen}.
 #' @param n_dep The argument \code{n_dep} is deprecated; please specify using
-#'   the input parameter \code{n_dep}.
+#'   the input parameter \code{gen}.
 #' @param q_emiss The argument \code{q_emiss} is deprecated; please specify
-#'   using the input parameter \code{q_emiss}.
+#'   using the input parameter \code{gen} (only to be specified when simulating
+#'   categorical data).
 #' @param start_state Optional numeric vector with length 1 denoting in which
 #'   state the simulated state sequence should start. If left unspecified, the
 #'   simulated state for time point 1 is sampled from the initial state
@@ -71,11 +75,15 @@
 #'   \emph{i}) to hidden state \emph{j} (column  \emph{j}).
 #' @param emiss_distr A list with \code{n_dep} elements containing the average
 #'   population emission distribution(s) of the observations given the hidden
-#'   states for each of the dependent variables. Each element is a matrix with
-#'   \code{m} rows and \code{q_emiss[k]} columns for each of the \code{k} in
-#'   \code{n_dep} emission distribution(s). That is, the probability of
-#'   observing category \emph{q} (column \emph{q}) in state \emph{i} (row
-#'   \emph{i}).
+#'   states for each of the dependent variables. If \code{data_distr =
+#'   'categorical'}, each element is a matrix with \code{m} rows and
+#'   \code{q_emiss[k]} columns for each of the \code{k} in \code{n_dep} emission
+#'   distribution(s). That is, the probability of observing category \emph{q}
+#'   (column \emph{q}) in state \emph{i} (row \emph{i}). If \code{data_distr =
+#'   'continuous'}, each element is a matrix with \code{m} rows and 2 columns;
+#'   the first column denoting the mean of state \emph{i} (row \emph{i}) and the
+#'   second column denoting the standard deviation of state \emph{i}
+#'   (row \emph{i}) of the Normal distribution.
 #' @param xx_vec List of 1 + \code{n_dep} vectors containing the covariate(s) to
 #'   predict the transition probability matrix \code{gamma} and/or (specific)
 #'   emission distribution(s) \code{emiss_distr} using the regression parameters
@@ -135,13 +143,16 @@
 #'   for only 1 subject is simulated (i.e., n = 1), \code{var_gamma} is set to
 #'   0.
 #' @param var_emiss A numeric vector with length \code{n_dep} denoting the
-#'   amount of variance between subjects in the emission distribution(s). Note
-#'   that this value corresponds to the variance of the parameters of the
-#'   Multinomial distribution (i.e., the intercepts of the regression equation
-#'   of the Multinomial distribution used to sample the components of the
-#'   emission distribution), see details below. Only one variance value can be
+#'   amount of variance between subjects in the emission distribution(s). For
+#'   categorical data, this value corresponds to the variance of the parameters
+#'   of the Multinomial distribution (i.e., the intercepts of the regression
+#'   equation of the Multinomial distribution used to sample the components of
+#'   the emission distribution), see details below. For continuous data, this
+#'   value corresponds to the variance in the mean of the emission
+#'   distribution(s) across subjects. Note that only one variance value can be
 #'   specified each emission distribution, hence the variance is assumed fixed
-#'   across states and across categories within a state. The default equals 0.1,
+#'   across states (and, for the categorical distribution, categories within
+#'   a state) within an emission distribuitonß. The default equals 0.1,
 #'   which corresponds to little variation between subjects given categorical
 #'   observations. If one wants to simulate data from exactly the same HMM for
 #'   all subjects, var_emiss should be set to a vector of 0's. Note that if data
@@ -182,7 +193,7 @@
 #'
 #'
 #' @examples
-#' # simulating data for 10 subjects with each 100 observations
+#' # simulating data for 10 subjects with each 100 categorical observations
 #' n_t     <- 100
 #' n       <- 10
 #' m       <- 3
@@ -230,11 +241,36 @@
 #' data4 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
 #'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 #' data4
+#'
+#' # simulating multivariate continuous data
+#' n_t     <- 100
+#' n       <- 10
+#' m       <- 3
+#' n_dep   <- 2
+#'
+#' gamma   <- matrix(c(0.8, 0.1, 0.1,
+#'                     0.2, 0.7, 0.1,
+#'                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
+#'
+#' emiss_distr <- list(matrix(c( 50, 10,
+#'                               100, 10,
+#'                               150, 10), nrow = m, byrow = TRUE),
+#'                     matrix(c(5, 2,
+#'                              10, 5,
+#'                              20, 3), nrow = m, byrow = TRUE))
+#'
+#' data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous',
+#'                       gen = list(m = m, n_dep = n_dep),
+#'                       gamma = gamma, emiss_distr = emiss_distr,
+#'                       var_gamma = .5, var_emiss = c(.5, 0.01))
+#'
+#' head(data_cont$states)
+#' head(data_cont$obs)
 
 
 #' @export
 
-sim_mHMM <- function(n_t, n, gen, gamma, emiss_distr, start_state = NULL,
+sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr, start_state = NULL,
                      xx_vec = NULL, beta = NULL, var_gamma = 0.1, var_emiss = NULL,
                      return_ind_par = FALSE, m, n_dep, q_emiss){
 
@@ -249,12 +285,14 @@ sim_mHMM <- function(n_t, n, gen, gamma, emiss_distr, start_state = NULL,
   }
 
   if(!missing(gen)){
-    if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1 | sum(objects(gen) %in% "q_emiss") != 1){
+    if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1 | (sum(objects(gen) %in% "q_emiss") != 1 & data_distr == 'categorical')){
       stop("The input argument gen should contain the elements m, n_dep and q_emiss.")
     }
     m <- gen$m
     n_dep <- gen$n_dep
-    q_emiss <- gen$q_emiss
+    if(data_distr == 'categorical'){
+      q_emiss <- gen$q_emiss
+    }
   }
 
   if(missing(m) & missing(gen)){
@@ -264,8 +302,10 @@ sim_mHMM <- function(n_t, n, gen, gamma, emiss_distr, start_state = NULL,
     n_dep <- 1
     warning("Please specify the number of dependent variables n_dep via the input parameter gen. Model now assums n_dep = 1")
   }
-  if(missing(q_emiss) & missing(gen)){
-    stop("Please specify the number of observed categories for each categorical emission distribtution q_emiss via the input parameter gen.")
+  if(data_distr == 'categorical'){
+    if(missing(q_emiss) & missing(gen)){
+      stop("Please specify the number of observed categories for each categorical emission distribtution q_emiss via the input parameter gen.")
+    }
   }
 
   if (dim(gamma)[1] != m | dim(gamma)[2] != m){
@@ -280,23 +320,32 @@ sim_mHMM <- function(n_t, n, gen, gamma, emiss_distr, start_state = NULL,
   if(length(emiss_distr) != n_dep){
     stop("The number of dependent variables specified in n_dep and the number of elements specified in the list emiss_distr should be equal")
   }
-  if(length(q_emiss) != n_dep){
-    stop("The lenght of q_emiss specifying the number of output categories for each of the number of dependent variables should equal the number of dependent variables specified in n_dep")
+  if(data_distr == 'categorical'){
+    if(length(q_emiss) != n_dep){
+      stop("The lenght of q_emiss specifying the number of output categories for each of the number of dependent variables should equal the number of dependent variables specified in n_dep")
+    }
   }
-  for(i in 1:n_dep){
-  if (dim(emiss_distr[[i]])[1] != m){
-    stop(paste("The number of rows of emission distribution matrix in element", i, "should be
+  for(q in 1:n_dep){
+    if (dim(emiss_distr[[q]])[1] != m){
+      stop(paste("The number of rows of emission distribution matrix in element", q, "should be
              equal to the number of states, which is", m, "."))
-  }
-    if (dim(emiss_distr[[i]])[2] != q_emiss[i]){
-      stop(paste("The number of columns of the emission distribution matrix should be
-                 equal to the number of observable categories, which is", q_emiss[i], ". See emission distribution in element", i, "."))
     }
-    if(!isTRUE(all.equal(apply(emiss_distr[[i]], 1, sum), rep(1, m)))){
-      stop("The elements in each row of the emission distribution matrix should sum up to 1, see emission distribution in element", i, ".")
+    if(data_distr == 'categorical'){
+     if (dim(emiss_distr[[q]])[2] != q_emiss[q]){
+       stop(paste("The number of columns of the emission distribution matrix should be
+                 equal to the number of observable categories, which is", q_emiss[q], ". See emission distribution in element", q, "."))
+      }
+      if(!isTRUE(all.equal(apply(emiss_distr[[q]], 1, sum), rep(1, m)))){
+       stop("The elements in each row of the emission distribution matrix should sum up to 1, see emission distribution in element", q, ".")
+      }
     }
+   if(data_distr == 'continuous'){
+     if (dim(emiss_distr[[q]])[2] != 2){
+       stop(paste("For continuous data, the number of columns of the emission distribution matrix should be 2, where the first column denotes the state dependent mean and the
+                  second column the state dependent standard deviation of the Normal emission distribution. See emission distribution in element", q, "."))
+     }
+   }
   }
-
   if((is.null(xx_vec) & !is.null(beta)) | (!is.null(xx_vec) & is.null(beta))){
     stop("Either only xx_vec or only beta is specified. Please specify both 1) the values for the covariate
          in xx_vec and 2) the values of the regression parameters in beta, to allow correct simulation of the
@@ -335,8 +384,8 @@ sim_mHMM <- function(n_t, n, gen, gamma, emiss_distr, start_state = NULL,
       stop(paste("The first element of beta to predict the transiton probability matrix gamma should be a m (", m, " ) by m - 1 (", m - 1, ") matrix."))
       }
     }
-    if (!is.null(beta[[2]])){
-    # extend to all 1 + n_dep
+    if (!is.null(beta[[2]]) & data_distr == 'categorical'){
+    # extend to all 1 + n_dep and continuous
       if((dim(beta[[2]])[1] != (m)) | (dim(beta[[2]])[2] != (q_emiss[1]-1))){
       stop(paste("The second element of beta to predict the emission distribution should be a m (", m, ") by q_emiss - 1 (", q_emiss[1] - 1, ") matrix."))
       }
@@ -358,7 +407,11 @@ sim_mHMM <- function(n_t, n, gen, gamma, emiss_distr, start_state = NULL,
     beta <- rep(list(NULL), n_dep + 1)
     beta[[1]] <- matrix(0, ncol = m - 1, nrow = m)
     for(i in 2:(n_dep + 1)){
-      beta[[i]] <- matrix(0, ncol = q_emiss[i-1] - 1, nrow = m)
+      if(data_distr == 'categorical'){
+        beta[[i]] <- matrix(0, ncol = q_emiss[i-1] - 1, nrow = m)
+      } else if (data_distr == 'continuous'){
+        beta[[i]] <- matrix(0, ncol = 1, nrow = m)
+      }
     }
   } else {
     if(is.null(beta[[1]])) {
@@ -366,7 +419,11 @@ sim_mHMM <- function(n_t, n, gen, gamma, emiss_distr, start_state = NULL,
     }
     for (i in 2:(n_dep + 1)){
       if (is.null(beta[[i]])) {
-        beta[[i]] <- matrix(0, ncol = q_emiss[i-1] - 1, nrow = m)
+        if(data_distr == 'categorical'){
+          beta[[i]] <- matrix(0, ncol = q_emiss[i-1] - 1, nrow = m)
+        } else if (data_distr == 'continuous'){
+          beta[[i]] <- matrix(0, ncol = 1, nrow = m)
+        }
       }
     }
   }
@@ -392,16 +449,24 @@ sim_mHMM <- function(n_t, n, gen, gamma, emiss_distr, start_state = NULL,
   sub_gamma <- rep(list(NULL), n)
   sub_emiss <- rep(list(vector("list", n_dep)), n)
   mnl_gamma <- prob_to_int(gamma)
-  mnl_emiss <- rep(list(NULL), n_dep)
-  for(i in 1:n_dep){
-     mnl_emiss[[i]] <- prob_to_int(emiss_distr[[i]])
+  if(data_distr == "categorical"){
+    mnl_emiss <- rep(list(NULL), n_dep)
+    for(i in 1:n_dep){
+      mnl_emiss[[i]] <- prob_to_int(emiss_distr[[i]])
+    }
   }
   for(j in 1:n){
     sub_gamma[[j]] <- int_to_prob(mnl_gamma + xx_vec[[1]][j] * beta[[1]] +
                                     rnorm(n = m * (m-1), mean = 0, sd = sqrt(var_gamma)))
     for(i in 1:n_dep){
-      sub_emiss[[j]][[i]] <- int_to_prob(mnl_emiss[[i]] + xx_vec[[1+i]][j] * beta[[1+i]] +
+      if(data_distr == "categorical"){
+        sub_emiss[[j]][[i]] <- int_to_prob(mnl_emiss[[i]] + xx_vec[[1+i]][j] * beta[[1+i]] +
                                            rnorm(n = m * (q_emiss[i]-1), mean = 0, sd = sqrt(var_emiss[i])))
+      } else if(data_distr == "continuous"){
+        sub_emiss[[j]][[i]] <- emiss_distr[[i]]
+        sub_emiss[[j]][[i]][,1] <- emiss_distr[[i]][,1] +  xx_vec[[1+i]][j] * beta[[1+i]] +
+        rnorm(n = m, mean = 0, sd = sqrt(var_emiss[i]))
+      }
     }
 
     if(n_t != 0){
@@ -411,13 +476,27 @@ sim_mHMM <- function(n_t, n, gen, gamma, emiss_distr, start_state = NULL,
       } else {
         states[((j-1) * n_t + 1), 2] <- start_state
       }
-      for(i in 1:n_dep){
-        obs[((j-1) * n_t + 1), (1+i)] <- sample(x = 1:q_emiss[i], size = 1, prob = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],])
+      if(data_distr == "categorical"){
+        for(i in 1:n_dep){
+          obs[((j-1) * n_t + 1), (1+i)] <- sample(x = 1:q_emiss[i], size = 1, prob = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],])
+        }
+      } else if (data_distr == "continuous"){
+        for(i in 1:n_dep){
+          obs[((j-1) * n_t + 1), (1+i)] <- rnorm(1, mean = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],1],
+                                                 sd = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],2])
+        }
       }
       for(t in 2:n_t){
         states[((j-1) * n_t + t), 2] <- sample(x = 1:m, size = 1, prob = sub_gamma[[j]][states[((j-1) * n_t + t - 1), 2],])
-        for(i in 1:n_dep){
-          obs[((j-1) * n_t + t), (1+i)] <- sample(x = 1:q_emiss[i], size = 1, prob = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],])
+        if(data_distr == "categorical"){
+          for(i in 1:n_dep){
+            obs[((j-1) * n_t + t), (1+i)] <- sample(x = 1:q_emiss[i], size = 1, prob = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],])
+          }
+        } else if (data_distr == "continuous"){
+          for(i in 1:n_dep){
+            obs[((j-1) * n_t + t), (1+i)] <- rnorm(1, mean = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],1],
+                                                   sd = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],2])
+          }
         }
       }
     }

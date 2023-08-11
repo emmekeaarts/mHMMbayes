@@ -42,10 +42,10 @@ the Multinomial logit intercepts.}
 variance-covariance matrix of the hyper-prior Inverse Wishart distribution
 on the covariance of the Multinomial logit intercepts.}
 
-\item{n_xx_gamma}{Optional numeric vector with length 1 denoting the number of
-(level 2) covariates used to predict the transition probability matrix
-gamma. When omitted, the model assumes no covariates are used to predict
-gamma.}
+\item{n_xx_gamma}{Optional numeric vector with length 1 denoting the number
+of (level 2) covariates (excluding the intercept) used to predict the
+transition probability matrix gamma. When omitted, the model assumes no
+covariates are used to predict gamma.}
 }
 \value{
 \code{prior_gamma} returns an object of class \code{mHMM_prior_gamma},

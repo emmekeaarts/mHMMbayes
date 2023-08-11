@@ -8,19 +8,21 @@ prior_emiss_cat(
   gen,
   emiss_mu0,
   emiss_K0 = NULL,
-  emiss_nu = NULL,
   emiss_V = NULL,
+  emiss_nu = NULL,
   n_xx_emiss = NULL
 )
 }
 \arguments{
 \item{gen}{List containing the following elements denoting the general model
 properties:
-\itemize{\item{\code{m}: numeric vector with length 1 denoting the number
+\itemize{
+\item{\code{m}: numeric vector with length 1 denoting the number
 of hidden states}
 \item{\code{n_dep}: numeric vector with length 1 denoting the
 number of dependent variables}
-\item{\code{q_emiss}: numeric vector with length \code{n_dep} denoting the
+\item{\code{q_emiss}: only to be specified if the data represents
+categorical data. Numeric vector with length \code{n_dep} denoting the
 number of observed categories for the categorical emission distribution
 for each of the dependent variables.}}}
 
@@ -46,17 +48,17 @@ used: each element is a numeric vector with length 1 + n_xx denoting the
 number of hypothetical prior subjects on which the set of intercepts (first
 value) and set of regression coefficients (subsequent values) are based.}
 
-\item{emiss_nu}{Optional list containing \code{n_dep} elements corresponding
-to each dependent variable \code{k}. Each element \code{k} is
-a numeric vector with length 1 denoting the degrees of freedom of the
-hyper-prior Inverse Wishart distribution on the covariance of the
-Multinomial logit intercepts.}
-
 \item{emiss_V}{Optional list containing \code{n_dep} elements corresponding
 to each dependent variable \code{k}, where each element \code{k} is a
 matrix of \code{q_emiss[k]} - 1 by \code{q_emiss[k]} - 1 containing the
 variance-covariance of the hyper-prior Inverse Wishart distribution on the
 covariance of the Multinomial logit intercepts.}
+
+\item{emiss_nu}{Optional list containing \code{n_dep} elements corresponding
+to each dependent variable \code{k}. Each element \code{k} is
+a numeric vector with length 1 denoting the degrees of freedom of the
+hyper-prior Inverse Wishart distribution on the covariance of the
+Multinomial logit intercepts.}
 
 \item{n_xx_emiss}{Optional numeric vector with length \code{n_dep} denoting
 the number of (level 2) covariates used to predict the emission
@@ -94,9 +96,11 @@ distribution(s).}
   }
 }
 \description{
-\code{prior_emiss_cat} provides a framework to manually specify an informative
-hyper-prior on the categorical emission distribution(s), and creates an object
-of class \code{mHMM_prior_emiss} used by the function \code{mHMM}. Note that the
+\code{prior_emiss_cat} provides a framework to manually specify an
+informative hyper-prior on the categorical emission distribution(s).
+\code{prior_emiss_cat} creates an object of class \code{mHMM_prior_emiss}
+used by the function \code{mHMM}, and additionally attaches the class
+\code{cat} to signal use for categorical observations. Note that the
 hyper-prior distribution on the categorical emission probabilities are on the
 intercepts (and, if subject level covariates are used, regression
 coefficients) of the Multinomial logit model used to accommodate the

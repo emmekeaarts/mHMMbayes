@@ -2,6 +2,7 @@
 # Could maybe made external
 # Calculates the forward probabilities, used for sampling the state sequence
 # Based on Zuchini 2016.
+# for categorical observations only.
 
 cat_Mult_HMM_fw <- function(x, m, emiss, n_dep, gamma, delta = NULL){
   if(is.null(delta)) {

@@ -4,6 +4,8 @@ using namespace Rcpp;
 // This is a c++ version of the the forward part of the forward backward algorithm
 // for a categorical emission distribution
 //' @keywords internal
+// [[Rcpp::plugins(cpp11)]]
+
 // [[Rcpp::export(rng = false)]]
 List cat_mult_fw_cpp(NumericMatrix allprobs, NumericMatrix gamma, int m, int n, NumericVector delta) {
 
@@ -15,7 +17,11 @@ List cat_mult_fw_cpp(NumericMatrix allprobs, NumericMatrix gamma, int m, int n, 
   double lscale;
   NumericMatrix lalpha(m, n);
 
-  foo = delta * allprobs(0,_);
+  if(std::any_of(allprobs(0,_).cbegin(), allprobs(0,_).cend(), NumericVector::is_na)){
+    foo = delta;
+  } else {
+    foo = delta * allprobs(0,_);
+  }
   sumfoo = 0;
   for (i = 0; i < m; i++){
     sumfoo += foo[i];
@@ -35,7 +41,11 @@ List cat_mult_fw_cpp(NumericMatrix allprobs, NumericMatrix gamma, int m, int n, 
         foo1[i] += alpha_prob(k, (t - 1)) * gamma(k,i);
       }
     }
-    foo = foo1 * allprobs(t,_);
+    if(std::any_of(allprobs(t,_).cbegin(), allprobs(t,_).cend(), NumericVector::is_na)){
+      foo = foo1;
+    } else {
+      foo = foo1 * allprobs(t,_);
+    }
     sumfoo = 0;
     for (i = 0; i < m; i++){
       sumfoo += foo[i];

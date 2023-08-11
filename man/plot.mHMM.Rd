@@ -9,8 +9,8 @@
   component = "gamma",
   dep = 1,
   col,
-  cat_lab,
   dep_lab,
+  cat_lab,
   lwd1 = 2,
   lwd2 = 1,
   lty1 = 1,
@@ -34,23 +34,24 @@ the posterior densities have to be plotted, see \code{dep}.}
 \item{dep}{Integer specifying for which dependent variable the posterior
 densities should be plotted. Only required if one wishes to plot the
 emission distribution probabilities and the model is based on multiple
-dependent variables.}
+dependent variables. Defaults to \code{dep = 1}.}
 
 \item{col}{Vector of colors for the posterior density lines. If one is
-plotting the posterior densities for gamma, the vector has length \code{m}
+plotting the posterior densities for gamma, or the posterior densities of
+Normally distributed emission probabilities, the vector has length \code{m}
 (i.e., number of hidden states). If one is plotting the posterior densities
-for the emission probabilities, the vector has length \code{q_emiss[k]}
-(i.e., the number of outcome categories for the dependent variable
-\code{k}).}
-
-\item{cat_lab}{Optional vector of strings when plotting the posterior
-densities of the emission probabilities, denoting the labels of the
-categorical outcome values. Automatically generated when not provided.}
+for categorical emission probabilities, the vector has length
+\code{q_emiss[k]} (i.e., the number of outcome categories for the dependent
+variable \code{k}).}
 
 \item{dep_lab}{Optional string when plotting the posterior
 densities of the emission probabilities with length 1, denoting the label
 for the dependent variable plotted. Automatically obtained from the input
 object \code{x} when not specified.}
+
+\item{cat_lab}{Optional vector of strings when plotting the posterior
+densities of categorical emission probabilities, denoting the labels of the
+categorical outcome values. Automatically generated when not provided.}
 
 \item{lwd1}{Positive number indicating the line width of the posterior
 density at the group level.}
@@ -84,7 +85,14 @@ object with the function \code{\link{mHMM}} will be used.}
 \code{plot.mHMM} plots the posterior densities for a fitted multilevel hidden
 Markov model for the group and subject level parameters simultaneously. The
 plotted posterior densities are either for the transition probability matrix
-gamma, or for the emission distribution probabilities.
+gamma, or for the emission distribution probabilities (categorical data) or
+means and standard deviation (continuous data).
+}
+\details{
+Note that the standard deviation of the (variable and) state specific Normal
+emission distribution in case of continuous data is fixed over subjects.
+Hence, for the standard deviation, only the posterior distribution at the
+group level is plotted.
 }
 \examples{
 ###### Example on package example data, see ?nonverbal

@@ -17,8 +17,8 @@ q_emiss <- c(4,2)
 gamma <- matrix(c(0.8, 0.1, 0.1,
                   0.2, 0.6, 0.2,
                   0.1, 0.2, 0.7), ncol = m, byrow = TRUE)
-emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
-                             0.1, 0.1, 0.8, 0.0,
+emiss_distr <- list(matrix(c(0.45, 0.45, 0.05, 0.05,
+                             0.1, 0.05, 0.8, 0.05,
                              0.1, 0.1, 0.2, 0.6), nrow = m, ncol = q_emiss[1], byrow = TRUE),
                     matrix(c(0.7, 0.3,
                              0.9, 0.1,
@@ -202,30 +202,30 @@ test_that("output dim prior_emiss", {
 })
 
 test_that("using prior_emiss object in mHMM", {
-  expect_failure(expect_error(mHMM(s_data = nonverbal,
+  expect_failure(expect_error(mHMM(s_data = data_sim$obs,
                                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                    start_val = c(list(gamma), emiss_distr),
                                    emiss_hyp_prior = manual_prior_emiss,
                                    mcmc = list(J = 11, burn_in = 5))))
-  expect_error(mHMM(s_data = nonverbal,
+  expect_error(mHMM(s_data = data_sim$obs,
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),
                     emiss_hyp_prior = manual_prior_emiss_wrongm,
                     mcmc = list(J = 11, burn_in = 5)),
                "number of states specified in m")
-  expect_error(mHMM(s_data = nonverbal,
+  expect_error(mHMM(s_data = data_sim$obs,
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),
                     emiss_hyp_prior = manual_prior_emiss_wrongn_dep,
                     mcmc = list(J = 11, burn_in = 5)),
                "number of dependent variables")
-  expect_error(mHMM(s_data = nonverbal,
+  expect_error(mHMM(s_data = data_sim$obs,
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),
                     emiss_hyp_prior = manual_prior_emiss_wrongq_emiss1,
                     mcmc = list(J = 11, burn_in = 5)),
                "number of number of observed categories")
-  expect_warning(expect_error(mHMM(s_data = nonverbal,
+  expect_warning(expect_error(mHMM(s_data = data_sim$obs,
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),
                     emiss_hyp_prior = manual_prior_emiss_wrongq_emiss2,
@@ -291,12 +291,12 @@ test_that("output dim prior_gamma", {
 })
 
 test_that("using prior_gamma object in mHMM", {
-  expect_failure(expect_error(mHMM(s_data = nonverbal,
+  expect_failure(expect_error(mHMM(s_data = data_sim$obs,
                                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                    start_val = c(list(gamma), emiss_distr),
                                    gamma_hyp_prior = manual_prior_gamma,
                                    mcmc = list(J = 11, burn_in = 5))))
-  expect_error(mHMM(s_data = nonverbal,
+  expect_error(mHMM(s_data = data_sim$obs,
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),
                     gamma_hyp_prior = manual_prior_gamma_wrongm,
