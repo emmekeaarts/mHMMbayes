@@ -119,7 +119,6 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
   n_dep   <- input$n_dep
   data_distr <- input$data_distr
 
-  graphics::plot.new()
   if(component == "gamma"){
     if (missing(col)){
       state_col <- grDevices::rainbow(m)
@@ -157,6 +156,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
       dep_lab <- input$dep_labels[dep]
     }
     if (data_distr == "categorical"){
+      q_emiss <- input$q_emiss
       if (missing(cat_lab)){
         cat_lab <- paste("Category", 1:q_emiss[dep])
       }
@@ -210,7 +210,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
         new <- max(stats::density(object$emiss_mu_bar[[dep]][burn_in:J,i])$y)
         if(new > max_y){max_y <- new}
       }
-      quantiles <- apply(object$emiss_mu_bar[[dep]][burn_in:J,], 2, quantile, probs = c(0.025, 0.975))
+      quantiles <- apply(object$emiss_mu_bar[[dep]][burn_in:J,], 2, stats::quantile, probs = c(0.025, 0.975))
       min_x <- min(quantiles)
       max_x <- max(quantiles)
       # set plotting area
@@ -236,7 +236,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
         new <- max(stats::density(object$emiss_sd_bar[[dep]][burn_in:J,i])$y)
         if(new > max_y){max_y <- new}
       }
-      quantiles <- apply(object$emiss_sd_bar[[dep]][burn_in:J,], 2, quantile, probs = c(0.025, 0.975))
+      quantiles <- apply(object$emiss_sd_bar[[dep]][burn_in:J,], 2, stats::quantile, probs = c(0.025, 0.975))
       min_x <- min(quantiles)
       max_x <- max(quantiles)
       # set plotting area
