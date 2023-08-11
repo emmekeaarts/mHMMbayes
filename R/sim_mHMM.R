@@ -325,23 +325,26 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
       stop("The lenght of q_emiss specifying the number of output categories for each of the number of dependent variables should equal the number of dependent variables specified in n_dep")
     }
   }
-  for(i in 1:n_dep){
-    if (dim(emiss_distr[[i]])[1] != m){
-      stop(paste("The number of rows of emission distribution matrix in element", i, "should be
+  for(q in 1:n_dep){
+    if (dim(emiss_distr[[q]])[1] != m){
+      stop(paste("The number of rows of emission distribution matrix in element", q, "should be
              equal to the number of states, which is", m, "."))
     }
     if(data_distr == 'categorical'){
-     if (dim(emiss_distr[[i]])[2] != q_emiss[i]){
+     if (dim(emiss_distr[[q]])[2] != q_emiss[q]){
        stop(paste("The number of columns of the emission distribution matrix should be
-                 equal to the number of observable categories, which is", q_emiss[i], ". See emission distribution in element", i, "."))
+                 equal to the number of observable categories, which is", q_emiss[q], ". See emission distribution in element", q, "."))
       }
-      if(!isTRUE(all.equal(apply(emiss_distr[[i]], 1, sum), rep(1, m)))){
-       stop("The elements in each row of the emission distribution matrix should sum up to 1, see emission distribution in element", i, ".")
+      if(!isTRUE(all.equal(apply(emiss_distr[[q]], 1, sum), rep(1, m)))){
+       stop("The elements in each row of the emission distribution matrix should sum up to 1, see emission distribution in element", q, ".")
       }
     }
-#   if(data_distr == 'continuous'){
-#
-#   }
+   if(data_distr == 'continuous'){
+     if (dim(emiss_distr[[q]])[2] != 2){
+       stop(paste("For continuous data, the number of columns of the emission distribution matrix should be 2, where the first column denotes the state dependent mean and the
+                  second column the state dependent standard deviation of the Normal emission distribution. See emission distribution in element", q, "."))
+     }
+   }
   }
   if((is.null(xx_vec) & !is.null(beta)) | (!is.null(xx_vec) & is.null(beta))){
     stop("Either only xx_vec or only beta is specified. Please specify both 1) the values for the covariate
