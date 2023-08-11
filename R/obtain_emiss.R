@@ -139,7 +139,7 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
       }
     }
   }
-  class(est_emiss) <- append(class(est_emiss), "mHMM_emiss")
+  class(est_emiss) <- append("mHMM_emiss", class(est_emiss))
   return(est_emiss)
 }
 
