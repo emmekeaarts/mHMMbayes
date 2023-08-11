@@ -102,7 +102,8 @@
 #' # Note that for reasons of running time, J is set at a ridiculous low value.
 #' # One would typically use a number of iterations J of at least 1000,
 #' # and a burn_in of 200.
-#' out_3st_cont_sim <- mHMM_cont(s_data = data_cont$obs,
+#' out_3st_cont_sim <- mHMM(s_data = data_cont$obs,
+#'                     data_distr = "continuous",
 #'                     gen = list(m = m, n_dep = n_dep),
 #'                     start_val = c(list(gamma), emiss_distr),
 #'                     emiss_hyp_prior = manual_prior_emiss,
