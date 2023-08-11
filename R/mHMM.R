@@ -437,9 +437,9 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
     if(length(q_emiss) != n_dep){
       stop("The lenght of q_emiss specifying the number of output categories for each of the number of dependent variables should equal the number of dependent variables specified in n_dep")
     }
-    if(sum(apply(matrix(s_data[,2:(n_dep + 1)], ncol = n_dep), 2, function(x) length(unique(x))) != q_emiss) > 0 |
+    if(sum(apply(as.matrix(s_data[,2:(n_dep + 1)], ncol = n_dep), 2, function(x) length(unique(x))) != q_emiss) > 0 |
        min(s_data[,2:(n_dep + 1)]) < 1 |
-       sum(apply(matrix(s_data[,2:(n_dep + 1)], ncol = n_dep), 2, max) > q_emiss) > 0){
+       sum(apply(as.matrix(s_data[,2:(n_dep + 1)], ncol = n_dep), 2, max) > q_emiss) > 0){
       stop("For categorical input variables, the values should be integers ranging from 1 to number of observed categories specified for each of the dependent variables in q_emiss")
     }
   } else {
