@@ -9,8 +9,8 @@
   component = "gamma",
   dep = 1,
   col,
-  cat_lab,
   dep_lab,
+  cat_lab,
   lwd1 = 2,
   lwd2 = 1,
   lty1 = 1,
@@ -34,7 +34,7 @@ the posterior densities have to be plotted, see \code{dep}.}
 \item{dep}{Integer specifying for which dependent variable the posterior
 densities should be plotted. Only required if one wishes to plot the
 emission distribution probabilities and the model is based on multiple
-dependent variables.}
+dependent variables. Defaults to \code{dep = 1}.}
 
 \item{col}{Vector of colors for the posterior density lines. If one is
 plotting the posterior densities for gamma, the vector has length \code{m}
@@ -43,14 +43,14 @@ for the emission probabilities, the vector has length \code{q_emiss[k]}
 (i.e., the number of outcome categories for the dependent variable
 \code{k}).}
 
-\item{cat_lab}{Optional vector of strings when plotting the posterior
-densities of the emission probabilities, denoting the labels of the
-categorical outcome values. Automatically generated when not provided.}
-
 \item{dep_lab}{Optional string when plotting the posterior
 densities of the emission probabilities with length 1, denoting the label
 for the dependent variable plotted. Automatically obtained from the input
 object \code{x} when not specified.}
+
+\item{cat_lab}{Optional vector of strings when plotting the posterior
+densities of categorical emission probabilities, denoting the labels of the
+categorical outcome values. Automatically generated when not provided.}
 
 \item{lwd1}{Positive number indicating the line width of the posterior
 density at the group level.}
