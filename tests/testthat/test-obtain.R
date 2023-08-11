@@ -12,8 +12,8 @@ q_emiss <- c(4,2)
 gamma <- matrix(c(0.8, 0.1, 0.1,
                   0.2, 0.6, 0.2,
                   0.1, 0.2, 0.7), ncol = m, byrow = TRUE)
-emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
-                             0.1, 0.1, 0.8, 0.0,
+emiss_distr <- list(matrix(c(0.45, 0.45, 0.05, 0.05,
+                             0.1, 0.05, 0.8, 0.05,
                              0.1, 0.1, 0.2, 0.6), nrow = m, ncol = q_emiss[1], byrow = TRUE),
                     matrix(c(0.7, 0.3,
                              0.9, 0.1,
@@ -42,10 +42,10 @@ out_2st_simb <- mHMM(s_data = data_sim$obs,
 test_that("expected errors obtain gamma and emiss", {
   expect_error(obtain_gamma(out_2st_simb, level = 'a'), " should be set to either group or subject")
   ab <- c(2,3,4)
-  expect_error(obtain_gamma(ab), "should either be from the class mHMM")
+  expect_error(obtain_gamma(ab), "should be from the class mHMM")
   expect_error(obtain_gamma(out_2st_simb, burn_in = 10), "burn in period should be at least 2 points smaller")
   expect_error(obtain_emiss(out_2st_simb, level = 'a'), " should be set to either group or subject")
-  expect_error(obtain_emiss(ab), "should either be from the class mHMM")
+  expect_error(obtain_emiss(ab), "should be from the class mHMM")
   expect_error(obtain_emiss(out_2st_simb, burn_in = 10), "burn in period should be at least 2 points smaller")
 })
 
@@ -58,9 +58,9 @@ test_that("output obtain gamma", {
   expect_equal(dim(gamma1_subj[[1]]), c(m,m))
   expect_equal(dim(gamma1_subj[[1]]), dim(gamma1_subj[[n]]))
   # calculations
-  expect_equal(as.vector(gamma1_g[2,]), c(0.190,  0.663, 0.146))
-  expect_equal(as.vector(gamma1_subj[[1]][3,]), c(0.216, 0.345, 0.439))
-  expect_equal(as.vector(gamma1_subj[[n]][1,]), c(0.539, 0.228, 0.233))
+  expect_equal(as.vector(gamma1_g[2,]), c(0.226, 0.575, 0.199))
+  expect_equal(as.vector(gamma1_subj[[1]][3,]), c( 0.038, 0.352, 0.610 ))
+  expect_equal(as.vector(gamma1_subj[[n]][1,]), c(0.718, 0.081, 0.201))
 })
 
 test_that("output obtain emiss", {
@@ -74,9 +74,9 @@ test_that("output obtain emiss", {
   expect_equal(dim(emiss1_subj[[1]][[1]]), c(m,q_emiss[1]))
   expect_equal(dim(emiss1_subj[[2]][[1]]), dim(emiss1_subj[[2]][[n]]))
   # calculations
-  expect_equal(as.vector(emiss1_g[[1]][2,]), c(0.094, 0.123, 0.726, 0.056))
-  expect_equal(as.vector(emiss1_g[[2]][2,]), c( 0.816, 0.184))
-  expect_equal(as.vector(emiss1_subj[[1]][[1]][3,]), c(0.086, 0.049, 0.248, 0.618))
-  expect_equal(as.vector(emiss1_subj[[2]][[n]][1,]), c(0.665, 0.334))
+  expect_equal(as.vector(emiss1_g[[1]][2,]), c(0.112, 0.094, 0.700, 0.094 ))
+  expect_equal(as.vector(emiss1_g[[2]][2,]), c(0.821, 0.179 ))
+  expect_equal(as.vector(emiss1_subj[[1]][[1]][3,]), c(0.062, 0.034, 0.312, 0.593))
+  expect_equal(as.vector(emiss1_subj[[2]][[n]][1,]), c(0.567, 0.433))
 })
 

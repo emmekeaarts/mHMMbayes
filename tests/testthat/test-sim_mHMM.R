@@ -9,9 +9,9 @@ q_emiss <- 4
 gamma   <- matrix(c(0.8, 0.1, 0.1,
                     0.2, 0.7, 0.1,
                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
-emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
-                        0.1, 0.1, 0.8, 0.0,
-                        0.0, 0.0, 0.1, 0.9), nrow = m, ncol = q_emiss, byrow = TRUE))
+emiss_distr <- list(matrix(c(0.45, 0.45, 0.05, 0.05,
+                             0.1, 0.05, 0.8, 0.05,
+                             0.1, 0.1, 0.2, 0.6), nrow = m, ncol = q_emiss[1], byrow = TRUE))
 
 beta      <- rep(list(NULL), 2)
 beta[[1]] <- matrix(c(0.5, 1.0,
@@ -95,7 +95,6 @@ data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_cont),
 data_cont2 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_cont),
                        data_distr = 'continuous', gamma = gamma, emiss_distr = emiss_distr_cont, xx_vec = xx_vec4, beta = beta8,
                        var_gamma = .5, var_emiss = c(0, 0), return_ind_par = TRUE)
-# data_cont2$subject_emiss
 
 ####################
 ## TESTING

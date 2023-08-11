@@ -17,8 +17,8 @@ q_emiss <- c(4,2)
 gamma <- matrix(c(0.8, 0.1, 0.1,
                   0.2, 0.6, 0.2,
                   0.1, 0.2, 0.7), ncol = m, byrow = TRUE)
-emiss_distr <- list(matrix(c(0.5, 0.5, 0.0, 0.0,
-                             0.1, 0.1, 0.8, 0.0,
+emiss_distr <- list(matrix(c(0.45, 0.45, 0.05, 0.05,
+                             0.1, 0.05, 0.8, 0.05,
                              0.1, 0.1, 0.2, 0.6), nrow = m, ncol = q_emiss[1], byrow = TRUE),
                     matrix(c(0.7, 0.3,
                              0.9, 0.1,
