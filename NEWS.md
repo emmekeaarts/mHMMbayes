@@ -27,6 +27,7 @@ Several extra checks have been implemented in `mHMM()`. Specifically, checking f
 ## Other minor (quite technical) improvements:
 
 * First, to the state transitions of the sampled state sequence in the MCMC sampler, and to state dependent categorical observations, a sequence of 1:m and 1:q_emiss[k] was added to ensure that all possible outcomes were observed at least once to avoid estimation problems (e.g., when a certain state was not sampled at all within an iteration, the sampled state sequence would equal 1:m to avoid 'empty' state transition observations). However, this resulted in bias, and this approach is now completely omitted. Parameter estimates are now only based on the sampled state sequence and sampled state dependent observations, in combination with the prior distribution. This means that if a certain state is not observed at all, parameter estimation solely depends on the prior distribution. 
+* The minimum supported version of R is now 3.6 (instead of 3.5), as the package now requires compilation with at least C++11 (and R 3.6, defaults to compiling packages with the C++11 standard). 
 
 # mHMMbayes 0.2.0
 
