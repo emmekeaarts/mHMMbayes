@@ -1,3 +1,6 @@
+#' @keywords internal
+"_PACKAGE"
+
 #' mHMMbayes: multilevel hidden Markov models using Bayesian estimation.
 #'
 #'   With the \code{R} package \code{mHMMbayes} you can fit multilevel hidden
@@ -62,5 +65,6 @@
 #' @importFrom Rcpp sourceCpp
 #'
 #' @docType package
+#' @aliases mHMMbayes-package
 #' @name mHMMbayes
 NULL
