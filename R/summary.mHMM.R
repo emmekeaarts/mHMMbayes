@@ -1,6 +1,9 @@
 #' @export
 #'
 summary.mHMM <- function(object, ...){
+  if(sum(objects(object$PD_subj[[1]]) %in% "log_likl") != 1){
+    stop("The input object is created using an earlier version of the mHMMbayes package. Please re-run the function mHMM with the current package version, or post-process the object using the earlier version of the package.")
+  }
   input   <- object$input
   dep_labels <- input$dep_labels
   n_subj  <- input$n_subj

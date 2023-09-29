@@ -133,6 +133,9 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
   if (!is.mHMM(object)){
     stop("The input object used should be from the class mHMM, obtained by using the function mHMM.")
   }
+  if(sum(objects(object$PD_subj[[1]]) %in% "log_likl") != 1){
+    stop("The input object is created using an earlier version of the mHMMbayes package. Please re-run the function mHMM with the current package version, or post-process the object using the earlier version of the package.")
+  }
   input      <- object$input
   data_distr <- input$data_distr
   id         <- unique(s_data[,1])
