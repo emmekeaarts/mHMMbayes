@@ -7,9 +7,9 @@ link-citations: yes
 header-includes:
 - \usepackage{fancyhdr}
 - \pagestyle{fancy}
-- \fancyfoot[CO,CE]{Vignette to the R package `mHMMbayes`}
-- \fancyfoot[LE,LO]{E. Aarts}
-- \fancyfoot[RE,RO]{\thepage}
+- \fancyfoot[C]{Vignette to the R package `mHMMbayes`}
+- \fancyfoot[L]{E. Aarts}
+- \fancyfoot[R]{\thepage}
 output: 
   pdf_document:
   citation_package: biblatex    

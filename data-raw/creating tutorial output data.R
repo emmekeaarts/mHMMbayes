@@ -146,7 +146,6 @@ out3 <- mHMM(s_data = nonverbal,
 # gamma_int_bar
 # emiss_int_bar
 
-out3$PD_subj <-NULL
 out3$emiss_cov_bar <-NULL
 out3$emiss_prob_bar <-NULL
 out3$emiss_int_subj <-NULL
