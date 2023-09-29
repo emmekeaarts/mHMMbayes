@@ -703,8 +703,15 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
                               NULL
                             },
                           log_likl = matrix(, nrow = J, ncol = 1))
+  if(dim(start_val[[1]])[1] != m | dim(start_val[[1]])[2] != m){
+    stop(paste0("Start values for the transition probability matrix contained in the first element of 'start_val' should be an m x m matrix, here ", m, " by ", m,"."))
+  }
   PD$trans_prob[1, ] <- unlist(sapply(start_val, t))[1:(m*m)]
   if (data_distr == 'categorical'){
+    if(sum(sapply(start_val, dim)[1, 2:(n_dep+1)] != rep(m, n_dep)) > 0 |
+       sum(sapply(start_val, dim)[2, 2:(n_dep+1)] != q_emiss) > 0){
+      stop("Start vaules for the emission distribuitons for categorical observations contained in 'start_val' should be one matrix per dependent variable, each with m rows and q_emiss[k] columns")
+    }
     PD_cat_emiss_names   <- character()
     for(q in 1:n_dep){
       PD_cat_emiss_names <- c(PD_cat_emiss_names, paste("dep", q, "_S", rep(1:m, each = q_emiss[q]), "_emiss", rep(1:q_emiss[q], m), sep = ""))
@@ -714,6 +721,10 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
       PD$cat_emiss[1, (sum(c(0,q_emiss)[1 : q] * m) + 1):sum(q_emiss[1 : q] * m)] <- as.vector(t(start_val[[q + 1]]))
     }
   } else if(data_distr == 'continuous'){
+    if(sum(sapply(start_val, dim)[1, 2:(n_dep+1)] != rep(m, n_dep)) > 0 |
+       sum(sapply(start_val, dim)[2, 2:(n_dep+1)] != rep(2, n_dep)) > 0){
+      stop("Start vaules for the emission distribuitons for continuous observations contained in 'start_val' should be one matrix per dependent variable, each with m rows and 2 columns")
+    }
     colnames(PD$cont_emiss) <- c(paste("dep", rep(1:n_dep, each = m), "_S", rep(1:m), "_mu", sep = ""),
                                  paste("dep", rep(1:n_dep, each = m), "_S", rep(1:m), "_sd", sep = ""))
     for(q in 1:n_dep){
