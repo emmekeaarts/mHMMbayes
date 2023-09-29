@@ -99,7 +99,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
   if (!is.mHMM(x)){
     stop("The input object x should be from the class mHMM, obtained with the function mHMM.")
   }
-  if(sum(objects(object$PD_subj[[1]]) %in% "log_likl") != 1){
+  if(sum(objects(x$PD_subj[[1]]) %in% "log_likl") != 1){
     stop("The input object is created using an earlier version of the mHMMbayes package. Please re-run the function mHMM with the current package version, or post-process the object using the earlier version of the package.")
   }
   if (component != "gamma" & component != "emiss"){
