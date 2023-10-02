@@ -15,7 +15,9 @@ New is also the accommodation of missing values (`NA`) in the dependent input va
 To accommodate missing values, the forward algorithm implemented in C++ was slightly adjusted, and state dependent observations (on which the parameter estimates of the emission distribution(s) are based) are selected such that missing values are omitted. 
 
 ## Returned output by `mHMM()`
-The `mHMM()` output component `PD_subj` was modified to facilitate the inclusion of both categorical and continuous input data. Before, `PD_subj` was a list containing one matrix per subject containing all subject level output paremeters over the iterations of the MCMC sampler. Now, `PD_subj`is a list containing one list per subject with the elements `trans_prob`, `cat_emiss` or `cont_emiss` in case of categorical or continuous observations, respectively, and `log_likl`, providing the subject parameter estimates over the iterations of the MCMC sampler. `trans_prob` relates to the transition probabilities gamma, `cat_emiss` to the categorical emission distribution (emission probabilities), `cont_emiss` to the continuous emission distributions (subsequently the the emission means and the (fixed over subjects) emission standard deviation), and `log_likl` to the log likelihood over the MCMC iterations. 
+The `mHMM()` output component `PD_subj` was modified to facilitate the inclusion of both categorical and continuous input data. Before, `PD_subj` was a list containing one matrix per subject containing all subject level output parameters over the iterations of the MCMC sampler. Now, `PD_subj`is a list containing one list per subject with the elements `trans_prob`, `cat_emiss` or `cont_emiss` in case of categorical or continuous observations, respectively, and `log_likl`, providing the subject parameter estimates over the iterations of the MCMC sampler. `trans_prob` relates to the transition probabilities gamma, `cat_emiss` to the categorical emission distribution (emission probabilities), `cont_emiss` to the continuous emission distributions (subsequently the the emission means and the (fixed over subjects) emission standard deviation), and `log_likl` to the log likelihood over the MCMC iterations. 
+
+A detailed error message is displayed when trying to post-process mHMM objects created with an earlier version of the package. 
 
 ## Extra checks input data within `mHMM()`
 Several extra checks have been implemented in `mHMM()`. Specifically, checking for: 
@@ -23,11 +25,13 @@ Several extra checks have been implemented in `mHMM()`. Specifically, checking f
 * The correct specification of categorical input, where values are allowed to range from 1 to the number of categories observable within a variable.
 * The inclusion of zero values in the start values of the transition prabability matrix gamma or the categorical emission probabilities, as this can lead to problems in the forward algorithm.
 * Possible reasons for a fatal error in the forward algorithm in the first (starting values that do not sufficiently support the range of observed values) or subsequent (hyper-paramter values that result in hyper distributions that do not sufficiently support the range of observed values) iterations. 
+* The correct dimensions for the starting values specified via `starting_val`.
 
 ## Other minor (quite technical) improvements:
-
-* First, to the state transitions of the sampled state sequence in the MCMC sampler, and to state dependent categorical observations, a sequence of 1:m and 1:q_emiss[k] was added to ensure that all possible outcomes were observed at least once to avoid estimation problems (e.g., when a certain state was not sampled at all within an iteration, the sampled state sequence would equal 1:m to avoid 'empty' state transition observations). However, this resulted in bias, and this approach is now completely omitted. Parameter estimates are now only based on the sampled state sequence and sampled state dependent observations, in combination with the prior distribution. This means that if a certain state is not observed at all, parameter estimation solely depends on the prior distribution. 
+* The appropriate PKGNAME-package \alias as per "Documenting packages" is now included. 
 * The minimum supported version of R is now 3.6 (instead of 3.5), as the package now requires compilation with at least C++11 (and R 3.6, defaults to compiling packages with the C++11 standard). 
+* First, to the state transitions of the sampled state sequence in the MCMC sampler, and to state dependent categorical observations, a sequence of 1:m and 1:q_emiss[k] was added to ensure that all possible outcomes were observed at least once to avoid estimation problems (e.g., when a certain state was not sampled at all within an iteration, the sampled state sequence would equal 1:m to avoid 'empty' state transition observations). However, this resulted in bias, and this approach is now completely omitted. Parameter estimates are now only based on the sampled state sequence and sampled state dependent observations, in combination with the prior distribution. This means that if a certain state is not observed at all, parameter estimation solely depends on the prior distribution. 
+
 
 # mHMMbayes 0.2.0
 
