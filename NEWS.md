@@ -1,6 +1,6 @@
 # mHMMbayes 0.3.0
 
-## Accommodating continous data (i.e., Normally distributed data)
+## Accommodating continuous data (i.e., Normally distributed data)
 A major improvement in this release is the possibility to include continuous data in `mHMM()`. Currently, the user can model data composed of either categorical data OR continuous data (so a mix of different types of emission distributions is not possible within the stable CRAN version). As such, the following changes are implemented:
 
 * `mHMM()` now includes the input parameter `data_distr`, where the user can specify whether the input data contains categorical or continuous data. Defaults to `data_distr = 'categorical'`.
@@ -23,8 +23,8 @@ A detailed error message is displayed when trying to post-process mHMM objects c
 Several extra checks have been implemented in `mHMM()`. Specifically, checking for: 
 
 * The correct specification of categorical input, where values are allowed to range from 1 to the number of categories observable within a variable.
-* The inclusion of zero values in the start values of the transition prabability matrix gamma or the categorical emission probabilities, as this can lead to problems in the forward algorithm.
-* Possible reasons for a fatal error in the forward algorithm in the first (starting values that do not sufficiently support the range of observed values) or subsequent (hyper-paramter values that result in hyper distributions that do not sufficiently support the range of observed values) iterations. 
+* The inclusion of zero values in the start values of the transition probability matrix gamma or the categorical emission probabilities, as this can lead to problems in the forward algorithm.
+* Possible reasons for a fatal error in the forward algorithm in the first (starting values that do not sufficiently support the range of observed values) or subsequent (hyper-parameter values that result in hyper distributions that do not sufficiently support the range of observed values) iterations. 
 * The correct dimensions for the starting values specified via `starting_val`.
 
 ## Other minor (quite technical) improvements:

@@ -143,7 +143,7 @@ value corresponds to the variance in the mean of the emission
 distribution(s) across subjects. Note that only one variance value can be
 specified each emission distribution, hence the variance is assumed fixed
 across states (and, for the categorical distribution, categories within
-a state) within an emission distribuitonß. The default equals 0.1,
+a state) within an emission distribution. The default equals 0.1,
 which corresponds to little variation between subjects given categorical
 observations. If one wants to simulate data from exactly the same HMM for
 all subjects, var_emiss should be set to a vector of 0's. Note that if data

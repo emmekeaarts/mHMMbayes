@@ -153,7 +153,7 @@ RW_emiss_accept <- sapply(out_3st_RWemiss$emiss_naccept, div_J, J_it, simplify =
 
 # average acceptance rate over all subjects per parameter
 # rows represent each of the n_dep dependent variables, columns represent the m states
-t(sapply(RW_emiss_accept, apply, MARGIN = 2, mean, simplyfy = FALSE))
+t(sapply(RW_emiss_accept, apply, MARGIN = 2, mean))
 }
 \dontshow{
 out_3st_RWemiss <- mHMM(s_data = nonverbal,

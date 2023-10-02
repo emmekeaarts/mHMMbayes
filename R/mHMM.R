@@ -80,7 +80,7 @@
 #'   the probability of observing each categorical outcome (columns) within each
 #'   state (rows). In case of continuous observations: a \code{m} by 2 matrix
 #'   denoting the mean (first column) and standard deviation (second column) of
-#'   the Normal emision distribution within each state (rows). Note that
+#'   the Normal emission distribution within each state (rows). Note that
 #'   \code{start_val} should not contain nested lists (i.e., lists within
 #'   lists).
 #' @param mcmc List of Markov chain Monte Carlo (MCMC) arguments, containing the
