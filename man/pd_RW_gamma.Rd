@@ -117,15 +117,6 @@ out_3st_RWgamma <- mHMM(s_data = nonverbal,
                          start_val = c(list(start_TM), start_EM),
                          gamma_sampler = manual_gamma_sampler,
                          mcmc = list(J = 11, burn_in = 5))
-}
-\dontshow{
-out_3st_RWgamma <- mHMM(s_data = nonverbal,
-                         gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                         start_val = c(list(start_TM), start_EM),
-                         gamma_sampler = manual_gamma_sampler,
-                         mcmc = list(J = 6, burn_in = 3))
-}
-
 out_3st_RWgamma
 summary(out_3st_RWgamma)
 
@@ -135,6 +126,15 @@ J_it <- 11 - 1 # accept/reject starts at iteration 2 of MCMC algorithm
 out_3st_RWgamma$gamma_naccept / J_it
 # average acceptance rate over all subjects per parameter
 apply(out_3st_RWgamma$gamma_naccept / J_it, 2, mean)
+}
+\dontshow{
+out_3st_RWgamma <- mHMM(s_data = nonverbal,
+                         gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                         start_val = c(list(start_TM), start_EM),
+                         gamma_sampler = manual_gamma_sampler,
+                         mcmc = list(J = 5, burn_in = 3))
+}
+
 
 }
 \references{

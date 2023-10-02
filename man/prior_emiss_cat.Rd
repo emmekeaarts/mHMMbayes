@@ -238,6 +238,9 @@ out_3st_infemiss <- mHMM(s_data = nonverbal,
                     start_val = c(list(start_TM), start_EM),
                     emiss_hyp_prior = manual_prior_emiss,
                     mcmc = list(J = 11, burn_in = 5))
+
+out_3st_infemiss
+summary(out_3st_infemiss)
 }
 \dontshow{
 # executable in < 5 sec together with the examples above
@@ -245,11 +248,8 @@ out_3st_infemiss <- mHMM(s_data = nonverbal,
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(start_TM), start_EM),
                     emiss_hyp_prior = manual_prior_emiss,
-                    mcmc = list(J = 6, burn_in = 3))
+                    mcmc = list(J = 5, burn_in = 3))
 }
-
-out_3st_infemiss
-summary(out_3st_infemiss)
 
 }
 \seealso{

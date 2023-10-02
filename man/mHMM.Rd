@@ -373,7 +373,7 @@ out_2st_sim <- mHMM(s_data = data1$obs,
                  mcmc = list(J = 11, burn_in = 5))
 
 ###### Example on continuous simulated data
-# simulating multivariate continuous data
+\donttest{ # simulating multivariate continuous data
 n_t     <- 100
 n       <- 10
 m       <- 3
@@ -414,6 +414,8 @@ out_3st_cont_sim <- mHMM(s_data = data_cont$obs,
                          start_val = c(list(gamma), emiss_distr),
                          emiss_hyp_prior = manual_prior_emiss,
                          mcmc = list(J = 11, burn_in = 5))
+
+}
 
 }
 \references{
