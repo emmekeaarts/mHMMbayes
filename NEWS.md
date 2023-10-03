@@ -1,4 +1,6 @@
-# mHMMbayes 0.3.0
+# mHMMbayes 1.0.0.9000 (development version)
+
+# mHMMbayes 1.0.0
 
 ## Accommodating continuous data (i.e., Normally distributed data)
 A major improvement in this release is the possibility to include continuous data in `mHMM()`. Currently, the user can model data composed of either categorical data OR continuous data (so a mix of different types of emission distributions is not possible within the stable CRAN version). As such, the following changes are implemented:
