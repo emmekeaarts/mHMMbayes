@@ -1,5 +1,10 @@
 # mHMMbayes 1.0.0.9000 (development version)
 
+## Patch release? 
+
+* Updating readme file to align with latest CRAN release.. 
+
+
 # mHMMbayes 1.0.0
 
 ## Accommodating continuous data (i.e., Normally distributed data)

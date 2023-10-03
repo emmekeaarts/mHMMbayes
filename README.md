@@ -1,12 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-*Note: In contrast to the current CRAN version of mHMMbayes, this GitHub
-version allows for **using continuous observations (i.e., normally
-distributed)** and missing data (NA) within the mHMM model. When this
-new version is even more thoroughly tested, the developments will be
-incorporated in the stable R CRAN version of the mHMM package.*
-
 # mHMMbayes
 
 With the package mHMMbayes you can fit multilevel hidden Markov models.
@@ -33,8 +27,9 @@ the package.
 
 ## Installation
 
-You can install mHMMbayes that incorporates the possibility of modelling
-data with continuous observations from github with:
+You can install the stable mHMMbayes package version directly from CRAN.
+Alternatively, you can install the GitHub version that includes the most
+recent package developments with:
 
 ``` r
 # install.packages("devtools")
@@ -235,7 +230,7 @@ summary(out_3st_cont_sim)
 #> State 2  9.218 4.954
 #> State 3 19.812 3.389
 
-# obtaining the transition probability matrix gamma and the emission ditribution 
+# obtaining the transition probability matrix gamma and the emission distribution 
 # at the group and subject level 
 obtain_gamma(out_3st_cont_sim, level = 'group')
 #>              To state 1 To state 2 To state 3

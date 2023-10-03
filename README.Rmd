@@ -12,8 +12,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-*Note: In contrast to the current CRAN version of mHMMbayes, this GitHub version allows for __using continuous observations (i.e., normally distributed)__ and missing data (NA) within the mHMM model. When this new version is even more thoroughly tested, the developments will be incorporated in the stable R CRAN version of the mHMM package.*
-
 
 # mHMMbayes
 
@@ -39,7 +37,7 @@ knitr::opts_chunk$set(
 
 ## Installation
 
-You can install mHMMbayes that incorporates the possibility of modelling data with continuous observations from github with:
+You can install the stable mHMMbayes package version directly from CRAN. Alternatively, you can install the GitHub version that includes the most recent package developments with:
 
 ```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
@@ -152,7 +150,7 @@ out_3st_cont_sim <- mHMM(s_data = data_cont$obs,
 out_3st_cont_sim
 summary(out_3st_cont_sim)
 
-# obtaining the transition probability matrix gamma and the emission ditribution 
+# obtaining the transition probability matrix gamma and the emission distribution 
 # at the group and subject level 
 obtain_gamma(out_3st_cont_sim, level = 'group')
 obtain_emiss(out_3st_cont_sim, level = 'subject')
