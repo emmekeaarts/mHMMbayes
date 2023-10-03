@@ -34,6 +34,7 @@ knitr::opts_chunk$set(
   
   Please do not hesitate to contact me if you have any questions regarding the 
   package. 
+  
 
 ## Installation
 
