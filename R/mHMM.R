@@ -1205,12 +1205,12 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
              # Sample subject specific lambda with RW-MH
              emiss_mu0_subj_bar <- c(t(emiss_c_mu_bar[[i]][[q]]) %*% xx[[q+1]][s,])
              emiss_candcov_comb <- (subj_data[[s]]$emiss_mhess[[q]][i] + emiss_V_mu[[i]][[q]]^-1)^-1
-             emiss_rw_out <- poisLN_RW_once(lambda = emiss_c_mu[[i]][[q]][s,1],
-                                            Obs = cond_y[[s]][[i]][[q]],
-                                            mu_bar1 = emiss_mu0_subj_bar,
-                                            V_1 = sqrt(emiss_V_mu[[i]][[q]]),
-                                            scalar = emiss_scalar,
-                                            candcov1 = emiss_candcov_comb)
+             emiss_rw_out <- pois_RW_once(lambda = emiss_c_mu[[i]][[q]][s,1],
+                                          Obs = cond_y[[s]][[i]][[q]],
+                                          mu_bar1 = emiss_mu0_subj_bar,
+                                          V_1 = sqrt(emiss_V_mu[[i]][[q]]),
+                                          scalar = emiss_scalar,
+                                          candcov1 = emiss_candcov_comb)
 
              emiss[[s]][[q]][i,1]        <- PD_subj[[s]][iter, ((q - 1) * m + i)] <- emiss_c_mu[[i]][[q]][s,1] <- emiss_rw_out$draw_lambda
              emiss_naccept[[q]][s, i]    <- emiss_naccept[[q]][s, i] + emiss_rw_out$accept
