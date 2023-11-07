@@ -34,12 +34,12 @@
 #' @param emiss_mu0 A list containing \code{n_dep} matrices, i.e., one list for
 #'   each dependent variable \code{k}. Each matrix contains the hypothesized
 #'   hyper-prior means of the logNormal emission distributions in each of the
-#'   states. Hence, each matrix consists of one row (when not including
-#'   covariates in the model) and \code{m} columns. If covariates are used, the
-#'   number of rows in each matrix in the list is equal to 1 + n_xx (i.e., the
-#'   first row corresponds to the hyper-prior means, the subsequent rows
-#'   correspond to the hyper-prior values of the regression coefficients
-#'   connected to each of the covariates).
+#'   states in the logarithmic scale. Hence, each matrix consists of one row
+#'   (when not including covariates in the model) and \code{m} columns. If
+#'   covariates are used, the number of rows in each matrix in the list is
+#'   equal to 1 + n_xx (i.e., the first row corresponds to the hyper-prior
+#'   means, the subsequent rows correspond to the hyper-prior values of the
+#'   regression coefficients connected to each of the covariates).
 #' @param emiss_K0 A list containing \code{n_dep} elements corresponding
 #'   to each dependent variable \code{k}. Each element \code{k} is a
 #'   numeric vector with length 1 (when no covariates are used) denoting the
