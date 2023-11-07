@@ -64,7 +64,11 @@ distribution(s). That is, the probability of observing category \emph{q}
 'continuous'}, each element is a matrix with \code{m} rows and 2 columns;
 the first column denoting the mean of state \emph{i} (row \emph{i}) and the
 second column denoting the standard deviation of state \emph{i}
-(row \emph{i}) of the Normal distribution.}
+(row \emph{i}) of the Normal distribution. If \code{data_distr =
+'count'}, each element is a matrix with \code{m} rows and 1 column;
+the first column denoting the logmean of state \emph{i} (row \emph{i})
+of the logNormal istribution used as prior for the Poisson emissions
+(note: the logmeans should be specified in the logarithmic scale).}
 
 \item{start_state}{Optional numeric vector with length 1 denoting in which
 state the simulated state sequence should start. If left unspecified, the
@@ -108,9 +112,9 @@ emission distribution(s) is not predicted by covariates.}
   predict \code{emiss_distr} consist of a matrix with the number of rows
   equal to \code{m} and the number of columns equal to \code{q_emiss[k]} - 1
   for each of the \code{k} in \code{n_dep} emission distribution(s). See
-  \emph{details} for more information. For continuous emission distributions,
-  the subsequent elements in the list \code{beta} consist of a matrix with
-  the number of rows equal to \code{m} and 1 column.
+  \emph{details} for more information. For continuous and count emission
+  distributions, the subsequent elements in the list \code{beta} consist of
+  a matrix with the number of rows equal to \code{m} and 1 column.
 
   Note that if \code{beta} is specified, \code{xx_vec} has to be specified as
   well. If \code{beta} is omitted completely, \code{beta} defaults to NULL,
@@ -120,18 +124,18 @@ emission distribution(s) is not predicted by covariates.}
   probability matrix or a specific emission distribution is not predicted by
   covariates.}
 
-\item{var_gamma}{A numeric vector with length 1 denoting the amount of variance between subjects in
-the transition probability matrix. Note that this value corresponds to the
-variance of the parameters of the Multinomial distribution (i.e., the
-intercepts of the regression equation of the Multinomial distribution used
-to sample the transition probability matrix), see details below. In
-addition, only one variance value can be specified for the complete
-transition probability matrix, hence the variance is assumed fixed across
-all components. The default equals 0.1, which corresponds to little
-variation between subjects. If one wants to simulate data from exactly the
-same HMM for all subjects, var_gamma should be set to 0. Note that if data
-for only 1 subject is simulated (i.e., n = 1), \code{var_gamma} is set to
-0.}
+\item{var_gamma}{A numeric vector with length 1 denoting the amount of
+variance between subjects in the transition probability matrix. Note
+that this value corresponds to the variance of the parameters of the
+Multinomial distribution (i.e., the intercepts of the regression equation
+of the Multinomial distribution used to sample the transition probability
+matrix), see details below. In addition, only one variance value can be
+specified for the complete transition probability matrix, hence the
+variance is assumed fixed across all components. The default equals 0.1,
+which corresponds to little variation between subjects. If one wants to
+simulate data from exactly the same HMM for all subjects, var_gamma should
+be set to 0. Note that if data for only 1 subject is simulated
+(i.e., n = 1), \code{var_gamma} is set to 0.}
 
 \item{var_emiss}{A numeric vector with length \code{n_dep} denoting the
 amount of variance between subjects in the emission distribution(s). For
@@ -140,15 +144,17 @@ of the Multinomial distribution (i.e., the intercepts of the regression
 equation of the Multinomial distribution used to sample the components of
 the emission distribution), see details below. For continuous data, this
 value corresponds to the variance in the mean of the emission
-distribution(s) across subjects. Note that only one variance value can be
-specified each emission distribution, hence the variance is assumed fixed
-across states (and, for the categorical distribution, categories within
-a state) within an emission distribution. The default equals 0.1,
-which corresponds to little variation between subjects given categorical
-observations. If one wants to simulate data from exactly the same HMM for
-all subjects, var_emiss should be set to a vector of 0's. Note that if data
-for only 1 subject is simulated (i.e., n = 1), \code{var_emiss} is set to a
-vector of 0's.}
+distribution(s) across subjects. For count data, it corresponds to the
+variance in the logmean of the emission distribution(s) across subjects
+and should be specified in the logarithmic scale. Note that only one
+variance value can be specified each emission distribution, hence the
+variance is assumed fixed across states (and, for the categorical
+distribution, categories within a state) within an emission distribution.
+The default equals 0.1, which corresponds to little variation between
+subjects given categorical observations. If one wants to simulate data
+from exactly the same HMM for all subjects, var_emiss should be set to a
+vector of 0's. Note that if data for only 1 subject is simulated
+(i.e., n = 1), \code{var_emiss} is set to a vector of 0's.}
 
 \item{return_ind_par}{A logical scalar. Should the subject specific
 transition probability matrix \code{gamma} and emission probability matrix

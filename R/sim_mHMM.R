@@ -83,7 +83,11 @@
 #'   'continuous'}, each element is a matrix with \code{m} rows and 2 columns;
 #'   the first column denoting the mean of state \emph{i} (row \emph{i}) and the
 #'   second column denoting the standard deviation of state \emph{i}
-#'   (row \emph{i}) of the Normal distribution.
+#'   (row \emph{i}) of the Normal distribution. If \code{data_distr =
+#'   'count'}, each element is a matrix with \code{m} rows and 1 column;
+#'   the first column denoting the logmean of state \emph{i} (row \emph{i})
+#'   of the logNormal istribution used as prior for the Poisson emissions
+#'   (note: the logmeans should be specified in the logarithmic scale).
 #' @param xx_vec List of 1 + \code{n_dep} vectors containing the covariate(s) to
 #'   predict the transition probability matrix \code{gamma} and/or (specific)
 #'   emission distribution(s) \code{emiss_distr} using the regression parameters
@@ -119,9 +123,9 @@
 #'   predict \code{emiss_distr} consist of a matrix with the number of rows
 #'   equal to \code{m} and the number of columns equal to \code{q_emiss[k]} - 1
 #'   for each of the \code{k} in \code{n_dep} emission distribution(s). See
-#'   \emph{details} for more information. For continuous emission distributions,
-#'   the subsequent elements in the list \code{beta} consist of a matrix with
-#'   the number of rows equal to \code{m} and 1 column.
+#'   \emph{details} for more information. For continuous and count emission
+#'   distributions, the subsequent elements in the list \code{beta} consist of
+#'   a matrix with the number of rows equal to \code{m} and 1 column.
 #'
 #'   Note that if \code{beta} is specified, \code{xx_vec} has to be specified as
 #'   well. If \code{beta} is omitted completely, \code{beta} defaults to NULL,
@@ -130,18 +134,18 @@
 #'   (i.e., set to \code{NULL}) to signify that either the transition
 #'   probability matrix or a specific emission distribution is not predicted by
 #'   covariates.
-#' @param var_gamma A numeric vector with length 1 denoting the amount of variance between subjects in
-#'   the transition probability matrix. Note that this value corresponds to the
-#'   variance of the parameters of the Multinomial distribution (i.e., the
-#'   intercepts of the regression equation of the Multinomial distribution used
-#'   to sample the transition probability matrix), see details below. In
-#'   addition, only one variance value can be specified for the complete
-#'   transition probability matrix, hence the variance is assumed fixed across
-#'   all components. The default equals 0.1, which corresponds to little
-#'   variation between subjects. If one wants to simulate data from exactly the
-#'   same HMM for all subjects, var_gamma should be set to 0. Note that if data
-#'   for only 1 subject is simulated (i.e., n = 1), \code{var_gamma} is set to
-#'   0.
+#' @param var_gamma A numeric vector with length 1 denoting the amount of
+#'   variance between subjects in the transition probability matrix. Note
+#'   that this value corresponds to the variance of the parameters of the
+#'   Multinomial distribution (i.e., the intercepts of the regression equation
+#'   of the Multinomial distribution used to sample the transition probability
+#'   matrix), see details below. In addition, only one variance value can be
+#'   specified for the complete transition probability matrix, hence the
+#'   variance is assumed fixed across all components. The default equals 0.1,
+#'   which corresponds to little variation between subjects. If one wants to
+#'   simulate data from exactly the same HMM for all subjects, var_gamma should
+#'   be set to 0. Note that if data for only 1 subject is simulated
+#'   (i.e., n = 1), \code{var_gamma} is set to 0.
 #' @param var_emiss A numeric vector with length \code{n_dep} denoting the
 #'   amount of variance between subjects in the emission distribution(s). For
 #'   categorical data, this value corresponds to the variance of the parameters
@@ -149,15 +153,17 @@
 #'   equation of the Multinomial distribution used to sample the components of
 #'   the emission distribution), see details below. For continuous data, this
 #'   value corresponds to the variance in the mean of the emission
-#'   distribution(s) across subjects. Note that only one variance value can be
-#'   specified each emission distribution, hence the variance is assumed fixed
-#'   across states (and, for the categorical distribution, categories within
-#'   a state) within an emission distribution. The default equals 0.1,
-#'   which corresponds to little variation between subjects given categorical
-#'   observations. If one wants to simulate data from exactly the same HMM for
-#'   all subjects, var_emiss should be set to a vector of 0's. Note that if data
-#'   for only 1 subject is simulated (i.e., n = 1), \code{var_emiss} is set to a
-#'   vector of 0's.
+#'   distribution(s) across subjects. For count data, it corresponds to the
+#'   variance in the logmean of the emission distribution(s) across subjects
+#'   and should be specified in the logarithmic scale. Note that only one
+#'   variance value can be specified each emission distribution, hence the
+#'   variance is assumed fixed across states (and, for the categorical
+#'   distribution, categories within a state) within an emission distribution.
+#'   The default equals 0.1, which corresponds to little variation between
+#'   subjects given categorical observations. If one wants to simulate data
+#'   from exactly the same HMM for all subjects, var_emiss should be set to a
+#'   vector of 0's. Note that if data for only 1 subject is simulated
+#'   (i.e., n = 1), \code{var_emiss} is set to a vector of 0's.
 #' @param return_ind_par A logical scalar. Should the subject specific
 #'   transition probability matrix \code{gamma} and emission probability matrix
 #'   \code{emiss_distr} be returned by the function (\code{return_ind_par =
@@ -344,6 +350,11 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
        stop(paste("For continuous data, the number of columns of the emission distribution matrix should be 2, where the first column denotes the state dependent mean and the
                   second column the state dependent standard deviation of the Normal emission distribution. See emission distribution in element", q, "."))
      }
+   } else if (data_distr == 'count'){
+     if (dim(emiss_distr[[q]])[2] != 1){
+       stop(paste("For count data, the number of columns of the emission distribution matrix should be 1, where the column denotes the state dependent logmean of
+                  the logNormal prior used for the Poisson emission distribution. See emission distribution in element", q, "."))
+     }
    }
   }
   if((is.null(xx_vec) & !is.null(beta)) | (!is.null(xx_vec) & is.null(beta))){
@@ -423,6 +434,8 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
           beta[[i]] <- matrix(0, ncol = q_emiss[i-1] - 1, nrow = m)
         } else if (data_distr == 'continuous'){
           beta[[i]] <- matrix(0, ncol = 1, nrow = m)
+        } else if (data_distr == 'count'){
+          beta[[i]] <- matrix(0, ncol = 1, nrow = m)
         }
       }
     }
@@ -466,6 +479,10 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
         sub_emiss[[j]][[i]] <- emiss_distr[[i]]
         sub_emiss[[j]][[i]][,1] <- emiss_distr[[i]][,1] +  xx_vec[[1+i]][j] * beta[[1+i]] +
         rnorm(n = m, mean = 0, sd = sqrt(var_emiss[i]))
+      } else if(data_distr == "count"){
+        sub_emiss[[j]][[i]] <- emiss_distr[[i]]
+        sub_emiss[[j]][[i]][,1] <- exp(emiss_distr[[i]][,1] +  xx_vec[[1+i]][j] * beta[[1+i]] +
+                                         rnorm(n = m, mean = 0, sd = sqrt(var_emiss[[i]]))) # Check if natural scale makes more sense
       }
     }
 
@@ -485,6 +502,10 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
           obs[((j-1) * n_t + 1), (1+i)] <- rnorm(1, mean = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],1],
                                                  sd = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],2])
         }
+      } else if (data_distr == "count"){
+        for(i in 1:n_dep){
+          obs[((j-1) * n_t + 1), (1+i)] <- rpois(1, lambda = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],1])
+        }
       }
       for(t in 2:n_t){
         states[((j-1) * n_t + t), 2] <- sample(x = 1:m, size = 1, prob = sub_gamma[[j]][states[((j-1) * n_t + t - 1), 2],])
@@ -496,6 +517,10 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
           for(i in 1:n_dep){
             obs[((j-1) * n_t + t), (1+i)] <- rnorm(1, mean = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],1],
                                                    sd = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],2])
+          }
+        } else if (data_distr == "count"){
+          for(i in 1:n_dep){
+            obs[((j-1) * n_t + t), (1+i)] <- rpois(1, lambda = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],1])
           }
         }
       }
