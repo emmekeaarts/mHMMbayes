@@ -154,6 +154,12 @@
 #'   transition probabilities over the iterations of the hybrid Metropolis within
 #'   Gibbs sampler. The iterations of the sampler are contained in the rows, and
 #'   the columns contain the group level regression coefficients.}
+#'   \item{\code{gamma_V_int_bar}}{A matrix containing the (co-)variance
+#'   components for the subject-level intercepts
+#'   of the multinomial logistic regression modeling the transition
+#'   probabilities over the iterations of the hybrid Metropolis within Gibbs
+#'   sampler. The iterations of the sampler are contained in the rows, and the
+#'   columns contain the variance components for the subject level intercepts.}
 #'   \item{\code{gamma_int_subj}}{A list containing one matrix per subject
 #'   denoting the subject level intercepts of the Multinomial logistic
 #'   regression modeling the transition probabilities over the iterations of the
@@ -243,6 +249,42 @@
 #'   variable, denoting the group level regression coefficients predicting the
 #'   emission means within each of the dependent variables over the iterations
 #'   of the Gibbs sampler. The iterations of the sampler are contained in the
+#'   rows  of the matrix, and the columns contain the group level regression
+#'   coefficients.}
+#'   \item{\code{emiss_naccept}}{A list containing one matrix per dependent
+#'   variable with the number of accepted draws at the subject level RW
+#'   Metropolis step for each set of parameters of the emission distribution.
+#'   The subjects are contained in the rows, and the columns of the matrix
+#'   contain the sets of parameters.}
+#'   \item{\code{input}}{Overview of used input specifications: the number of
+#'   states \code{m}, the number of used dependent variables \code{n_dep}, the
+#'   number of iterations \code{J} and the specified burn in period
+#'   \code{burn_in} of the hybrid Metropolis within Gibbs sampler, the number of
+#'   subjects \code{n_subj}, the observation length for each subject
+#'   \code{n_vary}, and the column names of the dependent variables
+#'   \code{dep_labels}.}}
+#'
+#' In case of count observations, the \code{mHMM} return object contains:
+#' \describe{
+#'   \item{\code{emiss_mu_bar}}{A list containing one matrix per dependent
+#'   variable, denoting the group level means of the logNormal prior used
+#'   in the emission distribution of each dependent variable over the
+#'   MCMC iterations. The iterations of the sampler are contained in the rows
+#'   of the matrix, and the columns contain the group level Poisson emission
+#'   means (in the logarithmic scale). If covariates were included in the
+#'   analysis, the group level means represent the predicted mean given that the
+#'   covariate is at the average value for continuous covariates, or given
+#'   that the covariate equals zero for dichotomous covariates.}
+#'   \item{\code{emiss_varmu_bar}}{A list containing one matrix per dependent
+#'   variable, denoting the variance between the subject level means of the
+#'   Poisson-logNormal emission distributions over the iterations of the MCMC
+#'   sampler. The iterations of the sampler are contained in the rows of the
+#'   matrix, and the columns contain the group level variance in the mean
+#'   (in the logarithmic scale).}
+#'   \item{\code{emiss_cov_bar}}{A list containing one matrix per dependent
+#'   variable, denoting the group level regression coefficients predicting the
+#'   emission means within each of the dependent variables over the iterations
+#'   of the MCMC sampler. The iterations of the sampler are contained in the
 #'   rows  of the matrix, and the columns contain the group level regression
 #'   coefficients.}
 #'   \item{\code{input}}{Overview of used input specifications: the number of
