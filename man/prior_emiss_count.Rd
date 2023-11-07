@@ -133,11 +133,11 @@ n_dep <- 2
 # hypothesized hyper-prior values for the continuous emission distribution
 manual_prior_emiss <- prior_emiss_count(
                         gen = list(m = m, n_dep = n_dep),
-                        emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
-                                         matrix(c(7, 8, 18), nrow = 1)),
+                        emiss_mu0 = list(matrix(log(c(30, 70, 170)), nrow = 1),
+                                         matrix(log(c(7, 8, 18)), nrow = 1)),
                         emiss_K0 = list(1, 1),
-                        emiss_V =  list(rep(100, m), rep(25, m)),
-                        emiss_nu = list(1, 1))
+                        emiss_V =  list(log(rep(10, m)), log(rep(5, m))),
+                        emiss_nu = list(0.1, 0.1))
 
 # to use the informative priors in a model, simulate multivariate continuous data
 n_t     <- 100
@@ -147,22 +147,25 @@ gamma   <- matrix(c(0.8, 0.1, 0.1,
                     0.2, 0.7, 0.1,
                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
 
-emiss_distr <- list(matrix(c( 50,
+emiss_distr <- list(matrix(log(c( 50,
                               100,
-                              150), nrow = m, byrow = TRUE),
-                    matrix(c(5,
+                              150)), nrow = m, byrow = TRUE),
+                    matrix(log(c(5,
                              10,
-                             20), nrow = m, byrow = TRUE))
+                             20)), nrow = m, byrow = TRUE))
 
-data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'count', gen = list(m = m, n_dep = n_dep),
+data_count <- sim_mHMM(n_t = n_t, n = n, data_distr = 'count', gen = list(m = m, n_dep = n_dep),
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
+
+start_gamma <- gamma
+start_emiss <- map(start_emiss_bad, exp)
 
 # using the informative hyper-prior in a model
 # Note that for reasons of running time, J is set at a ridiculous low value.
 # One would typically use a number of iterations J of at least 1000,
 # and a burn_in of 200.
 out_3st_cont_sim_infemiss <- mHMM(s_data = data_cont$obs,
-                    data_distr = "continuous",
+                    data_distr = "count",
                     gen = list(m = m, n_dep = n_dep),
                     start_val = c(list(gamma), emiss_distr),
                     emiss_hyp_prior = manual_prior_emiss,

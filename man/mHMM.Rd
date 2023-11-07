@@ -450,6 +450,63 @@ out_3st_cont_sim <- mHMM(s_data = data_cont$obs,
 
 }
 
+
+###### Example on multivariate count data
+\donttest{
+n_t     <- 200     # Number of observations on the dependent variable
+m       <- 3        # Number of hidden states
+n_dep   <- 3        # Number of dependent variables
+n_subj  <- 30        # Number of subjects
+
+gamma   <- matrix(c(0.9, 0.05, 0.05,
+                    0.2, 0.7, 0.1,
+                    0.2,0.3, 0.5), ncol = m, byrow = TRUE)
+
+emiss_distr <- list(matrix(c(log(20),
+                             log(10),
+                             log(5)), nrow = m, byrow = TRUE),
+                    matrix(c(log(15),
+                             log(2),
+                             log(5)), nrow = m, byrow = TRUE),
+                    matrix(c(log(50),
+                             log(3),
+                             log(20)), nrow = m, byrow = TRUE))
+
+set.seed(42)
+data_pois <- sim_mHMM(n_t = n_t, n = n_subj,
+                             data_distr = "count", m = m, n_dep = n_dep,
+                             gamma = gamma, emiss_distr = emiss_distr,
+                             var_gamma = 0.1, var_emiss = rep(0.1, n_dep), return_ind_par = TRUE)
+
+# Transition probabilities
+start_gamma <- diag(0.8, m)
+start_gamma[lower.tri(start_gamma) | upper.tri(start_gamma)] <- (1 - diag(start_gamma)) / (m - 1)
+
+# Emission distribution
+start_emiss <- list(matrix(c(20,10, 5), nrow = m, byrow = TRUE),
+                    matrix(c(15, 2, 5), nrow = m, byrow = TRUE),
+                    matrix(c(50, 3,20), nrow = m, byrow = TRUE))
+
+# Specify hyper-prior for the continuous emission distribution
+manual_prior_emiss <- prior_emiss_cont(
+  emiss_mu0 = list(matrix(c(20, 10, 5), nrow = 1, ncol = 3),
+                   matrix(c(15, 2, 5), nrow = 1, ncol = 3),
+                   matrix(c(50, 3, 20), nrow = 1, ncol = 3)),
+  emiss_K0  = rep(list(0.1),n_dep),
+  emiss_nu  = rep(list(0.1),n_dep),
+  emiss_V   = rep(list(rep(0.001, m)),n_dep)
+)
+
+# Run model
+out_3st_count_sim <- mHMM(s_data = sim_data,
+                            data_distr = 'count',
+                            gen = list(m = m, n_dep = n_dep),
+                            start_val = c(list(start_gamma), start_emiss),
+                            emiss_hyp_prior = manual_prior_emiss,
+                            mcmc = list(J = 11, burn_in = 5),
+                            show_progress = TRUE)
+}
+
 }
 \references{
 \insertRef{rabiner1989}{mHMMbayes}
