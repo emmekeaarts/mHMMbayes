@@ -250,15 +250,6 @@ In case of continuous observations, the \code{mHMM} return object contains:
   of the Gibbs sampler. The iterations of the sampler are contained in the
   rows  of the matrix, and the columns contain the group level regression
   coefficients.}
-  \item{\code{label_switch}}{A matrix of \code{m} rows and \code{n_dep}
-  columns containing the percentage of times the group mean of the emission
-  distribution of state \code{i} was sampled to be a smaller value compared to
-  the group mean of of the emission distribution of state \code{i-1}. If the
-  state dependent means of the emission distributions were given in a ranked
-  order (low to high) to both the start values and hyper-priors, a high
-  percentage in \code{label_switch} indicates that label switching possibly
-  poses a problem in the analysis, and further diagnostics (e.g.,
-  traceplots and posterior distributions) should be inspected.}
   \item{\code{input}}{Overview of used input specifications: the number of
   states \code{m}, the number of used dependent variables \code{n_dep}, the
   number of iterations \code{J} and the specified burn in period
