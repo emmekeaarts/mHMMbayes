@@ -31,12 +31,12 @@ for each of the dependent variables.}}}
 \item{emiss_mu0}{A list containing \code{n_dep} matrices, i.e., one list for
 each dependent variable \code{k}. Each matrix contains the hypothesized
 hyper-prior means of the logNormal emission distributions in each of the
-states. Hence, each matrix consists of one row (when not including
-covariates in the model) and \code{m} columns. If covariates are used, the
-number of rows in each matrix in the list is equal to 1 + n_xx (i.e., the
-first row corresponds to the hyper-prior means, the subsequent rows
-correspond to the hyper-prior values of the regression coefficients
-connected to each of the covariates).}
+states in the logarithmic scale. Hence, each matrix consists of one row
+(when not including covariates in the model) and \code{m} columns. If
+covariates are used, the number of rows in each matrix in the list is
+equal to 1 + n_xx (i.e., the first row corresponds to the hyper-prior
+means, the subsequent rows correspond to the hyper-prior values of the
+regression coefficients connected to each of the covariates).}
 
 \item{emiss_K0}{A list containing \code{n_dep} elements corresponding
 to each dependent variable \code{k}. Each element \code{k} is a
@@ -50,10 +50,10 @@ value) and set of regression coefficients (subsequent values) are based.}
 \item{emiss_V}{A list containing \code{n_dep} elements corresponding to each
 of the dependent variables \code{k}, where each element \code{k} is a
 vector with length \code{m} containing the hypothesized variance between
-the subject (emission distribution) means, which are assumed to follow a
-Inverse Gamma hyper-prior distribution (note: here, the Inverse Gamma
-hyper-prior distribution is parametrized as a scaled inverse chi-squared
-distribution).}
+the subject (emission distribution) means in the logarithmic scale,
+which are assumed to follow a Inverse Gamma hyper-prior distribution
+(note: here, the Inverse Gamma hyper-prior distribution is parametrized
+as a scaled inverse chi-squared distribution).}
 
 \item{emiss_nu}{A list containing \code{n_dep} elements corresponding to each
 dependent variable \code{k}. Each element \code{k} is a numeric vector with

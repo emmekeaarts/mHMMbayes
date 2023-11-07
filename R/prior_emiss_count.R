@@ -51,10 +51,10 @@
 #' @param emiss_V A list containing \code{n_dep} elements corresponding to each
 #'   of the dependent variables \code{k}, where each element \code{k} is a
 #'   vector with length \code{m} containing the hypothesized variance between
-#'   the subject (emission distribution) means, which are assumed to follow a
-#'   Inverse Gamma hyper-prior distribution (note: here, the Inverse Gamma
-#'   hyper-prior distribution is parametrized as a scaled inverse chi-squared
-#'   distribution).
+#'   the subject (emission distribution) means in the logarithmic scale,
+#'   which are assumed to follow a Inverse Gamma hyper-prior distribution
+#'   (note: here, the Inverse Gamma hyper-prior distribution is parametrized
+#'   as a scaled inverse chi-squared distribution).
 #' @param emiss_nu A list containing \code{n_dep} elements corresponding to each
 #'   dependent variable \code{k}. Each element \code{k} is a numeric vector with
 #'   length 1 denoting the degrees of freedom of the Inverse Gamma hyper-prior
