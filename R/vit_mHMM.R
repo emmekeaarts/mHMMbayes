@@ -146,7 +146,7 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
   }
   n_vary     <- table(s_data[,1])
   max_n      <- max(n_vary)
-  state_seq  <- matrix(,ncol = n_subj, nrow = max_n)
+  state_seq  <- matrix(NA_real_,ncol = n_subj, nrow = max_n)
   probs      <- vector(mode = "list", length = n_subj)
   n_dep      <- input$n_dep
   m          <- input$m
@@ -170,7 +170,7 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
       }
     }
   } else if(data_distr == "continuous"){
-    est_emiss  <- rep(list(rep(list(matrix(,nrow = m, ncol = 2)),n_dep)), n_subj)
+    est_emiss  <- rep(list(rep(list(matrix(NA_real_,nrow = m, ncol = 2)),n_dep)), n_subj)
     for(s in 1:n_subj){
       for(q in 1:n_dep){
         est_emiss[[s]][[q]][] <- matrix(round(c(apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median),
@@ -178,18 +178,29 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
                                         ncol = 2, nrow = m)
       }
     }
+  } else if(data_distr == "count"){
+    est_emiss  <- rep(list(rep(list(matrix(NA_real_,nrow = m, ncol = 1)),n_dep)), n_subj)
+    for(s in 1:n_subj){
+      for(q in 1:n_dep){
+        est_emiss[[s]][[q]][] <- matrix(round(apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median),3),
+                                        ncol = 1, nrow = m)
+      }
+    }
   }
 
   est_gamma <- obtain_gamma(object, level = "subject")
   for(s in 1:n_subj){
-    emiss <- est_emiss[[s]]
-    gamma    <- est_gamma[[s]]
+    emiss   <- est_emiss[[s]]
+    gamma   <- est_gamma[[s]]
     if(data_distr == "categorical"){
       probs[[s]]    <- cat_mult_fw_r_to_cpp(x = as.matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep),
                                        m = m, emiss = emiss, gamma = gamma, n_dep = n_dep, delta=NULL)[[1]]
     } else if(data_distr == "continuous"){
       probs[[s]]    <- cont_mult_fw_r_to_cpp(x = as.matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep),
                             m = m, emiss = emiss, n_dep = n_dep, gamma = gamma)[[1]]
+    } else if(data_distr == "count"){
+      probs[[s]]    <- count_mult_fw_r_to_cpp(x = as.matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep),
+                                             m = m, emiss = emiss, n_dep = n_dep, gamma = gamma)[[1]]
     }
     state_seq[1:n_vary[s], s] <- apply(probs[[s]], 2, which.max)
   }
