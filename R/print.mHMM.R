@@ -23,6 +23,8 @@ print.mHMM <- function(x, ...){
     AIC<-2*(sum((q_emiss-1)*m)+(m-1)*m) - (2*LL)
   } else if (data_distr == 'continuous'){
     AIC<-2*(m * n_dep * 2 + (m - 1) * m) - (2 * LL)
+  } else if (data_distr == 'count'){
+    AIC<-2*(m * n_dep + (m - 1) * m) - (2 * LL)
   }
 
   cat("Average Log likelihood over all subjects:", mean(LL), "\n")

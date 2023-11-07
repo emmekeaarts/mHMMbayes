@@ -887,12 +887,12 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
       emiss_cov_bar <- "No covariates where used to predict the emission probabilities"
     }
   } else if (data_distr == 'count'){
-    emiss_mu_bar			<- rep(list(matrix(, ncol = m, nrow = J, dimnames = list(NULL, c(paste("mu_", 1:m, sep = ""))))), n_dep)
+    emiss_mu_bar			<- rep(list(matrix(NA_real_, ncol = m, nrow = J, dimnames = list(NULL, c(paste("mu_", 1:m, sep = ""))))), n_dep)
     names(emiss_mu_bar) <- dep_labels
     for(q in 1:n_dep){
       emiss_mu_bar[[q]][1,] <- log(start_val[[q + 1]][,1])
     }
-    emiss_varmu_bar			<- rep(list(matrix(, ncol = m, nrow = J, dimnames = list(NULL, c(paste("varmu_", 1:m, sep = ""))))), n_dep)
+    emiss_varmu_bar			<- rep(list(matrix(NA_real_, ncol = m, nrow = J, dimnames = list(NULL, c(paste("varmu_", 1:m, sep = ""))))), n_dep)
     names(emiss_varmu_bar) <- dep_labels
     if(sum(nx[-1]) > n_dep){
       emiss_cov_bar			<- lapply(m * (nx[-1] - 1 ), dif_matrix, rows = J)

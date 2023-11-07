@@ -57,6 +57,11 @@ is.cont <- function(x) {
 }
 
 #' @keywords internal
+is.count <- function(x) {
+  inherits(x, "count")
+}
+
+#' @keywords internal
 is.mHMM_pdRW_gamma <- function(x) {
   inherits(x, "mHMM_pdRW_gamma")
 }
