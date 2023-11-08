@@ -473,8 +473,8 @@ emiss_distr <- list(matrix(c(log(20),
                              log(20)), nrow = m, byrow = TRUE))
 
 set.seed(42)
-data_pois <- sim_mHMM(n_t = n_t, n = n_subj,
-                             data_distr = "count", m = m, n_dep = n_dep,
+data_count <- sim_mHMM(n_t = n_t, n = n_subj,
+                             data_distr = "count",gen = list(m = m, n_dep = n_dep),
                              gamma = gamma, emiss_distr = emiss_distr,
                              var_gamma = 0.1, var_emiss = rep(0.1, n_dep), return_ind_par = TRUE)
 
@@ -488,7 +488,8 @@ start_emiss <- list(matrix(c(20,10, 5), nrow = m, byrow = TRUE),
                     matrix(c(50, 3,20), nrow = m, byrow = TRUE))
 
 # Specify hyper-prior for the continuous emission distribution
-manual_prior_emiss <- prior_emiss_cont(
+manual_prior_emiss <- prior_emiss_count(
+  gen = list(m = m, n_dep = n_dep),
   emiss_mu0 = list(matrix(c(20, 10, 5), nrow = 1, ncol = 3),
                    matrix(c(15, 2, 5), nrow = 1, ncol = 3),
                    matrix(c(50, 3, 20), nrow = 1, ncol = 3)),
@@ -498,7 +499,7 @@ manual_prior_emiss <- prior_emiss_cont(
 )
 
 # Run model
-out_3st_count_sim <- mHMM(s_data = sim_data,
+out_3st_count_sim <- mHMM(s_data = sim_count$obs,
                             data_distr = 'count',
                             gen = list(m = m, n_dep = n_dep),
                             start_val = c(list(start_gamma), start_emiss),

@@ -459,8 +459,8 @@
 #'                              log(20)), nrow = m, byrow = TRUE))
 #'
 #' set.seed(42)
-#' data_pois <- sim_mHMM(n_t = n_t, n = n_subj,
-#'                              data_distr = "count", m = m, n_dep = n_dep,
+#' data_count <- sim_mHMM(n_t = n_t, n = n_subj,
+#'                              data_distr = "count",gen = list(m = m, n_dep = n_dep),
 #'                              gamma = gamma, emiss_distr = emiss_distr,
 #'                              var_gamma = 0.1, var_emiss = rep(0.1, n_dep), return_ind_par = TRUE)
 #'
@@ -474,7 +474,8 @@
 #'                     matrix(c(50, 3,20), nrow = m, byrow = TRUE))
 #'
 #' # Specify hyper-prior for the continuous emission distribution
-#' manual_prior_emiss <- prior_emiss_cont(
+#' manual_prior_emiss <- prior_emiss_count(
+#'   gen = list(m = m, n_dep = n_dep),
 #'   emiss_mu0 = list(matrix(c(20, 10, 5), nrow = 1, ncol = 3),
 #'                    matrix(c(15, 2, 5), nrow = 1, ncol = 3),
 #'                    matrix(c(50, 3, 20), nrow = 1, ncol = 3)),
@@ -484,7 +485,7 @@
 #' )
 #'
 #' # Run model
-#' out_3st_count_sim <- mHMM(s_data = sim_data,
+#' out_3st_count_sim <- mHMM(s_data = sim_count$obs,
 #'                             data_distr = 'count',
 #'                             gen = list(m = m, n_dep = n_dep),
 #'                             start_val = c(list(start_gamma), start_emiss),
@@ -543,16 +544,20 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
       emiss_mhess[[q]] <- matrix(NA_real_, (q_emiss[q] - 1) * m, (q_emiss[q] - 1))
     }
   } else if (data_distr == 'count'){
-    emiss_mle       <- rep(list(NULL), n_dep)
-    emiss_mhess     <- rep(list(NULL), n_dep)
-    emiss_converge  <- rep(list(NULL), n_dep)
+    emiss_mhess     <- rep(list(rep(NA_real_,m)), n_dep)
+  } else if (data_distr == 'continuous'){
+    emiss_mhess     <- NULL
   }
+  emiss_mle       <- rep(list(rep(NA_real_,m)), n_dep)
+  emiss_converge  <- rep(list(rep(NA_real_,m)), n_dep)
   for(s in 1:n_subj){
     ypooled   <- rbind(ypooled, subj_data[[s]]$y)
     n_t       <- dim(subj_data[[s]]$y)[1]
     n_vary[s] <- n_t
     subj_data[[s]]	<- c(subj_data[[s]], n_t = n_t, list(gamma_mhess = matrix(NA_real_, (m - 1) * m, (m - 1)),
-                                                        emiss_mhess = emiss_mhess))
+                                                        emiss_mle = emiss_mle,
+                                                        emiss_mhess = emiss_mhess,
+                                                        emiss_converge = emiss_converge))
   }
   n_total 		<- dim(ypooled)[1]
 
@@ -917,6 +922,9 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
   gamma_int_bar				<- matrix(NA_real_, nrow = J, ncol = ((m-1) * m))
   colnames(gamma_int_bar) <- paste("int_S", rep(1:m, each = m-1), "toS", rep(2:m, m), sep = "")
   gamma_int_bar[1,] <- as.vector(t(prob_to_int(matrix(gamma_prob_bar[1,], byrow = TRUE, ncol = m, nrow = m))))
+  gamma_V_int_bar <- matrix(NA_real_, nrow = J, ncol = ((m-1) * (m-1) * m))
+  colnames(gamma_V_int_bar) <- paste("var_int_S", rep(1:m, each = (m-1)*(m-1)), "toS", rep(2:m, each=m-1), "_with_", "int_S", rep(1:m, each = (m-1)*(m-1)), "toS", rep(2:m, m), sep = "")
+  gamma_V_int_bar[1,] <- unlist(lapply(gamma_V, function(e) as.vector(t(e))))
   if(nx[1] > 1){
     gamma_cov_bar				<- matrix(NA_real_, nrow = J, ncol = ((m-1) * m) * (nx[1] - 1))
     colnames(gamma_cov_bar) <- paste( paste("cov", 1 : (nx[1] - 1), "_", sep = ""), "S", rep(1:m, each = (m-1) * (nx[1] - 1)), "toS", rep(2:m, m * (nx[1] - 1)), sep = "")
@@ -1126,7 +1134,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
         for(q in 1:n_dep){
           cond_y_pooled					      <- numeric()
           for(s in 1:n_subj){
-            cond_y_pooled             <- c(cond_y_pooled, cond_y[[s]][[i]][[q]])
+            cond_y_pooled             <- c(cond_y_pooled, cond_y[[s]][[q]][[i]])
           }
           if(iter <= 2) { # check
             emiss_c_mu_bar[[i]][[q]] <- log(start_val[[q+1]][i,1])
@@ -1177,7 +1185,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
           }
         } else if (data_distr == 'count'){
           for(q in 1:n_dep){
-            emiss_out	<- optim(log(emiss_mle_pooled[[i]][[q]]), llpois_frac_log, Obs = c(cond_y[[s]][[i]][[q]], round(exp(emiss_c_mu_bar[[i]][[q]][1]),0)),
+            emiss_out	<- optim(log(emiss_mle_pooled[[i]][[q]]), llpois_frac_log, Obs = c(cond_y[[s]][[q]][[i]], round(exp(emiss_c_mu_bar[[i]][[q]][1]),0)),
                                pooled_likel = emiss_pooled_ll[[i]][[q]],
                                w = emiss_w, wgt = wgt,
                                method = "BFGS",
@@ -1298,20 +1306,20 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
          ### sampling subject specific means for the poisson emission distributions from a lognormal prior
          for(q in 1:n_dep){
            for (s in 1:n_subj){
-             if(is.null(cond_y[[s]][[i]][[q]])){ # check
-               cond_y[[s]][[i]][[q]] <- round(exp(emiss_mu0_subj_bar),0)
+             if(is.null(cond_y[[s]][[q]][[i]])){ # check
+               cond_y[[s]][[q]][[i]] <- round(exp(emiss_mu0_subj_bar),0)
              }
              # Sample subject specific lambda with RW-MH
              emiss_mu0_subj_bar <- c(t(emiss_c_mu_bar[[i]][[q]]) %*% xx[[q+1]][s,])
              emiss_candcov_comb <- (subj_data[[s]]$emiss_mhess[[q]][i] + emiss_V_mu[[i]][[q]]^-1)^-1
              emiss_rw_out <- pois_RW_once(lambda = emiss_c_mu[[i]][[q]][s,1],
-                                          Obs = cond_y[[s]][[i]][[q]],
+                                          Obs = cond_y[[s]][[q]][[i]],
                                           mu_bar1 = emiss_mu0_subj_bar,
                                           V_1 = sqrt(emiss_V_mu[[i]][[q]]),
                                           scalar = emiss_scalar,
                                           candcov1 = emiss_candcov_comb)
 
-             emiss[[s]][[q]][i,1]        <- PD_subj[[s]][iter, ((q - 1) * m + i)] <- emiss_c_mu[[i]][[q]][s,1] <- emiss_rw_out$draw_lambda
+             emiss[[s]][[q]][i,1]        <- PD_subj[[s]]$count_emiss[iter, ((q - 1) * m + i)] <- emiss_c_mu[[i]][[q]][s,1] <- emiss_rw_out$draw_lambda
              emiss_naccept[[q]][s, i]    <- emiss_naccept[[q]][s, i] + emiss_rw_out$accept
            }
          }
@@ -1417,7 +1425,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
     class(out) <- append(class(out), c("mHMM", "cont"))
   } else if(data_distr == 'count'){
     if(return_path == TRUE){
-      out <- list(input = list(m = m, n_dep = n_dep, J = J,
+      out <- list(input = list(data_distr = data_distr, m = m, n_dep = n_dep, J = J,
                                burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                   PD_subj = PD_subj,
                   gamma_int_subj = gamma_int_subj,
@@ -1432,7 +1440,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
                   emiss_naccept = emiss_naccept,
                   sample_path = sample_path)
     } else {
-      out <- list(input = list(m = m, n_dep = n_dep, J = J,
+      out <- list(input = list(data_distr = data_distr, m = m, n_dep = n_dep, J = J,
                                burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                   PD_subj = PD_subj,
                   gamma_int_subj = gamma_int_subj,
@@ -1446,7 +1454,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
                   gamma_naccept = gamma_naccept,
                   emiss_naccept = emiss_naccept)
     }
-    class(out) <- append(class(out), "count")
+    class(out) <- append(class(out), c("mHMM","count"))
   }
   return(out)
 }

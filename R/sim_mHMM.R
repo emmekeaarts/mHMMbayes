@@ -422,6 +422,8 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
         beta[[i]] <- matrix(0, ncol = q_emiss[i-1] - 1, nrow = m)
       } else if (data_distr == 'continuous'){
         beta[[i]] <- matrix(0, ncol = 1, nrow = m)
+      } else if (data_distr == 'count'){
+        beta[[i]] <- matrix(0, ncol = 1, nrow = m)
       }
     }
   } else {
@@ -482,7 +484,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
       } else if(data_distr == "count"){
         sub_emiss[[j]][[i]] <- emiss_distr[[i]]
         sub_emiss[[j]][[i]][,1] <- exp(emiss_distr[[i]][,1] +  xx_vec[[1+i]][j] * beta[[1+i]] +
-                                         rnorm(n = m, mean = 0, sd = sqrt(var_emiss[[i]]))) # Check if natural scale makes more sense
+                                         rnorm(n = m, mean = 0, sd = sqrt(var_emiss[i]))) # Check if natural scale makes more sense
       }
     }
 
