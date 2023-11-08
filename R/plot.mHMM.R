@@ -257,7 +257,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
       graphics::legend("topright", col = state_col, legend = paste("State", 1:m), bty = 'n', lty = 1, lwd = 2, cex = .7)
 
     } else if (data_distr == 'count'){
-      graphics::par(mfrow = c(1,2), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
+      graphics::par(mfrow = c(1,1), mar = c(4,2,3,1) + 0.1, mgp = c(2,1,0))
       if (missing(col)){
         state_col <- grDevices::rainbow(m)
       } else {
@@ -283,7 +283,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
                         type = "l", col = state_col[i], lwd = lwd1, lty = lty1)
         # add density curves for subject posterior distributions
         for(s in 1:n_subj){
-          graphics::lines(stats::density(object$PD_subj[[s]]$cont_emiss[burn_in:J,((dep-1)*m + i)]),
+          graphics::lines(stats::density(object$PD_subj[[s]]$count_emiss[burn_in:J,((dep-1)*m + i)]),
                           type = "l", col = state_col[i], lwd = lwd2, lty = lty2)
         }
       }

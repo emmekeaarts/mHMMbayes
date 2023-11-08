@@ -476,9 +476,9 @@
 #' # Specify hyper-prior for the continuous emission distribution
 #' manual_prior_emiss <- prior_emiss_count(
 #'   gen = list(m = m, n_dep = n_dep),
-#'   emiss_mu0 = list(matrix(c(20, 10, 5), nrow = 1, ncol = 3),
-#'                    matrix(c(15, 2, 5), nrow = 1, ncol = 3),
-#'                    matrix(c(50, 3, 20), nrow = 1, ncol = 3)),
+#'   emiss_mu0 = list(matrix(log(c(20, 10, 5)), nrow = 1, ncol = 3),
+#'                    matrix(log(c(15, 2, 5)), nrow = 1, ncol = 3),
+#'                    matrix(log(c(50, 3, 20)), nrow = 1, ncol = 3)),
 #'   emiss_K0  = rep(list(0.1),n_dep),
 #'   emiss_nu  = rep(list(0.1),n_dep),
 #'   emiss_V   = rep(list(rep(0.001, m)),n_dep)
