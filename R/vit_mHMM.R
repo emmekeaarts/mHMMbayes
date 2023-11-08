@@ -182,7 +182,7 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
     est_emiss  <- rep(list(rep(list(matrix(NA_real_,nrow = m, ncol = 1)),n_dep)), n_subj)
     for(s in 1:n_subj){
       for(q in 1:n_dep){
-        est_emiss[[s]][[q]][] <- matrix(round(apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median),3),
+        est_emiss[[s]][[q]][] <- matrix(round(apply(object$PD_subj[[s]]$count_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median),3),
                                         ncol = 1, nrow = m)
       }
     }
