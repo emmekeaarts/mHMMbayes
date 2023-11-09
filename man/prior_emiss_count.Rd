@@ -10,8 +10,6 @@ prior_emiss_count(
   emiss_K0,
   emiss_V,
   emiss_nu,
-  emiss_a0,
-  emiss_b0,
   n_xx_emiss = NULL
 )
 }
@@ -164,7 +162,7 @@ start_emiss <- map(start_emiss_bad, exp)
 # Note that for reasons of running time, J is set at a ridiculous low value.
 # One would typically use a number of iterations J of at least 1000,
 # and a burn_in of 200.
-out_3st_cont_sim_infemiss <- mHMM(s_data = data_cont$obs,
+out_3st_cont_sim_infemiss <- mHMM(s_data = data_count$obs,
                     data_distr = "count",
                     gen = list(m = m, n_dep = n_dep),
                     start_val = c(list(gamma), emiss_distr),

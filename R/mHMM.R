@@ -438,7 +438,9 @@
 #'
 #'
 #' ###### Example on multivariate count data
+#' # Simulate data with one covariate for each count dependent variable
 #' \donttest{
+#'
 #' n_t     <- 200     # Number of observations on the dependent variable
 #' m       <- 3        # Number of hidden states
 #' n_dep   <- 3        # Number of dependent variables
@@ -458,6 +460,16 @@
 #'                              log(3),
 #'                              log(20)), nrow = m, byrow = TRUE))
 #'
+#' # Define list of vectors of covariate values
+#' set.seed(42)
+#' xx_vec <- c(list(NULL),rep(list(rnorm(n_subj,mean = 0, sd = 0.1)),3))
+#'
+#' # Define object beta with regression coefficients for the three dependent variables
+#' beta      <- rep(list(NULL), n_dep+1)
+#' beta[[2]] <- matrix(c(1,-1,0), byrow = TRUE, ncol = 1)
+#' beta[[3]] <- matrix(c(2,0,-2), byrow = TRUE, ncol = 1)
+#' beta[[4]] <- matrix(c(-1,3,1), byrow = TRUE, ncol = 1)
+#'
 #' # Create function to calculate between subject variance from logmu and logvar:
 #' get_varmu <- function(lambda, logvar){
 #'   logmu = log(lambda)
@@ -470,14 +482,15 @@
 #'   logmu = log(lambda)
 #'   log(0.5*exp(-2*logmu)*(exp(2*logmu) + sqrt(4*exp(2*logmu)*varmu+exp(4*logmu))))
 #' }
-#' # Use the largest ean of each dependent variable:
-#' logvar <- get_logvar(c(20,15,50), c(4,3,10)**2)
 #'
-#' set.seed(42)
+#' # Use the largest mean of each dependent variable:
+#' logvar <- get_logvar(c(20,15,50), c(2,1.5,5)**2)
+#'
+#' # Simulate count data
 #' data_count <- sim_mHMM(n_t = n_t, n = n_subj,
-#'                              data_distr = "count",gen = list(m = m, n_dep = n_dep),
-#'                              gamma = gamma, emiss_distr = emiss_distr,
-#'                              var_gamma = 0.1, var_emiss = logvar, return_ind_par = TRUE)
+#'                        data_distr = "count", gen = list(m = m, n_dep = n_dep),
+#'                        gamma = gamma, emiss_distr = emiss_distr, xx_vec = xx_vec, beta = beta,
+#'                        var_gamma = 0.1, var_emiss = logvar, return_ind_par = TRUE)
 #'
 #' # Transition probabilities
 #' start_gamma <- diag(0.8, m)
@@ -488,25 +501,34 @@
 #'                     matrix(c(15, 2, 5), nrow = m, byrow = TRUE),
 #'                     matrix(c(50, 3,20), nrow = m, byrow = TRUE))
 #'
+#' # Specify list of matrices with covariates
+#' set.seed(42)
+#' xx_vec <- c(list(NULL),rep(list(matrix(cbind(1, rnorm(n_subj,mean = 0, sd = 0.1)), ncol = 2)),3))
+#'
 #' # Specify hyper-prior for the continuous emission distribution
 #' manual_prior_emiss <- prior_emiss_count(
 #'   gen = list(m = m, n_dep = n_dep),
-#'   emiss_mu0 = list(matrix(log(c(20, 10, 5)), nrow = 1, ncol = 3),
-#'                    matrix(log(c(15, 2, 5)), nrow = 1, ncol = 3),
-#'                    matrix(log(c(50, 3, 20)), nrow = 1, ncol = 3)),
-#'   emiss_K0  = rep(list(0.1),n_dep),
+#'   emiss_mu0 = list(matrix(log(c(20, 10, 5,
+#'                                 1,  1, 1)), byrow = TRUE, ncol = m),
+#'                    matrix(log(c(15, 2, 5,
+#'                                 1, 1, 1)), byrow = TRUE, ncol = m),
+#'                    matrix(log(c(50, 3, 20,
+#'                                 1, 1,  1)), byrow = TRUE, ncol = m)),
+#'   emiss_K0  = rep(list(rep(0.1, 2)),n_dep),
 #'   emiss_nu  = rep(list(0.1),n_dep),
-#'   emiss_V   = rep(list(rep(0.001, m)),n_dep)
+#'   emiss_V   = rep(list(rep(10, m)),n_dep),
+#'   n_xx_emiss = rep(1,m)
 #' )
 #'
 #' # Run model
 #' out_3st_count_sim <- mHMM(s_data = data_count$obs,
-#'                             data_distr = 'count',
-#'                             gen = list(m = m, n_dep = n_dep),
-#'                             start_val = c(list(start_gamma), start_emiss),
-#'                             emiss_hyp_prior = manual_prior_emiss,
-#'                             mcmc = list(J = 11, burn_in = 5),
-#'                             show_progress = TRUE)
+#'                           data_distr = 'count',
+#'                           gen = list(m = m, n_dep = n_dep),
+#'                           xx = xx_vec,
+#'                           start_val = c(list(start_gamma), start_emiss),
+#'                           emiss_hyp_prior = manual_prior_emiss,
+#'                           mcmc = list(J = 11, burn_in = 6),
+#'                           show_progress = TRUE)
 #'}
 #'
 #' @export
