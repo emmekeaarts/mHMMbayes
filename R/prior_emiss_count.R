@@ -148,7 +148,7 @@
 #'
 
 
-prior_emiss_count <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, emiss_a0, emiss_b0, n_xx_emiss = NULL){
+prior_emiss_count <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, n_xx_emiss = NULL){
   if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1){
     stop("The input argument gen should contain the elements m and n_dep")
   }
