@@ -476,7 +476,7 @@ set.seed(42)
 data_count <- sim_mHMM(n_t = n_t, n = n_subj,
                              data_distr = "count",gen = list(m = m, n_dep = n_dep),
                              gamma = gamma, emiss_distr = emiss_distr,
-                             var_gamma = 0.1, var_emiss = rep(0.1, n_dep), return_ind_par = TRUE)
+                             var_gamma = 0.1, var_emiss = rep(0.01, n_dep), return_ind_par = TRUE)
 
 # Transition probabilities
 start_gamma <- diag(0.8, m)
@@ -499,7 +499,7 @@ manual_prior_emiss <- prior_emiss_count(
 )
 
 # Run model
-out_3st_count_sim <- mHMM(s_data = sim_count$obs,
+out_3st_count_sim <- mHMM(s_data = data_count$obs,
                             data_distr = 'count',
                             gen = list(m = m, n_dep = n_dep),
                             start_val = c(list(start_gamma), start_emiss),
