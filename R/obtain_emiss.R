@@ -152,7 +152,7 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
       for(q in 1:n_dep){
         names(est_emiss[[q]]) <- paste("Subject", 1:n_subj)
         for(s in 1:n_subj){
-          est_emiss[[q]][[s]][] <- matrix(round(c(apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median)),3), ncol = 1, nrow = m)
+          est_emiss[[q]][[s]][] <- matrix(round(c(apply(object$PD_subj[[s]]$count_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median)),3), ncol = 1, nrow = m)
         }
       }
     }
