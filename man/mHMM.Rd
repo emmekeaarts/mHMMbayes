@@ -472,11 +472,26 @@ emiss_distr <- list(matrix(c(log(20),
                              log(3),
                              log(20)), nrow = m, byrow = TRUE))
 
+# Create function to calculate between subject variance from logmu and logvar:
+get_varmu <- function(lambda, logvar){
+  logmu = log(lambda)
+  abs(exp(logvar)-1)*exp(2*logmu+logvar)
+}
+
+# Create function to calculate necessary logvar to get desired between
+#   subject variance (depends also on logmu chosen):
+get_logvar <- function(lambda, varmu){
+  logmu = log(lambda)
+  log(0.5*exp(-2*logmu)*(exp(2*logmu) + sqrt(4*exp(2*logmu)*varmu+exp(4*logmu))))
+}
+# Use the largest ean of each dependent variable:
+logvar <- get_logvar(c(20,15,50), c(4,3,10)**2)
+
 set.seed(42)
 data_count <- sim_mHMM(n_t = n_t, n = n_subj,
                              data_distr = "count",gen = list(m = m, n_dep = n_dep),
                              gamma = gamma, emiss_distr = emiss_distr,
-                             var_gamma = 0.1, var_emiss = rep(0.01, n_dep), return_ind_par = TRUE)
+                             var_gamma = 0.1, var_emiss = logvar, return_ind_par = TRUE)
 
 # Transition probabilities
 start_gamma <- diag(0.8, m)
