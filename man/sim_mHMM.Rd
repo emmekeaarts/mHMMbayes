@@ -33,9 +33,9 @@ which data is simulated.}
 
 \item{data_distr}{String vector with length 1 describing the
 observation type of the data. Currently supported are \code{'categorical'}
-and \code{'continuous'}. Note that for multivariate data, all dependent
-variables are assumed to be of the same observation type. The default
-equals to \code{data_distr = 'categorical'}.}
+, \code{'continuous'}, and \code{'count'}. Note that for multivariate
+data, all dependent variables are assumed to be of the same observation
+type. The default equals to \code{data_distr = 'categorical'}.}
 
 \item{gen}{List containing the following elements denoting the general model
 properties:
@@ -67,7 +67,7 @@ second column denoting the standard deviation of state \emph{i}
 (row \emph{i}) of the Normal distribution. If \code{data_distr =
 'count'}, each element is a matrix with \code{m} rows and 1 column;
 the first column denoting the logmean of state \emph{i} (row \emph{i})
-of the logNormal istribution used as prior for the Poisson emissions
+of the lognormal distribution used as prior for the Poisson emissions
 (note: the logmeans should be specified in the logarithmic scale).}
 
 \item{start_state}{Optional numeric vector with length 1 denoting in which
@@ -321,6 +321,64 @@ data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous',
 
 head(data_cont$states)
 head(data_cont$obs)
+
+
+###### Example on multivariate count data
+# Simulate data with one covariate for each count dependent variable
+
+n_t     <- 200     # Number of observations on the dependent variable
+m       <- 3        # Number of hidden states
+n_dep   <- 3        # Number of dependent variables
+n_subj  <- 30        # Number of subjects
+
+gamma   <- matrix(c(0.9, 0.05, 0.05,
+                    0.2, 0.7, 0.1,
+                    0.2,0.3, 0.5), ncol = m, byrow = TRUE)
+
+emiss_distr <- list(matrix(c(log(20),
+                             log(10),
+                             log(5)), nrow = m, byrow = TRUE),
+                    matrix(c(log(15),
+                             log(2),
+                             log(5)), nrow = m, byrow = TRUE),
+                    matrix(c(log(50),
+                             log(3),
+                             log(20)), nrow = m, byrow = TRUE))
+
+# Define list of vectors of covariate values
+set.seed(42)
+xx_vec <- c(list(NULL),rep(list(rnorm(n_subj,mean = 0, sd = 0.1)),3))
+
+# Define object beta with regression coefficients for the three dependent variables
+beta      <- rep(list(NULL), n_dep+1)
+beta[[2]] <- matrix(c(1,-1,0), byrow = TRUE, ncol = 1)
+beta[[3]] <- matrix(c(2,0,-2), byrow = TRUE, ncol = 1)
+beta[[4]] <- matrix(c(-1,3,1), byrow = TRUE, ncol = 1)
+
+# Create function to calculate between subject variance from logmu and logvar:
+get_varmu <- function(lambda, logvar){
+  logmu = log(lambda)
+  abs(exp(logvar)-1)*exp(2*logmu+logvar)
+}
+
+# Create function to calculate necessary logvar to get desired between
+#   subject variance (depends also on the emission means chosen):
+get_logvar <- function(mu, varmu){
+  logmu = log(mu)
+  log(0.5*exp(-2*logmu)*(exp(2*logmu) + sqrt(4*exp(2*logmu)*varmu+exp(4*logmu))))
+}
+
+# Use the largest mean of each dependent variable:
+logvar <- get_logvar(c(20,15,50), c(2,1.5,5)**2)
+
+# Simulate count data
+data_count <- sim_mHMM(n_t = n_t, n = n_subj,
+                       data_distr = "count", gen = list(m = m, n_dep = n_dep),
+                       gamma = gamma, emiss_distr = emiss_distr, xx_vec = xx_vec, beta = beta,
+                       var_gamma = 0.1, var_emiss = logvar, return_ind_par = TRUE)
+
+head(data_count$states)
+head(data_count$obs)
 }
 \seealso{
 \code{\link{mHMM}} for analyzing multilevel hidden Markov data.
