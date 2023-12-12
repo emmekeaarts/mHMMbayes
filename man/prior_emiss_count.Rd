@@ -10,7 +10,8 @@ prior_emiss_count(
   emiss_K0,
   emiss_V,
   emiss_nu,
-  n_xx_emiss = NULL
+  n_xx_emiss = NULL,
+  log = FALSE
 )
 }
 \arguments{
@@ -29,7 +30,7 @@ for each of the dependent variables.}}}
 \item{emiss_mu0}{A list containing \code{n_dep} matrices, i.e., one list for
 each dependent variable \code{k}. Each matrix contains the hypothesized
 hyper-prior means of the lognormal emission distributions in each of the
-states in the logarithmic scale. Hence, each matrix consists of one row
+states in the natural (Real) scale. Hence, each matrix consists of one row
 (when not including covariates in the model) and \code{m} columns. If
 covariates are used, the number of rows in each matrix in the list is
 equal to 1 + n_xx (i.e., the first row corresponds to the hyper-prior
@@ -48,7 +49,7 @@ value) and set of regression coefficients (subsequent values) are based.}
 \item{emiss_V}{A list containing \code{n_dep} elements corresponding to each
 of the dependent variables \code{k}, where each element \code{k} is a
 vector with length \code{m} containing the hypothesized variance between
-the subject (emission distribution) means in the logarithmic scale,
+the subject (emission distribution) means in the natural (Real) scale,
 which are assumed to follow a Inverse Gamma hyper-prior distribution
 (note: here, the Inverse Gamma hyper-prior distribution is parametrized
 as a scaled inverse chi-squared distribution).}
@@ -121,6 +122,14 @@ states. Also note that in case covariates are specified, the hyper-prior
 parameter values of the inverse Wishart distribution on the covariance matrix
 remain unchanged, as the estimates of the regression coefficients for the
 covariates are fixed over subjects.
+
+Also note that for simplicity the hyper-prior means and variances of the
+lognormal distribution, \code{emiss_mu0} and \code{emiss_V}, by default
+have to be specified in the natural (Real) scale and not in the logarithmic
+scale. \code{prior_emiss_count} returns the corresponding values of the
+parameters on the logarithmic scale. If the user wants to manually specify
+these values on the logarithmic scale, please set the argument \code{log}
+to TRUE in \code{prior_emiss_count}.
 }
 \examples{
 ###### Example using simulated data
@@ -128,16 +137,16 @@ covariates are fixed over subjects.
 m <- 3
 n_dep <- 2
 
-# hypothesized hyper-prior values for the continuous emission distribution
+# hypothesized hyper-prior values for the count emission distribution
 manual_prior_emiss <- prior_emiss_count(
                         gen = list(m = m, n_dep = n_dep),
-                        emiss_mu0 = list(matrix(log(c(30, 70, 170)), nrow = 1),
-                                         matrix(log(c(7, 8, 18)), nrow = 1)),
+                        emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
+                                         matrix(c(7, 8, 18), nrow = 1)),
                         emiss_K0 = list(1, 1),
-                        emiss_V =  list(log(rep(10, m)), log(rep(5, m))),
+                        emiss_V =  list(rep(16, m), rep(4, m)),
                         emiss_nu = list(0.1, 0.1))
 
-# to use the informative priors in a model, simulate multivariate continuous data
+# to use the informative priors in a model, simulate multivariate count data
 n_t     <- 100
 n       <- 10
 
@@ -145,32 +154,29 @@ gamma   <- matrix(c(0.8, 0.1, 0.1,
                     0.2, 0.7, 0.1,
                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
 
-emiss_distr <- list(matrix(log(c( 50,
+emiss_distr <- list(matrix(c( 50,
                               100,
-                              150)), nrow = m, byrow = TRUE),
-                    matrix(log(c(5,
+                              150), nrow = m, byrow = TRUE),
+                    matrix(c(5,
                              10,
-                             20)), nrow = m, byrow = TRUE))
+                             20), nrow = m, byrow = TRUE))
 
 data_count <- sim_mHMM(n_t = n_t, n = n, data_distr = 'count', gen = list(m = m, n_dep = n_dep),
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
-
-start_gamma <- gamma
-start_emiss <- map(start_emiss_bad, exp)
 
 # using the informative hyper-prior in a model
 # Note that for reasons of running time, J is set at a ridiculous low value.
 # One would typically use a number of iterations J of at least 1000,
 # and a burn_in of 200.
-out_3st_cont_sim_infemiss <- mHMM(s_data = data_count$obs,
+out_3st_count_sim_infemiss <- mHMM(s_data = data_count$obs,
                     data_distr = "count",
                     gen = list(m = m, n_dep = n_dep),
                     start_val = c(list(gamma), emiss_distr),
                     emiss_hyp_prior = manual_prior_emiss,
                     mcmc = list(J = 11, burn_in = 5))
 
-out_3st_cont_sim_infemiss
-summary(out_3st_cont_sim_infemiss)
+out_3st_count_sim_infemiss
+summary(out_3st_count_sim_infemiss)
 
 }
 \seealso{

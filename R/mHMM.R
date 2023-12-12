@@ -512,15 +512,15 @@
 #' set.seed(42)
 #' xx_vec <- c(list(NULL),rep(list(matrix(cbind(1, rnorm(n_subj,mean = 0, sd = 0.1)), ncol = 2)),3))
 #'
-#' # Specify hyper-prior for the continuous emission distribution
+#' # Specify hyper-prior for the count emission distribution
 #' manual_prior_emiss <- prior_emiss_count(
 #'   gen = list(m = m, n_dep = n_dep),
-#'   emiss_mu0 = list(matrix(log(c(20, 10, 5,
-#'                                 1,  1, 1)), byrow = TRUE, ncol = m),
-#'                    matrix(log(c(15, 2, 5,
-#'                                 1, 1, 1)), byrow = TRUE, ncol = m),
-#'                    matrix(log(c(50, 3, 20,
-#'                                 1, 1,  1)), byrow = TRUE, ncol = m)),
+#'   emiss_mu0 = list(matrix(c(20, 10, 5,
+#'                                 1,  1, 1), byrow = TRUE, ncol = m),
+#'                    matrix(c(15, 2, 5,
+#'                                 1, 1, 1), byrow = TRUE, ncol = m),
+#'                    matrix(c(50, 3, 20,
+#'                                 1, 1,  1), byrow = TRUE, ncol = m)),
 #'   emiss_K0  = rep(list(rep(0.1, 2)),n_dep),
 #'   emiss_nu  = rep(list(0.1),n_dep),
 #'   emiss_V   = rep(list(rep(10, m)),n_dep),
