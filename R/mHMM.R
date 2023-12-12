@@ -700,24 +700,18 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
   } else if(data_distr == 'count'){
     # Initialize emiss sampler
     if(is.null(emiss_sampler)) {
-      emiss_mle0      <- 0
-      emiss_scalar    <- 2.38
-      emiss_w         <- .1
+      emiss_scalar    <- rep(list(2.38), n_dep)
+      emiss_w	        <- rep(list(.1), n_dep)
     } else {
-      # Add checks:
-      # if (!is.mHMM_pdRW_emiss(emiss_sampler)){
-      #   stop("The input object specified for emiss_sampler should be from the class mHMM_pdRW_emiss, obtained by using the function pd_RW_emiss_cat")
-      # }
-      # if (emiss_sampler$gen$m != m){
-      #   stop("The number of states specified in m is not equal to the number of states specified when setting the proposal distribution of the RW Metropolis sampler on the emission distribution(s) using the function pd_RW_emiss_cat.")
-      # }
-      # if (emiss_sampler$gen$n_dep != n_dep){
-      #   stop("The number of dependent variables specified in n_dep is not equal to the number of dependent variables specified when setting the proposal distribution of the RW Metropolis sampler on the emission distribution(s) using the function pd_RW_emiss_cat.")
-      # }
-      # if (sum(emiss_sampler$gen$q_emiss != q_emiss) > 0){
-      #   stop("The number of number of observed categories for each of the dependent variable specified in q_emiss is not equal to q_emiss specified when setting the proposal distribution of the RW Metropolis sampler on the emission distribution(s) using the function pd_RW_emiss_cat.")
-      # }
-      emiss_mle0      <- emiss_sampler$emiss_mle0
+      if (!is.mHMM_pdRW_emiss(emiss_sampler)){
+        stop("The input object specified for emiss_sampler should be from the class mHMM_pdRW_emiss, obtained by using the function pd_RW_emiss_cat")
+      }
+      if (emiss_sampler$gen$m != m){
+        stop("The number of states specified in m is not equal to the number of states specified when setting the proposal distribution of the RW Metropolis sampler on the emission distribution(s) using the function pd_RW_emiss_cat.")
+      }
+      if (emiss_sampler$gen$n_dep != n_dep){
+        stop("The number of dependent variables specified in n_dep is not equal to the number of dependent variables specified when setting the proposal distribution of the RW Metropolis sampler on the emission distribution(s) using the function pd_RW_emiss_cat.")
+      }
       emiss_scalar    <- emiss_sampler$emiss_scalar
       emiss_w         <- emiss_sampler$emiss_w
     }
@@ -1183,7 +1177,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
           for(s in 1:n_subj){
             cond_y_pooled             <- c(cond_y_pooled, cond_y[[s]][[q]][[i]])
           }
-          if(iter <= 2) { # check
+          if(iter == 2) {
             emiss_c_mu_bar[[i]][[q]] <- log(start_val[[q+1]][i,1])
           }
           emiss_mle_pooled[[i]][[q]]  <- mean(c(cond_y_pooled, round(exp(emiss_c_mu_bar[[i]][[q]][1]),0)), na.rm=TRUE)
@@ -1234,7 +1228,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
           for(q in 1:n_dep){
             emiss_out	<- optim(log(emiss_mle_pooled[[i]][[q]]), llpois_frac_log, Obs = c(cond_y[[s]][[q]][[i]], round(exp(emiss_c_mu_bar[[i]][[q]][1]),0)),
                                pooled_likel = emiss_pooled_ll[[i]][[q]],
-                               w = emiss_w, wgt = wgt,
+                               w = emiss_w[[q]], wgt = wgt,
                                method = "BFGS",
                                hessian = TRUE,
                                control = list(fnscale = -1))
@@ -1353,7 +1347,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
          ### sampling subject specific means for the poisson emission distributions from a lognormal prior
          for(q in 1:n_dep){
            for (s in 1:n_subj){
-             if(is.null(cond_y[[s]][[q]][[i]])){ # check
+             if(is.null(cond_y[[s]][[q]][[i]])){
                cond_y[[s]][[q]][[i]] <- round(exp(emiss_mu0_subj_bar),0)
              }
              # Sample subject specific lambda with RW-MH
@@ -1363,7 +1357,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
                                           Obs = cond_y[[s]][[q]][[i]],
                                           mu_bar1 = emiss_mu0_subj_bar,
                                           V_1 = sqrt(emiss_V_mu[[i]][[q]]),
-                                          scalar = emiss_scalar,
+                                          scalar = emiss_scalar[[q]],
                                           candcov1 = emiss_candcov_comb)
 
              emiss[[s]][[q]][i,1]        <- PD_subj[[s]]$count_emiss[iter, ((q - 1) * m + i)] <- emiss_c_mu[[i]][[q]][s,1] <- emiss_rw_out$draw_lambda

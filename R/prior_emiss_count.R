@@ -1,11 +1,11 @@
 #' Specifying informative hyper-prior on the continuous emission distribution(s)  of the multilevel hidden Markov model
 #'
 #' \code{prior_emiss_count} provides a framework to manually specify an
-#' informative hyper-prior on the Poisson-logNormal emission
+#' informative hyper-prior on the Poisson-lognormal emission
 #' distributions. \code{prior_emiss_count} creates an object of class
 #' \code{mHMM_prior_emiss} used by the function \code{mHMM}, and additionally
 #' attaches the class \code{count} to signal use for count observations. The
-#' set of hyper-prior distributions consists of a logNormal-Inverse-Gamma
+#' set of hyper-prior distributions consists of a lognormal-Inverse-Gamma
 #' distribution (i.e., assuming both unknown population mean and variance
 #' between subject level means) on the vector of poisson means (i.e.,
 #' intercepts and regression coefficients).
@@ -33,7 +33,7 @@
 #'   distribution(s).
 #' @param emiss_mu0 A list containing \code{n_dep} matrices, i.e., one list for
 #'   each dependent variable \code{k}. Each matrix contains the hypothesized
-#'   hyper-prior means of the logNormal emission distributions in each of the
+#'   hyper-prior means of the lognormal emission distributions in each of the
 #'   states in the logarithmic scale. Hence, each matrix consists of one row
 #'   (when not including covariates in the model) and \code{m} columns. If
 #'   covariates are used, the number of rows in each matrix in the list is
@@ -73,7 +73,7 @@
 #'   used for checking equivalent general model properties
 #'   specified under \code{prior_emiss_count} and \code{mHMM}.}
 #'   \item{\code{emiss_mu0}}{A lists containing the hypothesized
-#'   hyper-prior means of the logNormal distribution on
+#'   hyper-prior means of the lognormal distribution on
 #'   the count emission probabilities.}
 #'   \item{\code{emiss_K0}}{A list containing \code{n_dep} elements denoting the
 #'   number of hypothetical prior subjects on which the set of hyper-prior means
