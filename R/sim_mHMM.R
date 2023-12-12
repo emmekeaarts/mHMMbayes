@@ -306,12 +306,6 @@
 #' beta[[3]] <- matrix(c(2,0,-2), byrow = TRUE, ncol = 1)
 #' beta[[4]] <- matrix(c(-1,3,1), byrow = TRUE, ncol = 1)
 #'
-#' # Create function to calculate between subject variance from logmu and logvar:
-#' get_varmu <- function(lambda, logvar){
-#'   logmu = log(lambda)
-#'   abs(exp(logvar)-1)*exp(2*logmu+logvar)
-#' }
-#'
 #' # Create function to calculate necessary logvar to get desired between
 #' #   subject variance (depends also on the emission means chosen):
 #' get_logvar <- function(mu, varmu){
@@ -528,6 +522,12 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
       mnl_emiss[[i]] <- prob_to_int(emiss_distr[[i]])
     }
   }
+  # if(data_distr == "count"){
+  #   for(i in 1:n_dep){
+  #     var_emiss[i]          <- obtain_logvar(max(emiss_distr[[i]][,1]), var_emiss[i])
+  #     emiss_distr[[i]][,1]  <- log(emiss_distr[[i]][,1])
+  #   }
+  # }
   for(j in 1:n){
     sub_gamma[[j]] <- int_to_prob(mnl_gamma + xx_vec[[1]][j] * beta[[1]] +
                                     rnorm(n = m * (m-1), mean = 0, sd = sqrt(var_gamma)))

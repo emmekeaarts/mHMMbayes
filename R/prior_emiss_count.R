@@ -121,19 +121,29 @@
 #' n_t     <- 100
 #' n       <- 10
 #'
+#' # Specify group-level transition and emission means
 #' gamma   <- matrix(c(0.8, 0.1, 0.1,
 #'                     0.2, 0.7, 0.1,
 #'                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
-#'
-#' emiss_distr <- list(matrix(c( 50,
+#' emiss_distr <- list(matrix(log(c( 50,
 #'                               100,
-#'                               150), nrow = m, byrow = TRUE),
+#'                               150)), nrow = m, byrow = TRUE),
+#'                     matrix(log(c(5,
+#'                              10,
+#'                              20)), nrow = m, byrow = TRUE))
+#' # Simulate data
+#' data_count <- sim_mHMM(n_t = n_t, n = n, data_distr = 'count', gen = list(m = m, n_dep = n_dep),
+#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.05, 0.01))
+#'
+#' # Specify starting values
+#' start_gamma <- gamma
+#' start_emiss <- list(matrix(c(50,
+#'                              100,
+#'                              150), nrow = m, byrow = TRUE),
 #'                     matrix(c(5,
 #'                              10,
 #'                              20), nrow = m, byrow = TRUE))
 #'
-#' data_count <- sim_mHMM(n_t = n_t, n = n, data_distr = 'count', gen = list(m = m, n_dep = n_dep),
-#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
 #'
 #' # using the informative hyper-prior in a model
 #' # Note that for reasons of running time, J is set at a ridiculous low value.
@@ -142,7 +152,7 @@
 #' out_3st_count_sim_infemiss <- mHMM(s_data = data_count$obs,
 #'                     data_distr = "count",
 #'                     gen = list(m = m, n_dep = n_dep),
-#'                     start_val = c(list(gamma), emiss_distr),
+#'                     start_val = c(list(start_gamma), start_emiss),
 #'                     emiss_hyp_prior = manual_prior_emiss,
 #'                     mcmc = list(J = 11, burn_in = 5))
 #'

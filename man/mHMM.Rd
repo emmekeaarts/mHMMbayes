@@ -491,12 +491,6 @@ beta[[2]] <- matrix(c(1,-1,0), byrow = TRUE, ncol = 1)
 beta[[3]] <- matrix(c(2,0,-2), byrow = TRUE, ncol = 1)
 beta[[4]] <- matrix(c(-1,3,1), byrow = TRUE, ncol = 1)
 
-# Create function to calculate between subject variance from logmu and logvar:
-get_varmu <- function(lambda, logvar){
-  logmu = log(lambda)
-  abs(exp(logvar)-1)*exp(2*logmu+logvar)
-}
-
 # Create function to calculate necessary logvar to get desired between
 #   subject variance (depends also on the emission means chosen):
 get_logvar <- function(mu, varmu){
@@ -553,6 +547,8 @@ out_3st_count_sim <- mHMM(s_data = data_count$obs,
                           emiss_hyp_prior = manual_prior_emiss,
                           mcmc = list(J = 11, burn_in = 5),
                           show_progress = TRUE)
+
+summary(out_3st_count_sim)
 }
 
 }
