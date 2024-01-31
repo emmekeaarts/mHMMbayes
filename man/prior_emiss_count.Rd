@@ -11,7 +11,7 @@ prior_emiss_count(
   emiss_V,
   emiss_nu,
   n_xx_emiss = NULL,
-  log = FALSE
+  log_scale = FALSE
 )
 }
 \arguments{
@@ -66,6 +66,11 @@ the number of (level 2) covariates used to predict the emission
 distribution of each of the dependent variables \code{k}. When omitted, the
 model assumes no covariates are used to predict the emission
 distribution(s).}
+
+\item{log_scale}{A logical scalar. Should \code{emiss_mu0} and \code{emiss_V}
+be specified in the logarithmic scale (\code{log_scale = TRUE}) or the
+natural scale (\code{log_scale = FALSE}). The default equals
+\code{log_scale = FALSE}.}
 }
 \value{
 \code{prior_emiss_count} returns an object of class \code{mHMM_prior_emiss},
@@ -128,8 +133,8 @@ lognormal distribution, \code{emiss_mu0} and \code{emiss_V}, by default
 have to be specified in the natural (Real) scale and not in the logarithmic
 scale. \code{prior_emiss_count} returns the corresponding values of the
 parameters on the logarithmic scale. If the user wants to manually specify
-these values on the logarithmic scale, please set the argument \code{log}
-to TRUE in \code{prior_emiss_count}.
+these values on the logarithmic scale, please set the argument
+\code{log_scale} to TRUE in \code{prior_emiss_count}.
 }
 \examples{
 ###### Example using simulated data
@@ -162,7 +167,7 @@ emiss_distr <- list(matrix(log(c( 50,
                              20)), nrow = m, byrow = TRUE))
 # Simulate data
 data_count <- sim_mHMM(n_t = n_t, n = n, data_distr = 'count', gen = list(m = m, n_dep = n_dep),
-                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.05, 0.01))
+                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.05, 0.01), log_scale = TRUE)
 
 # Specify starting values
 start_gamma <- gamma

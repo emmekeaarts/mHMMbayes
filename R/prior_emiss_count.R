@@ -30,8 +30,8 @@
 #' have to be specified in the natural (Real) scale and not in the logarithmic
 #' scale. \code{prior_emiss_count} returns the corresponding values of the
 #' parameters on the logarithmic scale. If the user wants to manually specify
-#' these values on the logarithmic scale, please set the argument \code{log}
-#' to TRUE in \code{prior_emiss_count}.
+#' these values on the logarithmic scale, please set the argument
+#' \code{log_scale} to TRUE in \code{prior_emiss_count}.
 #'
 #' @inheritParams mHMM
 #' @param n_xx_emiss Optional numeric vector with length \code{n_dep} denoting
@@ -69,6 +69,10 @@
 #'   distribution on the between subject variance of the emission distribution
 #'   means (note: here, the Inverse Gamma hyper-prior distribution is
 #'   parametrized as a scaled inverse chi-squared distribution).
+#' @param log_scale A logical scalar. Should \code{emiss_mu0} and \code{emiss_V}
+#'   be specified in the logarithmic scale (\code{log_scale = TRUE}) or the
+#'   natural scale (\code{log_scale = FALSE}). The default equals
+#'   \code{log_scale = FALSE}.
 #'
 #' @return \code{prior_emiss_count} returns an object of class \code{mHMM_prior_emiss},
 #'   containing informative hyper-prior values for the continuous emission
@@ -133,7 +137,7 @@
 #'                              20)), nrow = m, byrow = TRUE))
 #' # Simulate data
 #' data_count <- sim_mHMM(n_t = n_t, n = n, data_distr = 'count', gen = list(m = m, n_dep = n_dep),
-#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.05, 0.01))
+#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.05, 0.01), log_scale = TRUE)
 #'
 #' # Specify starting values
 #' start_gamma <- gamma
@@ -163,13 +167,13 @@
 #'
 
 
-prior_emiss_count <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, n_xx_emiss = NULL, log = FALSE){
+prior_emiss_count <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, n_xx_emiss = NULL, log_scale = FALSE){
   if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1){
     stop("The input argument gen should contain the elements m and n_dep")
   } else if (is.null(log)){
-    stop("The input argument log should be either FALSE for specification in the natural scale, or TRUE for specification in the logarithmic scale.")
+    stop("The input argument log_scale should be either FALSE for specification in the natural scale, or TRUE for specification in the logarithmic scale.")
   } else if(!log %in% c(FALSE, TRUE)){
-    stop("The input argument log should be either FALSE for specification in the natural scale, or TRUE for specification in the logarithmic scale.")
+    stop("The input argument log_scale should be either FALSE for specification in the natural scale, or TRUE for specification in the logarithmic scale.")
   }
   m <- gen$m
   n_dep <- gen$n_dep
@@ -233,7 +237,7 @@ prior_emiss_count <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, n_xx_
   }
 
   #### put parameters in the correct scale ####
-  if(log == FALSE){
+  if(log_scale == FALSE){
     for(q in 1:n_dep){
       emiss_V[[q]]     <- obtain_logvar(emiss_mu0[[q]][1,], emiss_V[[q]])
       emiss_mu0[[q]]   <- log(emiss_mu0[[q]])
