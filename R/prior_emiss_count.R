@@ -27,11 +27,14 @@
 #'
 #' Also note that for simplicity the hyper-prior means and variances of the
 #' lognormal distribution, \code{emiss_mu0} and \code{emiss_V}, by default
-#' have to be specified in the natural (Real) scale and not in the logarithmic
-#' scale. \code{prior_emiss_count} returns the corresponding values of the
-#' parameters on the logarithmic scale. If the user wants to manually specify
-#' these values on the logarithmic scale, please set the argument
-#' \code{log_scale} to TRUE in \code{prior_emiss_count}.
+#' have to be specified in the natural (positive real numbers) scale and not in
+#' the logarithmic scale. \code{prior_emiss_count} returns the corresponding
+#' values of the parameters on the logarithmic scale. If the user wants to
+#' manually specify these values on the logarithmic scale, please set the
+#' argument \code{log_scale} to \cote{TRUE} in \code{prior_emiss_count}. If
+#' covariates are used to predict the emission distribution, then the
+#' logarithmic scale should be used for the inputs \code{emiss_mu0} and
+#' \code{emiss_V}, and set \code{log_scale = TRUE}.
 #'
 #' @inheritParams mHMM
 #' @param n_xx_emiss Optional numeric vector with length \code{n_dep} denoting
@@ -42,12 +45,15 @@
 #' @param emiss_mu0 A list containing \code{n_dep} matrices, i.e., one list for
 #'   each dependent variable \code{k}. Each matrix contains the hypothesized
 #'   hyper-prior means of the lognormal emission distributions in each of the
-#'   states in the natural (Real) scale. Hence, each matrix consists of one row
-#'   (when not including covariates in the model) and \code{m} columns. If
-#'   covariates are used, the number of rows in each matrix in the list is
-#'   equal to 1 + n_xx (i.e., the first row corresponds to the hyper-prior
-#'   means, the subsequent rows correspond to the hyper-prior values of the
-#'   regression coefficients connected to each of the covariates).
+#'   states in the natural (positive real numbers) scale. Hence, each
+#'   matrix consists of one row (when not including covariates in the model)
+#'   and \code{m} columns. If covariates are used, the number of rows in each
+#'   matrix in the list is equal to 1 + n_xx_emiss (i.e., the first row
+#'   corresponds to the hyper-prior means, the subsequent rows correspond to
+#'   the hyper-prior values of the regression coefficients connected to each of
+#'   the covariates). If covariates are used to predict the emission
+#'   distribution, then \code{emiss_mu0} should be specified in the logarithmic
+#'   scale, and \code{log_scale} set to \code{TRUE}.
 #' @param emiss_K0 A list containing \code{n_dep} elements corresponding
 #'   to each dependent variable \code{k}. Each element \code{k} is a
 #'   numeric vector with length 1 (when no covariates are used) denoting the
@@ -59,10 +65,13 @@
 #' @param emiss_V A list containing \code{n_dep} elements corresponding to each
 #'   of the dependent variables \code{k}, where each element \code{k} is a
 #'   vector with length \code{m} containing the hypothesized variance between
-#'   the subject (emission distribution) means in the natural (Real) scale,
-#'   which are assumed to follow a Inverse Gamma hyper-prior distribution
-#'   (note: here, the Inverse Gamma hyper-prior distribution is parametrized
-#'   as a scaled inverse chi-squared distribution).
+#'   the subject (emission distribution) means in the natural (positive real
+#'   numbers) scale, which are assumed to follow a Inverse Gamma hyper-prior
+#'   distribution (note: here, the Inverse Gamma hyper-prior distribution is
+#'   parametrized as a scaled inverse chi-squared distribution). If
+#'   covariates are used to predict the emission distribution, then
+#'   \code{emiss_V} should be specified in the logarithmic scale, and
+#'   \code{log_scale} set to \code{TRUE}.
 #' @param emiss_nu A list containing \code{n_dep} elements corresponding to each
 #'   dependent variable \code{k}. Each element \code{k} is a numeric vector with
 #'   length 1 denoting the degrees of freedom of the Inverse Gamma hyper-prior
@@ -170,10 +179,12 @@
 prior_emiss_count <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, n_xx_emiss = NULL, log_scale = FALSE){
   if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1){
     stop("The input argument gen should contain the elements m and n_dep")
-  } else if (is.null(log)){
+  } else if (is.null(log_scale)){
     stop("The input argument log_scale should be either FALSE for specification in the natural scale, or TRUE for specification in the logarithmic scale.")
-  } else if(!log %in% c(FALSE, TRUE)){
+  } else if(!log_scale %in% c(FALSE, TRUE)){
     stop("The input argument log_scale should be either FALSE for specification in the natural scale, or TRUE for specification in the logarithmic scale.")
+  } else if(log_scale == FALSE & !is.null(n_xx_emiss)){
+    stop("According to n_xx_emiss covariates have been used to predict the count emission distribution. Please use the logarithmic scale to specify emiss_mu0 and emiss_V, and set `log_scale = TRUE`.")
   }
   m <- gen$m
   n_dep <- gen$n_dep
@@ -188,10 +199,10 @@ prior_emiss_count <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, n_xx_
 
   #### checking emiss_mu0 ####
   if(!is.list(emiss_mu0)){
-    stop(paste("emiss_mu0 should be a list containing", n_dep, "lists; one list for each dependent variable."))
+    stop(paste("emiss_mu0 should be a list containing", n_dep, "matrices; one matrix for each dependent variable."))
   }
   if(length(emiss_mu0) != n_dep ){
-    stop(paste("emiss_mu0 should be a list containing", n_dep, "lists; one list for each dependent variable."))
+    stop(paste("emiss_mu0 should be a list containing", n_dep, "matrices; one matrix for each dependent variable."))
   }
   if(sum(m == sapply(emiss_mu0, dim)[2,]) != n_dep){
     stop(paste("The matrix relating to dependent variable", k, "of the input argument emiss_mu0 should consist of m, here", m, ", columns."))
@@ -238,8 +249,9 @@ prior_emiss_count <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, n_xx_
 
   #### put parameters in the correct scale ####
   if(log_scale == FALSE){
+    emiss_V <- obtain_logvar(gen = gen, emiss_mu = emiss_mu0, var_emiss = emiss_V, byrow = TRUE)
     for(q in 1:n_dep){
-      emiss_V[[q]]     <- obtain_logvar(emiss_mu0[[q]][1,], emiss_V[[q]])
+      # emiss_V[[q]]     <- obtain_logvar(emiss_mu0[[q]][1,], emiss_V[[q]])
       emiss_mu0[[q]]   <- log(emiss_mu0[[q]])
     }
   }

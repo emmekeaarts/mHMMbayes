@@ -83,7 +83,7 @@
 #'   the Normal emission distribution within each state (rows). In case of
 #'   count observations: a \code{m} by 1 matrix denoting the mean (column) of
 #'   the Poisson emission distribution within each state on the natural
-#'   (i.e., Positive domain, not logarithmic) scale (rows). Note that
+#'   (i.e., real positive domain, not logarithmic) scale (rows). Note that
 #'   \code{start_val} should not contain nested lists (i.e., lists within
 #'   lists).
 #' @param mcmc List of Markov chain Monte Carlo (MCMC) arguments, containing the

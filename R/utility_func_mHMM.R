@@ -79,10 +79,17 @@ hms <- function(t){
         sep = ":")
 }
 
+#' @keywords internal
 depth <- function(x,xdepth=0){
   if(!is.list(x)){
     return(xdepth)
   }else{
     return(max(unlist(lapply(x,depth,xdepth=xdepth+1))))
   }
+}
+
+#' @keywords internal
+# Calculates the between subject variance from logmu and logvar:
+obtain_varmu <- function(logmu, logvar){
+  abs(exp(logvar)-1)*exp(2*logmu+logvar)
 }

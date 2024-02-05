@@ -30,12 +30,15 @@ for each of the dependent variables.}}}
 \item{emiss_mu0}{A list containing \code{n_dep} matrices, i.e., one list for
 each dependent variable \code{k}. Each matrix contains the hypothesized
 hyper-prior means of the lognormal emission distributions in each of the
-states in the natural (Real) scale. Hence, each matrix consists of one row
-(when not including covariates in the model) and \code{m} columns. If
-covariates are used, the number of rows in each matrix in the list is
-equal to 1 + n_xx (i.e., the first row corresponds to the hyper-prior
-means, the subsequent rows correspond to the hyper-prior values of the
-regression coefficients connected to each of the covariates).}
+states in the natural (positive real numbers) scale. Hence, each
+matrix consists of one row (when not including covariates in the model)
+and \code{m} columns. If covariates are used, the number of rows in each
+matrix in the list is equal to 1 + n_xx_emiss (i.e., the first row
+corresponds to the hyper-prior means, the subsequent rows correspond to
+the hyper-prior values of the regression coefficients connected to each of
+the covariates). If covariates are used to predict the emission
+distribution, then \code{emiss_mu0} should be specified in the logarithmic
+scale, and \code{log_scale} set to \code{TRUE}.}
 
 \item{emiss_K0}{A list containing \code{n_dep} elements corresponding
 to each dependent variable \code{k}. Each element \code{k} is a
@@ -49,10 +52,13 @@ value) and set of regression coefficients (subsequent values) are based.}
 \item{emiss_V}{A list containing \code{n_dep} elements corresponding to each
 of the dependent variables \code{k}, where each element \code{k} is a
 vector with length \code{m} containing the hypothesized variance between
-the subject (emission distribution) means in the natural (Real) scale,
-which are assumed to follow a Inverse Gamma hyper-prior distribution
-(note: here, the Inverse Gamma hyper-prior distribution is parametrized
-as a scaled inverse chi-squared distribution).}
+the subject (emission distribution) means in the natural (positive real
+numbers) scale, which are assumed to follow a Inverse Gamma hyper-prior
+distribution (note: here, the Inverse Gamma hyper-prior distribution is
+parametrized as a scaled inverse chi-squared distribution). If
+covariates are used to predict the emission distribution, then
+\code{emiss_V} should be specified in the logarithmic scale, and
+\code{log_scale} set to \code{TRUE}.}
 
 \item{emiss_nu}{A list containing \code{n_dep} elements corresponding to each
 dependent variable \code{k}. Each element \code{k} is a numeric vector with
@@ -130,11 +136,14 @@ covariates are fixed over subjects.
 
 Also note that for simplicity the hyper-prior means and variances of the
 lognormal distribution, \code{emiss_mu0} and \code{emiss_V}, by default
-have to be specified in the natural (Real) scale and not in the logarithmic
-scale. \code{prior_emiss_count} returns the corresponding values of the
-parameters on the logarithmic scale. If the user wants to manually specify
-these values on the logarithmic scale, please set the argument
-\code{log_scale} to TRUE in \code{prior_emiss_count}.
+have to be specified in the natural (positive real numbers) scale and not in
+the logarithmic scale. \code{prior_emiss_count} returns the corresponding
+values of the parameters on the logarithmic scale. If the user wants to
+manually specify these values on the logarithmic scale, please set the
+argument \code{log_scale} to \cote{TRUE} in \code{prior_emiss_count}. If
+covariates are used to predict the emission distribution, then the
+logarithmic scale should be used for the inputs \code{emiss_mu0} and
+\code{emiss_V}, and set \code{log_scale = TRUE}.
 }
 \examples{
 ###### Example using simulated data

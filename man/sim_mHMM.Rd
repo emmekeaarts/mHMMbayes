@@ -71,7 +71,8 @@ second column denoting the standard deviation of state \emph{i}
 the only column denoting the logmean of state \emph{i} (row \emph{i})
 of the lognormal distribution used as prior for the Poisson emissions
 (note: by default the logmeans should be specified in the natural scale;
-see argument \code{log_scale} below).}
+see argument \code{log_scale} below, unless covariates are used to predict
+a count emission distribution).}
 
 \item{start_state}{Optional numeric vector with length 1 denoting in which
 state the simulated state sequence should start. If left unspecified, the
@@ -125,7 +126,10 @@ emission distribution(s) is not predicted by covariates.}
   covariates. One of the elements in the list can also be left empty
   (i.e., set to \code{NULL}) to signify that either the transition
   probability matrix or a specific emission distribution is not predicted by
-  covariates.}
+  covariates. If covariates are used to predict a count emission
+  distribution (\code{data_distr = 'count'}), then the logarithmic scale
+  should be used for the inputs \code{emiss_distr} and \code{var_emiss} in
+  addition to \code{beta}, and also set \code{log_scale = TRUE}.}
 
 \item{var_gamma}{Either a numeric vector with length 1 or a matrix of
 (\code{m} by \code{m} - 1) elements denoting the amount of variance
@@ -152,7 +156,7 @@ subject is simulated (i.e., n = 1), \code{var_gamma} is set to 0.}
   between the subjects' means of state \emph{i} (row \emph{i}) of the normal
   distribution used as prior for the Normal emissions. If \code{data_distr =
   'count'}, each element is a matrix with \code{m} rows and 1 column; the
-  single column denoting the logvariance between the subjects; logmeans of
+  single column denoting the logvariance between the subjects' logmeans of
   state \emph{i} (row \emph{i}) of the lognormal distribution used as prior
   for the Poisson emissions (note: by default the logvariances should be
   specified in the natural scale; see argument \code{log_scale} below).
@@ -195,8 +199,12 @@ categorical data).}
 \code{emiss_distr} (i.e., the sample average logmeans) and
 \code{var_emiss} (i.e., the between subject logvariances) of the lognormal
 prior adopted for the count be specified in the logarithmic scale
-(\code{log_scale = TRUE}) or the natural scale (\code{log_scale = FALSE}).
-The default equals \code{log_scale = FALSE}.}
+(\code{log_scale = TRUE}) or the natural (i.e., real positive numbers)
+scale (\code{log_scale = FALSE}). The default equals
+\code{log_scale = FALSE}. Note that if covariates \code{beta} are used to
+predict the count emission distribution, then the logarithmic scale should
+be used for the inputs \code{emiss_distr}, \code{beta}, and
+\code{var_emiss}, and also set \code{log_scale = TRUE}.}
 }
 \value{
 The following components are returned by the function \code{sim_mHMM}:
@@ -250,11 +258,10 @@ dependent variables for multivariate data are assumed to be independent, and
 all distributions for one dataset have to be of the same type (either
 categorical or continuous).
 
-Note: the subject specific) initial state distributions (i.e., the
+Note that the subject specific initial state distributions (i.e., the
 probability of each of the states at the first time point) needed to simulate
 the data are obtained from the stationary distributions of the subject
 specific transition probability matrices gamma.
-
 
 \code{beta}: As the first element in each row of \code{gamma} is used as
 reference category in the Multinomial logistic regression, the first matrix
@@ -272,6 +279,16 @@ state one. The second element in the first row corresponds to the probability
 of observing category three is state one, and so on. The last element in the
 first row corresponds to the probability of observing the last category in
 state one.
+
+Note that when simulating count data (\code{data_distr = 'count'}), by
+default the emission distribution parameters \code{emiss_distr} and
+\code{var_emiss} are specified in the natural (positive real numbers) scale
+(as opposite to the logarithmic scale). If the user wants to manually
+specify these values on the logarithmic scale, please set the argument
+\code{log_scale = TRUE}. Also note that if covariates are used to predict a
+count emission distribution, then the logarithmic scale should be used for
+the inputs \code{emiss_distr}, \code{beta}, and \code{var_emiss}, and also
+set \code{log_scale = TRUE}.
 }
 \examples{
 

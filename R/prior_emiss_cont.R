@@ -185,10 +185,10 @@ prior_emiss_cont <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, emiss_
 
   #### checking emiss_mu0 ####
   if(!is.list(emiss_mu0)){
-    stop(paste("emiss_mu0 should be a list containing", n_dep, "lists; one list for each dependent variable."))
+    stop(paste("emiss_mu0 should be a list containing", n_dep, "matrices; one matrix for each dependent variable."))
   }
   if(length(emiss_mu0) != n_dep ){
-    stop(paste("emiss_mu0 should be a list containing", n_dep, "lists; one list for each dependent variable."))
+    stop(paste("emiss_mu0 should be a list containing", n_dep, "matrices; one matrix for each dependent variable."))
   }
   if(sum(m == sapply(emiss_mu0, dim)[2,]) != n_dep){
     stop(paste("The matrix relating to dependent variable", k, "of the input argument emiss_mu0 should consist of m, here", m, ", columns."))
