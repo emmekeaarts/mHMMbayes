@@ -370,7 +370,44 @@ head(data_cont$states)
 head(data_cont$obs)
 
 
-## Example on multivariate count data
+## Example on multivariate count data without covariates
+n_t     <- 200     # Number of observations on the dependent variable
+m       <- 3        # Number of hidden states
+n_dep   <- 2        # Number of dependent variables
+n_subj  <- 30        # Number of subjects
+
+gamma   <- matrix(c(0.9, 0.05, 0.05,
+                    0.2, 0.7, 0.1,
+                    0.2,0.3, 0.5), ncol = m, byrow = TRUE)
+
+emiss_distr <- list(matrix(c(20,
+                             10,
+                             5), nrow = m, byrow = TRUE),
+                    matrix(c(50,
+                             3,
+                             20), nrow = m, byrow = TRUE))
+
+# Define between variance to use on the simulating function:
+var_emiss <- c(5,2)
+
+# We can also use different values per state, if preferred:
+var_emiss <- list(c(5.0, 3.0, 1.5),
+                  c(5.0, 5.0, 5.0))
+var_emiss <- lapply(var_emiss, function(q) matrix(q, nrow = m))
+
+# Simulate count data:
+data_count <- sim_mHMM(n_t = n_t,
+                       n = n_subj,
+                       data_distr = "count",
+                       gen = list(m = m, n_dep = n_dep),
+                       gamma = gamma,
+                       emiss_distr = emiss_distr,
+                       var_gamma = 0.1,
+                       var_emiss = var_emiss,
+                       return_ind_par = TRUE)
+
+
+## Example on multivariate count data with covariates
 # Simulate data with one covariate for each count dependent variable
 
 n_t     <- 200     # Number of observations on the dependent variable
@@ -382,15 +419,18 @@ gamma   <- matrix(c(0.9, 0.05, 0.05,
                     0.2, 0.7, 0.1,
                     0.2,0.3, 0.5), ncol = m, byrow = TRUE)
 
-emiss_distr <- list(matrix(c(log(20),
-                             log(10),
-                             log(5)), nrow = m, byrow = TRUE),
-                    matrix(c(log(15),
-                             log(2),
-                             log(5)), nrow = m, byrow = TRUE),
-                    matrix(c(log(50),
-                             log(3),
-                             log(20)), nrow = m, byrow = TRUE))
+emiss_distr <- list(matrix(c(20,
+                             10,
+                             5), nrow = m, byrow = TRUE),
+                    matrix(c(15,
+                             2,
+                             5), nrow = m, byrow = TRUE),
+                    matrix(c(50,
+                             3,
+                             20), nrow = m, byrow = TRUE))
+
+# Since we have covariates, we specify inputs in the log scale:
+emiss_distr_log <- lapply(emiss_distr, function(e) log(e))
 
 # Define list of vectors of covariate values
 set.seed(42)
@@ -402,21 +442,38 @@ beta[[2]] <- matrix(c(1,-1,0), byrow = TRUE, ncol = 1)
 beta[[3]] <- matrix(c(2,0,-2), byrow = TRUE, ncol = 1)
 beta[[4]] <- matrix(c(-1,3,1), byrow = TRUE, ncol = 1)
 
-# Create function to calculate necessary logvar to get desired between
-#   subject variance (depends also on the emission means chosen):
-# get_logvar <- function(mu, varmu){
-#   logmu = log(mu)
-#   log(0.5*exp(-2*logmu)*(exp(2*logmu) + sqrt(4*exp(2*logmu)*varmu+exp(4*logmu))))
-# }
+# Calculate logvar to use on the simulating function:
+logvar <- obtain_logvar(gen = list(m = m, n_dep = n_dep),
+                        emiss_mu = emiss_distr,
+                        var_emiss =  list(rep(4, m),
+                                          rep(2, m),
+                                          rep(5, m)),
+                        byrow = FALSE)
 
-# Use the largest mean of each dependent variable:
-#logvar <- get_logvar(c(20,15,50), c(2,1.5,5)**2)
+# We can also use different values per state for logvar:
+logvar <- obtain_logvar(gen = list(m = m, n_dep = n_dep),
+                        emiss_mu = emiss_distr,
+                        var_emiss =  list(c(5.0, 3.0, 1.5),
+                                          c(2.0, 6.0, 0.5),
+                                          c(5.0, 5.0, 5.0)),
+                        byrow = FALSE)
 
-# Simulate count data
-data_count <- sim_mHMM(n_t = n_t, n = n_subj,
-                       data_distr = "count", gen = list(m = m, n_dep = n_dep),
-                       gamma = gamma, emiss_distr = emiss_distr, xx_vec = xx_vec, beta = beta,
-                       var_gamma = 0.1, var_emiss = logvar, return_ind_par = TRUE, log_scale = FALSE)
+# Put logvar in the right format:
+logvar <- lapply(logvar, function(q) matrix(q, nrow = m))
+
+# Simulate count data:
+data_count <- sim_mHMM(n_t = n_t,
+                       n = n_subj,
+                       data_distr = "count",
+                       gen = list(m = m, n_dep = n_dep),
+                       gamma = gamma,
+                       emiss_distr = emiss_distr_log,
+                       xx_vec = xx_vec,
+                       beta = beta,
+                       var_gamma = 0.1,
+                       var_emiss = logvar,
+                       return_ind_par = TRUE,
+                       log_scale = TRUE)
 
 head(data_count$states)
 head(data_count$obs)
