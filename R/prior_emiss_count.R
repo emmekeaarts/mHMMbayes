@@ -204,10 +204,13 @@ prior_emiss_count <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, n_xx_
   if(length(emiss_mu0) != n_dep ){
     stop(paste("emiss_mu0 should be a list containing", n_dep, "matrices; one matrix for each dependent variable."))
   }
-  if(sum(m == sapply(emiss_mu0, dim)[2,]) != n_dep){
-    stop(paste("The matrix relating to dependent variable", k, "of the input argument emiss_mu0 should consist of m, here", m, ", columns."))
+  if(any(!sapply(emiss_mu0, is.matrix))){
+    stop(paste("emiss_mu0 should be a list containing", n_dep, "matrices; one matrix for each dependent variable."))
   }
   for(k in 1:n_dep){
+    if(sum(m == sapply(emiss_mu0, dim)[2,]) != n_dep){
+      stop(paste("The matrix relating to dependent variable", k, "of the input argument emiss_mu0 should consist of m, here", m, ", columns."))
+    }
     if(n_xx_int[k] == 1 & dim(emiss_mu0[[k]])[1] != 1){
       stop(paste("According to the input paramter n_xx_emiss no covariates are used to predict the emission distribution of dependent variable", k, ". Hence, within input argument emiss_mu0, the matrix relating to dependent variable", k, ", should contain 1 row."))
     }

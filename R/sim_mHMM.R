@@ -456,11 +456,11 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
     stop("The input argument log_scale should be either TRUE or FALSE.")
   }
   if(data_distr == 'count' & log_scale == TRUE){
-    warning("The argument log_scale is set to TRUE, so the input arguments 'emiss_distr', 'beta', and 'var_emiss' will be assumed
-            to be in the logarithmic scale.")
+    # warning("The argument log_scale is set to TRUE, so the input arguments 'emiss_distr', 'beta', and 'var_emiss' will be assumed
+    #         to be in the logarithmic scale.")
   } else if(data_distr == 'count' & log_scale == TRUE){
-    warning("The argument log_scale is set to FALSE, so the input arguments 'emiss_distr' and 'var_emiss' will be assumed
-            to be in the natural scale.")
+    # warning("The argument log_scale is set to FALSE, so the input arguments 'emiss_distr' and 'var_emiss' will be assumed
+    #         to be in the natural scale.")
   } else if(data_distr == 'count' & log_scale == FALSE & !is.null(beta)){
     stop("Covariates have been used to predict the count emission distribution. Please use the logarithmic scale to specify emiss_distr, beta, and var_emiss, and set `log_scale = TRUE`.")
   }
@@ -627,7 +627,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
   # If a single value of var_gamma specified, use for all transitions
   if(length(var_gamma) == 1){
     var_gamma <- matrix(rep(var_gamma, m*(m-1)),nrow = m, byrow = TRUE)
-    warning("A single value of var_gamma was provided, which will be used for all states.")
+    # warning("A single value of var_gamma was provided, which will be used for all states.")
   } else if(is.matrix(var_gamma)){
     if (dim(var_gamma)[1] != m){
       stop(paste("The between-subject variance matrix for the transition distribution should be a", m, "by", m-1, "matrix."))
@@ -646,7 +646,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
         var_emiss[[i]] <- matrix(rep(0.1, m*(q_emiss[i]-1)),nrow = m, byrow = TRUE)
       }
     } else if(is.numeric(var_emiss) & length(var_emiss) == n_dep){
-      warning("A single value of var_emiss was provided per dependent variable, which will be used for all states.")
+      # warning("A single value of var_emiss was provided per dependent variable, which will be used for all states.")
       arg_var_emiss <- var_emiss
       var_emiss <- rep(list(NULL), n_dep)
       for(i in 1:n_dep){
@@ -672,7 +672,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
         var_emiss[[i]] <- matrix(rep(0.1, m), nrow = m, byrow = TRUE)
       }
     } else if(is.numeric(var_emiss) & length(var_emiss) == n_dep){
-      warning("A single value of var_emiss was provided per dependent variable, which will be used for all states.")
+      # warning("A single value of var_emiss was provided per dependent variable, which will be used for all states.")
       arg_var_emiss <- var_emiss
       var_emiss <- rep(list(NULL), n_dep)
       for(i in 1:n_dep){

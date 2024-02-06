@@ -127,8 +127,11 @@ obtain_logvar <- function(gen, emiss_mu, var_emiss, byrow = TRUE){
   }
 
   #### checking emiss_mu ####
-  if (any(unlist(emiss_distr) < 0)){
+  if (any(unlist(emiss_mu) <= 0)){
     stop(paste("All values in emiss_mu should be real positive numbers (emiss_mu > 0)."))
+  }
+  if(any(!sapply(emiss_mu, is.matrix))){
+    stop(paste("emiss_mu should be a list containing", n_dep, "matrices; one matrix for each dependent variable."))
   }
   if(byrow){
 
@@ -139,8 +142,11 @@ obtain_logvar <- function(gen, emiss_mu, var_emiss, byrow = TRUE){
     if(length(emiss_mu) != n_dep ){
       stop(paste("emiss_mu should be a list containing", n_dep, "matrices; one matrix for each dependent variable."))
     }
-    if(sum(m == sapply(emiss_mu, dim)[2,]) != n_dep){
-      stop(paste("The matrix relating to dependent variable", k, "of the input argument emiss_mu should consist of m, here", m, ", columns."))
+    for(q in 1:n_dep){
+      if (dim(emiss_mu[[q]])[2] != m){
+        stop(paste("The number of columns of the emission distribution matrix in element", q, "should be
+             equal to the number of states, which is", m, "."))
+      }
     }
 
   } else {
@@ -154,7 +160,7 @@ obtain_logvar <- function(gen, emiss_mu, var_emiss, byrow = TRUE){
     }
     for(q in 1:n_dep){
       if (dim(emiss_mu[[q]])[1] != m){
-        stop(paste("The number of rows of emission distribution matrix in element", q, "should be
+        stop(paste("The number of rows of the emission distribution matrix in element", q, "should be
              equal to the number of states, which is", m, "."))
       }
     }
@@ -167,6 +173,9 @@ obtain_logvar <- function(gen, emiss_mu, var_emiss, byrow = TRUE){
   }
   if(length(var_emiss) != n_dep | sum(m == sapply(var_emiss, length)) != n_dep){
     stop(paste("var_emiss should be a list containing n_dep, here", n_dep,", elements, where each element is vector with lenght m, here", m, "."))
+  }
+  if (any(unlist(var_emiss) <= 0)){
+    stop(paste("All values in var_emiss should be real non-negative numbers (var_emiss larger or equal to 0."))
   }
 
   # Cycle over dependent variables
