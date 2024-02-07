@@ -1,4 +1,5 @@
-#' Transform the between-subject variance in the positive scale to the logvarince in the logarithmic scale
+#' Transform the between-subject variance in the positive scale to the
+#' logvariance in the logarithmic scale
 #'
 #' \code{var_to_logvar} returns the desired between-subject logvariance in the
 #'   logarithmic scale corresponding to the between-subject variance in the

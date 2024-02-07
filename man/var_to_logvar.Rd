@@ -2,7 +2,8 @@
 % Please edit documentation in R/var_to_logvar.R
 \name{var_to_logvar}
 \alias{var_to_logvar}
-\title{Transform the between-subject variance in the positive scale to the logvarince in the logarithmic scale}
+\title{Transform the between-subject variance in the positive scale to the
+logvariance in the logarithmic scale}
 \usage{
 var_to_logvar(gen, emiss_mu, var_emiss, byrow = TRUE)
 }

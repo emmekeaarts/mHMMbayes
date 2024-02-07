@@ -1,4 +1,5 @@
-#' Specifying informative hyper-prior on the continuous emission distribution(s)  of the multilevel hidden Markov model
+#' Specifying informative hyper-priors on the count emission
+#' distribution(s) of the multilevel hidden Markov model
 #'
 #' \code{prior_emiss_count} provides a framework to manually specify an
 #' informative hyper-prior on the Poisson-lognormal emission

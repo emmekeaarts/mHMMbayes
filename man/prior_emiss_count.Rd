@@ -2,7 +2,8 @@
 % Please edit documentation in R/prior_emiss_count.R
 \name{prior_emiss_count}
 \alias{prior_emiss_count}
-\title{Specifying informative hyper-prior on the continuous emission distribution(s)  of the multilevel hidden Markov model}
+\title{Specifying informative hyper-priors on the count emission
+distribution(s) of the multilevel hidden Markov model}
 \usage{
 prior_emiss_count(
   gen,
