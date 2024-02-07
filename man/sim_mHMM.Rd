@@ -443,7 +443,7 @@ beta[[3]] <- matrix(c(2,0,-2), byrow = TRUE, ncol = 1)
 beta[[4]] <- matrix(c(-1,3,1), byrow = TRUE, ncol = 1)
 
 # Calculate logvar to use on the simulating function:
-logvar <- obtain_logvar(gen = list(m = m, n_dep = n_dep),
+logvar <- var_to_logvar(gen = list(m = m, n_dep = n_dep),
                         emiss_mu = emiss_distr,
                         var_emiss =  list(rep(4, m),
                                           rep(2, m),
@@ -451,7 +451,7 @@ logvar <- obtain_logvar(gen = list(m = m, n_dep = n_dep),
                         byrow = FALSE)
 
 # We can also use different values per state for logvar:
-logvar <- obtain_logvar(gen = list(m = m, n_dep = n_dep),
+logvar <- var_to_logvar(gen = list(m = m, n_dep = n_dep),
                         emiss_mu = emiss_distr,
                         var_emiss =  list(c(5.0, 3.0, 1.5),
                                           c(2.0, 6.0, 0.5),

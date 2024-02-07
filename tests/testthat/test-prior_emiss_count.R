@@ -40,7 +40,7 @@ emiss_V   <- list(rep(16, m), rep(4, m))
 emiss_nu  <- list(0.1, 0.1)
 
 emiss_mu0_log <- lapply(emiss_mu0, function(q) log(q))
-emiss_V_log <- obtain_logvar(gen = list(m = m, n_dep = n_dep),
+emiss_V_log <- var_to_logvar(gen = list(m = m, n_dep = n_dep),
                              emiss_mu = emiss_mu0,
                              var_emiss = emiss_V,
                              byrow = TRUE)

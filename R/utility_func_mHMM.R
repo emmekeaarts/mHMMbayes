@@ -90,6 +90,6 @@ depth <- function(x,xdepth=0){
 
 #' @keywords internal
 # Calculates the between subject variance from logmu and logvar:
-obtain_varmu <- function(logmu, logvar){
+logvar_to_var <- function(logmu, logvar){
   abs(exp(logvar)-1)*exp(2*logmu+logvar)
 }

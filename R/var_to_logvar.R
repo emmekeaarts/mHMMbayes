@@ -1,6 +1,6 @@
-#' Obtain the between-subject (log)variance in the logarithmic scale
+#' Transform the between-subject variance in the positive scale to the logvarince in the logarithmic scale
 #'
-#' \code{obtain_logvar} returns the desired between-subject logvariance in the
+#' \code{var_to_logvar} returns the desired between-subject logvariance in the
 #'   logarithmic scale corresponding to the between-subject variance in the
 #'   (real) positive scale specified as input. The logvariance is used as the
 #'   dispersion parameter in the lognormal distribution adopted as prior for
@@ -16,11 +16,7 @@
 #'   \item{\code{m}: numeric vector with length 1 denoting the number
 #'   of hidden states}
 #'   \item{\code{n_dep}: numeric vector with length 1 denoting the
-#'   number of dependent variables}
-#'   \item{\code{q_emiss}: only to be specified if the data represents
-#'   categorical data. Numeric vector with length \code{n_dep} denoting the
-#'   number of observed categories for the categorical emission distribution
-#'   for each of the dependent variables.}}
+#'   number of dependent variables}}
 #' @param emiss_mu A list containing \code{n_dep} matrices, i.e., one list for
 #'   each dependent variable \code{k}. Each matrix contains the group-level
 #'   means of the lognormal emission distributions in each of the
@@ -29,7 +25,7 @@
 #'   model) and \code{m} columns (see \code{emiss_mu0} in
 #'   \code{\link{prior_emiss_count}}), or \code{m} rows and 1 column
 #'   (when not including covariates in the model; see \code{emiss_distr} in
-#'   \code{\linl{sim_mHMM}}), denoting the mean of state
+#'   \code{\link{sim_mHMM}}), denoting the mean of state
 #'   \emph{i} (column or row \emph{i}) of the lognormal distribution used as
 #'   prior for the Poisson emissions. By default it is assumed that the
 #'   matrices contain 1 row and \code{m} columns, as specified for
@@ -54,7 +50,7 @@
 #'   \code{byrow = FALSE} if \code{emiss_mu} is entered as \code{emiss_distr}
 #'   in \code{\link{sim_mHMM}}. By default, \code{byrow = TRUE}.
 #'
-#' @return \code{obtain_logvar} Returns a list of \code{n_dep} numeric vectors
+#' @return \code{var_to_logvar} Returns a list of \code{n_dep} numeric vectors
 #'   of \code{m} elements denoting the state \code{i}-specific logvariance
 #'   (between-subject variance in the logarithmic scale) for the
 #'   \code{k}-dependent variable used as dispersion parameter in the lognormal
@@ -91,7 +87,7 @@
 #' logmu <-  list(matrix(log(c(30, 70, 170)), nrow = 1),
 #'                matrix(log(c(7, 8, 18)), nrow = 1))
 #'
-#' logvar <- obtain_logvar(gen = list(m = m, n_dep = n_dep),
+#' logvar <- var_to_logvar(gen = list(m = m, n_dep = n_dep),
 #'                         emiss_mu = list(matrix(c(30, 70, 170), nrow = 1),
 #'                                         matrix(c(7, 8, 18), nrow = 1)),
 #'                         var_emiss = list(c(16,25,32),
@@ -114,7 +110,7 @@
 #'
 #' @export
 
-obtain_logvar <- function(gen, emiss_mu, var_emiss, byrow = TRUE){
+var_to_logvar <- function(gen, emiss_mu, var_emiss, byrow = TRUE){
 
   # Initialize parameters
   n_dep   <- gen$n_dep

@@ -140,7 +140,7 @@ have to be specified in the natural (positive real numbers) scale and not in
 the logarithmic scale. \code{prior_emiss_count} returns the corresponding
 values of the parameters on the logarithmic scale. If the user wants to
 manually specify these values on the logarithmic scale, please set the
-argument \code{log_scale} to \cote{TRUE} in \code{prior_emiss_count}. If
+argument \code{log_scale} to \code{TRUE} in \code{prior_emiss_count}. If
 covariates are used to predict the emission distribution, then the
 logarithmic scale should be used for the inputs \code{emiss_mu0} and
 \code{emiss_V}, and set \code{log_scale = TRUE}.

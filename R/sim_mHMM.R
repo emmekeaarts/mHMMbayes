@@ -397,7 +397,7 @@
 #' beta[[4]] <- matrix(c(-1,3,1), byrow = TRUE, ncol = 1)
 #'
 #' # Calculate logvar to use on the simulating function:
-#' logvar <- obtain_logvar(gen = list(m = m, n_dep = n_dep),
+#' logvar <- var_to_logvar(gen = list(m = m, n_dep = n_dep),
 #'                         emiss_mu = emiss_distr,
 #'                         var_emiss =  list(rep(4, m),
 #'                                           rep(2, m),
@@ -405,7 +405,7 @@
 #'                         byrow = FALSE)
 #'
 #' # We can also use different values per state for logvar:
-#' logvar <- obtain_logvar(gen = list(m = m, n_dep = n_dep),
+#' logvar <- var_to_logvar(gen = list(m = m, n_dep = n_dep),
 #'                         emiss_mu = emiss_distr,
 #'                         var_emiss =  list(c(5.0, 3.0, 1.5),
 #'                                           c(2.0, 6.0, 0.5),
@@ -713,9 +713,9 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
     }
   }
   if(data_distr == "count" & log_scale == FALSE){
-    var_emiss  <- obtain_logvar(gen = gen, emiss_distr, var_emiss, byrow = FALSE)
+    var_emiss  <- var_to_logvar(gen = gen, emiss_distr, var_emiss, byrow = FALSE)
     for(i in 1:n_dep){
-      # var_emiss[[i]]        <- obtain_logvar(emiss_distr[[i]][,1], var_emiss[[i]])
+      # var_emiss[[i]]        <- var_to_logvar(emiss_distr[[i]][,1], var_emiss[[i]])
       emiss_distr[[i]][,1]  <- log(emiss_distr[[i]][,1])
       # beta[[1+i]] # Check: do anything with beta?
     }

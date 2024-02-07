@@ -31,7 +31,7 @@
 #' the logarithmic scale. \code{prior_emiss_count} returns the corresponding
 #' values of the parameters on the logarithmic scale. If the user wants to
 #' manually specify these values on the logarithmic scale, please set the
-#' argument \code{log_scale} to \cote{TRUE} in \code{prior_emiss_count}. If
+#' argument \code{log_scale} to \code{TRUE} in \code{prior_emiss_count}. If
 #' covariates are used to predict the emission distribution, then the
 #' logarithmic scale should be used for the inputs \code{emiss_mu0} and
 #' \code{emiss_V}, and set \code{log_scale = TRUE}.
@@ -252,9 +252,9 @@ prior_emiss_count <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, n_xx_
 
   #### put parameters in the correct scale ####
   if(log_scale == FALSE){
-    emiss_V <- obtain_logvar(gen = gen, emiss_mu = emiss_mu0, var_emiss = emiss_V, byrow = TRUE)
+    emiss_V <- var_to_logvar(gen = gen, emiss_mu = emiss_mu0, var_emiss = emiss_V, byrow = TRUE)
     for(q in 1:n_dep){
-      # emiss_V[[q]]     <- obtain_logvar(emiss_mu0[[q]][1,], emiss_V[[q]])
+      # emiss_V[[q]]     <- var_to_logvar(emiss_mu0[[q]][1,], emiss_V[[q]])
       emiss_mu0[[q]]   <- log(emiss_mu0[[q]])
     }
   }
