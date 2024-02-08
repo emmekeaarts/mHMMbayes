@@ -273,23 +273,35 @@
 #' In case of count observations, the \code{mHMM} return object contains:
 #' \describe{
 #'   \item{\code{emiss_mu_bar}}{A list containing one matrix per dependent
-#'   variable, denoting the group level means of the lognormal prior used
-#'   in the emission distribution of each dependent variable over the
-#'   MCMC iterations. The iterations of the sampler are contained in the rows
-#'   of the matrix, and the columns contain the group-level lognormal emission
-#'   logmeans in the logarithmic scale. If covariates were included in the
-#'   analysis, the group level means represent the predicted mean given that the
-#'   covariate is at the average value for continuous covariates, or given
-#'   that the covariate equals zero for dichotomous covariates. Note that to
-#'   obtain a corresponding median counts in the natual scale (i.e., Positive
-#'   domain), the group-level emission logmeans have to be exponentiated).}
+#'   variable, denoting the group-level means of the Poisson emission
+#'   distribution of each dependent variable over the MCMC iterations. The
+#'   iterations of the sampler are contained in the rows of the matrix, and the
+#'   columns contain the group-level Poisson emission means in the positive
+#'   scale. If covariates were included in the analysis, the group-level means
+#'   represent the predicted mean counts given that the covariate is at the
+#'   average value for continuous covariates, or given that the covariate
+#'   equals zero for dichotomous covariates.}
 #'   \item{\code{emiss_varmu_bar}}{A list containing one matrix per dependent
-#'   variable, denoting the logvariance between the subject-level means of the
-#'   Poisson emission sampled from the lognormal prior distributions over the
-#'   iterations of the MCMC sampler. The iterations of the sampler are
-#'   contained in the rows of the matrix, and the columns contain the
-#'   group-level logvariance between subject-specific means (in the
-#'   logarithmic scale).}
+#'   variable, denoting the variance between the subject-level means of the
+#'   Poisson emission distribution(s) over the iterations of the MCMC sampler.
+#'   The iterations of the sampler are contained in the rows of the matrix, and
+#'   the columns contain the group-level variance(s) between subject-specific
+#'   means (in the positive scale).}
+#'   \item{\code{emiss_logmu_bar}}{A list containing one matrix per dependent
+#'   variable, denoting the group-level logmeans of the Poisson emission
+#'   distribution of each dependent variable over the MCMC iterations. The
+#'   iterations of the sampler are contained in the rows of the matrix, and the
+#'   columns contain the group-level Poisson emission logmeans in the
+#'   logarithmic scale. If covariates were included in the analysis, the
+#'   group-level means represent the predicted logmean counts given that the
+#'   covariate is at the average value for continuous covariates, or given that
+#'   the covariate equals zero for dichotomous covariates.}
+#'   \item{\code{emiss_logvarmu_bar}}{A list containing one matrix per dependent
+#'   variable, denoting the logvariance between the subject-level logmeans of
+#'   the Poisson emission distribution(s) over the iterations of the MCMC
+#'   sampler. The iterations of the sampler are contained in the rows of the
+#'   matrix, and the columns contain the group-level logvariance(s) between
+#'   subject-specific means (in the logarithmic scale).}
 #'   \item{\code{emiss_cov_bar}}{A list containing one matrix per dependent
 #'   variable, denoting the group level regression coefficients predicting the
 #'   emission means in the logarithmic scale within each of the dependent
@@ -1035,12 +1047,17 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
     }
   } else if (data_distr == 'count'){
     emiss_mu_bar			<- rep(list(matrix(NA_real_, ncol = m, nrow = J, dimnames = list(NULL, c(paste("mu_", 1:m, sep = ""))))), n_dep)
+    emiss_logmu_bar			<- rep(list(matrix(NA_real_, ncol = m, nrow = J, dimnames = list(NULL, c(paste("logmu_", 1:m, sep = ""))))), n_dep)
     names(emiss_mu_bar) <- dep_labels
+    names(emiss_logmu_bar) <- dep_labels
     for(q in 1:n_dep){
-      emiss_mu_bar[[q]][1,] <- log(start_val[[q + 1]][,1])
+      emiss_mu_bar[[q]][1,] <- start_val[[q + 1]][,1]
+      emiss_logmu_bar[[q]][1,] <- log(start_val[[q + 1]][,1])
     }
     emiss_varmu_bar			<- rep(list(matrix(NA_real_, ncol = m, nrow = J, dimnames = list(NULL, c(paste("varmu_", 1:m, sep = ""))))), n_dep)
+    emiss_logvarmu_bar			<- rep(list(matrix(NA_real_, ncol = m, nrow = J, dimnames = list(NULL, c(paste("logvarmu_", 1:m, sep = ""))))), n_dep)
     names(emiss_varmu_bar) <- dep_labels
+    names(emiss_logvarmu_bar) <- dep_labels
     if(sum(nx[-1]) > n_dep){
       emiss_cov_bar			<- lapply(m * (nx[-1] - 1 ), dif_matrix, rows = J)
       names(emiss_cov_bar) <- dep_labels
@@ -1401,7 +1418,10 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
       }
     } else if(data_distr == 'count'){
       for(q in 1:n_dep){
-        emiss_mu_bar[[q]][iter, ]	<- as.vector(unlist(lapply(
+        emiss_mu_bar[[q]][iter, ]	<- exp(as.vector(unlist(lapply(
+          lapply(emiss_c_mu_bar, "[[", q), "[",1,)
+        )))
+        emiss_logmu_bar[[q]][iter, ]	<- as.vector(unlist(lapply(
           lapply(emiss_c_mu_bar, "[[", q), "[",1,)
         ))
         if(nx[1+q] > 1){
@@ -1409,7 +1429,8 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
             lapply(emiss_c_mu_bar, "[[", q), "[",-1,)
           ))
         }
-        emiss_varmu_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_V_mu, "[[", q)))
+        emiss_varmu_bar[[q]][iter,]	<- logvar_to_var(emiss_logmu_bar[[q]][iter, ], as.vector(unlist(sapply(emiss_V_mu, "[[", q))))
+        emiss_logvarmu_bar[[q]][iter,]	<- as.vector(unlist(sapply(emiss_V_mu, "[[", q)))
       }
     }
     if(show_progress == TRUE){
@@ -1472,10 +1493,12 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
                   gamma_int_bar = gamma_int_bar,
                   gamma_cov_bar = gamma_cov_bar,
                   gamma_V_int_bar = gamma_V_int_bar,
-                  emiss_cov_bar = emiss_cov_bar,
                   gamma_prob_bar = gamma_prob_bar,
                   emiss_mu_bar = emiss_mu_bar,
+                  emiss_cov_bar = emiss_cov_bar,
                   emiss_varmu_bar = emiss_varmu_bar,
+                  emiss_logmu_bar = emiss_logmu_bar,
+                  emiss_logvarmu_bar = emiss_logvarmu_bar,
                   gamma_naccept = gamma_naccept,
                   emiss_naccept = emiss_naccept,
                   sample_path = sample_path)
@@ -1491,6 +1514,8 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
                   emiss_mu_bar = emiss_mu_bar,
                   emiss_cov_bar = emiss_cov_bar,
                   emiss_varmu_bar = emiss_varmu_bar,
+                  emiss_logmu_bar = emiss_logmu_bar,
+                  emiss_logvarmu_bar = emiss_logvarmu_bar,
                   gamma_naccept = gamma_naccept,
                   emiss_naccept = emiss_naccept)
     }

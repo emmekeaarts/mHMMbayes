@@ -278,23 +278,35 @@ In case of continuous observations, the \code{mHMM} return object contains:
 In case of count observations, the \code{mHMM} return object contains:
 \describe{
   \item{\code{emiss_mu_bar}}{A list containing one matrix per dependent
-  variable, denoting the group level means of the lognormal prior used
-  in the emission distribution of each dependent variable over the
-  MCMC iterations. The iterations of the sampler are contained in the rows
-  of the matrix, and the columns contain the group-level lognormal emission
-  logmeans in the logarithmic scale. If covariates were included in the
-  analysis, the group level means represent the predicted mean given that the
-  covariate is at the average value for continuous covariates, or given
-  that the covariate equals zero for dichotomous covariates. Note that to
-  obtain a corresponding median counts in the natual scale (i.e., Positive
-  domain), the group-level emission logmeans have to be exponentiated).}
+  variable, denoting the group-level means of the Poisson emission
+  distribution of each dependent variable over the MCMC iterations. The
+  iterations of the sampler are contained in the rows of the matrix, and the
+  columns contain the group-level Poisson emission means in the positive
+  scale. If covariates were included in the analysis, the group-level means
+  represent the predicted mean counts given that the covariate is at the
+  average value for continuous covariates, or given that the covariate
+  equals zero for dichotomous covariates.}
   \item{\code{emiss_varmu_bar}}{A list containing one matrix per dependent
-  variable, denoting the logvariance between the subject-level means of the
-  Poisson emission sampled from the lognormal prior distributions over the
-  iterations of the MCMC sampler. The iterations of the sampler are
-  contained in the rows of the matrix, and the columns contain the
-  group-level logvariance between subject-specific means (in the
-  logarithmic scale).}
+  variable, denoting the variance between the subject-level means of the
+  Poisson emission distribution(s) over the iterations of the MCMC sampler.
+  The iterations of the sampler are contained in the rows of the matrix, and
+  the columns contain the group-level variance(s) between subject-specific
+  means (in the positive scale).}
+  \item{\code{emiss_logmu_bar}}{A list containing one matrix per dependent
+  variable, denoting the group-level logmeans of the Poisson emission
+  distribution of each dependent variable over the MCMC iterations. The
+  iterations of the sampler are contained in the rows of the matrix, and the
+  columns contain the group-level Poisson emission logmeans in the
+  logarithmic scale. If covariates were included in the analysis, the
+  group-level means represent the predicted logmean counts given that the
+  covariate is at the average value for continuous covariates, or given that
+  the covariate equals zero for dichotomous covariates.}
+  \item{\code{emiss_logvarmu_bar}}{A list containing one matrix per dependent
+  variable, denoting the logvariance between the subject-level logmeans of
+  the Poisson emission distribution(s) over the iterations of the MCMC
+  sampler. The iterations of the sampler are contained in the rows of the
+  matrix, and the columns contain the group-level logvariance(s) between
+  subject-specific means (in the logarithmic scale).}
   \item{\code{emiss_cov_bar}}{A list containing one matrix per dependent
   variable, denoting the group level regression coefficients predicting the
   emission means in the logarithmic scale within each of the dependent

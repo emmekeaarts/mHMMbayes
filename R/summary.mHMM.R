@@ -47,7 +47,7 @@ summary.mHMM <- function(object, ...){
       # colnames(EM_pop[[i]]) <- c("Mean","exp(Mean)")
       # rownames(EM_pop[[i]]) <- paste("State", 1:m)
       EM_pop[[i]] <- matrix(round(
-        exp(apply(object$emiss_mu_bar[[i]][((burn_in + 1): J),], 2, median)),
+        apply(object$emiss_mu_bar[[i]][((burn_in + 1): J),], 2, median),
         3), ncol = 1, nrow = m)
       colnames(EM_pop[[i]]) <- c("Mean")
       rownames(EM_pop[[i]]) <- paste("State", 1:m)
