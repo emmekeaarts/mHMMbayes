@@ -158,12 +158,14 @@
 #'   transition probabilities over the iterations of the hybrid Metropolis within
 #'   Gibbs sampler. The iterations of the sampler are contained in the rows, and
 #'   the columns contain the group level regression coefficients.}
-#'   \item{\code{gamma_V_int_bar}}{A matrix containing the (co-)variance
+#'   \item{\code{gamma_V_int_bar}}{A matrix containing the variance
 #'   components for the subject-level intercepts
 #'   of the multinomial logistic regression modeling the transition
 #'   probabilities over the iterations of the hybrid Metropolis within Gibbs
 #'   sampler. The iterations of the sampler are contained in the rows, and the
-#'   columns contain the variance components for the subject level intercepts.}
+#'   columns contain the variance components for the subject level intercepts.
+#'   Note that only the intercept variances (and not the co-variances) are
+#'   returned.}
 #'   \item{\code{gamma_int_subj}}{A list containing one matrix per subject
 #'   denoting the subject level intercepts of the Multinomial logistic
 #'   regression modeling the transition probabilities over the iterations of the
@@ -959,9 +961,10 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
   gamma_int_bar				<- matrix(NA_real_, nrow = J, ncol = ((m-1) * m))
   colnames(gamma_int_bar) <- paste("int_S", rep(1:m, each = m-1), "toS", rep(2:m, m), sep = "")
   gamma_int_bar[1,] <- as.vector(t(prob_to_int(matrix(gamma_prob_bar[1,], byrow = TRUE, ncol = m, nrow = m))))
-  gamma_V_int_bar <- matrix(NA_real_, nrow = J, ncol = ((m-1) * (m-1) * m))
-  colnames(gamma_V_int_bar) <- paste("var_int_S", rep(1:m, each = (m-1)*(m-1)), "toS", rep(2:m, each=m-1), "_with_", "int_S", rep(1:m, each = (m-1)*(m-1)), "toS", rep(2:m, m), sep = "")
-  gamma_V_int_bar[1,] <- unlist(lapply(gamma_V, function(e) as.vector(t(e))))
+  gamma_V_idx <- which(paste("var_int_S", rep(1:m, each = (m-1)*(m-1)), "toS", rep(2:m, each=m-1), "_with_", "int_S", rep(1:m, each = (m-1)*(m-1)), "toS", rep(2:m, m), sep = "")
+                       %in% paste0("var_int_S",rep(1:m,each=m-1),"toS",2:m,"_with_int_S",rep(1:m,each=m-1),"toS",2:m))
+  gamma_V_int_bar <- matrix(NA_real_, nrow = J, ncol = ((m-1) * m))
+  colnames(gamma_V_int_bar) <- paste0("var_int_S",rep(1:m,each=m-1),"toS",2:m)
   if(nx[1] > 1){
     gamma_cov_bar				<- matrix(NA_real_, nrow = J, ncol = ((m-1) * m) * (nx[1] - 1))
     colnames(gamma_cov_bar) <- paste( paste("cov", 1 : (nx[1] - 1), "_", sep = ""), "S", rep(1:m, each = (m-1) * (nx[1] - 1)), "toS", rep(2:m, m * (nx[1] - 1)), sep = "")
@@ -1370,7 +1373,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
     if(nx[1] > 1){
       gamma_cov_bar[iter, ]      	<- unlist(lapply(gamma_mu_int_bar, "[",-1,))
     }
-    gamma_V_int_bar[iter, ] <- unlist(lapply(gamma_V_int, function(e) as.vector(t(e))))
+    gamma_V_int_bar[iter, ] <- unlist(lapply(gamma_V_int, function(e) as.vector(t(e))))[gamma_V_idx]
     gamma_prob_bar[iter,]			<- unlist(gamma_mu_prob_bar)
     if(data_distr == 'categorical'){
       for(q in 1:n_dep){
