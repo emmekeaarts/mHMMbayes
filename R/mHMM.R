@@ -159,7 +159,7 @@
 #'   Gibbs sampler. The iterations of the sampler are contained in the rows, and
 #'   the columns contain the group level regression coefficients.}
 #'   \item{\code{gamma_V_int_bar}}{A matrix containing the variance
-#'   components for the subject-level intercepts
+#'   components for the subject-level intercepts (between subject variances)
 #'   of the multinomial logistic regression modeling the transition
 #'   probabilities over the iterations of the hybrid Metropolis within Gibbs
 #'   sampler. The iterations of the sampler are contained in the rows, and the
@@ -217,6 +217,14 @@
 #'   Metropolis within Gibbs sampler. The iterations of the sampler are
 #'   contained in the rows  of the matrix, and the columns contain the group
 #'   level regression coefficients.}
+#'   \item{\code{emiss_V_int_bar}}{A list containing one matrix per dependent
+#'   variable, denoting the variance components for the subject-level intercepts
+#'   (between subject variances) of the multinomial logistic regression
+#'   modeling the categorical emission probabilities over the iterations of
+#'   the hybrid Metropolis within Gibbs sampler. The iterations of the sampler
+#'   are contained in the rows, and the columns contain the variance components
+#'   for the subject level intercepts. Note that only the intercept variances
+#'   (and not the co-variances) are returned.}
 #'   \item{\code{emiss_int_subj}}{A list containing one list per subject denoting
 #'   the subject level intercepts of each dependent variable of the Multinomial
 #'   logistic regression modeling the probabilities of the emission distribution
@@ -998,9 +1006,15 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
     }
     emiss_int_bar			<- lapply((q_emiss-1) * m, dif_matrix, rows = J)
     names(emiss_int_bar) <- dep_labels
+    emiss_V_int_bar <- lapply((q_emiss-1) * m, dif_matrix, rows = J)
+    names(emiss_V_int_bar) <- dep_labels
+    emiss_V_idx <- vector("list", n_dep)
     for(q in 1:n_dep){
       colnames(emiss_int_bar[[q]]) <-  paste("int_Emiss", rep(2:q_emiss[q], m), "_S", rep(1:m, each = q_emiss[q] - 1), sep = "")
       emiss_int_bar[[q]][1,] <- as.vector(t(prob_to_int(matrix(emiss_prob_bar[[q]][1,], byrow = TRUE, ncol = q_emiss[q], nrow = m))))
+      colnames(emiss_V_int_bar[[q]]) <- paste("var_int_Emiss", 2:q_emiss[q],"_S", rep(1:m, each = (q_emiss[q] - 1)), sep = "")
+      emiss_V_idx[[q]] <- which(paste("var_int_Emiss", rep(2:q_emiss[q], each = (q_emiss[q]-1)),"_with_Emiss",rep(2:q_emiss[q], (q_emiss[q]-1)), "_S", rep(1:m, each = (q_emiss[q] - 1)*(q_emiss[q] - 1)), sep = "")
+                                %in% paste("var_int_Emiss", 2:q_emiss[q],"_with_Emiss",2:q_emiss[q], "_S", rep(1:m, each = (q_emiss[q] - 1)), sep = ""))
     }
     if(sum(nx[-1]) > n_dep){
       emiss_cov_bar			<- lapply((q_emiss-1) * m * (nx[-1] - 1 ), dif_matrix, rows = J)
@@ -1397,6 +1411,9 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
         emiss_int_bar[[q]][iter, ]	<- as.vector(unlist(lapply(
           lapply(emiss_mu_int_bar, "[[", q), "[",1,)
         ))
+        emiss_V_int_bar[[q]][iter, ] <- as.vector(unlist(lapply(
+          lapply(emiss_V_int, "[[", q), function(e) as.vector(t(e)) )
+        ))[emiss_V_idx[[q]]]
         if(nx[1+q] > 1){
           emiss_cov_bar[[q]][iter, ]  <- as.vector(unlist(lapply(
             lapply(emiss_mu_int_bar, "[[", q), "[",-1,)
@@ -1450,7 +1467,8 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
                                burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                   PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
                   gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, gamma_V_int_bar = gamma_V_int_bar,
-                  emiss_int_bar = emiss_int_bar, emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
+                  emiss_int_bar = emiss_int_bar, emiss_cov_bar = emiss_cov_bar, emiss_V_int_bar = emiss_V_int_bar,
+                  gamma_prob_bar = gamma_prob_bar,
                   emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept,
                   sample_path = sample_path)
     } else {
@@ -1458,7 +1476,8 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
                                burn_in = burn_in, n_subj = n_subj, n_vary = n_vary, dep_labels = dep_labels),
                   PD_subj = PD_subj, gamma_int_subj = gamma_int_subj, emiss_int_subj = emiss_int_subj,
                   gamma_int_bar = gamma_int_bar, gamma_cov_bar = gamma_cov_bar, gamma_V_int_bar = gamma_V_int_bar,
-                  emiss_int_bar = emiss_int_bar, emiss_cov_bar = emiss_cov_bar, gamma_prob_bar = gamma_prob_bar,
+                  emiss_int_bar = emiss_int_bar, emiss_cov_bar = emiss_cov_bar, emiss_V_int_bar = emiss_V_int_bar,
+                  gamma_prob_bar = gamma_prob_bar,
                   emiss_prob_bar = emiss_prob_bar, gamma_naccept = gamma_naccept, emiss_naccept = emiss_naccept)
     }
     class(out) <- append(class(out), c("mHMM", "cat"))

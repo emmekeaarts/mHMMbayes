@@ -164,7 +164,7 @@ applicable in case of categorical and count observations.}
   Gibbs sampler. The iterations of the sampler are contained in the rows, and
   the columns contain the group level regression coefficients.}
   \item{\code{gamma_V_int_bar}}{A matrix containing the variance
-  components for the subject-level intercepts
+  components for the subject-level intercepts (between subject variances)
   of the multinomial logistic regression modeling the transition
   probabilities over the iterations of the hybrid Metropolis within Gibbs
   sampler. The iterations of the sampler are contained in the rows, and the
@@ -222,6 +222,14 @@ contains:
   Metropolis within Gibbs sampler. The iterations of the sampler are
   contained in the rows  of the matrix, and the columns contain the group
   level regression coefficients.}
+  \item{\code{emiss_V_int_bar}}{A list containing one matrix per dependent
+  variable, denoting the variance components for the subject-level intercepts
+  (between subject variances) of the multinomial logistic regression
+  modeling the categorical emission probabilities over the iterations of
+  the hybrid Metropolis within Gibbs sampler. The iterations of the sampler
+  are contained in the rows, and the columns contain the variance components
+  for the subject level intercepts. Note that only the intercept variances
+  (and not the co-variances) are returned.}
   \item{\code{emiss_int_subj}}{A list containing one list per subject denoting
   the subject level intercepts of each dependent variable of the Multinomial
   logistic regression modeling the probabilities of the emission distribution
