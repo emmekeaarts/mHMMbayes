@@ -33,6 +33,55 @@ out_2st_simb <- mHMM(s_data = data_sim$obs,
                      mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
 
 
+# Count data
+set.seed(0602)
+
+## general properties tested model
+n_t <- 100
+n <- 10
+m <- 3
+J <- 11
+burn_in <- 5
+n_dep <- 2
+
+gamma   <- matrix(c(0.8, 0.1, 0.1,
+                    0.2, 0.7, 0.1,
+                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
+
+emiss_distr <- list(matrix(c(30, 70, 170), nrow = m),
+                    matrix(c(7, 8, 18), nrow = m))
+
+# Simulate count data:
+data_count <- sim_mHMM(n_t = n_t,
+                     n = n,
+                     data_distr = "count",
+                     gen = list(m = m, n_dep = n_dep),
+                     gamma = gamma,
+                     emiss_distr = emiss_distr,
+                     var_gamma = 0.1,
+                     var_emiss = c(5,2),
+                     return_ind_par = TRUE)
+
+# correct specification
+emiss_mu0 <- list(matrix(c(30, 70, 170), nrow = 1),
+                  matrix(c(7, 8, 18), nrow = 1))
+emiss_K0  <- list(1, 1)
+emiss_V   <- list(rep(16, m), rep(4, m))
+emiss_nu  <- list(0.1, 0.1)
+
+manual_prior_emiss1 <- prior_emiss_count(
+  gen = list(m = m, n_dep = n_dep),
+  emiss_mu0 = emiss_mu0,
+  emiss_K0 = emiss_K0,
+  emiss_V =  emiss_V,
+  emiss_nu = emiss_nu)
+
+out_count <- mHMM(s_data = data_count$obs,
+                  gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
+                  start_val = c(list(gamma), emiss_distr),data_distr = "count",emiss_hyp_prior = manual_prior_emiss1,
+                  mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
+
+
 ####################
 ## TESTING
 ###############
@@ -49,5 +98,12 @@ test_that("output viterbi", {
   expect_equal(dim(states1), c(n_t * n, 2))
   expect_equal(sort(unique(states1[,2])), c(1:m))
   expect_equal(sum(states1[,2]), 1890)
+})
+
+test_that("output count viterbi", {
+  states1 <- vit_mHMM(out_count, s_data = data_count$obs)
+  expect_equal(dim(states1), c(n_t * n, 2))
+  expect_equal(sort(unique(states1[,2])), c(1:m))
+  expect_equal(sum(states1[,2]), 1710)
 })
 

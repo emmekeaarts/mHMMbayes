@@ -39,6 +39,14 @@ summary.mHMM <- function(object, ...){
       colnames(EM_pop[[i]]) <- c("Mean", "SD")
       rownames(EM_pop[[i]]) <- paste("State", 1:m)
     }
+  } else if (data_distr == 'count'){
+    for(i in 1:n_dep){
+      EM_pop[[i]] <- matrix(round(
+        apply(object$emiss_mu_bar[[i]][((burn_in + 1): J),], 2, median),
+        3), ncol = 1, nrow = m)
+      colnames(EM_pop[[i]]) <- c("Mean")
+      rownames(EM_pop[[i]]) <- paste("State", 1:m)
+    }
   }
   print(EM_pop)
   cat("\n")

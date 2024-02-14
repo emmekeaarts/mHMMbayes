@@ -102,10 +102,16 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
         rownames(est[[q]]) <- paste("State", 1:m)
       }
     } else if (data_distr == 'continuous'){
-      est <- rep(list(matrix(, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "SD")))), n_dep)
+      est <- rep(list(matrix(NA_real_, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "SD")))), n_dep)
       names(est) <- dep_labels
       for(q in 1:n_dep){
         est[[q]][] <-  matrix(round(c(apply(object$emiss_mu_bar[[q]][((burn_in + 1): J),], 2, median), apply(object$emiss_sd_bar[[q]][((burn_in + 1): J),], 2, median)),3), ncol = 2, nrow = m)
+      }
+    } else if (data_distr == 'count'){
+      est <- rep(list(matrix(NA_real_, nrow = m, ncol = 1, dimnames = list(paste("State", 1:m), "Mean"))), n_dep)
+      names(est) <- dep_labels
+      for(q in 1:n_dep){
+        est[[q]][] <-  matrix(round(apply(object$emiss_mu_bar[[q]][((burn_in + 1): J),], 2, median),3), ncol = 1, nrow = m)
       }
     }
 
@@ -116,12 +122,12 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
       est_emiss <- est_emiss_int <- vector("list", n_dep)
       names(est_emiss) <- dep_labels
       for(q in 1:n_dep){
-       est <- matrix(, ncol = q_emiss[q], nrow = m)
+       est <- matrix(NA_real_, ncol = q_emiss[q], nrow = m)
        colnames(est) <- paste("Category", 1:q_emiss[q])
        rownames(est) <- paste("State", 1:m)
        est_emiss[[q]] <- rep(list(est), n_subj)
        names(est_emiss[[q]]) <- paste("Subject", 1:n_subj)
-       est_int <-  matrix(, ncol = q_emiss[q] - 1, nrow = m)
+       est_int <-  matrix(NA_real_, ncol = q_emiss[q] - 1, nrow = m)
        est_emiss_int[[q]] <- rep(list(est_int), n_subj)
      }
       for(s in 1:n_subj){
@@ -132,12 +138,21 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
         }
       }
     } else if (data_distr == 'continuous'){
-      est_emiss <- rep(list(rep(list(matrix(, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "SD")))), n_subj)), n_dep)
+      est_emiss <- rep(list(rep(list(matrix(NA_real_, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "SD")))), n_subj)), n_dep)
       names(est_emiss) <- dep_labels
       for(q in 1:n_dep){
         names(est_emiss[[q]]) <- paste("Subject", 1:n_subj)
         for(s in 1:n_subj){
           est_emiss[[q]][[s]][] <- matrix(round(c(apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median), apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J), (n_dep * m + (q-1) * m + 1):(n_dep * m + q * m)], 2, median)),3), ncol = 2, nrow = m)
+        }
+      }
+    } else if (data_distr == 'count'){
+      est_emiss <- rep(list(rep(list(matrix(NA_real_, nrow = m, ncol = 1, dimnames = list(paste("State", 1:m), c("Mean")))), n_subj)), n_dep)
+      names(est_emiss) <- dep_labels
+      for(q in 1:n_dep){
+        names(est_emiss[[q]]) <- paste("Subject", 1:n_subj)
+        for(s in 1:n_subj){
+          est_emiss[[q]][[s]][] <- matrix(round(c(apply(object$PD_subj[[s]]$count_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median)),3), ncol = 1, nrow = m)
         }
       }
     }

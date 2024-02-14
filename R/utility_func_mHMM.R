@@ -57,6 +57,11 @@ is.cont <- function(x) {
 }
 
 #' @keywords internal
+is.count <- function(x) {
+  inherits(x, "count")
+}
+
+#' @keywords internal
 is.mHMM_pdRW_gamma <- function(x) {
   inherits(x, "mHMM_pdRW_gamma")
 }
@@ -74,10 +79,17 @@ hms <- function(t){
         sep = ":")
 }
 
+#' @keywords internal
 depth <- function(x,xdepth=0){
   if(!is.list(x)){
     return(xdepth)
   }else{
     return(max(unlist(lapply(x,depth,xdepth=xdepth+1))))
   }
+}
+
+#' @keywords internal
+# Calculates the between subject variance from logmu and logvar:
+logvar_to_var <- function(logmu, logvar){
+  abs(exp(logvar)-1)*exp(2*logmu+logvar)
 }

@@ -6,6 +6,8 @@ n_t     <- 100
 n       <- 10
 m       <- 3
 q_emiss <- 4
+
+# Categorical data
 gamma   <- matrix(c(0.8, 0.1, 0.1,
                     0.2, 0.7, 0.1,
                     0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
@@ -79,7 +81,7 @@ xx_vec7      <- rep(list(NULL),3)
 xx_vec7[[2]] <-  c(rep(0,5), rep(1,5))
 xx_vec7[[3]] <-  c(0.1, 0.0, 1.0, 0.5, 1.0, 0.1, 0.5, 1.0, 0.0, 0.5)
 
-
+# Continuous data
 n_dep_cont   <- 2
 
 emiss_distr_cont <- list(matrix(c( 5, 1,
@@ -95,6 +97,27 @@ data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_cont),
 data_cont2 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_cont),
                        data_distr = 'continuous', gamma = gamma, emiss_distr = emiss_distr_cont, xx_vec = xx_vec4, beta = beta8,
                        var_gamma = .5, var_emiss = c(0, 0), return_ind_par = TRUE)
+
+# Count data
+n_dep_count   <- 2
+
+emiss_distr_count <- list(matrix(c( 5,
+                                   10,
+                                   15), nrow = m, byrow = TRUE),
+                         matrix(c(0.5,
+                                  1.0,
+                                  2.0), nrow = m, byrow = TRUE))
+
+emiss_distr_count_log <- lapply(emiss_distr_count, function(q) log(q))
+
+data_count <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_count),
+                      data_distr = 'count', gamma = gamma, emiss_distr = emiss_distr_count,
+                      var_gamma = .5, var_emiss = c(.5, 0.01))
+
+data_count2 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_count),
+                       data_distr = 'count', gamma = gamma, emiss_distr = emiss_distr_count_log, xx_vec = xx_vec4, beta = beta8,
+                       var_gamma = .5, var_emiss = c(0, 0), return_ind_par = TRUE, log_scale = TRUE)
+
 
 ####################
 ## TESTING
@@ -167,10 +190,20 @@ test_that("expected errors simulating data", {
                         emiss_distr = emiss_distr, xx_vec = xx_vec2, beta = beta6,
                         var_gamma = 1, var_emiss = 1),
                "second element of beta to predict the emission")
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_count),
+                        data_distr = 'count', gamma = gamma, emiss_distr = emiss_distr_count_log, xx_vec = xx_vec4, beta = beta8,
+                        var_gamma = .5, var_emiss = c(0, 0), log_scale = FALSE),
+               "Covariates have been used to predict the count emission distribution")
+
+  # wrong input of between-subject variance
+  expect_error(sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_count),
+                        data_distr = 'count', gamma = gamma, emiss_distr = emiss_distr_count,
+                        var_gamma = .5, var_emiss = list(matrix(.5), matrix(0.01))),
+               "The number of rows of the between-subject variance for the emission distribution should be")
 })
 
 
-test_that("output simulated dat", {
+test_that("output simulated data", {
   set.seed(2432)
   data1 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = 1, q_emiss = q_emiss), gamma = gamma,
                     emiss_distr = emiss_distr, var_gamma = 1, var_emiss = 1)
@@ -191,6 +224,37 @@ test_that("output simulated dat", {
   expect_equal(dim(data2$states), c(n * n_t, 2))
   expect_equal(unique(data2$obs[,1]), 1:n)
   expect_equal(sort(unique(data2$obs[,2])), 1:q_emiss)
+  expect_equal(unique(data2$states[,1]), 1:n)
+  expect_equal(sort(unique(data2$states[,2])), 1:m)
+
+  # calculations
+  expect_equal(data1$obs[10:15,1], rep(1,6))
+  expect_equal(data1$states[101:105,1], rep(2,5))
+  expect_equal(data2$obs[10:15,1], rep(1,6))
+  expect_equal(data2$states[101:105,1], rep(2,5))
+})
+
+test_that("output simulated count data", {
+  set.seed(2432)
+  data1 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_count),
+                    data_distr = 'count', gamma = gamma, emiss_distr = emiss_distr_count,
+                    var_gamma = .5, var_emiss = c(.5, 0.01))
+
+  data2 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep_count),
+                    data_distr = 'count', gamma = gamma, emiss_distr = emiss_distr_count_log, xx_vec = xx_vec4, beta = beta8,
+                    var_gamma = .5, var_emiss = c(0.01, 0.001), return_ind_par = TRUE, log_scale = TRUE)
+
+  # dimensions
+  expect_equal(dim(data1$obs), c(n * n_t, 3))
+  expect_equal(dim(data1$states), c(n * n_t, 2))
+  expect_equal(unique(data1$obs[,1]), 1:n)
+  expect_equal(sort(unique(data1$obs[,2])), 0:26)
+  expect_equal(unique(data1$states[,1]), 1:n)
+  expect_equal(sort(unique(data1$states[,2])), 1:m)
+  expect_equal(dim(data2$obs), c(n * n_t, 3))
+  expect_equal(dim(data2$states), c(n * n_t, 2))
+  expect_equal(unique(data2$obs[,1]), 1:n)
+  expect_equal(sort(unique(data2$obs[,2])), 0:25)
   expect_equal(unique(data2$states[,1]), 1:n)
   expect_equal(sort(unique(data2$states[,2])), 1:m)
 
