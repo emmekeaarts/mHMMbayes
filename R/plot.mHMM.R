@@ -266,10 +266,10 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
       # PLOTTING POSTERIOR MEAN IN THE NATURAL SCALE
       max_y <- 0
       for(i in 1:m){
-        new <- max(stats::density(exp(object$emiss_mu_bar[[dep]][burn_in:J,i]))$y)
+        new <- max(stats::density(object$emiss_mu_bar[[dep]][burn_in:J,i])$y)
         if(new > max_y){max_y <- new}
       }
-      quantiles <- apply(exp(object$emiss_mu_bar[[dep]][burn_in:J,]), 2, stats::quantile, probs = c(0.025, 0.975))
+      quantiles <- apply(object$emiss_mu_bar[[dep]][burn_in:J,], 2, stats::quantile, probs = c(0.025, 0.975))
       min_x <- min(quantiles)
       max_x <- max(quantiles)
       # set plotting area
@@ -279,7 +279,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
       graphics::title(ylab="Density", line=.5)
       for(i in 1:m){
         # add density curve for population level posterior distribution
-        graphics::lines(stats::density(exp(object$emiss_mu_bar[[dep]][burn_in:J,i])),
+        graphics::lines(stats::density(object$emiss_mu_bar[[dep]][burn_in:J,i]),
                         type = "l", col = state_col[i], lwd = lwd1, lty = lty1)
         # add density curves for subject posterior distributions
         for(s in 1:n_subj){

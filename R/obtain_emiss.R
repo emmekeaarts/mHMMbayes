@@ -108,10 +108,10 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
         est[[q]][] <-  matrix(round(c(apply(object$emiss_mu_bar[[q]][((burn_in + 1): J),], 2, median), apply(object$emiss_sd_bar[[q]][((burn_in + 1): J),], 2, median)),3), ncol = 2, nrow = m)
       }
     } else if (data_distr == 'count'){
-      est <- rep(list(matrix(NA_real_, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "exp(Mean)")))), n_dep)
+      est <- rep(list(matrix(NA_real_, nrow = m, ncol = 1, dimnames = list(paste("State", 1:m), "Mean"))), n_dep)
       names(est) <- dep_labels
       for(q in 1:n_dep){
-        est[[q]][] <-  matrix(round(c(apply(object$emiss_mu_bar[[q]][((burn_in + 1): J),], 2, median), apply(exp(object$emiss_mu_bar[[q]][((burn_in + 1): J),]), 2, median)),3), ncol = 2, nrow = m)
+        est[[q]][] <-  matrix(round(apply(object$emiss_mu_bar[[q]][((burn_in + 1): J),], 2, median),3), ncol = 1, nrow = m)
       }
     }
 
