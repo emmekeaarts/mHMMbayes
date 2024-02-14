@@ -30,7 +30,7 @@ for each of the dependent variables.}}}
 
 \item{emiss_mu0}{A list containing \code{n_dep} matrices, i.e., one list for
 each dependent variable \code{k}. Each matrix contains the hypothesized
-hyper-prior means of the lognormal emission distributions in each of the
+hyper-prior means of the Poisson emission distribution in each of the
 states in the natural (positive real numbers) scale. Hence, each
 matrix consists of one row (when not including covariates in the model)
 and \code{m} columns. If covariates are used, the number of rows in each
@@ -91,8 +91,8 @@ natural scale (\code{log_scale = FALSE}). The default equals
   used for checking equivalent general model properties
   specified under \code{prior_emiss_count} and \code{mHMM}.}
   \item{\code{emiss_mu0}}{A lists containing the hypothesized
-  hyper-prior means of the lognormal distribution on
-  the count emission probabilities.}
+  hyper-prior means of the the Poisson distribution used to model
+  the count emissions.}
   \item{\code{emiss_K0}}{A list containing \code{n_dep} elements denoting the
   number of hypothetical prior subjects on which the set of hyper-prior means
   specified in \code{emiss_mu0} are based.}
@@ -110,8 +110,8 @@ natural scale (\code{log_scale = FALSE}). The default equals
 }
 \description{
 \code{prior_emiss_count} provides a framework to manually specify an
-informative hyper-prior on the Poisson-lognormal emission
-distributions. \code{prior_emiss_count} creates an object of class
+informative hyper-prior on the count emission distributions.
+\code{prior_emiss_count} creates an object of class
 \code{mHMM_prior_emiss} used by the function \code{mHMM}, and additionally
 attaches the class \code{count} to signal use for count observations. The
 set of hyper-prior distributions consists of a lognormal-Inverse-Gamma
