@@ -985,7 +985,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
         # note: the posterior is thus one of a Bayesian linear regression because of the optional regression parameters
         for(q in 1:n_dep){
           emiss_mu0_n                    <- solve(t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% (t(xx[[1 + q]]) %*% emiss_c_mu[[i]][[q]] + emiss_K0[[q]] %*% emiss_mu0[[q]][,i])
-          emiss_a_mu_n                   <- (emiss_K0[[q]] + n_subj) / 2
+          emiss_a_mu_n                   <- (emiss_nu[[q]] + n_subj) / 2
           emiss_b_mu_n                   <- (emiss_nu[[q]] * emiss_V[[q]][i]) / 2 + (t(emiss_c_mu[[i]][[q]]) %*% emiss_c_mu[[i]][[q]] +
                                                                                        t(emiss_mu0[[q]][,i]) %*% emiss_K0[[q]] %*% emiss_mu0[[q]][,i] -
                                                                                        t(emiss_mu0_n) %*% (t(xx[[1 + q]]) %*% xx[[1 + q]] + emiss_K0[[q]]) %*% emiss_mu0_n) / 2
