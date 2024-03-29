@@ -8,12 +8,12 @@ pois_RW_once <- function(lambda, Obs, mu_bar1, V_1, scalar, candcov1) {
 
   # obtain likelihood and transition prob with the parameters sampled in the previous iteration and current sampled state sequence
   oldloglike	 	<- llpois(lambda = lambda, Obs = Obs)
-  oldpostlike	 	<- oldloglike + dnorm(log(lambda), mu_bar1, V_1, log = TRUE)
+  oldpostlike	 	<- oldloglike + stats::dnorm(log(lambda), mu_bar1, V_1, log = TRUE)
 
   # obtain new parameters for gamma from proposal distribution plus new likelihood
   lambda_new		<- exp(log(lambda) + rnorm(1, 0, scalar * sqrt(candcov1)))
   newloglike	 	<- llpois(lambda = lambda_new, Obs = Obs)
-  newpostlike	 	<- newloglike + dnorm(log(lambda_new), mu_bar1, V_1, log = TRUE)
+  newpostlike	 	<- newloglike + stats::dnorm(log(lambda_new), mu_bar1, V_1, log = TRUE)
 
   # determine to use the updated or current (previous iteration) gamma values of the parameters
   acc 			<- min(log(1), (newpostlike - oldpostlike))

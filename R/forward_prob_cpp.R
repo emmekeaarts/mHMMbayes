@@ -14,7 +14,7 @@ all1 <- function(x, emiss, n_dep, data_distr){
     }
   } else if (data_distr == "count") {
     for(q in 1:n_dep){
-      inp[[q]] <- outer(x[,q], emiss[[q]][,1], FUN = dpois)
+      inp[[q]] <- outer(x[,q], emiss[[q]][,1], FUN = stats::dpois)
     }
   }
   allprobs <- Reduce("*", inp)

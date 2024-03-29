@@ -1,7 +1,7 @@
 #' @keywords internal
 # Obtain poisson log likelihood
 llpois <- function(lambda, Obs){
-  ll_pois <- sum(dpois(Obs, lambda, log = TRUE))
+  ll_pois <- sum(stats::dpois(Obs, lambda, log = TRUE))
   return(ll_pois)
 }
 
