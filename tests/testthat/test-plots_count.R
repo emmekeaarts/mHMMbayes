@@ -66,7 +66,7 @@ manual_prior_emiss_log <- prior_emiss_count(
   emiss_nu = emiss_nu,
   log_scale = TRUE)
 
-out_count <- mHMM(s_data = data_count2$obs,
+out_count <- mHMM(s_data = data_count1$obs,
                   gen = list(m = m, n_dep = n_dep),
                   start_val = c(list(gamma), emiss_distr), data_distr = "count", emiss_hyp_prior = manual_prior_emiss_log,
                   mcmc = list(J = J, burn_in = burn_in), show_progress = FALSE)
