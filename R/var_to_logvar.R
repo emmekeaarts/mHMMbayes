@@ -45,7 +45,7 @@
 #'   \code{\link{prior_emiss_count}}.
 #' @param byrow A logical scalar indicating whether the emission means are
 #'   specified in the first row (\code{byrow = TRUE}) or the first column
-#'   (\code{byrow = FALSE}) of the wah of the \code{n_dep} matrices listed in
+#'   (\code{byrow = FALSE}) of the \code{n_dep} matrices listed in
 #'   \code{emiss_mu}. Use \code{byrow = TRUE} if \code{emiss_mu} is entered
 #'   as \code{emiss_mu0} in \code{\link{prior_emiss_count}}, and
 #'   \code{byrow = FALSE} if \code{emiss_mu} is entered as \code{emiss_distr}

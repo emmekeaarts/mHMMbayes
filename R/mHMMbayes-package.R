@@ -6,7 +6,7 @@
 ## usethis namespace: start
 #' @importFrom mvtnorm dmvnorm rmvnorm dmvt rmvt
 #' @importFrom MCMCpack rdirichlet rwish
-#' @importFrom stats optim rnorm runif median na.omit quantile
+#' @importFrom stats optim rnorm runif median na.omit quantile dpois dnorm rgamma rpois
 # to include bib references in help file
 #' @importFrom Rdpack reprompt
 # for RCpp

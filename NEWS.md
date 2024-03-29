@@ -11,7 +11,7 @@ Several new functions are introduced specifically relating to modelling count da
 
 * `prior_emiss_count()` enables the specification of hyper prior parameters when using count input data. 
 * `pd_RW_emiss_count()` enables the manual specification of the settings of the proposal distribution of the random walk (RW) Metropolis sampler of Poisson emission distribution(s). Note that the implemented RW Metropolis sampler is self tuning, hence manual specification is optional. 
-* `var_to_logvar()` aids the user with transforming the between-subject variance in the positive scale to the logvariance in the logarithmic scale. That is, specifying hyper prior parameters when using count input data is obligatory. When not using covariates, the expected means (lambda) and corresponding variances can be specified in  the natural (positive real numbers) scale. However, when using covariates, the expected means and corresponding variances have to be specified on the logarithmic scale. Transforming the variances to the logarithmic scale is a nontrivial task. As such, to aid the user with this task, the function `var_to_logvar()` can be used. 
+* `var_to_logvar()` aids the user with transforming the between-subject variance in the positive scale to the log variance in the logarithmic scale. That is, specifying hyper prior parameters when using count input data is obligatory. When not using covariates, the expected means (lambda) and corresponding variances can be specified in  the natural (positive real numbers) scale. However, when using covariates, the expected means and corresponding variances have to be specified on the logarithmic scale. Transforming the variances to the logarithmic scale is a nontrivial task. As such, to aid the user with this task, the function `var_to_logvar()` can be used. 
 
 
 ## Other improvements:
@@ -74,7 +74,7 @@ A major improvement in this release is the increased speed of the `mHMM()` algor
 * the forward algorithm used in mHMM() is now implemented in c++ using Rcpp to optimize computational speed
 * the call to optim() in mHMM() used to create correct scalers for the Metropolis Hasting was computationally very intensive, especially for long sequences of data. In this new version, the log likelihood function of the Multinomial distribution is programmed in a more efficient manner, and obtaining the Hessian based on the outcomes of optim() is done more efficiently.  
 
-## Manually specifying hyper-prior distribution paramter values
+## Manually specifying hyper-prior distribution parameter values
 Two new functions to manually specify hyper-prior distribution parameter values for the multilevel hidden Markov model are introduced:
 
 * prior_emiss_cat(): for manually specifying hyper-prior distribution parameter values for the categorical emission distribution(s), creating an object of class 'mHMM_prior_emiss'. 
