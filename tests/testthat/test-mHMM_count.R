@@ -127,7 +127,7 @@ test_that("print mHMM", {
   expect_output(print(out_count), paste("Number of subjects:", n))
   expect_output(print(out_count), paste(J, "iterations"))
   expect_output(print(out_count), paste("likelihood over all subjects:", -701.4061))
-  expect_output(print(out_count), paste("AIC over all subjects:", 1426.812))
+  expect_output(print(out_count), paste("AIC over all subjects: ", 1426.812))
   expect_output(print(out_count), paste("states used:", m))
   expect_output(print(out_count), paste("dependent variables used:", n_dep))
 
@@ -135,7 +135,7 @@ test_that("print mHMM", {
   expect_output(print(out_count_cov), paste("Number of subjects:", n))
   expect_output(print(out_count_cov), paste(J, "iterations"))
   expect_output(print(out_count_cov), paste("likelihood over all subjects:", -680.2284))
-  expect_output(print(out_count_cov), paste("AIC over all subjects:", 1384.457))
+  expect_output(print(out_count_cov), paste("AIC over all subjects: ", 1384.457))
   expect_output(print(out_count_cov), paste("states used:", m))
   expect_output(print(out_count_cov), paste("dependent variables used:", n_dep))
 })

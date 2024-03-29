@@ -9,6 +9,7 @@ print.mHMM <- function(x, ...){
   burn_in <- input$burn_in
   J       <- input$J
   m       <- input$m
+  n_vary  <- input$n_vary
   data_distr <- input$data_distr
   n_dep   <- input$n_dep
   cat("Number of subjects:", n_subj, "\n")
@@ -20,15 +21,22 @@ print.mHMM <- function(x, ...){
   }
   if(data_distr == 'categorical'){
     q_emiss <- input$q_emiss
-    AIC<-2*(sum((q_emiss-1)*m)+(m-1)*m) - (2*LL)
+    n_par <- sum((q_emiss-1)*m)+(m-1)*m
+    AIC   <- 2 * n_par - (2 * LL)
+    AICc  <- ((2 * n_vary * n_par) / (n_vary - n_par - 1)) - (2 * LL)
   } else if (data_distr == 'continuous'){
-    AIC<-2*(m * n_dep * 2 + (m - 1) * m) - (2 * LL)
+    n_par <- m * n_dep * 2 + (m - 1) * m
+    AIC   <- 2 * n_par - (2 * LL)
+    AICc   <- ((2 * n_vary * n_par) / (n_vary - n_par - 1)) - (2 * LL)
   } else if (data_distr == 'count'){
-    AIC<-2*(m * n_dep + (m - 1) * m) - (2 * LL)
+    n_par <- m * n_dep + (m - 1) * m
+    AIC   <- 2 * n_par - (2 * LL)
+    AICc  <- ((2 * n_vary * n_par) / (n_vary - n_par - 1)) - (2 * LL)
   }
 
   cat("Average Log likelihood over all subjects:", mean(LL), "\n")
-  cat("Average AIC over all subjects:", mean(AIC), "\n")
+  cat("Average AIC over all subjects: ", mean(AIC), "\n")
+  cat("Average AICc over all subjects:", mean(AICc), "\n")
   cat("\n")
   cat("Number of states used:", m, "\n")
   cat("\n")
