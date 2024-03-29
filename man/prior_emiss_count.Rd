@@ -144,7 +144,9 @@ manually specify these values on the logarithmic scale, please set the
 argument \code{log_scale} to \code{TRUE} in \code{prior_emiss_count}. If
 covariates are used to predict the emission distribution, then the
 logarithmic scale should be used for the inputs \code{emiss_mu0} and
-\code{emiss_V}, and set \code{log_scale = TRUE}.
+\code{emiss_V}, and set \code{log_scale = TRUE}. To aid the user in
+transforming the variance to the logarithmic scale, the function
+`var_to_logvar()` can be used.
 }
 \examples{
 ###### Example using simulated data
@@ -176,8 +178,10 @@ emiss_distr <- list(matrix(log(c( 50,
                              10,
                              20)), nrow = m, byrow = TRUE))
 # Simulate data
-data_count <- sim_mHMM(n_t = n_t, n = n, data_distr = 'count', gen = list(m = m, n_dep = n_dep),
-                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.05, 0.01), log_scale = TRUE)
+data_count <- sim_mHMM(n_t = n_t, n = n, data_distr = 'count',
+                       gen = list(m = m, n_dep = n_dep),
+                       gamma = gamma, emiss_distr = emiss_distr,
+                       var_gamma = .1, var_emiss = c(.05, 0.01), log_scale = TRUE)
 
 # Specify starting values
 start_gamma <- gamma

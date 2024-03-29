@@ -54,7 +54,7 @@ likelihood.}
 \description{
 \code{pd_RW_emiss_count} provides a framework to manually specify the
 settings of the proposal distribution of the random walk (RW) Metropolis
-sampler of the emission distribution(s) of the multilevel hidden Markov
+sampler of Poisson emission distribution(s) of the multilevel hidden Markov
 model, and creates on object of the class \code{mHMM_pdRW_emiss}. The RW
 metropolis sampler is used for sampling the subject level parameter estimates
 relating to the emission distributions of the dependent variables \code{k},
@@ -75,105 +75,40 @@ considered optimal when a single parameter is being updated (Gelman,
 Carlin, Stern & Rubin, 2014).
 }
 \examples{
-###### Example using package simulated data
+###### Example using simulated data
 # specifying general model properties:
-m <- 3
-n_dep <- 3
-
-# specifying manual values for RW metropolis sampler on emission distributions
-emiss_mle0 <- list(matrix(c( 2,  0,
-                                -2, -2,
-                                 0, -1), byrow = TRUE, nrow = m, ncol = q_emiss[1] - 1),
-                       matrix(c( 2,
-                                 2,
-                                 2), byrow = TRUE, nrow = m, ncol = q_emiss[2] - 1),
-                       matrix(c(-2, -2,
-                                 2,  0,
-                                 0, -1), byrow = TRUE, nrow = m, ncol = q_emiss[3] - 1),
-                       matrix(c( 2,
-                                 2,
-                                 2), byrow = TRUE, nrow = m, ncol = q_emiss[4] - 1))
-emiss_scalar <- list(c(2), c(3))
-emiss_w <- rep(list(c(0.2)), n_dep)
-manual_emiss_sampler <- pd_RW_emiss_count(gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                                        emiss_mle0 = emiss_mle0,
-                                        emiss_scalar = emiss_scalar,
-                                        emiss_w = emiss_w)
-
-# specifying starting values
-start_TM <- diag(.7, m)
-start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .1
-start_EM <- list(matrix(c(0.05, 0.90, 0.05,
-                          0.90, 0.05, 0.05,
-                          0.55, 0.45, 0.05), byrow = TRUE,
-                        nrow = m, ncol = q_emiss[1]), # vocalizing patient
-                 matrix(c(0.1, 0.9,
-                          0.1, 0.9,
-                          0.1, 0.9), byrow = TRUE, nrow = m,
-                        ncol = q_emiss[2]), # looking patient
-                 matrix(c(0.90, 0.05, 0.05,
-                          0.05, 0.90, 0.05,
-                          0.55, 0.45, 0.05), byrow = TRUE,
-                        nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-                 matrix(c(0.1, 0.9,
-                          0.1, 0.9,
-                          0.1, 0.9), byrow = TRUE, nrow = m,
-                        ncol = q_emiss[4])) # looking therapist
-
-# Note that for reasons of running time, J is set at a ridiculous low value.
-# One would typically use a number of iterations J of at least 1000,
-# and a burn_in of 200.
-\donttest{
-out_3st_RWemiss <- mHMM(s_data = nonverbal,
-                         gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                         start_val = c(list(start_TM), start_EM),
-                         emiss_sampler = manual_emiss_sampler,
-                         mcmc = list(J = 11, burn_in = 5))
-
-out_3st_RWemiss
-summary(out_3st_RWemiss)
-
-# checking acceptance rate (for illustrative purposes, in the example,
-# J is too low for getting a fair indication)
-div_J <- function(x, J) x / J
-J_it <- 11 - 1 # accept/reject starts at iteration 2 of MCMC algorithm
-RW_emiss_accept <- sapply(out_3st_RWemiss$emiss_naccept, div_J, J_it, simplify = FALSE)
-
-# average acceptance rate over all subjects per parameter
-# rows represent each of the n_dep dependent variables, columns represent the m states
-t(sapply(RW_emiss_accept, apply, MARGIN = 2, mean))
-}
-\dontshow{
-out_3st_RWemiss <- mHMM(s_data = nonverbal,
-                         gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                         start_val = c(list(start_TM), start_EM),
-                         emiss_sampler = manual_emiss_sampler,
-                         mcmc = list(J = 5, burn_in = 3))
-}
 n_t     <- 200     # Number of observations on the dependent variable
 m       <- 3        # Number of hidden states
-n_dep   <- 3        # Number of dependent variables
+n_dep   <- 2        # Number of dependent variables
 n_subj  <- 30        # Number of subjects
 
 gamma   <- matrix(c(0.9, 0.05, 0.05,
                     0.2, 0.7, 0.1,
                     0.2,0.3, 0.5), ncol = m, byrow = TRUE)
 
-emiss_distr <- list(matrix(c(log(20),
-                             log(10),
-                             log(5)), nrow = m, byrow = TRUE),
-                    matrix(c(log(15),
-                             log(2),
-                             log(5)), nrow = m, byrow = TRUE),
-                    matrix(c(log(50),
-                             log(3),
-                             log(20)), nrow = m, byrow = TRUE))
+emiss_distr <- list(matrix(c(20,
+                             10,
+                             5), nrow = m, byrow = TRUE),
+                    matrix(c(50,
+                             3,
+                             20), nrow = m, byrow = TRUE))
 
-# Simulate count data
-data_count <- sim_mHMM(n_t = n_t, n = n_subj,
-                       data_distr = "count", gen = list(m = m, n_dep = n_dep),
-                       gamma = gamma, emiss_distr = emiss_distr,
-                       var_gamma = 0.1, var_emiss = rep(0.01, n_dep), return_ind_par = TRUE)
+# Define between subject variance to use on the simulating function:
+# here, the variance is varied over states within the dependent variable.
+var_emiss <- list(matrix(c(5.0, 3.0, 1.5), nrow = m),
+                  matrix(c(5.0, 5.0, 5.0), nrow = m))
+
+# Simulate count data:
+data_count <- sim_mHMM(n_t = n_t,
+                       n = n_subj,
+                       data_distr = "count",
+                       gen = list(m = m, n_dep = n_dep),
+                       gamma = gamma,
+                       emiss_distr = emiss_distr,
+                       var_gamma = 0.1,
+                       var_emiss = var_emiss,
+                       return_ind_par = TRUE)
+
 
 # Transition probabilities
 start_gamma <- diag(0.8, m)
@@ -181,15 +116,13 @@ start_gamma[lower.tri(start_gamma) | upper.tri(start_gamma)] <- (1 - diag(start_
 
 # Emission distribution
 start_emiss <- list(matrix(c(20,10, 5), nrow = m, byrow = TRUE),
-                    matrix(c(15, 2, 5), nrow = m, byrow = TRUE),
                     matrix(c(50, 3,20), nrow = m, byrow = TRUE))
 
 # Specify hyper-prior for the count emission distribution
 manual_prior_emiss <- prior_emiss_count(
   gen = list(m = m, n_dep = n_dep),
-  emiss_mu0 = list(matrix(log(c(20, 10, 5)), byrow = TRUE, ncol = m),
-                   matrix(log(c(15, 2, 5)), byrow = TRUE, ncol = m),
-                   matrix(log(c(50, 3, 20)), byrow = TRUE, ncol = m)),
+  emiss_mu0 = list(matrix(c(20, 10, 5), byrow = TRUE, ncol = m),
+                   matrix(c(50, 3, 20), byrow = TRUE, ncol = m)),
   emiss_K0  = rep(list(0.1),n_dep),
   emiss_nu  = rep(list(0.1),n_dep),
   emiss_V   = rep(list(rep(10, m)),n_dep)
@@ -204,7 +137,7 @@ manual_emiss_sampler <- pd_RW_emiss_count(gen = list(m = m, n_dep = n_dep),
 # Note that for reasons of running time, J is set at a ridiculous low value.
 # One would typically use a number of iterations J of at least 1000,
 # and a burn_in of 200.
-out_3st_count_sim <- mHMM(s_data = data_count$obs,
+out_3st_count_RWemiss <- mHMM(s_data = data_count$obs,
                           data_distr = 'count',
                           gen = list(m = m, n_dep = n_dep),
                           start_val = c(list(start_gamma), start_emiss),
@@ -214,10 +147,10 @@ out_3st_count_sim <- mHMM(s_data = data_count$obs,
                           show_progress = TRUE)
 
 # Examine acceptance rates over dependent variable, individual, and states:
-lapply(out_3st_count_sim$emiss_naccept, function(e) e/out_3st_count_sim$input$J)
+lapply(out_3st_count_RWemiss$emiss_naccept, function(e) e/out_3st_count_RWemiss$input$J)
 
 # Finally, take the average acceptance rate by dependent variable and state:
-lapply(out_3st_count_sim$emiss_naccept, function(e) colMeans(e/out_3st_count_sim$input$J))
+lapply(out_3st_count_RWemiss$emiss_naccept, function(e) colMeans(e/out_3st_count_RWemiss$input$J))
 
 
 }

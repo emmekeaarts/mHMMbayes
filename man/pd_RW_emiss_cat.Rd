@@ -64,7 +64,7 @@ likelihood.}
 \description{
 \code{pd_RW_emiss_cat} provides a framework to manually specify the
 settings of the proposal distribution of the random walk (RW) Metropolis
-sampler of the emission distribution(s) of the multilevel hidden Markov
+sampler of categorical emission distribution(s) of the multilevel hidden Markov
 model, and creates on object of the class \code{mHMM_pdRW_emiss}. The RW
 metropolis sampler is used for sampling the subject level parameter estimates
 relating to the emission distributions of the dependent variables \code{k},
