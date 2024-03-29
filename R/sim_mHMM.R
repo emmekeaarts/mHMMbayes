@@ -318,7 +318,7 @@
 #' data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous',
 #'                       gen = list(m = m, n_dep = n_dep),
 #'                       gamma = gamma, emiss_distr = emiss_distr,
-#'                       var_gamma = .5, var_emiss = c(.5, 0.01))
+#'                       var_gamma = .5, var_emiss = c(5^2, 0.2^2))
 #'
 #' head(data_cont$states)
 #' head(data_cont$obs)
@@ -341,13 +341,10 @@
 #'                              3,
 #'                              20), nrow = m, byrow = TRUE))
 #'
-#' # Define between variance to use on the simulating function:
-#' var_emiss <- c(5,2)
-#'
-#' # We can also use different values per state, if preferred:
-#' var_emiss <- list(c(5.0, 3.0, 1.5),
-#'                   c(5.0, 5.0, 5.0))
-#' var_emiss <- lapply(var_emiss, function(q) matrix(q, nrow = m))
+#' # Define between subject variance to use on the simulating function:
+#' # here, the variance is varied over states within the dependent variable.
+#' var_emiss <- list(matrix(c(5.0, 3.0, 1.5), nrow = m),
+#'                   matrix(c(5.0, 5.0, 5.0), nrow = m))
 #'
 #' # Simulate count data:
 #' data_count <- sim_mHMM(n_t = n_t,
@@ -402,14 +399,6 @@
 #'                         var_emiss =  list(rep(4, m),
 #'                                           rep(2, m),
 #'                                           rep(5, m)),
-#'                         byrow = FALSE)
-#'
-#' # We can also use different values per state for logvar:
-#' logvar <- var_to_logvar(gen = list(m = m, n_dep = n_dep),
-#'                         emiss_mu = emiss_distr,
-#'                         var_emiss =  list(c(5.0, 3.0, 1.5),
-#'                                           c(2.0, 6.0, 0.5),
-#'                                           c(5.0, 5.0, 5.0)),
 #'                         byrow = FALSE)
 #'
 #' # Put logvar in the right format:
@@ -756,7 +745,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
         }
       } else if (data_distr == "count"){
         for(i in 1:n_dep){
-          obs[((j-1) * n_t + 1), (1+i)] <- rpois(1, lambda = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],1])
+          obs[((j-1) * n_t + 1), (1+i)] <- stats::rpois(1, lambda = sub_emiss[[j]][[i]][states[((j-1) * n_t + 1), 2],1])
         }
       }
       for(t in 2:n_t){
@@ -772,7 +761,7 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
           }
         } else if (data_distr == "count"){
           for(i in 1:n_dep){
-            obs[((j-1) * n_t + t), (1+i)] <- rpois(1, lambda = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],1])
+            obs[((j-1) * n_t + t), (1+i)] <- stats::rpois(1, lambda = sub_emiss[[j]][[i]][states[((j-1) * n_t + t), 2],1])
           }
         }
       }

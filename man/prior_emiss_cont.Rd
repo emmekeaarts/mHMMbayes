@@ -159,10 +159,10 @@ manual_prior_emiss <- prior_emiss_cont(
                         emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
                                          matrix(c(7, 8, 18), nrow = 1)),
                         emiss_K0 = list(1, 1),
-                        emiss_V =  list(rep(100, m), rep(25, m)),
+                         emiss_V =  list(rep(5^2, m), rep(0.5^2, m)),
                         emiss_nu = list(1, 1),
-                        emiss_a0 = list(rep(1, m), rep(1, m)),
-                        emiss_b0 = list(rep(1, m), rep(1, m)))
+                        emiss_a0 = list(rep(1.5, m), rep(1, m)),
+                        emiss_b0 = list(rep(20, m), rep(4, m)))
 
 # to use the informative priors in a model, simulate multivariate continuous data
 n_t     <- 100
@@ -179,8 +179,10 @@ emiss_distr <- list(matrix(c( 50, 10,
                              10, 5,
                              20, 3), nrow = m, byrow = TRUE))
 
-data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous', gen = list(m = m, n_dep = n_dep),
-                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
+data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous',
+                      gen = list(m = m, n_dep = n_dep),
+                      gamma = gamma, emiss_distr = emiss_distr,
+                      var_gamma = .1, var_emiss = c(5^2, 0.2^2))
 
 # using the informative hyper-prior in a model
 # Note that for reasons of running time, J is set at a ridiculous low value.

@@ -332,15 +332,15 @@ In case of count observations, the \code{mHMM} return object contains:
   \code{dep_labels}.}}
 }
 \description{
-\code{mHMM} fits a multilevel (also known as mixed or random effects)
-hidden Markov model (HMM) to intense longitudinal data with categorical
-or continuous (i.e., normally distributed) observations of multiple
-subjects using Bayesian estimation, and creates an object of class \code{mHMM}.
-By using a multilevel framework, we allow for heterogeneity in the model
-parameters between subjects, while estimating one overall HMM. The function
-includes the possibility to add covariates at level 2 (i.e., at the subject
-level) and have varying observation lengths over subjects. For a short
-description of the package see \link{mHMMbayes}. See
+\code{mHMM} fits a multilevel (also known as mixed or random effects) hidden
+Markov model (HMM) to intense longitudinal data with categorical, continuous
+(i.e., normally distributed), or count (i.e., Poisson distributed)
+observations of multiple subjects using Bayesian estimation, and creates an
+object of class \code{mHMM}. By using a multilevel framework, we allow for
+heterogeneity in the model parameters between subjects, while estimating one
+overall HMM. The function includes the possibility to add covariates at level
+2 (i.e., at the subject level) and have varying observation lengths over
+subjects. For a short description of the package see \link{mHMMbayes}. See
 \code{vignette("tutorial-mhmm")} for an introduction to multilevel hidden
 Markov models and the package, and see \code{vignette("estimation-mhmm")} for
 an overview of the used estimation algorithms.
@@ -454,8 +454,10 @@ emiss_distr <- list(matrix(c( 50, 10,
                              10, 5,
                              20, 3), nrow = m, byrow = TRUE))
 
-data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous', gen = list(m = m, n_dep = n_dep),
-                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
+data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous',
+                      gen = list(m = m, n_dep = n_dep),
+                      gamma = gamma, emiss_distr = emiss_distr,
+                      var_gamma = .1, var_emiss = c(5^2, 0.2^2))
 
 # Specify hyper-prior for the continuous emission distribution
 manual_prior_emiss <- prior_emiss_cont(
@@ -463,10 +465,10 @@ manual_prior_emiss <- prior_emiss_cont(
                         emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
                                          matrix(c(7, 8, 18), nrow = 1)),
                         emiss_K0 = list(1, 1),
-                        emiss_V =  list(rep(100, m), rep(25, m)),
+                        emiss_V =  list(rep(5^2, m), rep(0.5^2, m)),
                         emiss_nu = list(1, 1),
-                        emiss_a0 = list(rep(1, m), rep(1, m)),
-                        emiss_b0 = list(rep(1, m), rep(1, m)))
+                        emiss_a0 = list(rep(1.5, m), rep(1, m)),
+                        emiss_b0 = list(rep(20, m), rep(4, m)))
 
 # Run the model on the simulated data:
 # Note that for reasons of running time, J is set at a ridiculous low value.
@@ -485,78 +487,56 @@ out_3st_cont_sim <- mHMM(s_data = data_cont$obs,
 ###### Example on multivariate count data
 # Simulate data with one covariate for each count dependent variable
 \donttest{
-
 n_t     <- 200     # Number of observations on the dependent variable
 m       <- 3        # Number of hidden states
-n_dep   <- 3        # Number of dependent variables
+n_dep   <- 2        # Number of dependent variables
 n_subj  <- 30        # Number of subjects
 
 gamma   <- matrix(c(0.9, 0.05, 0.05,
                     0.2, 0.7, 0.1,
                     0.2,0.3, 0.5), ncol = m, byrow = TRUE)
 
-emiss_distr <- list(matrix(c(log(20),
-                             log(10),
-                             log(5)), nrow = m, byrow = TRUE),
-                    matrix(c(log(15),
-                             log(2),
-                             log(5)), nrow = m, byrow = TRUE),
-                    matrix(c(log(50),
-                             log(3),
-                             log(20)), nrow = m, byrow = TRUE))
+emiss_distr <- list(matrix(c(20,
+                             10,
+                             5), nrow = m, byrow = TRUE),
+                    matrix(c(50,
+                             3,
+                             20), nrow = m, byrow = TRUE))
 
-# Define list of vectors of covariate values
-set.seed(42)
-xx_vec <- c(list(NULL),rep(list(rnorm(n_subj,mean = 0, sd = 0.1)),3))
+# Define between subject variance to use on the simulating function:
+# here, the variance is varied over states within the dependent variable.
+var_emiss <- list(matrix(c(5.0, 3.0, 1.5), nrow = m),
+                  matrix(c(5.0, 5.0, 5.0), nrow = m))
 
-# Define object beta with regression coefficients for the three dependent variables
-beta      <- rep(list(NULL), n_dep+1)
-beta[[2]] <- matrix(c(1,-1,0), byrow = TRUE, ncol = 1)
-beta[[3]] <- matrix(c(2,0,-2), byrow = TRUE, ncol = 1)
-beta[[4]] <- matrix(c(-1,3,1), byrow = TRUE, ncol = 1)
+# Simulate count data:
+data_count <- sim_mHMM(n_t = n_t,
+                       n = n_subj,
+                       data_distr = "count",
+                       gen = list(m = m, n_dep = n_dep),
+                       gamma = gamma,
+                       emiss_distr = emiss_distr,
+                       var_gamma = 0.1,
+                       var_emiss = var_emiss,
+                       return_ind_par = TRUE)
 
-# Create function to calculate necessary logvar to get desired between
-#   subject variance (depends also on the emission means chosen):
-get_logvar <- function(mu, varmu){
-  logmu = log(mu)
-  log(0.5*exp(-2*logmu)*(exp(2*logmu) + sqrt(4*exp(2*logmu)*varmu+exp(4*logmu))))
-}
-
-# Use the largest mean of each dependent variable:
-logvar <- get_logvar(c(20,15,50), c(2,1.5,5)**2)
-
-# Simulate count data
-data_count <- sim_mHMM(n_t = n_t, n = n_subj,
-                       data_distr = "count", gen = list(m = m, n_dep = n_dep),
-                       gamma = gamma, emiss_distr = emiss_distr, xx_vec = xx_vec, beta = beta,
-                       var_gamma = 0.1, var_emiss = logvar, return_ind_par = TRUE)
 
 # Transition probabilities
 start_gamma <- diag(0.8, m)
-start_gamma[lower.tri(start_gamma) | upper.tri(start_gamma)] <- (1 - diag(start_gamma)) / (m - 1)
+start_gamma[lower.tri(start_gamma) | upper.tri(start_gamma)] <-
+                                            (1 - diag(start_gamma)) / (m - 1)
 
 # Emission distribution
 start_emiss <- list(matrix(c(20,10, 5), nrow = m, byrow = TRUE),
-                    matrix(c(15, 2, 5), nrow = m, byrow = TRUE),
                     matrix(c(50, 3,20), nrow = m, byrow = TRUE))
-
-# Specify list of matrices with covariates
-set.seed(42)
-xx_vec <- c(list(NULL),rep(list(matrix(cbind(1, rnorm(n_subj,mean = 0, sd = 0.1)), ncol = 2)),3))
 
 # Specify hyper-prior for the count emission distribution
 manual_prior_emiss <- prior_emiss_count(
   gen = list(m = m, n_dep = n_dep),
-  emiss_mu0 = list(matrix(c(20, 10, 5,
-                                1,  1, 1), byrow = TRUE, ncol = m),
-                   matrix(c(15, 2, 5,
-                                1, 1, 1), byrow = TRUE, ncol = m),
-                   matrix(c(50, 3, 20,
-                                1, 1,  1), byrow = TRUE, ncol = m)),
-  emiss_K0  = rep(list(rep(0.1, 2)),n_dep),
+  emiss_mu0 = list(matrix(c(20, 10, 5), byrow = TRUE, ncol = m),
+                   matrix(c(50, 3, 20), byrow = TRUE, ncol = m)),
+  emiss_K0  = rep(list(0.1),n_dep),
   emiss_nu  = rep(list(0.1),n_dep),
-  emiss_V   = rep(list(rep(10, m)),n_dep),
-  n_xx_emiss = rep(1,m)
+  emiss_V   = rep(list(rep(10, m)),n_dep)
 )
 
 # Run model
@@ -566,7 +546,6 @@ manual_prior_emiss <- prior_emiss_count(
 out_3st_count_sim <- mHMM(s_data = data_count$obs,
                           data_distr = 'count',
                           gen = list(m = m, n_dep = n_dep),
-                          xx = xx_vec,
                           start_val = c(list(start_gamma), start_emiss),
                           emiss_hyp_prior = manual_prior_emiss,
                           mcmc = list(J = 11, burn_in = 5),
