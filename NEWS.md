@@ -1,3 +1,36 @@
+# mHMMbayes 1.1.0
+
+## Accommodating count data (i.e., Poisson distributed data) 
+A major improvement in this release is the possibility to include count data in `mHMM()`. Currently, the user can model data composed of either categorical data OR continuous data OR count data (so a mix of different types of emission distributions is not possible within the stable CRAN version). As such, the following changes are implemented:
+
+*  The input parameter `data_distr` of the function `mHMM()` used specify the type of input data now contains the option `data_distr = 'count'`.
+* `sim_mHMM()` allows the simulation of count data, which is facilitated again by the input parameter `data_distr`.
+* Functions that utilize `mHMM()` output objects as input such as `obtain_emiss()`, `vit_mHMM()`, and S3 methods as `print()`, `summary()`, and `plot()` automatically detect whether the output object relates to a multilevel HMM fitted to categorical, continuous, or count data, and adjusts it's processing methods accordingly.  
+
+Several new functions are introduced specifically relating to modelling count data: 
+
+* `prior_emiss_count()` enables the specification of hyper prior parameters when using count input data. 
+* `pd_RW_emiss_count()` enables the manual specification of the settings of the proposal distribution of the random walk (RW) Metropolis sampler of Poisson emission distribution(s). Note that the implemented RW Metropolis sampler is self tuning, hence manual specification is optional. 
+* `var_to_logvar()` aids the user with transforming the between-subject variance in the positive scale to the logvariance in the logarithmic scale. That is, specifying hyper prior parameters when using count input data is obligatory. When not using covariates, the expected means (lambda) and corresponding variances can be specified in  the natural (positive real numbers) scale. However, when using covariates, the expected means and corresponding variances have to be specified on the logarithmic scale. Transforming the variances to the logarithmic scale is a nontrivial task. As such, to aid the user with this task, the function `var_to_logvar()` can be used. 
+
+
+## Other improvements:
+### `sim_mHMM()`
+
+* When simulating multilevel HMM data using `sim_mHMM()`, it is now possible to specify the between subject variance in gamma and the emission distribution at the parameter level, instead of fixed over states. When the input parameter `var_gamma` or `var_emiss` is a numeric vector with length 1 for gamma or length `n_dep` for `var_emiss`, the variance is still assumed fixed across switching probabilities of the transition probability matrix gamma or fixed across states (and, for the categorical distribution, categories within a state) within an emission distribution. 
+
+### `mHMM()`
+
+* The S3 `print()` option now returns the corrected Akaike information criterion (AICc) in addition to the conventional AIC model selection criterion. The AICc is a modification of the original AIC that corrects for small sample sizes. One rule of thumb is to use the AICc when the number of observations divided by the number of model parameters < 40. In the implementation of the function `mHMM()`, the number of observations relates to the (average) number of observations per subject, and the model parameters to the subject level freely estimated transition probabilities and emission distribution parameters. For example in a model with m = 3 states and univariate data (i.e., only one dependent variable) with a normal emission distribution, the number of parameters equals: m x (m-1) = 6 freely estimated transition probabilities, 3 normal emission means and 3 normal emission variances, totals to 12 parameters. Any subject level sequence length below 12 * 40 = 480 observations would preferably use the AICc instead of the AIC.  
+
+* `mHMM()` output now also includes `gamma_V_int_bar`, which is a matrix containing the variance components for the subject-level intercepts (between subject variances) of the multinomial logistic regression modeling the transition probabilities over the iterations of the hybrid Metropolis within Gibbs sampler. 
+
+* `mHMM()` output now also includes `emiss_V_int_bar`, which is a list containing one matrix per dependent variable, denoting the variance components for the subject-level intercepts (between subject variances) of the multinomial logistic regression modeling the categorical emission probabilities over the iterations of the hybrid Metropolis within Gibbs sampler. 
+
+### `vit_mHMM()`
+
+* A small error in the object returned by the function `vit_mHMM()` is now fixed. The number of rows in the output object of `vit_mHMM()` should be the sum of the sequence lengths over the subjects. However, with varying sequence length, for each subject the maximum sequence length of the sample was used, inserting NA for non existing observations at the end of the sequence. This is now corrected, with the number of rows in the output object of `vit_mHMM()` equaling the sum of the sequence lengths over the subjects and not inputting 'spurious' `NA`s. 
+
 # mHMMbayes 1.0.0
 
 ## Accommodating continuous data (i.e., Normally distributed data)
