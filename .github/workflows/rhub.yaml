@@ -52,6 +52,7 @@ jobs:
 
     steps:
       - uses: r-hub/rhub2/actions/rhub-checkout@v1
+      - uses: r-lib/actions/setup-pandoc@v2
       - uses: r-hub/rhub2/actions/rhub-platform-info@v1
         with:
           token: ${{ secrets.RHUB_TOKEN }}
