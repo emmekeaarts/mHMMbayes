@@ -116,7 +116,7 @@ informative hyper-prior on the count emission distributions.
 attaches the class \code{count} to signal use for count observations. The
 set of hyper-prior distributions consists of a lognormal-Inverse-Gamma
 distribution (i.e., assuming both unknown population mean and variance
-between subject level means) on the vector of poisson means (i.e.,
+between subject level means) on the vector of Poisson means (i.e.,
 intercepts and regression coefficients).
 }
 \details{
