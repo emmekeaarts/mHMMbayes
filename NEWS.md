@@ -1,3 +1,5 @@
+# mHMMbayes (development version)
+
 # mHMMbayes 1.1.0
 
 ## Accommodating count data (i.e., Poisson distributed data) 
