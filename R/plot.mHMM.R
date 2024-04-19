@@ -213,7 +213,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
         new <- max(stats::density(object$emiss_mu_bar[[dep]][burn_in:J,i])$y)
         if(new > max_y){max_y <- new}
       }
-      quantiles <- apply(object$emiss_mu_bar[[dep]][burn_in:J,], 2, stats::quantile, probs = c(0.025, 0.975))
+      quantiles <- apply(matrix(object$emiss_mu_bar[[dep]][burn_in:J,], ncol = m), 2, stats::quantile, probs = c(0.025, 0.975))
       min_x <- min(quantiles)
       max_x <- max(quantiles)
       # set plotting area
@@ -239,7 +239,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
         new <- max(stats::density(object$emiss_sd_bar[[dep]][burn_in:J,i])$y)
         if(new > max_y){max_y <- new}
       }
-      quantiles <- apply(object$emiss_sd_bar[[dep]][burn_in:J,], 2, stats::quantile, probs = c(0.025, 0.975))
+      quantiles <- apply(matrix(object$emiss_sd_bar[[dep]][burn_in:J,], ncol = m), 2, stats::quantile, probs = c(0.025, 0.975))
       min_x <- min(quantiles)
       max_x <- max(quantiles)
       # set plotting area
@@ -269,7 +269,7 @@ plot.mHMM <- function(x, component = "gamma", dep = 1, col, dep_lab, cat_lab,
         new <- max(stats::density(object$emiss_mu_bar[[dep]][burn_in:J,i])$y)
         if(new > max_y){max_y <- new}
       }
-      quantiles <- apply(object$emiss_mu_bar[[dep]][burn_in:J,], 2, stats::quantile, probs = c(0.025, 0.975))
+      quantiles <- apply(matrix(object$emiss_mu_bar[[dep]][burn_in:J,], ncol = m), 2, stats::quantile, probs = c(0.025, 0.975))
       min_x <- min(quantiles)
       max_x <- max(quantiles)
       # set plotting area

@@ -15,8 +15,12 @@ summary.mHMM <- function(object, ...){
     q_emiss <- input$q_emiss
   }
   n_dep   <- input$n_dep
-  gamma_int <- matrix(apply(object$gamma_int_bar[((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = m-1, nrow = m)
-  gamma_pop <- round(int_to_prob(gamma_int),3)
+  if(m > 1){
+    gamma_int <- matrix(apply(object$gamma_int_bar[((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = m-1, nrow = m)
+    gamma_pop <- round(int_to_prob(gamma_int),3)
+  } else if (m == 1){
+    gamma_pop <- matrix(1)
+  }
   colnames(gamma_pop) <- paste("To state", 1:m)
   rownames(gamma_pop) <- paste("From state", 1:m)
   cat("State transition probability matrix","\n",  "(at the group level):", "\n", "\n")
@@ -35,14 +39,16 @@ summary.mHMM <- function(object, ...){
     }
   } else if (data_distr == 'continuous'){
     for(i in 1:n_dep){
-      EM_pop[[i]] <- matrix(round(c(apply(object$emiss_mu_bar[[i]][((burn_in + 1): J),], 2, median), apply(object$emiss_sd_bar[[i]][((burn_in + 1): J),], 2, median)),3), ncol = 2, nrow = m)
+      EM_pop[[i]] <- matrix(round(c(apply(matrix(object$emiss_mu_bar[[i]][((burn_in + 1): J),], ncol = m), 2, median),
+                                    apply(matrix(object$emiss_sd_bar[[i]][((burn_in + 1): J),], ncol = m), 2, median)),
+                                  3), ncol = 2, nrow = m)
       colnames(EM_pop[[i]]) <- c("Mean", "SD")
       rownames(EM_pop[[i]]) <- paste("State", 1:m)
     }
   } else if (data_distr == 'count'){
     for(i in 1:n_dep){
       EM_pop[[i]] <- matrix(round(
-        apply(object$emiss_mu_bar[[i]][((burn_in + 1): J),], 2, median),
+        apply(matrix(object$emiss_mu_bar[[i]][((burn_in + 1): J),], ncol = m), 2, median),
         3), ncol = 1, nrow = m)
       colnames(EM_pop[[i]]) <- c("Mean")
       rownames(EM_pop[[i]]) <- paste("State", 1:m)

@@ -92,6 +92,9 @@ obtain_gamma <- function(object, level = "group", burn_in = NULL){
                compared to the number of iterations J, J =", J))
   }
   m       <- input$m
+  if(m == 1){
+    stop("obtain_gamma cannot be used when the number of states m equals 1; it's obsolete (the transition probability matrix always equals 1).")
+  }
   n_dep   <- input$n_dep
   est <- matrix(, ncol = m, nrow = m)
   colnames(est) <- paste("To state", 1:m)

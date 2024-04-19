@@ -427,7 +427,6 @@
 sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr, start_state = NULL,
                      xx_vec = NULL, beta = NULL, var_gamma = 0.1, var_emiss = NULL,
                      return_ind_par = FALSE, m, n_dep, q_emiss, log_scale = FALSE){
-
   if(!missing(m)){
     warning("The argument m is deprecated; please specify using the input parameter gen.")
   }
@@ -464,7 +463,9 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
       q_emiss <- gen$q_emiss
     }
   }
-
+  if(m == 1){
+    warning("If the number of states m is set to 1, variance between subjects in the transition probability matrix is ignored, and cannot be explained by covariates.")
+  }
   if(missing(m) & missing(gen)){
     stop("Please specify the number of hidden states m via the input parameter gen.")
   }
@@ -692,9 +693,13 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
   states[,1] <- rep(1:n, each = n_t)
   obs <- matrix(ncol = 1 + n_dep, nrow = n_t*n)
   obs[,1] <- rep(1:n, each = n_t)
-  sub_gamma <- rep(list(NULL), n)
   sub_emiss <- rep(list(vector("list", n_dep)), n)
-  mnl_gamma <- prob_to_int(gamma)
+  if(m > 1){
+    sub_gamma <- rep(list(NULL), n)
+    mnl_gamma <- prob_to_int(gamma)
+  } else if (m == 1){
+    sub_gamma <- rep(list(matrix(1)), n)
+  }
   if(data_distr == "categorical"){
     mnl_emiss <- rep(list(NULL), n_dep)
     for(i in 1:n_dep){
@@ -710,8 +715,10 @@ sim_mHMM <- function(n_t, n, data_distr = 'categorical', gen, gamma, emiss_distr
     }
   }
   for(j in 1:n){
-    sub_gamma[[j]] <- int_to_prob(mnl_gamma + xx_vec[[1]][j] * beta[[1]] +
-                                    rnorm(n = m * (m-1), mean = 0, sd = sqrt(as.numeric(var_gamma))))
+    if(m > 1){
+      sub_gamma[[j]] <- int_to_prob(mnl_gamma + xx_vec[[1]][j] * beta[[1]] +
+                                      rnorm(n = m * (m-1), mean = 0, sd = sqrt(as.numeric(var_gamma))))
+    }
     for(i in 1:n_dep){
       if(data_distr == "categorical"){
         sub_emiss[[j]][[i]] <- int_to_prob(mnl_emiss[[i]] + xx_vec[[1+i]][j] * beta[[1+i]] +

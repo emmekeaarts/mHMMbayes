@@ -1,5 +1,8 @@
 # mHMMbayes (development version)
 
+## Accomodating the possibility of fitting a 1-state mHMM
+This version includes the possibility of running (and simulating data from) a 1-state multilevel hidden Markov model. This is mainly convenient for benchmarking purposes for model selection (e.g., how much does the AIC / AICc decrease from a 1-state to a 2-state model). To accommodate this change the following main functions are updated: `mHMM()` and `sim_mHMM()`. The following S3 methods were updated: `print()`, `summary()`, and `plot()`. In addition, the following post processing functions were updated: `obtain_emiss()`, `obtain_gamma()`, and `vit_mHMM()`. 
+
 # mHMMbayes 1.1.0
 
 ## Accommodating count data (i.e., Poisson distributed data) 

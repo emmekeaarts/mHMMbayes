@@ -151,6 +151,10 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
   probs      <- vector(mode = "list", length = n_subj)
   n_dep      <- input$n_dep
   m          <- input$m
+  if(m == 1){
+    stop("The viterbi algorithm is redundant for models with only 1 state"
+    )
+  }
   if(is.null(burn_in)){
     burn_in  <- input$burn_in
   }

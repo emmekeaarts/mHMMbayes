@@ -96,7 +96,7 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
       est_int <- est <- vector("list", n_dep)
       names(est) <- dep_labels
       for(q in 1:n_dep){
-        est_int[[q]] <- matrix(apply(object$emiss_int_bar[[q]][((burn_in + 1): J),], 2, median), byrow = TRUE, ncol = q_emiss[q]-1, nrow = m)
+        est_int[[q]] <- matrix(apply(matrix(object$emiss_int_bar[[q]][((burn_in + 1): J),], ncol = (q_emiss[q]-1) * m), 2, median), byrow = TRUE, ncol = q_emiss[q]-1, nrow = m)
         est[[q]] <- round(int_to_prob(est_int[[q]]),3)
         colnames(est[[q]]) <- paste("Category", 1:q_emiss[q])
         rownames(est[[q]]) <- paste("State", 1:m)
@@ -105,13 +105,13 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
       est <- rep(list(matrix(NA_real_, nrow = m, ncol = 2, dimnames = list(paste("State", 1:m), c("Mean", "SD")))), n_dep)
       names(est) <- dep_labels
       for(q in 1:n_dep){
-        est[[q]][] <-  matrix(round(c(apply(object$emiss_mu_bar[[q]][((burn_in + 1): J),], 2, median), apply(object$emiss_sd_bar[[q]][((burn_in + 1): J),], 2, median)),3), ncol = 2, nrow = m)
+        est[[q]][] <-  matrix(round(c(apply(matrix(object$emiss_mu_bar[[q]][((burn_in + 1): J),], ncol = m), 2, median), apply(matrix(object$emiss_sd_bar[[q]][((burn_in + 1): J),], ncol = m), 2, median)),3), ncol = 2, nrow = m)
       }
     } else if (data_distr == 'count'){
       est <- rep(list(matrix(NA_real_, nrow = m, ncol = 1, dimnames = list(paste("State", 1:m), "Mean"))), n_dep)
       names(est) <- dep_labels
       for(q in 1:n_dep){
-        est[[q]][] <-  matrix(round(apply(object$emiss_mu_bar[[q]][((burn_in + 1): J),], 2, median),3), ncol = 1, nrow = m)
+        est[[q]][] <-  matrix(round(apply(matrix(object$emiss_mu_bar[[q]][((burn_in + 1): J),], ncol = m), 2, median),3), ncol = 1, nrow = m)
       }
     }
 
@@ -132,7 +132,7 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
      }
       for(s in 1:n_subj){
       for(q in 1:n_dep){
-          est_emiss_int[[q]][[s]][] <- matrix(apply(object$emiss_int_subj[[s]][[q]][burn_in:J, ], 2, median),
+          est_emiss_int[[q]][[s]][] <- matrix(apply(matrix(object$emiss_int_subj[[s]][[q]][burn_in:J, ], ncol = (q_emiss[q]-1) * m), 2, median),
                                               byrow = TRUE, ncol = q_emiss[q]-1, nrow = m)
           est_emiss[[q]][[s]][] <- round(int_to_prob(est_emiss_int[[q]][[s]]),3)
         }
@@ -143,7 +143,9 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
       for(q in 1:n_dep){
         names(est_emiss[[q]]) <- paste("Subject", 1:n_subj)
         for(s in 1:n_subj){
-          est_emiss[[q]][[s]][] <- matrix(round(c(apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median), apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J), (n_dep * m + (q-1) * m + 1):(n_dep * m + q * m)], 2, median)),3), ncol = 2, nrow = m)
+          est_emiss[[q]][[s]][] <- matrix(round(c(apply(matrix(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], ncol = m), 2, median),
+                                                  apply(matrix(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J), (n_dep * m + (q-1) * m + 1):(n_dep * m + q * m)], ncol = m), 2, median)),
+                                                3), ncol = 2, nrow = m)
         }
       }
     } else if (data_distr == 'count'){
@@ -152,7 +154,7 @@ obtain_emiss <- function(object, level = "group", burn_in = NULL){
       for(q in 1:n_dep){
         names(est_emiss[[q]]) <- paste("Subject", 1:n_subj)
         for(s in 1:n_subj){
-          est_emiss[[q]][[s]][] <- matrix(round(c(apply(object$PD_subj[[s]]$count_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median)),3), ncol = 1, nrow = m)
+          est_emiss[[q]][[s]][] <- matrix(round(c(apply(matrix(object$PD_subj[[s]]$count_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], ncol = m), 2, median)),3), ncol = 1, nrow = m)
         }
       }
     }
