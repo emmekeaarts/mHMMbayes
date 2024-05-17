@@ -63,3 +63,43 @@ count_mult_fw_r_to_cpp <- function(x, m, emiss, n_dep, gamma, delta = NULL){
   out <- cat_mult_fw_cpp(allprobs = allprobs, gamma = gamma, m = m, n = n, delta = delta)
   return(out)
 }
+
+
+#' @keywords internal
+#' Calculates the forward probabilities, used for sampling the state sequence
+#' specific for when data includes a time varying covariate
+cat_tv_mult_fw_r_to_cpp <- function(x, m, emiss, n_dep, tgamma, delta = NULL, data_distr){
+  if(is.null(delta)) {
+    delta <- solve(t(diag(m) - matrix(tgamma[1,], byrow = TRUE, ncol = m) + 1), rep(1, m))
+  }
+  n        <- dim(x)[1]
+  allprobs <- all1(x = x, emiss = emiss, n_dep = n_dep, data_distr = "categorical")
+  out <- cat_tv_mult_fw_cpp(allprobs = allprobs, tgamma = tgamma, m = m, n = n, delta = delta)
+  return(out)
+}
+
+#' @keywords internal
+#' Calculates the forward probabilities, used for sampling the state sequence
+#' specific for when data includes a time varying covariate
+cont_tv_mult_fw_r_to_cpp <- function(x, m, emiss, n_dep, tgamma, delta = NULL, data_distr){
+  if(is.null(delta)) {
+    delta <- solve(t(diag(m) - matrix(tgamma[1,], byrow = TRUE, ncol = m) + 1), rep(1, m))
+  }
+  n        <- dim(x)[1]
+  allprobs <- all1(x = x, emiss = emiss, n_dep = n_dep, data_distr = "continuous")
+  out <- cat_tv_mult_fw_cpp(allprobs = allprobs, tgamma = tgamma, m = m, n = n, delta = delta)
+  return(out)
+}
+
+#' @keywords internal
+#' Calculates the forward probabilities, used for sampling the state sequence
+#' specific for when data includes a time varying covariate
+count_tv_mult_fw_r_to_cpp <- function(x, m, emiss, n_dep, tgamma, delta = NULL, data_distr){
+  if(is.null(delta)) {
+    delta <- solve(t(diag(m) - matrix(tgamma[1,], byrow = TRUE, ncol = m) + 1), rep(1, m))
+  }
+  n        <- dim(x)[1]
+  allprobs <- all1(x = x, emiss = emiss, n_dep = n_dep, data_distr = "count")
+  out <- cat_tv_mult_fw_cpp(allprobs = allprobs, tgamma = tgamma, m = m, n = n, delta = delta)
+  return(out)
+}

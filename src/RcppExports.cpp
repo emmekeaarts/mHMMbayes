@@ -24,9 +24,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cat_tv_mult_fw_cpp
+List cat_tv_mult_fw_cpp(NumericMatrix allprobs, NumericMatrix tgamma, int m, int n, NumericVector delta);
+RcppExport SEXP _mHMMbayes_cat_tv_mult_fw_cpp(SEXP allprobsSEXP, SEXP tgammaSEXP, SEXP mSEXP, SEXP nSEXP, SEXP deltaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type allprobs(allprobsSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type tgamma(tgammaSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type delta(deltaSEXP);
+    rcpp_result_gen = Rcpp::wrap(cat_tv_mult_fw_cpp(allprobs, tgamma, m, n, delta));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_mHMMbayes_cat_mult_fw_cpp", (DL_FUNC) &_mHMMbayes_cat_mult_fw_cpp, 5},
+    {"_mHMMbayes_cat_tv_mult_fw_cpp", (DL_FUNC) &_mHMMbayes_cat_tv_mult_fw_cpp, 5},
     {NULL, NULL, 0}
 };
 
