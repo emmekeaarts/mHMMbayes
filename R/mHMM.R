@@ -1184,7 +1184,7 @@ mHMM <- function(s_data, data_distr = 'categorical', gen, xx = NULL, start_val, 
     else if(m == 1){
       for(s in 1:n_subj){
         allprobs <- all1(x = subj_data[[s]]$y, emiss = emiss[[s]], n_dep = n_dep, data_distr = data_distr)
-        PD_subj[[s]]$log_likl[iter, 1] <- sum(log(allprobs))
+        PD_subj[[s]]$log_likl[iter, 1] <- sum(log(stats::na.omit(allprobs)))
         for(q in 1:n_dep){
           cond_y[[s]][[q]][[i]] <- stats::na.omit(c(subj_data[[s]]$y[,q]))
         }
