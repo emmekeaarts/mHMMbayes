@@ -3,7 +3,7 @@
 #' Ideas:
 #' (1) use MAPs similarly as done with the Viterbi algorithm:
 #'  +++ fast
-#'  --- no measure of uncertainty on forcasts
+#'  --- no measure of uncertainty on forecasts
 #' (2) obtain forecasts over iterations (after burn-in):
 #'  +++ uncertainty on forecasts
 #'  --- slow
