@@ -19,7 +19,8 @@ sim_mHMM(
   return_ind_par = FALSE,
   m,
   n_dep,
-  q_emiss
+  q_emiss,
+  log_scale = FALSE
 )
 }
 \arguments{
@@ -31,11 +32,12 @@ specific transition probability matrices gamma and emission distributions
 \item{n}{Numeric vector with length 1 denoting the number of subjects for
 which data is simulated.}
 
-\item{data_distr}{String vector with length 1 describing the
-observation type of the data. Currently supported are \code{'categorical'}
-and \code{'continuous'}. Note that for multivariate data, all dependent
-variables are assumed to be of the same observation type. The default
-equals to \code{data_distr = 'categorical'}.}
+\item{data_distr}{A character vector of length 1 denoting the distribution
+adopted for the data given the hidden states. It can take the values
+'categorical', 'continuous', or 'count', standing for the for categorical
+observations following a Multinomial logit, continuous observations
+following a normal distribution, and count observations following a
+Poisson distribution, correspondingly.}
 
 \item{gen}{List containing the following elements denoting the general model
 properties:
@@ -64,7 +66,13 @@ distribution(s). That is, the probability of observing category \emph{q}
 'continuous'}, each element is a matrix with \code{m} rows and 2 columns;
 the first column denoting the mean of state \emph{i} (row \emph{i}) and the
 second column denoting the standard deviation of state \emph{i}
-(row \emph{i}) of the Normal distribution.}
+(row \emph{i}) of the Normal distribution. If \code{data_distr =
+'count'}, each element is a matrix with \code{m} rows and 1 column;
+the only column denoting the logmean of state \emph{i} (row \emph{i})
+of the lognormal distribution used as prior for the Poisson emissions
+(note: by default the logmeans should be specified in the natural scale;
+see argument \code{log_scale} below, unless covariates are used to predict
+a count emission distribution).}
 
 \item{start_state}{Optional numeric vector with length 1 denoting in which
 state the simulated state sequence should start. If left unspecified, the
@@ -108,9 +116,9 @@ emission distribution(s) is not predicted by covariates.}
   predict \code{emiss_distr} consist of a matrix with the number of rows
   equal to \code{m} and the number of columns equal to \code{q_emiss[k]} - 1
   for each of the \code{k} in \code{n_dep} emission distribution(s). See
-  \emph{details} for more information. For continuous emission distributions,
-  the subsequent elements in the list \code{beta} consist of a matrix with
-  the number of rows equal to \code{m} and 1 column.
+  \emph{details} for more information. For continuous and count emission
+  distributions, the subsequent elements in the list \code{beta} consist of
+  a matrix with the number of rows equal to \code{m} and 1 column.
 
   Note that if \code{beta} is specified, \code{xx_vec} has to be specified as
   well. If \code{beta} is omitted completely, \code{beta} defaults to NULL,
@@ -118,37 +126,58 @@ emission distribution(s) is not predicted by covariates.}
   covariates. One of the elements in the list can also be left empty
   (i.e., set to \code{NULL}) to signify that either the transition
   probability matrix or a specific emission distribution is not predicted by
-  covariates.}
+  covariates. If covariates are used to predict a count emission
+  distribution (\code{data_distr = 'count'}), then the logarithmic scale
+  should be used for the inputs \code{emiss_distr} and \code{var_emiss} in
+  addition to \code{beta}, and also set \code{log_scale = TRUE}.}
 
-\item{var_gamma}{A numeric vector with length 1 denoting the amount of variance between subjects in
-the transition probability matrix. Note that this value corresponds to the
-variance of the parameters of the Multinomial distribution (i.e., the
-intercepts of the regression equation of the Multinomial distribution used
-to sample the transition probability matrix), see details below. In
-addition, only one variance value can be specified for the complete
-transition probability matrix, hence the variance is assumed fixed across
-all components. The default equals 0.1, which corresponds to little
-variation between subjects. If one wants to simulate data from exactly the
-same HMM for all subjects, var_gamma should be set to 0. Note that if data
-for only 1 subject is simulated (i.e., n = 1), \code{var_gamma} is set to
-0.}
+\item{var_gamma}{Either a numeric vector with length 1 or a matrix of
+(\code{m} by \code{m} - 1) elements denoting the amount of variance
+between subjects in the transition probability matrix. Note that the
+value(s) correspond to the variance of the parameters of the Multinomial
+distribution (i.e., the intercepts of the regression equation of the
+Multinomial distribution used to sample the transition probability
+matrix), see details below. Also note that if only one variance value is
+provided, it will be adopted for the complete transition probability
+matrix, hence the variance is assumed fixed across all components. The
+default equals 0.1, which corresponds to little variation between
+subjects. If one wants to simulate data from exactly the same HMM for all
+subjects, var_gamma should be set to 0. Note that if data for only 1
+subject is simulated (i.e., n = 1), \code{var_gamma} is set to 0.}
 
-\item{var_emiss}{A numeric vector with length \code{n_dep} denoting the
-amount of variance between subjects in the emission distribution(s). For
-categorical data, this value corresponds to the variance of the parameters
-of the Multinomial distribution (i.e., the intercepts of the regression
-equation of the Multinomial distribution used to sample the components of
-the emission distribution), see details below. For continuous data, this
-value corresponds to the variance in the mean of the emission
-distribution(s) across subjects. Note that only one variance value can be
-specified each emission distribution, hence the variance is assumed fixed
-across states (and, for the categorical distribution, categories within
-a state) within an emission distribution. The default equals 0.1,
-which corresponds to little variation between subjects given categorical
-observations. If one wants to simulate data from exactly the same HMM for
-all subjects, var_emiss should be set to a vector of 0's. Note that if data
-for only 1 subject is simulated (i.e., n = 1), \code{var_emiss} is set to a
-vector of 0's.}
+\item{var_emiss}{Either a numeric vector with length \code{n_dep} or a
+  list of \code{n_dep} matrices denoting the amount of variance between
+  subjects in the emission distribution(s). When opting for a list of
+  matrices: if \code{data_distr = 'categorical'}, each element of the list
+  is a matrix with \code{m} rows and \code{q_emiss[k] - 1} columns for each
+  of the \code{k} in \code{n_dep} emission distribution(s) between subject
+  variances; if \code{data_distr = 'continuous'}, each element is a matrix
+  with \code{m} rows and 1 column; the single column denoting the variance
+  between the subjects' means of state \emph{i} (row \emph{i}) of the normal
+  distribution used as prior for the Normal emissions. If \code{data_distr =
+  'count'}, each element is a matrix with \code{m} rows and 1 column; the
+  single column denoting the logvariance between the subjects' logmeans of
+  state \emph{i} (row \emph{i}) of the lognormal distribution used as prior
+  for the Poisson emissions (note: by default the logvariances should be
+  specified in the natural scale; see argument \code{log_scale} below).
+
+  For categorical data, this value corresponds to the variance of the
+  parameters of the Multinomial distribution (i.e., the intercepts of the
+  regression equation of the Multinomial distribution used to sample the
+  components of the emission distribution), see details below. For
+  continuous data, this value corresponds to the variance in the mean of the
+  emission distribution(s) across subjects. For count data, it corresponds
+  to the variance in the logmean of the emission distribution(s) across
+  subjects and by should be specified in the natural scale (see argument
+  \code{log_scale} below). Note that if only one variance value provided for
+  each emission distribution, the variance is assumed fixed across states
+  (and, for the categorical distribution, categories within a state) within
+  an emission distribution. The default equals 0.1, which corresponds to
+  little variation between subjects given categorical observations. If one
+  wants to simulate data from exactly the same HMM for all subjects,
+  var_emiss should be set to a vector of 0's. Note that if data for only 1
+  subject is simulated (i.e., n = 1), \code{var_emiss} is set to a vector
+  of 0's.}
 
 \item{return_ind_par}{A logical scalar. Should the subject specific
 transition probability matrix \code{gamma} and emission probability matrix
@@ -165,6 +194,17 @@ the input parameter \code{gen}.}
 \item{q_emiss}{The argument \code{q_emiss} is deprecated; please specify
 using the input parameter \code{gen} (only to be specified when simulating
 categorical data).}
+
+\item{log_scale}{A logical scalar. If \code{data_distr = 'count'}, should
+\code{emiss_distr} (i.e., the sample average logmeans) and
+\code{var_emiss} (i.e., the between subject logvariances) of the lognormal
+prior adopted for the count be specified in the logarithmic scale
+(\code{log_scale = TRUE}) or the natural (i.e., real positive numbers)
+scale (\code{log_scale = FALSE}). The default equals
+\code{log_scale = FALSE}. Note that if covariates \code{beta} are used to
+predict the count emission distribution, then the logarithmic scale should
+be used for the inputs \code{emiss_distr}, \code{beta}, and
+\code{var_emiss}, and also set \code{log_scale = TRUE}.}
 }
 \value{
 The following components are returned by the function \code{sim_mHMM}:
@@ -218,11 +258,10 @@ dependent variables for multivariate data are assumed to be independent, and
 all distributions for one dataset have to be of the same type (either
 categorical or continuous).
 
-Note: the subject specific) initial state distributions (i.e., the
+Note that the subject specific initial state distributions (i.e., the
 probability of each of the states at the first time point) needed to simulate
 the data are obtained from the stationary distributions of the subject
 specific transition probability matrices gamma.
-
 
 \code{beta}: As the first element in each row of \code{gamma} is used as
 reference category in the Multinomial logistic regression, the first matrix
@@ -240,8 +279,20 @@ state one. The second element in the first row corresponds to the probability
 of observing category three is state one, and so on. The last element in the
 first row corresponds to the probability of observing the last category in
 state one.
+
+Note that when simulating count data (\code{data_distr = 'count'}), by
+default the emission distribution parameters \code{emiss_distr} and
+\code{var_emiss} are specified in the natural (positive real numbers) scale
+(as opposite to the logarithmic scale). If the user wants to manually
+specify these values on the logarithmic scale, please set the argument
+\code{log_scale = TRUE}. Also note that if covariates are used to predict a
+count emission distribution, then the logarithmic scale should be used for
+the inputs \code{emiss_distr}, \code{beta}, and \code{var_emiss}, and also
+set \code{log_scale = TRUE}.
 }
 \examples{
+
+## Examples on univariate categorical data
 # simulating data for 10 subjects with each 100 categorical observations
 n_t     <- 100
 n       <- 10
@@ -291,6 +342,8 @@ data4 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
 data4
 
+
+## Example on multivariate continuous data
 # simulating multivariate continuous data
 n_t     <- 100
 n       <- 10
@@ -311,10 +364,108 @@ emiss_distr <- list(matrix(c( 50, 10,
 data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous',
                       gen = list(m = m, n_dep = n_dep),
                       gamma = gamma, emiss_distr = emiss_distr,
-                      var_gamma = .5, var_emiss = c(.5, 0.01))
+                      var_gamma = .5, var_emiss = c(5^2, 0.2^2))
 
 head(data_cont$states)
 head(data_cont$obs)
+
+
+## Example on multivariate count data without covariates
+n_t     <- 200     # Number of observations on the dependent variable
+m       <- 3        # Number of hidden states
+n_dep   <- 2        # Number of dependent variables
+n_subj  <- 30        # Number of subjects
+
+gamma   <- matrix(c(0.9, 0.05, 0.05,
+                    0.2, 0.7, 0.1,
+                    0.2,0.3, 0.5), ncol = m, byrow = TRUE)
+
+emiss_distr <- list(matrix(c(20,
+                             10,
+                             5), nrow = m, byrow = TRUE),
+                    matrix(c(50,
+                             3,
+                             20), nrow = m, byrow = TRUE))
+
+# Define between subject variance to use on the simulating function:
+# here, the variance is varied over states within the dependent variable.
+var_emiss <- list(matrix(c(5.0, 3.0, 1.5), nrow = m),
+                  matrix(c(5.0, 5.0, 5.0), nrow = m))
+
+# Simulate count data:
+data_count <- sim_mHMM(n_t = n_t,
+                       n = n_subj,
+                       data_distr = "count",
+                       gen = list(m = m, n_dep = n_dep),
+                       gamma = gamma,
+                       emiss_distr = emiss_distr,
+                       var_gamma = 0.1,
+                       var_emiss = var_emiss,
+                       return_ind_par = TRUE)
+
+
+## Example on multivariate count data with covariates
+# Simulate data with one covariate for each count dependent variable
+
+n_t     <- 200     # Number of observations on the dependent variable
+m       <- 3        # Number of hidden states
+n_dep   <- 3        # Number of dependent variables
+n_subj  <- 30        # Number of subjects
+
+gamma   <- matrix(c(0.9, 0.05, 0.05,
+                    0.2, 0.7, 0.1,
+                    0.2,0.3, 0.5), ncol = m, byrow = TRUE)
+
+emiss_distr <- list(matrix(c(20,
+                             10,
+                             5), nrow = m, byrow = TRUE),
+                    matrix(c(15,
+                             2,
+                             5), nrow = m, byrow = TRUE),
+                    matrix(c(50,
+                             3,
+                             20), nrow = m, byrow = TRUE))
+
+# Since we have covariates, we specify inputs in the log scale:
+emiss_distr_log <- lapply(emiss_distr, function(e) log(e))
+
+# Define list of vectors of covariate values
+set.seed(42)
+xx_vec <- c(list(NULL),rep(list(rnorm(n_subj,mean = 0, sd = 0.1)),3))
+
+# Define object beta with regression coefficients for the three dependent variables
+beta      <- rep(list(NULL), n_dep+1)
+beta[[2]] <- matrix(c(1,-1,0), byrow = TRUE, ncol = 1)
+beta[[3]] <- matrix(c(2,0,-2), byrow = TRUE, ncol = 1)
+beta[[4]] <- matrix(c(-1,3,1), byrow = TRUE, ncol = 1)
+
+# Calculate logvar to use on the simulating function:
+logvar <- var_to_logvar(gen = list(m = m, n_dep = n_dep),
+                        emiss_mu = emiss_distr,
+                        var_emiss =  list(rep(4, m),
+                                          rep(2, m),
+                                          rep(5, m)),
+                        byrow = FALSE)
+
+# Put logvar in the right format:
+logvar <- lapply(logvar, function(q) matrix(q, nrow = m))
+
+# Simulate count data:
+data_count <- sim_mHMM(n_t = n_t,
+                       n = n_subj,
+                       data_distr = "count",
+                       gen = list(m = m, n_dep = n_dep),
+                       gamma = gamma,
+                       emiss_distr = emiss_distr_log,
+                       xx_vec = xx_vec,
+                       beta = beta,
+                       var_gamma = 0.1,
+                       var_emiss = logvar,
+                       return_ind_par = TRUE,
+                       log_scale = TRUE)
+
+head(data_count$states)
+head(data_count$obs)
 }
 \seealso{
 \code{\link{mHMM}} for analyzing multilevel hidden Markov data.

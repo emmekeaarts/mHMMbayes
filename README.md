@@ -11,16 +11,16 @@ multilevel framework, we allow for heterogeneity in the model parameters
 (transition probability matrix and conditional distribution), while
 estimating one overall HMM. The model has a great potential of
 application in many fields, such as the social sciences and medicine.
-The model can be fitted on multivariate data with categorical and/or
-continuous (i.e., normally distributed) observations, and include
-individual level covariates (allowing for e.g., group comparisons on
-model parameters). Parameters are estimated using Bayesian estimation
-utilizing the forward-backward recursion within a hybrid Metropolis
-within Gibbs sampler. Missing data (NA) in the dependent variables is
-accommodated assuming MAR. The package also includes various options for
-model visualization, a function to simulate data and a function to
-obtain the most likely hidden state sequence for each individual using
-the Viterbi algorithm.
+The model can be fitted on multivariate data with categorical,
+continuous (i.e., normally distributed), or count (i.e., Poisson
+distributed) observations, and include individual level covariates
+(allowing for e.g., group comparisons on model parameters). Parameters
+are estimated using Bayesian estimation utilizing the forward-backward
+recursion within a hybrid Metropolis within Gibbs sampler. Missing data
+(NA) in the dependent variables is accommodated assuming MAR. The
+package also includes various options for model visualization, a
+function to simulate data and a function to obtain the most likely
+hidden state sequence for each individual using the Viterbi algorithm.
 
 Please do not hesitate to contact me if you have any questions regarding
 the package.
@@ -85,7 +85,8 @@ out_2st
 #> 
 #> 11 iterations used in the MCMC algorithm with a burn in of 5 
 #> Average Log likelihood over all subjects: -1639.917 
-#> Average AIC over all subjects: 3307.834 
+#> Average AIC over all subjects:  3307.834 
+#> Average AICc over all subjects: 3308.309 
 #> 
 #> Number of states used: 2 
 #> 
@@ -168,7 +169,7 @@ emiss_distr <- list(matrix(c( 50, 10,
 
 set.seed(2327)
 data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous', gen = list(m = m, n_dep = n_dep),
-                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
+                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(5^2, 0.2^2))
 
 # Specify hyper-prior for the continuous emission distribution
 manual_prior_emiss <- prior_emiss_cont(
@@ -176,10 +177,10 @@ manual_prior_emiss <- prior_emiss_cont(
                         emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
                                          matrix(c(7, 8, 18), nrow = 1)),
                         emiss_K0 = list(1, 1),
-                        emiss_V =  list(rep(100, m), rep(25, m)),
+                        emiss_V =  list(rep(5^2, m), rep(0.5^2, m)),
                         emiss_nu = list(1, 1),
-                        emiss_a0 = list(rep(1, m), rep(1, m)),
-                        emiss_b0 = list(rep(1, m), rep(1, m)))
+                        emiss_a0 = list(rep(1.5, m), rep(1, m)),
+                        emiss_b0 = list(rep(20, m), rep(4, m)))
 
 # Run the model on the simulated data:
 set.seed(9834)
@@ -197,8 +198,9 @@ out_3st_cont_sim
 #> Number of subjects: 10 
 #> 
 #> 1000 iterations used in the MCMC algorithm with a burn in of 200 
-#> Average Log likelihood over all subjects: -707.9179 
-#> Average AIC over all subjects: 1451.836 
+#> Average Log likelihood over all subjects: -701.7614 
+#> Average AIC over all subjects:  1439.523 
+#> Average AICc over all subjects: 1447.967 
 #> 
 #> Number of states used: 3 
 #> 
@@ -210,9 +212,9 @@ summary(out_3st_cont_sim)
 #>  (at the group level): 
 #>  
 #>              To state 1 To state 2 To state 3
-#> From state 1      0.795      0.076      0.128
-#> From state 2      0.218      0.645      0.137
-#> From state 3      0.179      0.252      0.570
+#> From state 1      0.789      0.081      0.130
+#> From state 2      0.222      0.636      0.143
+#> From state 3      0.181      0.246      0.574
 #> 
 #>  
 #> Emission distribution ( continuous ) for each of the dependent variables 
@@ -220,146 +222,146 @@ summary(out_3st_cont_sim)
 #>  
 #> $`observation 1`
 #>            Mean     SD
-#> State 1  48.543 11.778
-#> State 2  95.767 11.797
-#> State 3 153.027 10.156
+#> State 1  50.375 11.914
+#> State 2  95.105 11.900
+#> State 3 154.916 10.212
 #> 
 #> $`observation 2`
 #>           Mean    SD
-#> State 1  5.227 2.226
-#> State 2  9.218 4.954
-#> State 3 19.812 3.389
+#> State 1  5.213 2.065
+#> State 2  8.968 4.667
+#> State 3 19.779 3.162
 
 # obtaining the transition probability matrix gamma and the emission distribution 
 # at the group and subject level 
 obtain_gamma(out_3st_cont_sim, level = 'group')
 #>              To state 1 To state 2 To state 3
-#> From state 1      0.795      0.076      0.128
-#> From state 2      0.218      0.645      0.137
-#> From state 3      0.179      0.252      0.570
+#> From state 1      0.789      0.081      0.130
+#> From state 2      0.222      0.636      0.143
+#> From state 3      0.181      0.246      0.574
 obtain_emiss(out_3st_cont_sim, level = 'subject')
 #> $`observation 1`
 #> $`observation 1`$`Subject 1`
 #>            Mean     SD
-#> State 1  49.972 11.778
-#> State 2  97.475 11.797
-#> State 3 153.374 10.156
+#> State 1  49.252 11.914
+#> State 2  98.191 11.900
+#> State 3 159.001 10.212
 #> 
 #> $`observation 1`$`Subject 2`
 #>            Mean     SD
-#> State 1  51.126 11.778
-#> State 2 103.527 11.797
-#> State 3 150.888 10.156
+#> State 1  52.368 11.914
+#> State 2 109.374 11.900
+#> State 3 150.214 10.212
 #> 
 #> $`observation 1`$`Subject 3`
 #>            Mean     SD
-#> State 1  51.562 11.778
-#> State 2  95.136 11.797
-#> State 3 150.623 10.156
+#> State 1  54.818 11.914
+#> State 2  95.409 11.900
+#> State 3 154.159 10.212
 #> 
 #> $`observation 1`$`Subject 4`
 #>            Mean     SD
-#> State 1  50.944 11.778
-#> State 2  96.317 11.797
-#> State 3 151.328 10.156
+#> State 1  52.898 11.914
+#> State 2  91.227 11.900
+#> State 3 153.357 10.212
 #> 
 #> $`observation 1`$`Subject 5`
 #>            Mean     SD
-#> State 1  48.705 11.778
-#> State 2  99.862 11.797
-#> State 3 151.165 10.156
+#> State 1  53.216 11.914
+#> State 2 101.155 11.900
+#> State 3 154.301 10.212
 #> 
 #> $`observation 1`$`Subject 6`
 #>            Mean     SD
-#> State 1  50.108 11.778
-#> State 2  98.278 11.797
-#> State 3 151.417 10.156
+#> State 1  51.501 11.914
+#> State 2  91.208 11.900
+#> State 3 150.539 10.212
 #> 
 #> $`observation 1`$`Subject 7`
 #>            Mean     SD
-#> State 1  49.707 11.778
-#> State 2  97.602 11.797
-#> State 3 150.817 10.156
+#> State 1  53.160 11.914
+#> State 2  97.857 11.900
+#> State 3 154.078 10.212
 #> 
 #> $`observation 1`$`Subject 8`
 #>            Mean     SD
-#> State 1  49.233 11.778
-#> State 2  97.115 11.797
-#> State 3 146.999 10.156
+#> State 1  50.592 11.914
+#> State 2  97.077 11.900
+#> State 3 139.972 10.212
 #> 
 #> $`observation 1`$`Subject 9`
 #>            Mean     SD
-#> State 1  51.440 11.778
-#> State 2 101.777 11.797
-#> State 3 153.486 10.156
+#> State 1  55.668 11.914
+#> State 2  98.197 11.900
+#> State 3 163.877 10.212
 #> 
 #> $`observation 1`$`Subject 10`
 #>            Mean     SD
-#> State 1  51.043 11.778
-#> State 2  97.393 11.797
-#> State 3 150.500 10.156
+#> State 1  54.117 11.914
+#> State 2  98.876 11.900
+#> State 3 152.388 10.212
 #> 
 #> 
 #> $`observation 2`
 #> $`observation 2`$`Subject 1`
 #>           Mean    SD
-#> State 1  4.613 2.226
-#> State 2  9.498 4.954
-#> State 3 19.800 3.389
+#> State 1  4.535 2.065
+#> State 2  9.146 4.667
+#> State 3 19.726 3.162
 #> 
 #> $`observation 2`$`Subject 2`
 #>           Mean    SD
-#> State 1  6.095 2.226
-#> State 2  9.386 4.954
-#> State 3 20.436 3.389
+#> State 1  6.257 2.065
+#> State 2  9.061 4.667
+#> State 3 20.123 3.162
 #> 
 #> $`observation 2`$`Subject 3`
 #>           Mean    SD
-#> State 1  5.060 2.226
-#> State 2  9.831 4.954
-#> State 3 20.267 3.389
+#> State 1  5.030 2.065
+#> State 2  9.434 4.667
+#> State 3 20.083 3.162
 #> 
 #> $`observation 2`$`Subject 4`
 #>           Mean    SD
-#> State 1  4.773 2.226
-#> State 2  8.539 4.954
-#> State 3 20.318 3.389
+#> State 1  4.755 2.065
+#> State 2  8.671 4.667
+#> State 3 20.273 3.162
 #> 
 #> $`observation 2`$`Subject 5`
 #>           Mean    SD
-#> State 1  5.197 2.226
-#> State 2 10.123 4.954
-#> State 3 19.810 3.389
+#> State 1  5.349 2.065
+#> State 2  9.162 4.667
+#> State 3 19.829 3.162
 #> 
 #> $`observation 2`$`Subject 6`
 #>           Mean    SD
-#> State 1  4.906 2.226
-#> State 2  9.505 4.954
-#> State 3 20.515 3.389
+#> State 1  4.843 2.065
+#> State 2  9.206 4.667
+#> State 3 20.271 3.162
 #> 
 #> $`observation 2`$`Subject 7`
 #>           Mean    SD
-#> State 1  4.513 2.226
-#> State 2  9.122 4.954
-#> State 3 19.273 3.389
+#> State 1  4.471 2.065
+#> State 2  9.021 4.667
+#> State 3 19.458 3.162
 #> 
 #> $`observation 2`$`Subject 8`
 #>           Mean    SD
-#> State 1  4.313 2.226
-#> State 2  7.920 4.954
-#> State 3 19.664 3.389
+#> State 1  4.325 2.065
+#> State 2  8.164 4.667
+#> State 3 19.893 3.162
 #> 
 #> $`observation 2`$`Subject 9`
 #>           Mean    SD
-#> State 1  5.422 2.226
-#> State 2  9.566 4.954
-#> State 3 19.553 3.389
+#> State 1  5.455 2.065
+#> State 2  9.156 4.667
+#> State 3 19.586 3.162
 #> 
 #> $`observation 2`$`Subject 10`
 #>           Mean    SD
-#> State 1  5.233 2.226
-#> State 2  9.592 4.954
-#> State 3 20.347 3.389
+#> State 1  5.251 2.065
+#> State 2  9.179 4.667
+#> State 3 20.127 3.162
 
 # Inferring the most likely state at each point in time
 inferred_states <- vit_mHMM(out_3st_cont_sim, data_cont$obs)

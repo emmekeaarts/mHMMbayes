@@ -22,15 +22,16 @@ knitr::opts_chunk$set(
   allow for heterogeneity in the model parameters (transition probability matrix
   and conditional distribution), while estimating one overall HMM. The model has
   a great potential of application in  many fields, such as the social sciences
-  and medicine. The model can be fitted on multivariate data with categorical
-  and/or continuous (i.e., normally distributed) observations, and include
-  individual level covariates (allowing for e.g., group comparisons on model
-  parameters). Parameters are estimated using Bayesian estimation utilizing the
-  forward-backward recursion within a hybrid Metropolis within Gibbs sampler. 
-  Missing data (NA) in the dependent variables is accommodated assuming MAR. 
-  The package also includes various options for model visualization, a function
-  to simulate data and a function to obtain the most likely hidden state
-  sequence for each individual using the Viterbi algorithm.
+  and medicine. The model can be fitted on multivariate data with categorical,
+  continuous (i.e., normally distributed), or count (i.e., Poisson distributed)
+  observations, and include individual level covariates (allowing for e.g.,
+  group comparisons on model parameters). Parameters are estimated using
+  Bayesian estimation utilizing the forward-backward recursion within a hybrid
+  Metropolis within Gibbs sampler. Missing data (NA) in the dependent variables
+  is accommodated assuming MAR. The package also includes various options for
+  model visualization, a function to simulate data and a function to obtain the
+  most likely hidden state sequence for each individual using the Viterbi
+  algorithm.
   
   Please do not hesitate to contact me if you have any questions regarding the 
   package. 
@@ -125,7 +126,7 @@ emiss_distr <- list(matrix(c( 50, 10,
 
 set.seed(2327)
 data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous', gen = list(m = m, n_dep = n_dep),
-                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
+                  gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(5^2, 0.2^2))
 
 # Specify hyper-prior for the continuous emission distribution
 manual_prior_emiss <- prior_emiss_cont(
@@ -133,10 +134,10 @@ manual_prior_emiss <- prior_emiss_cont(
                         emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
                                          matrix(c(7, 8, 18), nrow = 1)),
                         emiss_K0 = list(1, 1),
-                        emiss_V =  list(rep(100, m), rep(25, m)),
+                        emiss_V =  list(rep(5^2, m), rep(0.5^2, m)),
                         emiss_nu = list(1, 1),
-                        emiss_a0 = list(rep(1, m), rep(1, m)),
-                        emiss_b0 = list(rep(1, m), rep(1, m)))
+                        emiss_a0 = list(rep(1.5, m), rep(1, m)),
+                        emiss_b0 = list(rep(20, m), rep(4, m)))
 
 # Run the model on the simulated data:
 set.seed(9834)

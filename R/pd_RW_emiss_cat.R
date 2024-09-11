@@ -2,7 +2,7 @@
 #'
 #' \code{pd_RW_emiss_cat} provides a framework to manually specify the
 #' settings of the proposal distribution of the random walk (RW) Metropolis
-#' sampler of the emission distribution(s) of the multilevel hidden Markov
+#' sampler of categorical emission distribution(s) of the multilevel hidden Markov
 #' model, and creates on object of the class \code{mHMM_pdRW_emiss}. The RW
 #' metropolis sampler is used for sampling the subject level parameter estimates
 #' relating to the emission distributions of the dependent variables \code{k},
@@ -76,7 +76,7 @@
 #' n_dep <- 4
 #' q_emiss <- c(3, 2, 3, 2)
 #'
-#' # specifying manual values for RW metropolis sampler on emission distribtutions
+#' # specifying manual values for RW metropolis sampler on emission distributions
 #' emiss_int_mle0 <- list(matrix(c( 2,  0,
 #'                                 -2, -2,
 #'                                  0, -1), byrow = TRUE, nrow = m, ncol = q_emiss[1] - 1),

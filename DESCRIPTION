@@ -1,7 +1,7 @@
 Package: mHMMbayes
 Type: Package
 Title: Multilevel Hidden Markov Models Using Bayesian Estimation
-Version: 1.0.0
+Version: 1.1.0
 Depends: R (>= 3.6.0)
 Imports:
     MCMCpack,
@@ -11,7 +11,7 @@ Imports:
     Rcpp
 Authors@R: c(person("Emmeke", "Aarts", email = "e.aarts@uu.nl",
                   role = c("aut", "cre")),
-             person("Sebastian", "Mildiner Moraga", role = "ctb"))      
+             person("Sebastian", "Mildiner Moraga", role = "aut"))      
 Maintainer: Emmeke Aarts <e.aarts@uu.nl>
 Description: An implementation of the multilevel (also known as mixed or random 
     effects) hidden Markov model using Bayesian estimation in R. The multilevel 
@@ -22,7 +22,7 @@ Description: An implementation of the multilevel (also known as mixed or random
     <doi:10.1080/00273171.2017.1370364>. Using a multilevel framework, we allow 
     for heterogeneity in the model parameters (transition probability matrix and 
     conditional distribution), while estimating one overall HMM. The model can 
-    be fitted on multivariate data with either a categorical or Normal 
+    be fitted on multivariate data with either a categorical, normal, or Poisson 
     distribution, and include individual level covariates (allowing for e.g., 
     group comparisons on model parameters). Parameters are estimated using 
     Bayesian estimation utilizing the forward-backward recursion within a hybrid 
@@ -30,7 +30,7 @@ Description: An implementation of the multilevel (also known as mixed or random
     variables is accommodated assuming MAR. The package also includes various 
     visualization options, a function to simulate data, and a function to obtain 
     the most likely hidden state sequence for each individual using the Viterbi 
-    algorithm.
+    algorithm. 
 URL: https://CRAN.R-project.org/package=mHMMbayes
 BugReports: https://github.com/emmekeaarts/mHMMbayes/issues
 License: GPL-3

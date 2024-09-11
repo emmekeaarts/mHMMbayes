@@ -87,6 +87,8 @@ xx_wrong5[[1]] <- cbind(rep(1,n), c(rep(2,n/2), rep(1, n/2)))
 xx_wrong6 <- rep(list(NULL),  (n_dep + 1))
 xx_wrong6[[1]] <- data.frame(rep(1,n), as.factor(c(rep(2,n/2), rep(1, n/2))))
 
+
+
 ####################
 ## TESTING
 ###############
@@ -146,7 +148,7 @@ test_that("print mHMM", {
   expect_output(print(out_2st_simb), paste("Number of subjects:", n))
   expect_output(print(out_2st_simb), paste(J, "iterations"))
   expect_output(print(out_2st_simb), paste("likelihood over all subjects:", -170))
-  expect_output(print(out_2st_simb), paste("AIC over all subjects:", 377))
+  expect_output(print(out_2st_simb), paste("AIC over all subjects: ", 377))
   expect_output(print(out_2st_simb), paste("states used:", m))
   expect_output(print(out_2st_simb), paste("dependent variables used:", n_dep))
 })
@@ -292,10 +294,5 @@ test_that("output input", {
   expect_equal(out_2st_simb$input[[8]], rep(n_t, n))
   expect_equal(out_2st_simb$input[[9]], c("output_1", "output_2"))
 })
-
-
-
-
-
 
 

@@ -138,7 +138,7 @@ manual_prior_gamma_wrongm$m <- 2
 ## TESTING
 ###############
 
-test_that("errors prior_emiss input", {
+test_that("errors prior_emiss_cat input", {
   expect_error(prior_emiss_cat(gen = list(m = m_wrong, n_dep = n_dep, q_emiss = q_emiss),
                                emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0,
                                emiss_nu = emiss_nu, emiss_V = emiss_V),
@@ -206,7 +206,7 @@ test_that("using prior_emiss object in mHMM", {
                                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                    start_val = c(list(gamma), emiss_distr),
                                    emiss_hyp_prior = manual_prior_emiss,
-                                   mcmc = list(J = 11, burn_in = 5))))
+                                   mcmc = list(J = 11, burn_in = 5), show_progress = FALSE)))
   expect_error(mHMM(s_data = data_sim$obs,
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),
@@ -295,7 +295,7 @@ test_that("using prior_gamma object in mHMM", {
                                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                                    start_val = c(list(gamma), emiss_distr),
                                    gamma_hyp_prior = manual_prior_gamma,
-                                   mcmc = list(J = 11, burn_in = 5))))
+                                   mcmc = list(J = 11, burn_in = 5), show_progress = FALSE)))
   expect_error(mHMM(s_data = data_sim$obs,
                     gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
                     start_val = c(list(gamma), emiss_distr),

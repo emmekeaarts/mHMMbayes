@@ -84,8 +84,10 @@
 #'                              10, 5,
 #'                              20, 3), nrow = m, byrow = TRUE))
 #'
-#' data_cont <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep), data_distr = 'continuous',
-#'                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
+#' data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous',
+#'                       gen = list(m = m, n_dep = n_dep), gamma = gamma,
+#'                       emiss_distr = emiss_distr, var_gamma = .1,
+#'                       var_emiss = c(5^2, 0.2^2))
 #'
 #' # Specify hyper-prior for the continuous emission distribution
 #' manual_prior_emiss <- prior_emiss_cont(
@@ -93,10 +95,10 @@
 #'                         emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
 #'                                          matrix(c(7, 8, 18), nrow = 1)),
 #'                         emiss_K0 = list(1, 1),
-#'                         emiss_V =  list(rep(100, m), rep(25, m)),
+#'                         emiss_V =  list(rep(5^2, m), rep(0.5^2, m)),
 #'                         emiss_nu = list(1, 1),
-#'                         emiss_a0 = list(rep(1, m), rep(1, m)),
-#'                         emiss_b0 = list(rep(1, m), rep(1, m)))
+#'                         emiss_a0 = list(rep(1.5, m), rep(1, m)),
+#'                         emiss_b0 = list(rep(20, m), rep(4, m)))
 #'
 #' # Run the model on the simulated data:
 #' # Note that for reasons of running time, J is set at a ridiculous low value.
@@ -144,9 +146,8 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
     stop("s_data used should be from the same subjects used for creating the object in mHMM.
          The number of subjects in the datasets are not the same.")
   }
-  n_vary     <- table(s_data[,1])
-  max_n      <- max(n_vary)
-  state_seq  <- matrix(,ncol = n_subj, nrow = max_n)
+  n_vary     <- input$n_vary
+  state_seq  <- lapply(n_vary, dif_matrix, cols = 2, data = NA_real_)
   probs      <- vector(mode = "list", length = n_subj)
   n_dep      <- input$n_dep
   m          <- input$m
@@ -170,7 +171,7 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
       }
     }
   } else if(data_distr == "continuous"){
-    est_emiss  <- rep(list(rep(list(matrix(,nrow = m, ncol = 2)),n_dep)), n_subj)
+    est_emiss  <- rep(list(rep(list(matrix(NA_real_,nrow = m, ncol = 2)),n_dep)), n_subj)
     for(s in 1:n_subj){
       for(q in 1:n_dep){
         est_emiss[[s]][[q]][] <- matrix(round(c(apply(object$PD_subj[[s]]$cont_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median),
@@ -178,32 +179,42 @@ vit_mHMM <- function(object, s_data, burn_in = NULL, return_state_prob = FALSE){
                                         ncol = 2, nrow = m)
       }
     }
+  } else if(data_distr == "count"){
+    est_emiss  <- rep(list(rep(list(matrix(NA_real_,nrow = m, ncol = 1)),n_dep)), n_subj)
+    for(s in 1:n_subj){
+      for(q in 1:n_dep){
+        est_emiss[[s]][[q]][] <- matrix(round(apply(object$PD_subj[[s]]$count_emiss[((burn_in + 1): J),((q-1) * m + 1):(q * m)], 2, median),3),
+                                        ncol = 1, nrow = m)
+      }
+    }
   }
 
   est_gamma <- obtain_gamma(object, level = "subject")
   for(s in 1:n_subj){
-    emiss <- est_emiss[[s]]
-    gamma    <- est_gamma[[s]]
+    emiss   <- est_emiss[[s]]
+    gamma   <- est_gamma[[s]]
     if(data_distr == "categorical"){
       probs[[s]]    <- cat_mult_fw_r_to_cpp(x = as.matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep),
                                        m = m, emiss = emiss, gamma = gamma, n_dep = n_dep, delta=NULL)[[1]]
     } else if(data_distr == "continuous"){
       probs[[s]]    <- cont_mult_fw_r_to_cpp(x = as.matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep),
                             m = m, emiss = emiss, n_dep = n_dep, gamma = gamma)[[1]]
+    } else if(data_distr == "count"){
+      probs[[s]]    <- count_mult_fw_r_to_cpp(x = as.matrix(s_data[s_data[,1] == id[s],][,-1], ncol = n_dep),
+                                             m = m, emiss = emiss, n_dep = n_dep, gamma = gamma)[[1]]
     }
-    state_seq[1:n_vary[s], s] <- apply(probs[[s]], 2, which.max)
+    state_seq[[s]][,1] <- id[s]
+    state_seq[[s]][,2] <- apply(probs[[s]], 2, which.max)
   }
-  state_seq <- as.data.frame(state_seq)
-  colnames(state_seq) <- id
-  state_seq_stacked <- utils::stack(state_seq)[,c(2,1)]
-  colnames(state_seq_stacked) <- c("subj", "state")
+  state_seq_m <- do.call(rbind, state_seq)
+  colnames(state_seq_m) <- c("subj", "state")
   if(return_state_prob == TRUE){
     probs <- sapply(probs, t, simplify = FALSE)
     probs <- do.call(rbind, probs)
     colnames(probs) <- paste0("pr_state_", 1:m)
-    state_seq_stacked <- cbind(state_seq_stacked, probs)
+    state_seq_m <- cbind(state_seq_m, probs)
   }
-  return(state_seq = state_seq_stacked)
+  return(state_seq = as.data.frame(state_seq_m))
 }
 
 
