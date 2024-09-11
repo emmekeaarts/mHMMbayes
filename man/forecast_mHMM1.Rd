@@ -4,14 +4,77 @@
 \alias{forecast_mHMM1}
 \title{Forecasts (forward predictions) using a multilevel hidden Markov model}
 \usage{
-forecast_mHMM1(s_data, object, forecast_steps = 1, burn_in = NULL)
+forecast_mHMM1(
+  s_data,
+  object,
+  forecast_steps = 1,
+  value_range = NULL,
+  burn_in = NULL,
+  return_all = FALSE
+)
 }
 \description{
 Ideas:
-(1) use MAPs similarly as done with the viterbi algorithm:
+(1) use MAPs similarly as done with the Viterbi algorithm:
  +++ fast
- --- no measure of uncertainty on forcasts
+ --- no measure of uncertainty on forecasts
 (2) obtain forecasts over iterations (after burn-in):
  +++ uncertainty on forecasts
  --- slow
+}
+\details{
+To add:
+ - option to request simulating (forecasting) observations or at least
+   predicting the probability of observations for a number of timesteps.
+}
+\examples{
+
+### Example on continuous simulated data
+library(mHMMbayes)
+
+n_t     <- 500
+n       <- 10
+m       <- 3
+n_dep   <- 2
+
+gamma   <- matrix(c(0.99, 0.005, 0.005,
+                    0.08, 0.9, 0.02,
+                    0.05, 0.15, 0.8), ncol = m, byrow = TRUE)
+
+emiss_distr <- list(matrix(c( 50, 10,
+                              100, 10,
+                              150, 10), nrow = m, byrow = TRUE),
+                    matrix(c(5, 2,
+                             10, 5,
+                             20, 3), nrow = m, byrow = TRUE))
+
+data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous', gen = list(m = m, n_dep = n_dep),
+                      gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(.5, 0.01))
+
+# Specify hyper-prior for the continuous emission distribution
+manual_prior_emiss <- prior_emiss_cont(
+  gen = list(m = m, n_dep = n_dep),
+  emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
+                   matrix(c(7, 8, 18), nrow = 1)),
+  emiss_K0 = list(1, 1),
+  emiss_V =  list(rep(100, m), rep(25, m)),
+  emiss_nu = list(1, 1),
+  emiss_a0 = list(rep(1, m), rep(1, m)),
+  emiss_b0 = list(rep(1, m), rep(1, m)))
+
+# Run the model on the simulated data:
+# Note that for reasons of running time, J is set at a ridiculous low value.
+# One would typically use a number of iterations J of at least 1000,
+# and a burn_in of 200.
+out_3st_cont_sim <- mHMM(s_data = data_cont$obs,
+                         data_distr = 'continuous',
+                         gen = list(m = m, n_dep = n_dep),
+                         start_val = c(list(gamma), emiss_distr),
+                         emiss_hyp_prior = manual_prior_emiss,
+                         mcmc = list(J = 500, burn_in = 250))
+
+summary(out_3st_cont_sim)
+
+t(forecast_mHMM1(object = out_3st_cont_sim, s_data = data_cont$obs, forecast_steps = 50)[[3]])
+
 }
