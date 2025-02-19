@@ -65,9 +65,13 @@ count_mult_fw_r_to_cpp <- function(x, m, emiss, n_dep, gamma, delta = NULL){
 }
 
 
-#' @keywords internal
+
 #' Calculates the forward probabilities, used for sampling the state sequence
 #' specific for when data includes a time varying covariate
+#'
+#' @export
+#'
+
 cat_tv_mult_fw_r_to_cpp <- function(x, m, emiss, n_dep, tgamma, delta = NULL, data_distr){
   if(is.null(delta)) {
     delta <- solve(t(diag(m) - matrix(tgamma[1,], byrow = TRUE, ncol = m) + 1), rep(1, m))
@@ -78,9 +82,13 @@ cat_tv_mult_fw_r_to_cpp <- function(x, m, emiss, n_dep, tgamma, delta = NULL, da
   return(out)
 }
 
-#' @keywords internal
+
 #' Calculates the forward probabilities, used for sampling the state sequence
 #' specific for when data includes a time varying covariate
+#'
+#' @export
+#'
+
 cont_tv_mult_fw_r_to_cpp <- function(x, m, emiss, n_dep, tgamma, delta = NULL, data_distr){
   if(is.null(delta)) {
     delta <- solve(t(diag(m) - matrix(tgamma[1,], byrow = TRUE, ncol = m) + 1), rep(1, m))
@@ -91,9 +99,13 @@ cont_tv_mult_fw_r_to_cpp <- function(x, m, emiss, n_dep, tgamma, delta = NULL, d
   return(out)
 }
 
-#' @keywords internal
+
 #' Calculates the forward probabilities, used for sampling the state sequence
 #' specific for when data includes a time varying covariate
+#'
+#' @export
+#'
+
 count_tv_mult_fw_r_to_cpp <- function(x, m, emiss, n_dep, tgamma, delta = NULL, data_distr){
   if(is.null(delta)) {
     delta <- solve(t(diag(m) - matrix(tgamma[1,], byrow = TRUE, ncol = m) + 1), rep(1, m))
