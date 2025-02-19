@@ -1336,9 +1336,15 @@ mHMM_tv <- function(s_data, data_distr = 'categorical', gen, xx = NULL, xx_t = N
           # X                 <- makeX(xx_t = matrix(c(rep(1, length(xx_t_state[[s]][[i]]) + m), c(xx_t_state[[s]][[i]], rep(0,m))), ncol = 2), n_cat = m)
           X                 <- makeX(xx_t = matrix(c(rep(1, length(xx_t_state[[s]][[i]])/n_tv_cov + m),
                                                      rbind(xx_t_state[[s]][[i]], matrix(rep(0,m), nrow = m, ncol = n_tv_cov) ) ), ncol = 1 + n_tv_cov), n_cat = m) # CHECK dimensions
-          gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_bet_frac, Obs = c(trans[[s]][[i]], c(1:m)),
+          gamma_out         <- NULL
+          try(gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_bet_frac, Obs = c(trans[[s]][[i]], c(1:m)),
                                  X = X, n_cat = m, pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt,
-                                 method="BFGS", hessian = FALSE, control = list(fnscale = -1)) # CHECK all
+                                 method="BFGS", hessian = FALSE, control = list(fnscale = -1)))
+          if(is.null(gamma_out)){
+            gamma_out					<- optim(gamma_int_mle_pooled[[i]], llmnl_bet_frac, Obs = c(trans[[s]][[i]], c(1:m)),
+                                   X = X, n_cat = m, pooled_likel = gamma_pooled_ll[[i]], w = gamma_w, wgt = wgt,
+                                   method="Nelder-Mead", hessian = FALSE, control = list(fnscale = -1))
+          }
           if(gamma_out$convergence == 0){
             subj_data[[s]]$gamma_converge[i] <- 1
             subj_data[[s]]$gamma_int_mle[i,] <- gamma_out$par
