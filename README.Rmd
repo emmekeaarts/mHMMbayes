@@ -41,69 +41,128 @@ knitr::opts_chunk$set(
 
 ## Installation
 
-You can install mHMMbayes that incorporates the possibility of fitting a 1-state model from github with:
+You can install the stable mHMMbayes package version directly from CRAN. Alternatively, you can install the GitHub version that includes the most recent package developments with:
 
 ```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
-devtools::install_github("emmekeaarts/mHMMbayes@one-state")
+devtools::install_github("emmekeaarts/mHMMbayes")
 ```
 
 ## Usage
-This is a basic example which shows you how to run the model using simulated
-continuous data with one state. For a general, more
-elaborate introduction, see the vignette “tutorial-mhmm” accompanying
-the package.
+This is a basic example which shows you how to run the model using categorical example data 
+included with the package. Below we include an example on continuous data and how to simulate data. For a more elaborate
+introduction, see the vignette "tutorial-mhmm" accompanying the package.
 
+```{r example1}
+library(mHMMbayes)
 
-```{r example3}
+##### Simple 2 state model
+# specifying general model properties
+m <- 2
+n_dep <- 4
+q_emiss <- c(3, 2, 3, 2)
+
+# specifying starting values
+start_TM <- diag(.8, m)
+start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
+start_EM <- list(matrix(c(0.05, 0.90, 0.05,
+                          0.90, 0.05, 0.05), byrow = TRUE,
+                         nrow = m, ncol = q_emiss[1]), # vocalizing patient
+                  matrix(c(0.1, 0.9,
+                           0.1, 0.9), byrow = TRUE, nrow = m,
+                         ncol = q_emiss[2]), # looking patient
+                  matrix(c(0.90, 0.05, 0.05,
+                           0.05, 0.90, 0.05), byrow = TRUE,
+                         nrow = m, ncol = q_emiss[3]), # vocalizing therapist
+                  matrix(c(0.1, 0.9,
+                           0.1, 0.9), byrow = TRUE, nrow = m,
+                         ncol = q_emiss[4])) # looking therapist
+
+ # Run a model without covariates. 
+ # Note that normally, a much higher number of iterations J would be used
+ set.seed(23245)
+ out_2st <- mHMM(s_data = nonverbal, 
+              gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
+              start_val = c(list(start_TM), start_EM),
+              mcmc = list(J = 11, burn_in = 5))
+ 
+out_2st
+summary(out_2st)
+
+# Run a model including a covariate 
+# Here, the covariate (standardized CDI change) predicts the emission 
+# distribution for each of the 4 dependent variables:
+n_subj <- 10
+xx <- rep(list(matrix(1, ncol = 1, nrow = n_subj)), (n_dep + 1))
+for(i in 2:(n_dep + 1)){
+ xx[[i]] <- cbind(xx[[i]], nonverbal_cov$std_CDI_change)
+}
+out_2st_c <- mHMM(s_data = nonverbal, xx = xx, 
+                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), 
+                 start_val = c(list(start_TM), start_EM),
+                 mcmc = list(J = 11, burn_in = 5))
+
+```
+
+This is a basic example which shows you how to run the model on data that includes continuous (i.e., normally distributed) observations, and how to simulate (this type of) data. 
+
+```{r example2}
 library(mHMMbayes)
 
 ###### Example on simulated data
 # simulating multivariate continuous data
 n_t     <- 100
 n       <- 10
-m       <- 1
+m       <- 3
 n_dep   <- 2
 
-gamma   <- matrix(c(1), ncol = m, byrow = TRUE)
+gamma   <- matrix(c(0.8, 0.1, 0.1,
+                    0.2, 0.7, 0.1,
+                    0.2, 0.2, 0.6), ncol = m, byrow = TRUE)
 
-emiss_distr <- list(matrix(c( 50, 10), nrow = m, byrow = TRUE),
-                    matrix(c(5, 2), nrow = m, byrow = TRUE))
+emiss_distr <- list(matrix(c( 50, 10,
+                              100, 10,
+                              150, 10), nrow = m, byrow = TRUE),
+                    matrix(c(5, 2,
+                             10, 5,
+                             20, 3), nrow = m, byrow = TRUE))
 
 set.seed(2327)
 data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous', gen = list(m = m, n_dep = n_dep),
                   gamma = gamma, emiss_distr = emiss_distr, var_gamma = .1, var_emiss = c(5^2, 0.2^2))
 
 # Specify hyper-prior for the continuous emission distribution
-manual_prior_emiss <- prior_emiss_cont(gen = list(m = m, n_dep = n_dep),
-                                       emiss_mu0 = list(matrix(c(30), nrow = 1),
-                                                        matrix(c(7), nrow = 1)),
-                                       emiss_K0 = list(1, 1),
-                                       emiss_V =  list(rep(5^2, m), rep(0.5^2, m)),
-                                       emiss_nu = list(1, 1),
-                                       emiss_a0 = list(rep(1.5, m), rep(1, m)),
-                                       emiss_b0 = list(rep(20, m), rep(4, m)))
+manual_prior_emiss <- prior_emiss_cont(
+                        gen = list(m = m, n_dep = n_dep),
+                        emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
+                                         matrix(c(7, 8, 18), nrow = 1)),
+                        emiss_K0 = list(1, 1),
+                        emiss_V =  list(rep(5^2, m), rep(0.5^2, m)),
+                        emiss_nu = list(1, 1),
+                        emiss_a0 = list(rep(1.5, m), rep(1, m)),
+                        emiss_b0 = list(rep(20, m), rep(4, m)))
 
 # Run the model on the simulated data:
 set.seed(9834)
-out_1st_cont_sim <- mHMM(s_data = data_cont$obs,
+out_3st_cont_sim <- mHMM(s_data = data_cont$obs,
                          data_distr = 'continuous',
                          gen = list(m = m, n_dep = n_dep),
                          start_val = c(list(gamma), emiss_distr),
                          emiss_hyp_prior = manual_prior_emiss,
                           mcmc = list(J = 1000, burn_in = 200))
 
-out_1st_cont_sim
-summary(out_1st_cont_sim)
+out_3st_cont_sim
+summary(out_3st_cont_sim)
 
-# obtaining the emission distribution 
+# obtaining the transition probability matrix gamma and the emission distribution 
 # at the group and subject level 
-obtain_emiss(out_1st_cont_sim, level = 'group')
-obtain_emiss(out_1st_cont_sim, level = 'subject')
+obtain_gamma(out_3st_cont_sim, level = 'group')
+obtain_emiss(out_3st_cont_sim, level = 'group')
 
-# note that as the transition probability matrix always equals 1, 
-# as such running the function obtain_gamma() function on output of a 1-state model will not run (and will throw an explanation)
+obtain_gamma(out_3st_cont_sim, level = 'subject')
+obtain_emiss(out_3st_cont_sim, level = 'subject')
 
-# note that as all states over time equal 1, inferring the most likely state at each point in time is obsolete. 
-# as such, running the vit_mHMM() function on output of a 1-state model will not run (and will throw an explanation)
+# Inferring the most likely state at each point in time
+inferred_states <- vit_mHMM(out_3st_cont_sim, data_cont$obs)
+head(inferred_states)
 ```
