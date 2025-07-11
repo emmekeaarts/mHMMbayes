@@ -16,8 +16,6 @@ knitr::opts_chunk$set(
   [![R-CMD-check](https://github.com/emmekeaarts/mHMMbayes/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/emmekeaarts/mHMMbayes/actions/workflows/R-CMD-check.yaml)
   <!-- badges: end -->
 
-*Note: this branch is dedicated to development of __fitting a 1 state model__ within the `mHMM()` function. This development is near complete. When the development is complete (e.g., documentation is complete, functions thoroughly tested), the developments will be incorporated in the master branch, and eventually in the stable R CRAN version of the mHMM package.*
-
 # mHMMbayes
 
   With the \code{R} package mHMMbayes you can fit multilevel hidden Markov

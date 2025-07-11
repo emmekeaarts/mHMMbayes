@@ -1,12 +1,10 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-*Note: this branch is dedicated to development of **fitting a 1 state
-model** within the `mHMM()` function. This development is near complete.
-When the development is complete (e.g., documentation is complete,
-functions thoroughly tested), the developments will be incorporated in
-the master branch, and eventually in the stable R CRAN version of the
-mHMM package.*
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/emmekeaarts/mHMMbayes/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/emmekeaarts/mHMMbayes/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
 
 # mHMMbayes
 
