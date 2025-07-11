@@ -8,7 +8,7 @@ output:
     mathjax: default
 bibliography: bibliography.bib
 vignette: >
-  %\VignetteIndexEntry{Multilevel HMM tutorial}
+  %\VignetteIndexEntry{Estimation of the multilevel hidden Markov model}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   % \VignetteDepends{RColorBrewer}
