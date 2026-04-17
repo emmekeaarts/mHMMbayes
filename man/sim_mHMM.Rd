@@ -45,11 +45,7 @@ properties:
 \item{\code{m}: numeric vector with length 1 denoting the number
 of hidden states}
 \item{\code{n_dep}: numeric vector with length 1 denoting the
-number of dependent variables}
-\item{\code{q_emiss}: only to be specified if the data represents
-categorical data. Numeric vector with length \code{n_dep} denoting the
-number of observed categories for the categorical emission distribution
-for each of the dependent variables.}}}
+number of dependent variables}}}
 
 \item{gamma}{A matrix with \code{m} rows and \code{m} columns containing the
 average population transition probability matrix used for simulating the
@@ -468,5 +464,5 @@ head(data_count$states)
 head(data_count$obs)
 }
 \seealso{
-\code{\link{mHMM}} for analyzing multilevel hidden Markov data.
+\code{\link{mHMM_f}} for analyzing multilevel hidden Markov data.
 }

@@ -27,8 +27,8 @@ is.whole <- function(x) {
 }
 
 #' @keywords internal
-is.mHMM <- function(x) {
-  inherits(x, "mHMM")
+is.mHMM_f <- function(x) {
+  inherits(x, "mHMM_f")
 }
 
 #' @keywords internal
@@ -46,30 +46,18 @@ is.mHMM_prior_emiss <- function(x) {
   inherits(x, "mHMM_prior_emiss")
 }
 
-#' @keywords internal
-is.cat <- function(x) {
-  inherits(x, "cat")
-}
 
 #' @keywords internal
-is.cont <- function(x) {
-  inherits(x, "cont")
+is.cont_f <- function(x) {
+  inherits(x, "cont_f")
 }
 
-#' @keywords internal
-is.count <- function(x) {
-  inherits(x, "count")
-}
 
 #' @keywords internal
 is.mHMM_pdRW_gamma <- function(x) {
   inherits(x, "mHMM_pdRW_gamma")
 }
 
-#' @keywords internal
-is.mHMM_pdRW_emiss <- function(x) {
-  inherits(x, "mHMM_pdRW_emiss")
-}
 
 #' @keywords internal
 hms <- function(t){
@@ -88,8 +76,4 @@ depth <- function(x,xdepth=0){
   }
 }
 
-#' @keywords internal
-# Calculates the between subject variance from logmu and logvar:
-logvar_to_var <- function(logmu, logvar){
-  abs(exp(logvar)-1)*exp(2*logmu+logvar)
-}
+

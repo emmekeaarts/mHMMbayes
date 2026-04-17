@@ -6,7 +6,7 @@
 
  #' @export
  #'
- print.mHMM_emiss <- function(x, ...){
+ print.mHMM_emiss_f <- function(x, ...){
    print(x[])
  }
 

@@ -58,7 +58,7 @@
 #' the inputs \code{emiss_distr}, \code{beta}, and \code{var_emiss}, and also
 #' set \code{log_scale = TRUE}.
 #'
-#' @inheritParams mHMM
+#' @inheritParams mHMM_f
 #' @param n_t Numeric vector with length 1 denoting the length of the observed
 #'   sequence to be simulated for each subject. To only simulate subject
 #'   specific transition probability matrices gamma and emission distributions
@@ -241,7 +241,7 @@
 #' }
 #'
 #'
-#' @seealso \code{\link{mHMM}} for analyzing multilevel hidden Markov data.
+#' @seealso \code{\link{mHMM_f}} for analyzing multilevel hidden Markov data.
 #'
 #'
 #' @examples

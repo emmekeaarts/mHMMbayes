@@ -1,6 +1,6 @@
 #' @export
 #'
-print.mHMM <- function(x, ...){
+print.mHMM_f <- function(x, ...){
   if(sum(objects(x$PD_subj[[1]]) %in% "log_likl") != 1){
     stop("The input object is created using an earlier version of the mHMMbayes package. Please re-run the function mHMM with the current package version, or post-process the object using the earlier version of the package.")
   }
@@ -19,20 +19,10 @@ print.mHMM <- function(x, ...){
   for(s in 1:n_subj){
     LL[s] <- median(x$PD_subj[[s]]$log_likl[((burn_in + 1): J), 1])
   }
-  if(data_distr == 'categorical'){
-    q_emiss <- input$q_emiss
-    n_par <- sum((q_emiss-1)*m)+(m-1)*m
-    AIC   <- 2 * n_par - (2 * LL)
-    AICc  <- ((2 * n_vary * n_par) / (n_vary - n_par - 1)) - (2 * LL)
-  } else if (data_distr == 'continuous'){
-    n_par <- m * n_dep * 2 + (m - 1) * m
-    AIC   <- 2 * n_par - (2 * LL)
-    AICc   <- ((2 * n_vary * n_par) / (n_vary - n_par - 1)) - (2 * LL)
-  } else if (data_distr == 'count'){
-    n_par <- m * n_dep + (m - 1) * m
-    AIC   <- 2 * n_par - (2 * LL)
-    AICc  <- ((2 * n_vary * n_par) / (n_vary - n_par - 1)) - (2 * LL)
-  }
+  n_par <- m * n_dep * 2 + (m - 1) * m
+  AIC   <- 2 * n_par - (2 * LL)
+  AICc   <- ((2 * n_vary * n_par) / (n_vary - n_par - 1)) - (2 * LL)
+
 
   cat("Average Log likelihood over all subjects:", mean(LL), "\n")
   cat("Average AIC over all subjects: ", mean(AIC), "\n")
@@ -42,6 +32,6 @@ print.mHMM <- function(x, ...){
   cat("\n")
   cat("Number of dependent variables used:", n_dep, "\n")
   cat("\n")
-  cat("Type of dependent variable(s):", data_distr, "\n")
+  cat("Type of dependent variable(s):", data_distr, "(fixed emission) \n")
   cat("\n")
 }

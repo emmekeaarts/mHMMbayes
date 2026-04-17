@@ -1,9 +1,9 @@
 #' Specifying informative hyper-prior on the continuous emission distribution(s)  of the multilevel hidden Markov model
 #'
-#' \code{prior_emiss_cont} provides a framework to manually specify an
+#' \code{prior_emiss_cont_f} provides a framework to manually specify an
 #' informative hyper-prior on the Normal (i.e., Gaussian) emission
-#' distributions. \code{prior_emiss_cont} creates an object of class
-#' \code{mHMM_prior_emiss} used by the function \code{mHMM}, and additionally
+#' distributions. \code{prior_emiss_cont_f} creates an object of class
+#' \code{mHMM_prior_emiss} used by the function \code{mHMM_f}, and additionally
 #' attaches the class \code{cont} to signal use for continuous observations. The
 #' set of hyper-prior distributions consists of a Normal-Inverse-Gamma
 #' distribution (i.e., assuming both unknown population mean and variance
@@ -26,12 +26,7 @@
 #' remain unchanged, as the estimates of the regression coefficients for the
 #' covariates are fixed over subjects.
 #'
-#' @inheritParams mHMM
-#' @param n_xx_emiss Optional numeric vector with length \code{n_dep} denoting
-#'   the number of (level 2) covariates used to predict the emission
-#'   distribution of each of the dependent variables \code{k}. When omitted, the
-#'   model assumes no covariates are used to predict the emission
-#'   distribution(s).
+#' @inheritParams mHMM_f
 #' @param emiss_mu0 A list containing \code{n_dep} matrices, i.e., one list for
 #'   each dependent variable \code{k}. Each matrix contains the hypothesized
 #'   hyper-prior means of the Normal emission distributions in each of the
@@ -51,40 +46,28 @@
 #'   value) and set of regression coefficients (subsequent values) are based.
 #' @param emiss_V A list containing \code{n_dep} elements corresponding to each
 #'   of the dependent variables \code{k}, where each element \code{k} is a
-#'   vector with length \code{m} containing the hypothesized variance between
-#'   the subject (emission distribution) means, which are assumed to follow a
-#'   Inverse Gamma hyper-prior distribution (note: here, the Inverse Gamma
-#'   hyper-prior distribution is parametrized as a scaled inverse chi-squared
-#'   distribution).
+#'   vector with length \code{m} containing the hypothesized (fixed over
+#'   subjects) variance of the Normal emission distributions, which are assumed
+#'   to follow a Inverse Gamma hyper-prior distribution (note: here, the Inverse
+#'   Gamma hyper-prior distribution is parametrized as a scaled inverse
+#'   chi-squared distribution).
 #' @param emiss_nu A list containing \code{n_dep} elements corresponding to each
 #'   dependent variable \code{k}. Each element \code{k} is a numeric vector with
 #'   length 1 denoting the degrees of freedom of the Inverse Gamma hyper-prior
-#'   distribution on the between subject variance of the emission distribution
-#'   means (note: here, the Inverse Gamma hyper-prior distribution is
+#'   distribution on the (fixed over subjects) variance of the Normal emission
+#'   distributions (note: here, the Inverse Gamma hyper-prior distribution is
 #'   parametrized as a scaled inverse chi-squared distribution).
-#' @param emiss_a0 A list containing \code{n_dep} elements corresponding to each
-#'   of the dependent variables \code{k}, where each element \code{k} is a
-#'   vector with length \code{m} containing the shape values of the Inverse
-#'   Gamma hyper-prior on each of the (fixed over subjects) emission standard
-#'   deviation^2 of the Normal emission distributions (note: here the standard
-#'   Inverse Gamma parametrization is used).
-#' @param emiss_b0 A list containing \code{n_dep} elements corresponding to each
-#'   of the dependent variables \code{k}, where each element \code{k} is a
-#'   vector with length \code{m} containing the scale values of the Inverse
-#'   Gamma hyper-prior on each of the (fixed over subjects) emission standard
-#'   deviation^2 of the Normal emission distributions (note: here the standard
-#'   Inverse Gamma parametrization is used).
 #'
-#' @return \code{prior_emiss_cont} returns an object of class \code{mHMM_prior_emiss},
+#' @return \code{prior_emiss_cont_f} returns an object of class \code{mHMM_prior_emiss},
 #'   containing informative hyper-prior values for the continuous emission
 #'   distribution(s) of the multilevel hidden Markov model. The object is
-#'   specifically created and formatted for use by the function \code{mHMM},
+#'   specifically created and formatted for use by the function \code{mHMM_f},
 #'   and thoroughly checked for correct input dimensions.
 #'   The object contains the following components:
 #'   \describe{
 #'   \item{\code{gen}}{A list containing the elements \code{m}, and \code{n_dep},
 #'   used for checking equivalent general model properties
-#'   specified under \code{prior_emiss_cont} and \code{mHMM}.}
+#'   specified under \code{prior_emiss_cont_f} and \code{mHMM_f}.}
 #'   \item{\code{emiss_mu0}}{A lists containing the hypothesized
 #'   hyper-prior means of the Normal distribution on
 #'   the continuous emission probabilities.}
@@ -92,28 +75,16 @@
 #'   number of hypothetical prior subjects on which the set of hyper-prior means
 #'   specified in \code{emiss_mu0} are based.}
 #'   \item{\code{emiss_V}}{A list containing \code{n_dep} elements containing
-#'   the variance of the Inverse Gamma hyper-prior distribution on the between
-#'   subject variance of the emission distribution means.}
+#'   the variance of the Inverse Gamma hyper-prior distribution on the fixed
+#'   over subjects variance of the Normal emission distribution. }
 #'   \item{\code{emiss_nu}}{A list containing \code{n_dep} elements denoting the
 #'   degrees of freedom of the Inverse Gamma hyper-prior distribution on the
-#'   between subject variance of the emission distribution means.}
-#'   \item{\code{emiss_a0}}{A list containing \code{n_dep} elements denoting
-#'   the shape values of the Inverse Gamma hyper-prior on each of the (fixed
-#'   over subjects) emission standard deviation^2 of the Normal emission
-#'   distributions.}
-#'   \item{\code{emiss_b0}}{A list containing \code{n_dep} elements denoting
-#'   the scale values of the Inverse Gamma hyper-prior on each of the (fixed
-#'   over subjects) emission standard deviation^2 of the Normal emission
-#'   distributions.}
-#'   \item{\code{n_xx_emiss}}{A numeric vector denoting the number of (level 2)
-#'   covariates used to predict the emission distribution of each of the
-#'   dependent variables. When no covariates are used, \code{n_xx_emiss} equals
-#'   \code{NULL}.}
+#'   fixed over subjects variance of the Normal emission distribution. }
 #'   }
 #'
 #' @seealso \code{\link{prior_gamma}} for manually specifying an informative
 #'  hyper-prior on the transition probability matrix gamma, and
-#'  \code{\link{mHMM}} for fitting a multilevel hidden Markov model.
+#'  \code{\link{mHMM_f}} for fitting a multilevel hidden Markov model.
 #'
 #' @examples
 #' ###### Example using simulated data
@@ -122,15 +93,13 @@
 #' n_dep <- 2
 #'
 #' # hypothesized hyper-prior values for the continuous emission distribution
-#' manual_prior_emiss <- prior_emiss_cont(
+#' manual_prior_emiss <- prior_emiss_cont_f(
 #'                         gen = list(m = m, n_dep = n_dep),
 #'                         emiss_mu0 = list(matrix(c(30, 70, 170), nrow = 1),
 #'                                          matrix(c(7, 8, 18), nrow = 1)),
 #'                         emiss_K0 = list(1, 1),
-#'                          emiss_V =  list(rep(5^2, m), rep(0.5^2, m)),
-#'                         emiss_nu = list(1, 1),
-#'                         emiss_a0 = list(rep(1.5, m), rep(1, m)),
-#'                         emiss_b0 = list(rep(20, m), rep(4, m)))
+#'                         emiss_V =  list(rep(5^2, m), rep(0.5^2, m)),
+#'                         emiss_nu = list(1, 1))
 #'
 #' # to use the informative priors in a model, simulate multivariate continuous data
 #' n_t     <- 100
@@ -156,7 +125,7 @@
 #' # Note that for reasons of running time, J is set at a ridiculous low value.
 #' # One would typically use a number of iterations J of at least 1000,
 #' # and a burn_in of 200.
-#' out_3st_cont_sim_infemiss <- mHMM(s_data = data_cont$obs,
+#' out_3st_cont_sim_infemiss <- mHMM_f(s_data = data_cont$obs,
 #'                     data_distr = "continuous",
 #'                     gen = list(m = m, n_dep = n_dep),
 #'                     start_val = c(list(gamma), emiss_distr),
@@ -170,20 +139,12 @@
 #'
 
 
-prior_emiss_cont <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, emiss_a0, emiss_b0, n_xx_emiss = NULL){
+prior_emiss_cont_f <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu){
   if(sum(objects(gen) %in% "m") != 1 | sum(objects(gen) %in% "n_dep") != 1){
     stop("The input argument gen should contain the elements m and n_dep")
   }
   m <- gen$m
   n_dep <- gen$n_dep
-  if(is.null(n_xx_emiss)){
-    n_xx_int <- rep(1, n_dep)
-  } else {
-    if(length(n_xx_emiss) != n_dep){
-      stop(paste("n_xx_emiss should be a numeric vector with length n_dep, here", n_dep, "."))
-    }
-    n_xx_int <- n_xx_emiss + 1
-  }
 
   #### checking emiss_mu0 ####
   if(!is.list(emiss_mu0)){
@@ -198,26 +159,17 @@ prior_emiss_cont <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, emiss_
   if(sum(m == sapply(emiss_mu0, dim)[2,]) != n_dep){
     stop(paste("The matrix relating to dependent variable", k, "of the input argument emiss_mu0 should consist of m, here", m, ", columns."))
   }
-  for(k in 1:n_dep){
-    if(n_xx_int[k] == 1 & dim(emiss_mu0[[k]])[1] != 1){
-      stop(paste("According to the input paramter n_xx_emiss no covariates are used to predict the emission distribution of dependent variable", k, ". Hence, within input argument emiss_mu0, the matrix relating to dependent variable", k, ", should contain 1 row."))
-    }
-
-    if(n_xx_int[k] > 1 & dim(emiss_mu0[[k]])[1] != n_xx_int[k]){
-      stop(paste("According to the input paramter n_xx_emiss", n_xx_emiss[k], "covariates are used to predict the emission distribution of dependent variable", k, ". Hence, within input argument emiss_mu0, the matrix relating to dependent variable", k, ", should contain 1 + n_xx_emiss =", 1 + n_xx_emiss[k], "rows."))
-    }
-  }
 
   #### checking emiss_K0 ####
   if(!is.list(emiss_K0) | length(emiss_K0) != n_dep){
     stop(paste("emiss_K0 should be a list containing n_dep, here", n_dep,", elements. "))
   }
-  if(sum(sapply(emiss_K0, is.double)) != n_dep | sum(sapply(emiss_K0, is.matrix)) > 0 | sum(n_xx_int == sapply(emiss_K0, length)) != n_dep){
-    stop(paste("Each of the n_dep elements within the list emiss_K0 should be a numeric vector with lengths", paste(n_xx_int, collapse = ", "), "."))
+  if(sum(sapply(emiss_K0, is.double)) != n_dep | sum(sapply(emiss_K0, is.matrix)) > 0 ){
+    stop(paste("Each of the n_dep elements within the list emiss_K0 should be a numeric vector with lengths", paste(1, collapse = ", "), "."))
   }
   emiss_K0_list     <- rep(list(NULL), n_dep)
   for(k in 1:n_dep){
-    emiss_K0_list[[k]]			<- diag(emiss_K0[[k]], n_xx_int[k])
+    emiss_K0_list[[k]]			<- diag(emiss_K0[[k]], 1)
   }
   emiss_K0 <- emiss_K0_list
 
@@ -238,24 +190,10 @@ prior_emiss_cont <- function(gen, emiss_mu0, emiss_K0, emiss_V, emiss_nu, emiss_
     stop(paste("emiss_V should be a list containing n_dep, here", n_dep,", elements, where each element is vector with lenght m, here", m, "."))
   }
 
-  #### checking emiss_a0 ####
-  if(!is.list(emiss_a0)){
-    stop(paste("emiss_a0 should be a list containing n_dep, here", n_dep,", elements, where each element is vector with lenght m, here", m, "."))
-  }
-  if(length(emiss_a0) != n_dep | sum(m == sapply(emiss_a0, length)) != n_dep){
-    stop(paste("emiss_a0 should be a list containing n_dep, here", n_dep,", elements, where each element is vector with lenght m, here", m, "."))
-  }
 
-  #### checking emiss_b0 ####
-  if(!is.list(emiss_b0)){
-    stop(paste("emiss_b0 should be a list containing n_dep, here", n_dep,", elements, where each element is vector with lenght m, here", m, "."))
-  }
-  if(length(emiss_b0) != n_dep | sum(m == sapply(emiss_b0, length)) != n_dep){
-    stop(paste("emiss_b0 should be a list containing n_dep, here", n_dep,", elements, where each element is vector with lenght m, here", m, "."))
-  }
 
   #### return output ####
-  out <- list(gen = gen, emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0, emiss_nu = emiss_nu, emiss_V = emiss_V, emiss_a0 = emiss_a0, emiss_b0 = emiss_b0, n_xx_emiss = n_xx_emiss)
-  class(out) <- append(class(out), c("mHMM_prior_emiss", "cont"))
+  out <- list(gen = gen, emiss_mu0 = emiss_mu0, emiss_K0 = emiss_K0, emiss_nu = emiss_nu, emiss_V = emiss_V)
+  class(out) <- append(class(out), c("mHMM_prior_emiss", "cont_f"))
   return(out)
 }
