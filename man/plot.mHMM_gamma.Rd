@@ -47,84 +47,9 @@ over all subjects, or at the subject level. In case of the latter, the user
 has to specify for which subject the transition probability matrix should be
 plotted.
 }
-\examples{
-\donttest{
-#' ###### Example on package data, see ?nonverbal
-# specifying general model properties:
-m <- 2
-n_dep <- 4
-q_emiss <- c(3, 2, 3, 2)
-
-# specifying starting values
-start_TM <- diag(.8, m)
-start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .2
-start_EM <- list(matrix(c(0.05, 0.90, 0.05,
-                          0.90, 0.05, 0.05), byrow = TRUE,
-                        nrow = m, ncol = q_emiss[1]), # vocalizing patient
-                 matrix(c(0.1, 0.9,
-                          0.1, 0.9), byrow = TRUE, nrow = m,
-                        ncol = q_emiss[2]), # looking patient
-                 matrix(c(0.90, 0.05, 0.05,
-                          0.05, 0.90, 0.05), byrow = TRUE,
-                        nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-                 matrix(c(0.1, 0.9,
-                          0.1, 0.9), byrow = TRUE, nrow = m,
-                        ncol = q_emiss[4])) # looking therapist
-
-# Run a model without covariate(s):
-out_2st <- mHMM(s_data = nonverbal,
-                gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                start_val = c(list(start_TM), start_EM),
-                mcmc = list(J = 11, burn_in = 5))
-
-out_2st
-summary(out_2st)
-
-# obtaining the transition probabilities at the group and subject level
-est_gamma_group <- obtain_gamma(out_2st, level = "group")
-
-# plot the obtained transition probabilities
-plot(est_gamma_group, col = rep(c("green", "blue"), each = m))
-
-}
-\dontshow{
-###### Example on simulated data
-# Simulate data for 10 subjects with each 100 observations:
-n_t <- 100
-n <- 10
-m <- 2
-n_dep <- 1
-q_emiss <- 3
-gamma <- matrix(c(0.8, 0.2,
-                  0.3, 0.7), ncol = m, byrow = TRUE)
-emiss_distr <- list(matrix(c(0.5, 0.5, 0.0,
-                        0.1, 0.1, 0.8), nrow = m, ncol = q_emiss, byrow = TRUE))
-data1 <- sim_mHMM(n_t = n_t, n = n, gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss), gamma = gamma,
-                  emiss_distr = emiss_distr, var_gamma = .5, var_emiss = .5)
-
-# Specify remaining required analysis input (for the example, we use simulation
-# input as starting values):
-n_dep <- 1
-q_emiss <- 3
-
-# Run the model on the simulated data:
-out_2st_sim <- mHMM(s_data = data1$obs,
-                 gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                 start_val = c(list(gamma), emiss_distr),
-                 mcmc = list(J = 11, burn_in = 5))
-
-# obtaining the transition probabilities at the group and subject level
-est_gamma_group_sim <- obtain_gamma(out_2st_sim, level = "group")
-
-# plot the obtained transition probabilities
-plot(est_gamma_group_sim, col = rep(c("green", "blue"), each = m))
-
-}
-
-}
 \seealso{
-\code{\link{mHMM}} for fitting the multilevel hidden Markov
-  model, creating the object \code{mHMM}, and \code{\link{obtain_gamma}} to
+\code{\link{mHMM_f}} for fitting the multilevel hidden Markov
+  model, creating the object \code{mHMM_f}, and \code{\link{obtain_gamma}} to
   obtain the transition probabilities gamma for a fitted multilevel HMM,
   creating the object \code{mHMM_gamma}.
 }

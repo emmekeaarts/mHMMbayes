@@ -78,7 +78,7 @@ covariates are used to predict gamma.}
 \description{
 \code{prior_gamma} provides a framework to manually specify an informative
 hyper-prior on the transition probability matrix gamma, and creates an object
-of class \code{mHMM_prior_gamma} used by the function \code{mHMM}. Note that the
+of class \code{mHMM_prior_gamma} used by the function \code{mHMM_f}. Note that the
 hyper-prior distribution on the transition probabilities are on the
 intercepts (and, if subject level covariates are used, regression
 coefficients) of the Multinomial logit model used to accommodate the
@@ -118,90 +118,15 @@ and the off-diagonal elements (i.e., the covariance) set to 0. In addition,
 when no manual values for the hyper-prior on gamma are specified at all (that
 is, the function \code{prior_gamma} is not used), all elements of the
 matrices contained in \code{gamma_mu0} are set to 0 in the function
-\code{mHMM}.
+\code{mHMM_f}.
 
 Note that in case covariates are specified, the hyper-prior parameter values
 of the inverse Wishart distribution on the covariance matrix remain
 unchanged, as the estimates of the regression coefficients for the covariates
 are fixed over subjects.
 }
-\examples{
-###### Example using package example data, see ?nonverbal
-# specifying general model properties:
-m <- 3
-# representing a prior belief that switching to state 3 does not occur often and
-# state 3 has a relative short duration
-prior_prob_gamma <- matrix(c(0.70, 0.25, 0.05,
-                             0.25, 0.70, 0.05,
-                             0.30, 0.30, 0.40), nrow = m, ncol = m, byrow = TRUE)
-
-# using the function prob_to_int to obtain intercept values for the above specified
-# transition probability matrix gamma
-prior_int_gamma <- prob_to_int(prior_prob_gamma)
-gamma_mu0 <- list(matrix(prior_int_gamma[1,], nrow = 1, ncol = m-1),
-                  matrix(prior_int_gamma[2,], nrow = 1, ncol = m-1),
-                  matrix(prior_int_gamma[3,], nrow = 1, ncol = m-1))
-
-gamma_K0 <- 1
-gamma_nu <- 5
-gamma_V <- diag(5, m - 1)
-
-manual_prior_gamma <- prior_gamma(m = m, gamma_mu0 = gamma_mu0,
-                                  gamma_K0 = gamma_K0, gamma_nu = gamma_nu,
-                                  gamma_V = gamma_V)
-
-
-# using the informative hyper-prior in a model
-n_dep <- 4
-q_emiss <- c(3, 2, 3, 2)
-
-# specifying starting values
-start_TM <- diag(.7, m)
-start_TM[lower.tri(start_TM) | upper.tri(start_TM)] <- .1
-start_EM <- list(matrix(c(0.05, 0.90, 0.05,
-                          0.90, 0.05, 0.05,
-                          0.55, 0.45, 0.05), byrow = TRUE,
-                        nrow = m, ncol = q_emiss[1]), # vocalizing patient
-                 matrix(c(0.1, 0.9,
-                          0.1, 0.9,
-                          0.1, 0.9), byrow = TRUE, nrow = m,
-                        ncol = q_emiss[2]), # looking patient
-                 matrix(c(0.90, 0.05, 0.05,
-                          0.05, 0.90, 0.05,
-                          0.55, 0.45, 0.05), byrow = TRUE,
-                        nrow = m, ncol = q_emiss[3]), # vocalizing therapist
-                 matrix(c(0.1, 0.9,
-                          0.1, 0.9,
-                          0.1, 0.9), byrow = TRUE, nrow = m,
-                        ncol = q_emiss[4])) # looking therapist
-
-# Note that for reasons of running time, J is set at a ridiculous low value.
-# One would typically use a number of iterations J of at least 1000,
-# and a burn_in of 200.
-\donttest{
-out_3st_infgamma <- mHMM(s_data = nonverbal,
-                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                    start_val = c(list(start_TM), start_EM),
-                    gamma_hyp_prior = manual_prior_gamma,
-                    mcmc = list(J = 11, burn_in = 5))
-
-out_3st_infgamma
-summary(out_3st_infgamma)
-}
-\dontshow{
-out_3st_infgamma <- mHMM(s_data = nonverbal,
-                    gen = list(m = m, n_dep = n_dep, q_emiss = q_emiss),
-                    start_val = c(list(start_TM), start_EM),
-                    gamma_hyp_prior = manual_prior_gamma,
-                    mcmc = list(J = 5, burn_in = 3))
-}
-
-
-}
 \seealso{
-\code{\link{prior_emiss_cat}} for manually specifying an informative
-  hyper-prior on the categorical emission distribution(s),
-  \code{\link{prob_to_int}} for transforming a set of probabilities to a set
-  of Multinomial logit regression intercepts, and \code{\link{mHMM}} for
+\code{\link{prob_to_int}} for transforming a set of probabilities to a set
+  of Multinomial logit regression intercepts, and \code{\link{mHMM_f}} for
   fitting a multilevel hidden Markov model.
 }

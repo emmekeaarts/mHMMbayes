@@ -179,13 +179,12 @@
 #'   }
 #'
 #'
-#' @seealso \code{\link{sim_mHMM}} for simulating multilevel hidden Markov data,
-#'   \code{\link{vit_mHMM}} for obtaining the most likely hidden state sequence
-#'   for each subject using the Viterbi algorithm, \code{\link{obtain_gamma}}
-#'   and \code{\link{obtain_emiss}} for obtaining the transition or emission
-#'   distribution probabilities of a fitted model at the group or subject level,
-#'   and \code{\link{plot.mHMM}} for plotting the posterior densities of a
-#'   fitted model.
+#' @seealso \code{\link{sim_mHMM_f}} for simulating multilevel hidden Markov
+#'   data with fixed (Gaussian) emission distributions, \code{\link{vit_mHMM_f}}
+#'   for obtaining the most likely hidden state sequence for each subject using
+#'   the Viterbi algorithm, \code{\link{obtain_gamma}} and
+#'   \code{\link{obtain_emiss_f}} for obtaining the transition or emission
+#'   distribution probabilities of a fitted model at the group or subject level.
 #'
 #' @references
 #' \insertRef{rabiner1989}{mHMMbayes}
@@ -217,10 +216,10 @@
 #'                              10, 5,
 #'                              20, 3), nrow = m, byrow = TRUE))
 #'
-#' data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous',
+#' data_cont <- sim_mHMM_f(n_t = n_t, n = n, data_distr = 'continuous',
 #'                       gen = list(m = m, n_dep = n_dep),
 #'                       gamma = gamma, emiss_distr = emiss_distr,
-#'                       var_gamma = .1, var_emiss = c(5^2, 0.2^2))
+#'                       var_gamma = .1)
 #'
 #' # Specify hyper-prior for the continuous emission distribution
 #' manual_prior_emiss <- prior_emiss_cont_f(

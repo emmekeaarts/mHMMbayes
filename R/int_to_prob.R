@@ -7,10 +7,9 @@
 #' first state or category.
 #'
 #' Designed to ease the specification of informative hyper-prior values for the
-#' mean intercepts of the transition probability matrix gamma and categorical
-#' emission distribution(s) of the multilevel hidden Markov model through the
-#' functions \code{\link{prior_gamma}} and \code{\link{prior_emiss_cat}}. No
-#' check is performed on correct specifications of the dimensions.
+#' mean intercepts of the transition probability matrix gamma of the multilevel
+#' hidden Markov model through the function \code{\link{prior_gamma}}. No check
+#' is performed on correct specifications of the dimensions.
 #'
 #' @param int_matrix A matrix with (number of states OR categories - 1) columns
 #'   and number of rows to be determined by the user. For obtaining the set of
@@ -27,9 +26,9 @@
 #'
 #' @seealso \code{\link{prob_to_int}} for transforming a set of probabilities to
 #'   a set of Multinomial logit regression intercepts, \code{\link{prior_gamma}}
-#'   and \code{\link{prior_emiss_cat}} for specifying informative hyper-priors
-#'   for the the multilevel hidden Markov model and \code{\link{mHMM}} to fit a
-#'   multilevel hidden Markov model.
+#'   for specifying informative hyper-priors for the the multilevel hidden
+#'   Markov model and \code{\link{mHMM_f}} to fit a multilevel hidden Markov
+#'   model.
 #'
 #' @examples
 #'
@@ -64,10 +63,9 @@ int_to_prob <- function(int_matrix) {
 #' category.
 #'
 #' Designed to ease the specification of informative hyper-prior values for the
-#' mean intercepts of the transition probability matrix gamma and categorical
-#' emission distribution(s) of the multilevel hidden Markov model through the
-#' functions \code{\link{prior_gamma}} and \code{\link{prior_emiss_cat}}. No
-#' check is performed on correct specifications of the dimensions.
+#' mean intercepts of the transition probability matrix gamma of the multilevel
+#' hidden Markov model through the functions \code{\link{prior_gamma}}. No check
+#' is performed on correct specifications of the dimensions.
 #'
 #' @param prob_matrix A matrix with number of states OR categories columns and
 #'   number of rows to be determined by the user, with rows summing to one. For
@@ -85,9 +83,9 @@ int_to_prob <- function(int_matrix) {
 #'
 #' @seealso \code{\link{int_to_prob}} for transforming a set of Multinomial
 #'   logit regression intercepts to a probabilities, \code{\link{prior_gamma}}
-#'   and \code{\link{prior_emiss_cat}} for specifying informative hyper-priors
-#'   for the the multilevel hidden Markov model and \code{\link{mHMM}} to fit a
-#'   multilevel hidden Markov model.
+#'   for specifying informative hyper-priors for the the multilevel hidden
+#'   Markov model and \code{\link{mHMM_f}} to fit a multilevel hidden Markov
+#'   model.
 #'
 #' @examples
 #'

@@ -53,10 +53,9 @@
 #'                              10, 5,
 #'                              20, 3), nrow = m, byrow = TRUE))
 #'
-#' data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous',
+#' data_cont <- sim_mHMM_f(n_t = n_t, n = n, data_distr = 'continuous',
 #'                       gen = list(m = m, n_dep = n_dep), gamma = gamma,
-#'                       emiss_distr = emiss_distr, var_gamma = .1,
-#'                       var_emiss = c(5^2, 0.2^2))
+#'                       emiss_distr = emiss_distr, var_gamma = .1)
 #'
 #' # Specify hyper-prior for the continuous emission distribution
 #' manual_prior_emiss <- prior_emiss_cont_f(
@@ -87,7 +86,7 @@
 #'
 #' @seealso \code{\link{mHMM_f}} for analyzing multilevel hidden Markov data
 #'   and obtaining the input needed for \code{vit_mHMM_f}, and
-#'   \code{\link{sim_mHMM}} for simulating multilevel hidden Markov data.
+#'   \code{\link{sim_mHMM_f}} for simulating multilevel hidden Markov data.
 #'
 #' @references
 #'  \insertRef{viterbi1967}{mHMMbayes}

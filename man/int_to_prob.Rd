@@ -30,10 +30,9 @@ first state or category.
 }
 \details{
 Designed to ease the specification of informative hyper-prior values for the
-mean intercepts of the transition probability matrix gamma and categorical
-emission distribution(s) of the multilevel hidden Markov model through the
-functions \code{\link{prior_gamma}} and \code{\link{prior_emiss_cat}}. No
-check is performed on correct specifications of the dimensions.
+mean intercepts of the transition probability matrix gamma of the multilevel
+hidden Markov model through the function \code{\link{prior_gamma}}. No check
+is performed on correct specifications of the dimensions.
 }
 \examples{
 
@@ -49,7 +48,7 @@ gamma_prob
 \seealso{
 \code{\link{prob_to_int}} for transforming a set of probabilities to
   a set of Multinomial logit regression intercepts, \code{\link{prior_gamma}}
-  and \code{\link{prior_emiss_cat}} for specifying informative hyper-priors
-  for the the multilevel hidden Markov model and \code{\link{mHMM}} to fit a
-  multilevel hidden Markov model.
+  for specifying informative hyper-priors for the the multilevel hidden
+  Markov model and \code{\link{mHMM_f}} to fit a multilevel hidden Markov
+  model.
 }

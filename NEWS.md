@@ -1,3 +1,7 @@
+# mHMMbayes 1.1.1.0002
+
+This is a developers version dedicated to development of __fitting a model with FIXED GAUSSIAN emission distributions__ using the `mHMM_f()` function, creating an object of class `mHMM_f`. In this branch, the usual function `mHMM()` is not included. All S3 methods are tailored to the `mHMM_f()` function.
+
 # mHMMbayes 1.1.1
 
 ## Accomodating the possibility of fitting a 1-state mHMM

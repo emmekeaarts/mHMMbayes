@@ -132,10 +132,10 @@ emiss_distr <- list(matrix(c( 50, 10,
                              10, 5,
                              20, 3), nrow = m, byrow = TRUE))
 
-data_cont <- sim_mHMM(n_t = n_t, n = n, data_distr = 'continuous',
+data_cont <- sim_mHMM_f(n_t = n_t, n = n, data_distr = 'continuous',
                       gen = list(m = m, n_dep = n_dep),
                       gamma = gamma, emiss_distr = emiss_distr,
-                      var_gamma = .1, var_emiss = c(5^2, 0.2^2))
+                      var_gamma = .1)
 
 # using the informative hyper-prior in a model
 # Note that for reasons of running time, J is set at a ridiculous low value.
